@@ -53,7 +53,7 @@ def load_files(screen, files, type, Ctr, args):
       print "E", f
       print "E:", message
       print
-    except Exception, message:
+    except None:#Exception, message:
       print "E: Unknown error loading", f
       print "E:", message
       print "E: Please contact the developers (pyddr-devel@icculus.org)."

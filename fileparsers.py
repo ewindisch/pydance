@@ -54,7 +54,7 @@ class GenericFile(object):
           self.info[t] = os.path.join(dir, self.info[t])
           if not os.path.isfile(self.info[t]): del(self.info[t])
 
-    if "cdtitle" in self.info and not os.path.isfile(self.info["cdtitle"]):
+    if self.info.get("cdtitle") and not os.path.isfile(self.info["cdtitle"]):
       for path in search_paths + (dir,):
         p = os.path.join(path, "cdtitles", self.info["cdtitle"])
         if os.path.isfile(p):
@@ -489,10 +489,10 @@ class DWIFile(MSDFile):
           self.info["preview"][1] = self.parse_time(rest)
         else: self.info["preview"] = [45, self.parse_time(rest)]
       elif parts[0] == "DISPLAYBPM":
-        if parts[1] != "*":
+        if rest != "*":
           self.info["bpmdisplay"] = [float(b) for b in parts[1].split("..")]
         else:
-          self.info["bpmdisplay"] = -1
+          self.info["bpmdisplay"] = [-1]
       elif parts[0] == "CHANGEBPM":
         rest = rest.replace(" ", "")
         self.bpms = [(float(beat), float(bpm)) for beat, bpm in
@@ -627,10 +627,10 @@ class SMFile(MSDFile):
       elif parts[0] == "CDTITLE":
         self.info["cdtitle"] = self.find_cdtitle(rest)
       elif parts[0] == "DISPLAYBPM":
-        if parts[1] != "*":
+        if rest != "*":
           self.info["bpmdisplay"] = [float(b) for b in parts[1].split("..")]
         else:
-          self.info["bpmdisplay"] = -1
+          self.info["bpmdisplay"] = [-1]
       elif parts[0] == "SAMPLESTART":
         if "preview" in self.info:
           self.info["preview"][0] = float(parts[1])

@@ -70,8 +70,8 @@ class BPMDisplay(pygame.sprite.Sprite):
     self.rect.center = self._center
 
   def set_song(self, song):
-    if song and "displaybpm" in song.info:
-      bpms = song.info["displaybpm"]
+    if song and "bpmdisplay" in song.info:
+      bpms = song.info["bpmdisplay"]
       if bpms[0] == -1:
         self._bpm_idx = -1
         self._bpm = 150
