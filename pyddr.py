@@ -23,7 +23,7 @@ elif os.name == "posix":
   elif os.environ.has_key("HOME"):
     osname = "posix"
 else:
-  print "Your platform (%s) is not supported by pyDDR. We're going to call it"
+  print "Your platform (%s) is not supported by pyDDR. We're going to call it"#'
   print "POSIX, and then just let it crash."
 
 # Run pyDDR from anywhere
@@ -135,6 +135,9 @@ theme = mainconfig['gfxtheme']
 songdir = mainconfig['songdir']
 anncname = mainconfig['djtheme']
 annc = Announcer(os.path.join('themes','dj',anncname,'djtheme.cfg'))
+
+if songdir[0] == "~":
+  songdir = os.environ["HOME"]+songdir[1:]
 
 p1d = p1u = p1l = p1r = p2l = p2r = p2u = p2d = 0
 
@@ -2147,8 +2150,13 @@ class HoldArrowSprite(CloneSprite):
     self.bottom = ARROWTOP #+ int(ARROWDIFF/8.0)
 
     finaltime = 0
-    if len(lbct)<2:
+    if len(lbct)<2: # single run (I hope)
       onebeat = float(60000.0/curbpm)/1000
+      doomtime = self.timef1 - curtime
+      if doomtime < 0:
+        doomtime = 0
+      beatsleft = float(doomtime / onebeat)
+      self.top = self.top - int( (beatsleft/8.0)*ARROWDIFF )
       doomtime = self.timef2 - curtime
       beatsleft = float(doomtime / onebeat)
       self.bottom = self.bottom - int( (beatsleft/8.0)*ARROWDIFF )
@@ -2158,57 +2166,29 @@ class HoldArrowSprite(CloneSprite):
       for bpmcheck in range(len(lbct[-1])-1):
         bpmsub = lbct[bpmcheck+1]
 #        print "bpmsub[0]",bpmsub[0],"curtime",curtime
-        if bpmsub[0] <= self.timef2:
+        if bpmsub[0] <= self.timef1 or bpmsub <= self.timef2:
 #          print "adjusting for",bpmsub,
 #          onefbeat = float(60000.0/bpmsub[1])/1000
           onefbeat = float(60000.0/curbpm)/1000
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           bpmbeats = float(bpmdoom / onefbeat)
 #          print "bpmbeats",bpmbeats
-          self.bottom = self.bottom - int(bpmbeats*ARROWDIFF/8.0)
+	  if bpmsub[0] <= self.timef1:
+	    self.top = self.top - int(bpmbeats*ARROWDIFF/8.0)
+          if bpmsub[0] <= self.timef2:
+            self.bottom = self.bottom - int(bpmbeats*ARROWDIFF/8.0)
           oldbpmsub = bpmsub
       if not finaltime:
 #        print "adjusting for finaltime",
         onefbeat = float(60000.0/oldbpmsub[1])/1000
 #        onefbeat = float(60000.0/curbpm)/1000
-        bpmdoom = self.timef2 - oldbpmsub[0] 
+        bpmdoom = self.timef1 - oldbpmsub[0]
         bpmbeats = float(bpmdoom / onefbeat)
-#        print "bpmbeats",bpmbeats
-        self.bottom = self.bottom - int(bpmbeats*ARROWDIFF/8.0)
-        finaltime = 1
-
-    finaltime = 0
-    if len(lbct)<2:
-      onebeat = float(60000.0/curbpm)/1000
-      doomtime = self.timef1 - curtime
-      if doomtime < 0:
-        doomtime = 0
-      beatsleft = float(doomtime / onebeat) #- 0.5
-      self.top = self.top - int( (beatsleft/8.0)*ARROWDIFF )
-    else:
-#      print "holdarrow + bpmchange = weirdstuffmighthappen"
-      oldbpmsub = [curtime,curbpm]
-      bpmbeats = 0
-      for bpmcheck in range(len(lbct[-1])-1):
-        bpmsub = lbct[bpmcheck+1]
-#        print "bpmsub[0]",bpmsub[0],"curtime",curtime
-        if bpmsub[0] <= self.timef1:
-#          print "adjusting for",bpmsub,
-#          onefbeat = float(60000.0/bpmsub[1])/1000
-          onefbeat = float(60000.0/curbpm)/1000
-          bpmdoom = bpmsub[0] - oldbpmsub[0]
-          bpmbeats = float(bpmdoom / onefbeat)
-#          print "bpmbeats",bpmbeats
-          self.top = self.top - int(bpmbeats*ARROWDIFF/8.0)
-          oldbpmsub = bpmsub
-      if not finaltime:
-#        print "adjusting for finaltime",
-        onefbeat = float(60000.0/oldbpmsub[1])/1000
-#        onefbeat = float(60000.0/curbpm)/1000
-        bpmdoom = self.timef1 - oldbpmsub[0] 
-        bpmbeats = float(bpmdoom / onefbeat) #- 0.5
-#        print "bpmbeats",bpmbeats
+#        print "bpmbeats1=",bpmbeats1," bpmbeats2=",bpmbeats2
         self.top = self.top - int(bpmbeats*ARROWDIFF/8.0)
+        bpmdoom = self.timef2 - oldbpmsub[0]
+        bpmbeats = float(bpmdoom / onefbeat)
+        self.bottom = self.bottom - int(bpmbeats*ARROWDIFF/8.0)
         finaltime = 1
 
     if self.bottom > 480:
