@@ -4,7 +4,7 @@
 
 import colors, pygame, fontfx
 
-from Listener import listener
+from listener import Listener
 from constants import *
 
 class AbstractScore(Listener, pygame.sprite.Sprite):
