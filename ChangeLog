@@ -12,7 +12,8 @@ legend:
   + Nonstop help and playlist display.
   + 'gratuitous' option to turn off the slow extras in the song selector.
 + Endless mode.
-+ Oni-style life meter.
++ Configurable oni life meter.
++ New "centered" arrow scrolling style for gameplay.
 + Smaller download size by converting wavs to oggs.
   - Requires SDL_mixer 1.2.5.
 + The timer display is controllable via the 'fpsdisplay' option.
