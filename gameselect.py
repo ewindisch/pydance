@@ -25,15 +25,15 @@ MODES = {
   ("5P", "COUPLE"): "5COUPLE",
   ("5P", "DOUBLE"): "5DOUBLE",
 
-  ("8P", "SINGLE"): "6PANEL",
-  ("8P", "VERSUS"): "6VERSUS",
-  ("8P", "COUPLE"): "6COUPLE",
-  ("8P", "DOUBLE"): "6DOUBLE",
+  ("6P", "SINGLE"): "6PANEL",
+  ("6P", "VERSUS"): "6VERSUS",
+  ("6P", "COUPLE"): "6COUPLE",
+  ("6P", "DOUBLE"): "6DOUBLE",
 
-  ("6P", "SINGLE"): "8PANEL",
-  ("6P", "VERSUS"): "8VERSUS",
-  ("6P", "COUPLE"): "8COUPLE",
-  ("6P", "DOUBLE"): "8DOUBLE",
+  ("8P", "SINGLE"): "8PANEL",
+  ("8P", "VERSUS"): "8VERSUS",
+  ("8P", "COUPLE"): "8COUPLE",
+  ("8P", "DOUBLE"): "8DOUBLE",
   }
 
 # Descriptions to output on the screen for each mode.
