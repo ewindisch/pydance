@@ -45,11 +45,6 @@ def switch_rotate_index_back(name, list):
   mainconfig[name] = (mainconfig[name] - 1) % len(list)
   return get_rotate_index(name, list)
 
-# Write out the config file
-def config_write(path):
-  mainconfig.write(path)
-  return None, None
-  
 def fullscreen_toggle(dummy):
   mainconfig["fullscreen"] ^= 1
   pygame.display.toggle_fullscreen()
@@ -100,9 +95,6 @@ def do(screen, songselect, songdata):
        ["Sort By", rotate_index_opt,
         ("sortmode", ["file", "song", "group", "bpm",
                               "difficulty", "mix"])],
-       ["Save Changes", {E_START: config_write},
-        ((os.path.join(rc_path, "pyddr.cfg")), )],
-       # ^^^ FIXME Should that be a constant variable?
        ["Quit", None, None]
        )
 

@@ -148,7 +148,9 @@ class Menu:
     while ev != E_QUIT:
       ev = event.poll()[1]
 
-      if ev == E_FULLSCREEN: pygame.display.toggle_fullscreen()
+      if ev == E_FULLSCREEN:
+        mainconfig["fullscreen"] ^= 1
+        pygame.display.toggle_fullscreen()
 
       # Scroll down through the menu
       elif ev == E_DOWN:
@@ -169,7 +171,7 @@ class Menu:
         curitem -= 1
         if curitem < 0:
           curitem = len(self.items) - 1
-          topitem = max(0, curitem - DISPLAYED_ITEMS - 1)
+          topitem = max(0, curitem - DISPLAYED_ITEMS + 1)
         elif curitem < topitem:
           topitem = curitem
         ev = self.items[curitem].activate(E_SELECT)

@@ -553,6 +553,7 @@ class GradingScreen:
         break
       elif ev[1] == E_FULLSCREEN:
         pygame.display.toggle_fullscreen()
+        mainconfig["fullscreen"] ^= 1
       elif ev[1] == E_SCREENSHOT:
         print "writing next frame to screenshot.bmp"
         screenshot = 1
@@ -2268,12 +2269,8 @@ def main():
 
   print "pyDDR ready. Entering song selector...."
 
-  domenu(songs)
-    
-def domenu(songs):
-  global fooblah, screen
-  
   menudriver.do(screen, songSelect, (songs, 1))
+  mainconfig.write(os.path.join(rc_path, "pyddr.cfg"))
 
 def blatantplug():
   xiphlogo = pygame.image.load(os.path.join(image_path, "xifish.png")).convert()
@@ -2468,7 +2465,7 @@ def songSelect(songs, players):
     elif ev[1] == E_PASS:                            pass
     elif ev[1] == E_FULLSCREEN:
       pygame.display.toggle_fullscreen()
-      mainconfig["fullscreen"] = mainconfig["fullscreen"] ^ 1
+      mainconfig["fullscreen"] ^= 1
     elif ev[1] == E_SCREENSHOT:                      s = 1
     elif (ev == (0, E_LEFT)):    difficulty -= 1
     elif (ev == (0, E_RIGHT)):   difficulty += 1
@@ -3137,6 +3134,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
       if ev[1] == E_QUIT: break
       elif ev[1] == E_FULLSCREEN:
         pygame.display.toggle_fullscreen()
+        mainconfig["fullscreen"] ^= 1
       elif ev[1] == E_SCREENSHOT:
         screenshot = 1
       elif ev[1] == E_LEFT: key.append((ev[0], 'l'))
