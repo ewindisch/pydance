@@ -120,7 +120,7 @@ class EventManager(object):
     self.handler.set_allowed((KEYUP, KEYDOWN, ACTIVEEVENT, VIDEOEXPOSE))
     self.states = {} # States of buttons
     # Tuples of events, key is tuple: (from, event)
-    # Types are "kb" or "jsX" where X is a joystick number.
+    # Types are keyboard (-1) or X where X is a joystick number (0-n).
     self.events = {}
     self.set_repeat()
 
@@ -139,7 +139,7 @@ class EventManager(object):
         else: # A 4/16 should be P1 if available, overriding 6/12.
           mat2 = mat
           mat = i
-      elif MATS.get((ddrmat.get_numaxes(), ddrmat.get_numbuttons())):
+      elif MATS.has_key((ddrmat.get_numaxes(), ddrmat.get_numbuttons())):
         if mat == None: mat = i
         elif mat2 == None: mat2 = i
       else:
@@ -155,28 +155,28 @@ class EventManager(object):
       emsp2 = {} # Player two's keys on the EMSUSB
       for key in A4B16: emsp2[key + 16] = A4B16[key]
 
-      self.mergeEvents(A4B16, 0, "js" + str(emsusb2))
-      self.mergeEvents(emsp2, 1, "js" + str(emsusb2))
+      self.mergeEvents(A4B16, 0, emsusb2)
+      self.mergeEvents(emsp2, 1, emsusb2)
     # FIXME We can clean this up a lot
     elif mat != None:
       ddrmat = pygame.joystick.Joystick(mat)
       ddrmat.init()
       data = {}
       if ddrmat.get_numbuttons() == 16:
-        self.mergeEvents(A4B16, 0, "js" + str(mat))
+        self.mergeEvents(A4B16, 0, mat)
       elif MATS.get(ddrmat.get_numaxes(), ddrmat.get_numbuttons()):
         self.mergeEvents(MATS[(ddrmat.get_numaxes(), ddrmat.get_numbuttons())],
-                         0, "js" + str(mat))
+                         0, mat)
       print "Mat 1 initialized: js", mat
       self.handler.set_allowed((JOYBUTTONUP, JOYBUTTONDOWN))
       if mat2 != None:
         ddrmat = pygame.joystick.Joystick(mat2)
         ddrmat.init()
         if ddrmat.get_numbuttons() == 16:
-          self.mergeEvents(A4B16, 1, "js" + str(mat2))
+          self.mergeEvents(A4B16, 1, mat2)
         elif MATS.get(ddrmat.get_numaxes(), ddrmat.get_numbuttons()):
           self.mergeEvents(MATS[(ddrmat.get_numaxes(),
-                                 ddrmat.get_numbuttons())], 0, "js" + str(mat))
+                                 ddrmat.get_numbuttons())], 0, mat)
         print "Mat 2 initialized: js", mat2
     else:
       print "No mats found. Not initializing joystick support."
@@ -196,8 +196,8 @@ class EventManager(object):
 
     keys[1][K_KP_PLUS] = E_START
 
-    for i in range(len(keys)): self.mergeEvents(keys[i], i, "kb")
-    self.mergeEvents(KEYCONFIG, 0, "kb")
+    for i in range(len(keys)): self.mergeEvents(keys[i], i, -1)
+    self.mergeEvents(KEYCONFIG, 0, -1)
 
   def mergeEvents(self, events, player, type):
     for key in events:
@@ -211,6 +211,8 @@ class EventManager(object):
     self.handler.clear()
     for key in self.states: self.states[key] = 0
 
+  # pygame.key.set_repeat doesn't affect joystick events, but we want
+  # joystick and key input to be indistinguishable, so wrap it.
   def set_repeat(self, *args):
     if len(args) == 0:
       self.repeat = False
@@ -232,10 +234,10 @@ class EventManager(object):
     v = 0
     if ev.type == QUIT: return (0, E_QUIT)
     elif ev.type == JOYBUTTONDOWN or ev.type == JOYBUTTONUP:
-      t = "js" + str(ev.joy)
+      t = ev.joy
       v = ev.button
     elif ev.type == KEYDOWN or ev.type == KEYUP:
-      t = "kb"
+      t = -1
       v = ev.key
     elif (self.repeat and self.last_press[0][1] and
           self.last_press[1] + self.rate[0] < pygame.time.get_ticks() and
