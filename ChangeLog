@@ -15,6 +15,7 @@ legend:
 + New game menu display.
 + Better theme detection and configuration support.
 + The 'badknees' option will remove jumps.
++ A new README that actually documents all the options!
 * Once again, numerous cleanups and bugs fixed.
 
 0.6.1 - The second one

@@ -1,144 +1,309 @@
-[note: this is practically verbatim from the website]
 
-pyDDR:
-a DDR clone for Python that needs a name
+                                  About pyDDR
 
-DISCLAIMER: This game is not guaranteed to do anything of use. If it 
-decidedly blows up or does anything other than give you hours of 
-amusement, I'm not responsible for any damages.
+   pyDDR is a dancing simulator, primarily for GNU/Linux, but it also
+   runs on other UNIX-like operating systems, Windows, and MacOS X. DDR
+   stands for "Dance Dance Revolution", a game that's slowly earning
+   populatority in the United States and other countries, that comes from
+   Japan. The game idea is simple. There's a mat with four directional
+   arrows you can step on, and the game scrolls arrows up the screen
+   while playing a song. When the arrows reach the top of the screen (not
+   sooner and not later, since they pass over stationary arrows), you hit
+   the corresponding arrow on the pad, and given that you hit it on time
+   with the beat, you score points. The idea is that the game is supposed
+   to either teach you to dance, or simulate dancing. It works to a
+   degree. =]
 
-* What is pyDDR?
+   However, if you're just hearing about this game (or cheap), you don't
+   actually need a mat to play pyDDR (although it definitely makes it
+   more fun). You can use a keyboard or regular joystick instead.
 
-  PyDDR is my solution to there being no DDR clone for Linux. Although 
-  Python code runs on many architectures, and PyGame code also runs on 
-  multiple platforms as well, it seems to be especially well suited on 
-  Linux boxen, so with my PC DDR mat, I set out on my quest....
+   This document assumes you've managed to install pyDDR already. If not,
+   you might want to look at the INSTALL file included with the source.
 
-  PyDDR is also something to help me learn Python, which so far kicks a 
-  lot of ass for an interpreted programming language.
+                                 Playing pyDDR
 
-  As a side note, pyDDR has nothing to do with your Double Datarate RAM.
+   To play the game, just select "Play Game" from the menu and select a
+   song. Press j and l to change your difficulty setting (more bars means
+   more difficult). Hit enter when you're on a difficulty and song you
+   like.
 
-* What the hell is this DDR thing you keep referring to?
+   Oh wait, now there's all these arrows scrolling up the screen - what
+   should you do? Actually, it's pretty simple. When the arrows get to
+   the top (which is in time with the music), step on the direction of
+   the arrow on your pad. If you're using the keyboard, you can just IJKL
+   for up/down/left/right.
 
-  DDR stands for Dance Dance Revolution, a game that's slowly earning 
-  popularity in the states, but is tremendously popular in Asian 
-  countries. The game idea is simple. There's a mat with four directional 
-  arrows you can step on, and the game scrolls arrows up the screen while 
-  playing a song. When the arrows reach the top of the screen (not sooner 
-  and not later, since they pass over stationary arrows), you hit the 
-  corresponding arrow on the pad, and given that you hit it on time with 
-  the beat, you score points. The idea is that the game is supposed to 
-  either teach you to dance, or simulate dancing. Works to a degree. =] 
-  More DDR info is at http://ddrfreak.com
+   If you want to play a versus game, just hit start on the second
+   player's joystick (or '2' on the keyboard). The second player uses the
+   arrow keys.
 
-* What do I need to play?
+   If you need to exit the game or back out of menus, just press escape.
 
-  Aside from a mat, a brain, and an itch to twitch more than just your 
-  fingers, you'll need working installations of:
+                               Configuring pyDDR
 
-    * Python 2.1 (?) or higher: get at http://python.org
-    * Pygame 1.4.9 or higher: get at http://pygame.org
-    * All of the pygame dependencies (I know this is a pain in the ass, 
-      but SDL and most of its libs are standard, and Numeric is good to 
-      have around, as is SMPEG)
+   The easy way to configure pyDDR is to use the in-game configuration
+   menus. Just select the menu item you want to change and hit enter or
+   left and right. If you need more precise configuration, read on.
 
-  PyDDR runs on Linux boxes, as this is the development platform. I have 
-  successfully been able to run it on win9x boxes as well, and there are 
-  reports of pyDDR running on NT. I don't have any framerates for any 
-  win boxen, but if you get em, send em in. Some current samples:
+   pyDDR reads from configuration files in appropriate places. This means
+   /etc/pyddr.cfg and ~/.pyddr/pyddr.cfg on UNIX,
+   /Library/Preferences/pyDDR/pyddr.cfg and
+   ~/Library/Preferences/pyDDR/pyddr.cfg on MacOS X, and pyddr.cfg in the
+   current directory on all platforms (note that this is the only
+   configuration file Windows systems will read). Files are read in the
+   order listed above.
 
-  me: Athlon/700, 256M, MGA G400, Linux 2.4.14. SDL 1.2.2, 
-  Python 2.1.1. ~ 170fps without mat, ~ 60 fps with mat
+Adding Songs
 
-  CrashChaos: Athlon/1200, 512M, TNT2, Linux 2.4.9, 
-  SDL 1.2.2, Python 2.1. ~ 110fps
+   To add songs, you just need to put the .step file, music file, and (if
+   they exist) background and banner files into one of your song
+   directories. This is the songdir configuration variable. On POSIX
+   systems this is /usr/share/games/pyddr/songs,
+   /usr/local/share/games/pyddr/songs, and ~/.pyddr/songs. On Windows,
+   this is anywhere in the directory pyDDR was installed in.
 
-  Intention: P2/400, 128M, ATI RagePro, Linux 2.4.8, 
-  SDL 1.2.2, Python 2.1.1. ~ 40fps
+pyddr.cfg
 
-  Chris: Athlon/1000, 160M, GeForce 2, Linux 2.4.5, 
-  SDL 1.2.1, Python 2.1.1. ~ 80fps
+   There's a ton of options for this program, most of them with confusing
+   names. A complete (as of sometime between 0.6.1 and 0.6.2) list
+   follows.
 
+  Gameplay Options
 
-GIVE TO ME THE PROGRAM$%#@!
+   arrowcolors 1|2|3|4
+          Normally there are three colors of arrows; one for on-beat
+          (quarter notes), one for exactly off-beat (eighth notes), and
+          one for all other kinds (16th, 24th, and so on). If you change
+          this option, you will only see limited colors, which can make
+          the game much harder.
 
-  New releases should always be available at:
+   assist 0|1
+          In this mode, pyDDR will play a sound when you are supposed to
+          hit an arrow. It's useful if you can't see the screen, or need
+          help getting on beat in a particular song.
 
-  http://clickass.org/~tgz/pyddr/
+   badknees 0|1
+          If you have trouble with jumps (two arrows at once), you can
+          turn this option on to change jumps to one regular arrow.
 
-  If you're reading this, you have the source tarball and you seem to 
-  have been able to untar it..
+   grading 1|0
+          pyDDR will normally display a grade at the end of every song.
+          Turning this option off will bring you back to the song
+          selector instead.
 
-  You do not need to be root to play. No installation is required. Untar 
-  and run pyddr.py with either:
+   hidden [num] (default 0)
+          This makes arrows fade out when they are a certain number of
+          beats before the top arrows. You do, however, still have to hit
+          them. :)
 
-  $ python ./pyddr.py
+   autofail 1|0
+          If this is turned off, the game will continue, even when your
+          lifebar runs out.
 
-  or
+   little 0|1|2|3 (default 0)
+          If you want to try a harder song but want simpler steps, you
+          can set this option. 1 removes 16th notes from the song, 2
+          removes 8th notes, and 3 removes 16th and 8th notes.
 
-  $ ./pyddr.py
+   lowestcombo [num] (default 4)
+          The number of greats, perfects, or marvelouses you need in a
+          row before it begins to count as a "combo" (which affects
+          scoring and judging).
 
-* I'm scared, I've never played DDR before. 
+   reversescroll 0|1
+          Normally arrows scroll from botton to top. If this is on, they
+          will scroll from top to bottom.
 
-  This is really easy. I promise. Once you start, arrows are going to 
-  start scrolling up the screen. When the colored arrow passes over the 
-  stationary arrow at the top, press the corresponding arrow. THIS IS NOT 
-  A RACE and the idea is to hit the arrows ON BEAT. Don't step on every 
-  arrow you see.
+   scrollspeed [num] (default 1.0)
+          You can use this to make the arrows scroll faster or slower
+          (which changes how many are on the screen at any time and the
+          spacing between them). It can be a fractional value, like 0.5
+          or 1.33.
 
-  IF YOU ARE PLAYING WITH THE KEYBOARD, hitting arrows means just that, 
-  you press the arrow keys.
+   showtoparrows 1|0
+          This removes the visual aid of the arrows at the top, making
+          you pay more attention to the beat of the music.
 
-  IF YOU HAVE A MAT, make sure it's plugged in, and that you've got it set 
-  up for your OS. I do NOT know how windows boxes will handle mats. 
-  Currently in Linux 2.4, this should be sufficient:
+   sudden [num] (default 0)
+          This makes arrows appear only after they are a certain number
+          of beats up the screen. It's the opposite of hidden.
 
-  # modprobe gamecon gc=0,7
+  Graphical Options
 
-  or try the new included ddr mat module (new improved better faster!):
+   arrowspin 0|1
+          If this option is on, the arrows will spin around in circles as
+          they go up the screen.
 
-  # insmod ddrmat.o gc=0,7
+   arrowscale [num] (default 1)
+          Arrows normally stay the same size as they go up the screen.
+          This option makes them shrink (if it's less than 1) or grow (if
+          it's more than 1).
 
-  Now the one thing I regretfully report; if you use gamecon, you must 
-  turn your mat 45 degrees counter-clockwise so that the up arrow is 
-  pointing forward/left  and your mat is pointed like a diamond. Now, 
-  instead of dancing on the arrows, dance on the buttons -- with my topway 
-  mat it's now like this:
-  
-  X - Left      O - Up      triangle - down      square - right
+   bgbrightness [num] (default 127)
+          This option determines how bright the background during the
+          song is. Higher numbers mean a brighter background.
 
-  I'm sorry the mat detection is clunky; if you have any 6 axis 12 button 
-  joysticks, pyDDR may think this is your mat and you should unplug them.
+   explodestyle [0|1|2|3] (default 3)
+          pyDDR usually displays an effect if you successfully hit an
+          arrow, rotating and scaling the arrow at the top. If this is
+          too CPU intensive (or you just don't like it), you can set it
+          to 0 for no effect, 1 for rotating, 2 for scaling, and 3 for
+          rotating and scaling.
 
-* Where do I report bugs?
+   fpsdisplay 1|0
+          If this is on pyDDR will display an FPS counter in the corner.
+          See the FAQ for what to do if your FPS is very low.
 
-  Please let me know if:
-  - you managed to get the game to run on any obscure platform,
-    or with especially old libraries.
-  - you have an OS and framerate for an unlisted OS
-  - you have a strange oddball problem that makes pyDDR not run at all
-    (PLEASE check to make sure you have ALL the pygame dependencies!)
-    (I know getting pyDDR to work in win is a pain, I'm working on this)
-  - you have some other problem with pyDDR that I claim to have fixed
-  - you have an idea on how to improve pyDDR that I haven't thought of
-  - you can code in python and want to help me improve pyDDR
+   gfxtheme [themename]
+          Sets your graphical theme (affecting the look of the arrows and
+          your lifebar). pyDDR comes with the 'classic' and 'bryan'
+          themes. More themes can be installed by putting them in your
+          themes/gfx directory.
 
-  Please do not contact me if:
-  - you haven't installed pygame properly and need help (I hang out in 
-    #pygame on irc.openprojects.net and we can help you there)
-  - you want a feature of pyDDR that I already plan on implementing
-    (in other words, I don't want to hear from 10 people that I need hold 
-    arrows and BPM changes - read pyddr.txt for my notes)
-  - all you can tell me is "it doesn't work" (I need details to help)
+   lyriccolor [color] (default cyan)
+          Set the color that lyrics appear in. Possible values are cyan,
+          aqua, yellow, white, black, red, purple, or orange.
 
-  You can send me an email at tgz at orotech dot net - do be sure to 
-  substitute the proper marks where they go or I will not get any email. =]
+   showbackground 1|0
+          Many songs in pyDDR and other dancing games have a background
+          image that displays when you play them; however, this can make
+          the game slightly slower. If you're desperate for more frames,
+          try turning this off to remove the background.
 
-  You may have a lot of luck jumping on irc.openprojects.net and joining 
-  #pyDDR - my nickname is P2E.
+   showcombo 1|0
+          Normally when you get a combo, pyDDR will display your current
+          combo length on the screen. Turning this off will remove that
+          display.
 
-* Oh, so I don't get a screenshot?
+   showlyrics 1|0
+          Some songs have lyrics or other text that will appear at the
+          bottom of the screen. Turning this off will remove those
+          lyrics.
 
-  Try running the game. It's better than an animated GIF. Or maybe it 
-  isn't..
+   stickycombo 1|0
+          If this is off, your combo is erased from the screen after a
+          period of time, even if you don't miss an arrow.
+
+   stickyjudge 1|0
+          This is like stickycombo, but for judgings (good, marvelous,
+          and so on), rather than your combo.
+
+   totaljudgings [num] (default 1)
+          This many judgings will be displayed on the screen at a time.
+
+   transcolor [color] (default aqua)
+          The color of the second line of lyrics (the "translated" line).
+          Possible colors are the same as the ones for the lyriccolor
+          option.
+
+  Sound Options
+
+   djtheme [themename]
+          Sets your announcer theme. By default pyDDR comes with the
+          'none' theme (no announcer). Copies from the official website
+          also have a 'mrt' theme, which is not distributed with various
+          other packages for legal reasons. The pyDDR development team is
+          looking for people willing to do voice acting for free
+          announcer samples! New themes can be installed in themes/dj.
+
+   masteroffset [num] (default 0)
+          Some systems have speakers or displays that take measurable
+          time (in terms of affecting gameplay) to output a signal. If
+          you have one of these, you can add an offset in milliseconds to
+          every song you have.
+
+          This should not be used if you have a lot of step files that
+          are a specific number of milliseconds off. If you use it for
+          this, all new files you get will be wrong, and no one else will
+          be able to use your original files.
+
+   mixerclock 1|0
+          Setting this to 0 will make pyDDR use the system clock instead
+          of SDL's internal timing functions. This can lead to drift
+          between the position in the song and the arrows displayed.
+
+   onboardaudio 0|1
+          Some systems (especially laptops) use sound cards that resample
+          sound in really stupid ways, which may make pyDDR play songs
+          such that they "drift" in relation to the steps. If you seem to
+          be having drifting issues in all the songs you play, you should
+          try turning this on.
+
+   previewmusic 1|0
+          If this is on, the song selection screen will play a brief
+          sound clip from the middle of the song when you move the
+          selector over it.
+
+  Interface Options
+
+   sortmode 0|1|2|3|4|5 (default 0)
+          This sets the sorting mode for the song select screen. 0 sorts
+          by filename, 1 by song name, 2 by artist name, 3 by BPM, 4 by
+          difficulty, and 5 by mix.
+
+          This can also be changed by pressing 's' on the song select
+          screen.
+
+  System Options
+
+   keyboard qwerty|rqwerty|dvorak|rdvorak
+          Your keyboard type. 'ijkl', while convenient on qwerty
+          (standard) keyboards, doesn't work at all on dvorak ones.
+          Setting this option to dvorak will redefine your keys to
+          'chtn'. The "r" variants swap controls (so player 1 uses the
+          arrows, and player 2 uses the letters).
+
+   songdir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)
+          This is a list of directories where pyDDR should look for songs
+          (.step files, backgrounds and banners, and the audio itself).
+          Generally installing pyDDR gives you a system-wide location to
+          place songs (that all users will have access to), and a local
+          one in your home directory.
+
+  Obscure Options
+
+   strobe 0|1
+          Turning this on results in a little blinking light in the
+          bottom right corner of the screen. With various light detection
+          equipment, this can be used to make pyDDR communicate with a
+          strobe lighting system.
+
+   vesacompat 0|1
+          This makes pyDDR (try to) work with the old, buggy, obsolete
+          SVGAlib library and drivers on UNIX.
+
+                                      FAQ
+
+   The official FAQ is currently at
+   [1]http://www.icculus.org/pyddr/faq.php.
+
+                                   Contacts
+
+   There are several different ways to get in touch with the pyDDR
+   developers.
+
+Email
+
+   The primary email address is the pyddr-discuss mailing list on
+   icculus.org. To subscribe, email
+   [2]pyddr-discuss-subscribe@icculus.org. You can then send email to
+   [3]pyddr-discuss@icculus.org to talk about pyDDR. If you want to see
+   about having pyDDR at a convention or show, contact [4]Brendan Becker
+   <tgz@orotech.net>.
+
+IRC
+
+   If you need a bit more real-time help than email offers, pyDDR has an
+   IRC channel on the [5]Freenode IRC network. Surprisingly, the channel
+   is named #pyddr. The main developers are often in the channel as P2E
+   (Brendan) and piman (Joe). Jerub and DShadow may also be able to
+   answer questions about bugs.
+
+References
+
+   1. http://www.icculus.org/pyddr/faq.php
+   2. mailto:pyddr-discuss-subscribe@icculus.org
+   3. mailto:pyddr-discuss@icculus.org
+   4. mailto:tgz@orotech.net
+   5. http://www.freenode.net/
