@@ -8,7 +8,7 @@ from announcer import Announcer
 
 from pygame.sprite import RenderUpdates
 
-import fontfx, gradescreen, steps, audio, fileparsers
+import fontfx, gradescreen, steps, audio, fileparsers, games
 
 import random, sys, os
 
@@ -568,9 +568,11 @@ def play(screen, playlist, configs, songconf, playmode):
 
   first = True
 
+  game = games.GAMES[playmode]
+
   players = []
   for playerID in range(numplayers):
-    plr = Player(playerID, configs[playerID], songconf)
+    plr = Player(playerID, configs[playerID], songconf, game)
     players.append(plr)
 
   for songfn, diff in playlist:
@@ -586,7 +588,7 @@ def play(screen, playlist, configs, songconf, playmode):
     print "Playing", songfn
     print songdata.title, "by", songdata.artist
   
-    if dance(screen, songdata, players, prevscr, first):
+    if dance(screen, songdata, players, prevscr, first, game):
       break # Failed
     first = False
 
@@ -600,7 +602,7 @@ def play(screen, playlist, configs, songconf, playmode):
 
   return judges
 
-def dance(screen, song, players, prevscr, ready_go):
+def dance(screen, song, players, prevscr, ready_go, game):
   songFailed = False
 
   background = SimpleSprite(res = screen.get_size())
@@ -720,7 +722,7 @@ def dance(screen, song, players, prevscr, ready_go):
   song.play()
   for plr in players:
     plr.start_song()
-    for arrowID in DIRECTIONS:
+    for arrowID in game.dirs:
       if mainconfig['explodestyle'] > -1:
         plr.toparrfx[arrowID].add(fgroup)
       if not plr.dark:
@@ -763,7 +765,9 @@ def dance(screen, song, players, prevscr, ready_go):
       elif ev[1] == E_SCREENSHOT:
         screenshot = 1
       elif ev[1] == E_LEFT: key.append((ev[0], 'l'))
+      elif ev[1] == E_UNMARK: key.append((ev[0], 'k'))
       elif ev[1] == E_RIGHT: key.append((ev[0], 'r'))
+      elif ev[1] == E_PGUP: key.append((ev[0], 'z'))
       elif ev[1] == E_UP: key.append((ev[0], 'u'))
       elif ev[1] == E_DOWN: key.append((ev[0], 'd'))
 
@@ -783,10 +787,10 @@ def dance(screen, song, players, prevscr, ready_go):
     keymap_kludge = ({"u": E_UP, "d": E_DOWN, "l": E_LEFT, "r": E_RIGHT})
 
     for plr in players:
-      for checkhold in DIRECTIONS:
+      for checkhold in game.dirs:
         plr.toparrfx[checkhold].holding(0)
         currenthold = plr.should_hold(checkhold, curtime)
-        dirID = DIRECTIONS.index(checkhold)
+        dirID = game.dirs.index(checkhold)
         if currenthold is not None:
           if event.states[(plr.pid, keymap_kludge[checkhold])]:
             if plr.judge.holdsub[plr.tempholding[dirID]] != -1:
@@ -798,7 +802,7 @@ def dance(screen, song, players, prevscr, ready_go):
             botchdir, timef1, timef2 = plr.steps.holdinfo[currenthold]
             for spr in plr.arrow_group.sprites():
               try:
-                if (spr.timef1 == timef1) and (DIRECTIONS.index(spr.dir) == dirID): spr.broken = 1
+                if (spr.timef1 == timef1) and (game.dirs.index(spr.dir) == dirID): spr.broken = 1
               except: pass
         else:
           if plr.tempholding[dirID] > -1:
@@ -812,13 +816,13 @@ def dance(screen, song, players, prevscr, ready_go):
         
         for ev in events:
           if ev.feet:
-            for (dir,num) in zip(DIRECTIONS,ev.feet):
+            for (dir,num) in zip(game.dirs,ev.feet):
               if num & 1:
                 plr.judge.handle_arrow(dir, ev.when)
          
         for ev in nevents:
           if ev.feet:
-            for (dir,num) in zip(DIRECTIONS, ev.feet):
+            for (dir,num) in zip(game.dirs, ev.feet):
               dirstr = dir + repr(int(ev.color) % plr.colortype)
               groups = (plr.arrow_group, rgroup)
               if num & 1:
@@ -827,7 +831,7 @@ def dance(screen, song, players, prevscr, ready_go):
                               curtime, ev.when, plr, song).add(groups)
 
               if num & 2:
-                holdindex = plr.steps.holdref.index((DIRECTIONS.index(dir),
+                holdindex = plr.steps.holdref.index((game.dirs.index(dir),
                                                      ev.when))
                 HoldArrowSprite(plr.theme.arrows[dirstr].c, curtime,
                                 plr.steps.holdinfo[holdindex], plr, song).add(groups)

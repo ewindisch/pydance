@@ -7,30 +7,30 @@ import fontfx, spritelib, colors
 
 # Display the score overlaying the song difficulty
 class ScoringDisp(pygame.sprite.Sprite):
-    def __init__(self, playernum, text):
-      pygame.sprite.Sprite.__init__(self)
-      self.set_text(text)
-      self.image = pygame.surface.Surface((160, 48))
-      self.rect = self.image.get_rect()
-      self.rect.bottom = 484
-      self.rect.centerx = 160 + playernum * 320
+  def __init__(self, playernum, text):
+    pygame.sprite.Sprite.__init__(self)
+    self.set_text(text)
+    self.image = pygame.surface.Surface((160, 48))
+    self.rect = self.image.get_rect()
+    self.rect.bottom = 484
+    self.rect.centerx = 160 + playernum * 320
 
-    def set_text(self, text):
-      tx = FONTS[28].size(text)[0] + 2
-      txt = fontfx.embfade(text, 28, 2, (tx, 24), colors.color["gray"])
-      basemode = pygame.transform.scale(txt, (tx, 48))
-      self.baseimage = pygame.surface.Surface((128, 48))
-      self.baseimage.blit(basemode, (64 - (tx / 2), 0))
-      self.oldscore = -1 # Force a refresh
+  def set_text(self, text):
+    tx = FONTS[28].size(text)[0] + 2
+    txt = fontfx.embfade(text, 28, 2, (tx, 24), colors.color["gray"])
+    basemode = pygame.transform.scale(txt, (tx, 48))
+    self.baseimage = pygame.surface.Surface((128, 48))
+    self.baseimage.blit(basemode, (64 - (tx / 2), 0))
+    self.oldscore = -1 # Force a refresh
 
-    def update(self, score):
-      if score != self.oldscore:
-        self.image.blit(self.baseimage, (0,0))
-        scoretext = FONTS[28].render(str(score), 1, (192,192,192))
-        self.image.blit(scoretext, (64 - (scoretext.get_rect().size[0] / 2),
+  def update(self, score):
+    if score != self.oldscore:
+      self.image.blit(self.baseimage, (0,0))
+      scoretext = FONTS[28].render(str(score), 1, (192,192,192))
+      self.image.blit(scoretext, (64 - (scoretext.get_rect().size[0] / 2),
                                     13))
-        self.image.set_colorkey(self.image.get_at((0, 0)), RLEACCEL)
-        self.oldscore = score
+      self.image.set_colorkey(self.image.get_at((0, 0)), RLEACCEL)
+      self.oldscore = score
 
 class AbstractLifeBar(pygame.sprite.Sprite):
   def __init__(self, playernum, maxlife, songconf):
@@ -192,29 +192,30 @@ class OniLifeBarDisp(AbstractLifeBar):
       self.image.blit(self.failtext, (70, 2) )
 
 class HoldJudgeDisp(pygame.sprite.Sprite):
-  def __init__(self, player):
+  def __init__(self, player, game):
     pygame.sprite.Sprite.__init__(self)
+    self.game = game
 
     self.space = pygame.surface.Surface((48, 24))
     self.space.fill((0, 0, 0))
 
-    self.image = pygame.surface.Surface((320, 24))
+    self.image = pygame.surface.Surface((len(game.dirs) * game.width, 24))
     self.image.fill((0, 0, 0))
     self.image.set_colorkey((0, 0, 0))
 
-    self.okimg = fontfx.shadefade("OK",28,3,(48,24),(112,224,112))
-    self.ngimg = fontfx.shadefade("NG",28,3,(48,24),(224,112,112))
+    self.okimg = fontfx.shadefade("OK", 28, 3, (48, 24), (112, 224, 112))
+    self.ngimg = fontfx.shadefade("NG", 28, 3, (48, 24), (224, 112, 112))
 
     self.rect = self.image.get_rect()
     if player.scrollstyle == 2: self.rect.top = 228
     elif player.scrollstyle == 1: self.rect.top = 400
     else: self.rect.top = 56
 
-    self.rect.left = 60 + (320 * player.pid)
+    self.rect.left = self.game.left_off + (320 * player.pid)
 
-    self.slotnow = ['','','','']        
-    self.slotold = ['','','','']
-    self.slothit = [-1,-1,-1,-1]
+    self.slotnow = [''] * len(game.dirs)
+    self.slotold = list(self.slotnow)
+    self.slothit = [-1] * len(game.dirs)
         
   def fillin(self, curtime, direction, value):
     self.slothit[direction] = curtime
@@ -225,7 +226,7 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
       if (curtime - self.slothit[i] > 0.5):
         self.slotnow[i]=''
       if self.slotnow[i] != self.slotold[i]:
-        x = (i*72)
+        x = (i * self.game.width)
         if self.slotnow[i] == 'OK':
           self.image.blit(self.okimg,(x,0))
         elif self.slotnow[i] == 'NG':
@@ -317,8 +318,8 @@ class Player:
 
   lifebars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp]
 
-  def __init__(self, pid, config, songconf):
-    self.theme = GFXTheme(mainconfig["gfxtheme"])
+  def __init__(self, pid, config, songconf, game):
+    self.theme = GFXTheme(mainconfig["gfxtheme"], game)
     self.pid = pid
 
     self.__dict__.update(config)
@@ -330,15 +331,16 @@ class Player:
     self.score = ScoringDisp(pid, "Player " + str(pid))
     self.lifebar = Player.lifebars[songconf["lifebar"]](pid, self.theme,
                                                         songconf)
-    self.holdtext = HoldJudgeDisp(self)
+    self.holdtext = HoldJudgeDisp(self, game)
     self.judging_list = []
     self.total_judgings = mainconfig['totaljudgings']
-    self.tempholding = [-1, -1, -1, -1]
+    self.tempholding = [-1] * len(game.dirs)
     self.combos = ComboDisp(pid)
     self.judge = None
     self.steps = None
     self.holds = None
     self.evt = None
+    self.game = game
 
   def set_song(self, steps):
     self.steps = steps
@@ -401,14 +403,14 @@ class Player:
 
     for spr in self.arrow_group.sprites():
       spr.update(curtime, self.judge.bpm, self.steps.lastbpmchangetime)
-    for d in DIRECTIONS:
+    for d in self.game.dirs:
       self.toparr[d].update(curtime + self.steps.offset * 1000)
       self.toparrfx[d].update(curtime, self.judge.combo)
 
   def should_hold(self, direction, curtime):
     l = self.steps.holdinfo
     for i in range(len(l)):
-      if l[i][0] == DIRECTIONS.index(direction):
+      if l[i][0] == self.game.dirs.index(direction):
         if ((curtime - 15.0/self.steps.playingbpm > l[i][1])
             and (curtime < l[i][2])):
           return i

@@ -1,7 +1,7 @@
 # These parse various file formats describing steps.
 # Please read docs/fileparsers.txt and docs/dance-spec.txt
 
-import colors, audio, random, copy
+import colors, audio, random, copy, games
 
 from lyrics import Lyrics
 from util import toRealTime
@@ -18,7 +18,9 @@ BEATS = { 'x': 0.25, 't': 0.5, 'u': 1.0/3.0, 'f': 2.0/3.0,
 # -1 - Shuffle (calculated elsewhere)
 STEP_MAPPINGS = {
   "SINGLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
+  "DOUBLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
   "COUPLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
+  "6PANEL": [[0, 1, 2, 3, 4, 5]],
   }
 
 # FIXME: This can probably be replaced by something smaller, like a tuple.
@@ -42,8 +44,6 @@ class SongEvent:
                                                 ' '.join(rest))
 
 # Step objects, made from SongItem objects
-
-COUPLE_MODES = ["COUPLE"]
 
 class Steps:
   def __init__(self, song, difficulty, player, lyrics, playmode):
@@ -74,7 +74,7 @@ class Steps:
     releaselist = []
     releasetimes = []
     self.numholds = 1
-    holding = [0, 0, 0, 0]
+    holding = [0] * len(games.GAMES[playmode].dirs)
     little = player.little
     coloring_mod = 0
     cur_time = float(self.offset)
@@ -92,7 +92,7 @@ class Steps:
     self.nevent_idx = 0
 
     song_steps = song.steps[playmode][difficulty]
-    if playmode in COUPLE_MODES: song_steps = song_steps[player.pid]
+    if playmode in games.COUPLE: song_steps = song_steps[player.pid]
 
     for words in song_steps:
 

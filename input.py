@@ -50,7 +50,12 @@ A2B10 = { 0: E_LEFT, 1: E_DOWN, 2: E_RIGHT, 3: E_UP,
 A2B8 = { E_UP: 4, E_DOWN: 6, E_LEFT: 5, E_RIGHT: 7,
          E_START: 2, E_MARK: 3, E_PGUP: 0, E_PGDN: 1 }
 
+# X-Box controller with X-Box Linux
+A14B10 = { E_UP: 4, E_DOWN: 0, E_LEFT: 3, E_RIGHT: 1, E_START: 6,
+           E_QUIT: 9, }
+
 MATS = { (6, 12): A6B12,
+         (14, 10): A14B10,
          (2, 10): A2B10,
          (2, 8): A2B8 }
 

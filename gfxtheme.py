@@ -1,28 +1,28 @@
 # GFXTheme and associated classes.
 # These handle loading the various graphics themes for pydance.
 
-import dircache, os
+import dircache, os, games
 
 from constants import *
 from spritelib import *
 from util import toRealTime
 
 class GFXTheme:
-  def themes(cls, imgtype = "png"):
+  def themes(cls):
     theme_list = []
     for path in search_paths:
       checkpath = os.path.join(path, "themes", "gfx")
       if os.path.isdir(checkpath):
         for name in dircache.listdir(checkpath):
-          if os.path.isfile(os.path.join(checkpath, name,
-                                         "arr_c_d_0." + imgtype)):
+          if os.path.isfile(os.path.join(checkpath, name, "arr_c_d_0.png")):
             theme_list.append(name)
     return theme_list
 
   themes = classmethod(themes)
 
-  def __init__(self, name):
+  def __init__(self, name, game):
     self.name = name
+    self.game = game
     self.path = None
     for path in search_paths:
       if os.path.isdir(os.path.join(path, "themes", "gfx", name)):
@@ -34,30 +34,28 @@ class GFXTheme:
     self.load()
 
   def load(self):
-    self.arrows = ArrowSet(self.path)
+    self.arrows = ArrowSet(self.path, self.game)
 
   def toparrows(self, bpm, ypos, playernum):
     arrs = {}
     arrfx = {}
-    for d in DIRECTIONS:
-      arrs[d] = TopArrow(bpm, d, ypos, playernum, self.path)
-      arrfx[d] = ArrowFX(bpm, d, ypos, playernum, self.path)
+    for d in self.game.dirs:
+      arrs[d] = TopArrow(bpm, d, ypos, playernum, self.path, self.game)
+      arrfx[d] = ArrowFX(bpm, d, ypos, playernum, self.path, self.game)
     return arrs, arrfx
 
   def __repr__(self):
     return ('<GFXTheme name=%r>' % self.name)
 
 class ArrowSet: 
-  def __init__ (self, path, imgtype='png'):
-    arrows = {"l": 12, "d": 12+76, "u": 12+2*76, "r": 12+3*76}
-    for dir,left in arrows.items():
+  def __init__ (self, path, game):
+    arrows = {}
+    for dir in game.dirs:
+      left = game.left_off + game.width * game.dirs.index(dir)
       for cnum in range(4):
-        if cnum == 3:
-          color = 1
-        else:
-          color = cnum
-        arrows[dir+repr(cnum)] = ScrollingArrow(path, dir, str(color),
-                                                imgtype, left)
+        if cnum == 3: color = 1
+        else: color = cnum
+        arrows[dir+repr(cnum)] = ScrollingArrow(path, dir, str(color), left)
     # allow access by instance.l or instance.arrows['l']
     for n in arrows: self.__dict__[n] = arrows[n] 
     self.arrows = arrows
@@ -67,7 +65,7 @@ class ArrowSet:
 
 class TopArrow(pygame.sprite.Sprite):
 
-  def __init__ (self, bpm, direction, ypos, playernum, path):
+  def __init__ (self, bpm, direction, ypos, playernum, path, game):
     pygame.sprite.Sprite.__init__(self)
     self.presstime = -1
     self.tick = toRealTime(bpm, 1);
@@ -86,18 +84,15 @@ class TopArrow(pygame.sprite.Sprite):
       else:            ftemp = 's_'
       fn = os.path.join(path,
                         'arr_'+ftemp+self.direction+'_'+repr(i)+'.png')
-      self.topimg.append(pygame.image.load(fn))
-      self.topimg[i].set_colorkey(self.topimg[i].get_at((0,0)),RLEACCEL)
+      self.topimg.append(pygame.image.load(fn).convert())
+      self.topimg[i].set_colorkey(self.topimg[i].get_at((0, 0)), RLEACCEL)
 
       self.image = self.topimg[0]
       self.rect = self.image.get_rect()
       self.rect.top = self.ypos
-      if self.direction == 'l':        self.rect.left = 12
-      if self.direction == 'd':        self.rect.left = 88
-      if self.direction == 'u':        self.rect.left = 164
-      if self.direction == 'r':        self.rect.left = 240
-
-      self.rect.left += (320*self.playernum)
+      self.rect.left = game.left_off + (game.dirs.index(direction) *
+                                        game.width)
+      self.rect.left += 320 * self.playernum
 
   def stepped(self, modifier, time):
     if modifier:    self.adder = 4
@@ -116,12 +111,13 @@ class TopArrow(pygame.sprite.Sprite):
       self.oldframe = self.frame
 
 class ArrowFX(pygame.sprite.Sprite):
-  def __init__ (self, bpm, direction, ypos, playernum, path):
+  def __init__ (self, bpm, direction, ypos, playernum, path, game):
     pygame.sprite.Sprite.__init__(self)
     self.presstime = -1000000
     self.tick = toRealTime(bpm, 1);
     self.centery = ypos + 32
-    self.centerx = {'l':44, 'd':120, 'u':196, 'r':272}[direction]
+    self.centerx = (game.left_off + game.dirs.index(direction) * game.width +
+                   game.width / 2)
     self.playernum = playernum
     
     fn = os.path.join(path, 'arr_n_' + direction + '_3.png')
@@ -191,12 +187,12 @@ class ArrowFX(pygame.sprite.Sprite):
       self.rect.left += (320*self.playernum)
 
 class ScrollingArrow:
-  def __init__ (self, path, dir, color, imgtype, left):
+  def __init__ (self, path, dir, color, left):
     self.dir = dir
     states = {}
     for state in ("c",):
       filename = os.path.join(path,
-                              "_".join(("arr", state, dir, color))+"."+imgtype)
+                              "_".join(("arr", state, dir, color))+".png")
       states[state] = SimpleSprite(file=filename)
       states[state].rect.left = left
     # allow access by instance.n or instance.states['n']

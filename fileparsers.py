@@ -337,18 +337,32 @@ class DWIFile(GenericFile):
             "'": "n", ")": "e", "]": "e", "}": "e" }
   times = { "x": 0.25, "f": 2.0/3.0, "s": 1.0, "e": 2.0, "n": 1/12.0 }
   steps = {
-    "0": [0, 0, 0, 0],
-    "1": [1, 1, 0, 0],
-    "2": [0, 1, 0, 0],
-    "3": [0, 1, 0, 1],
-    "4": [1, 0, 0, 0],
-    "6": [0, 0, 0, 1],
-    "7": [1, 0, 1, 0],
-    "8": [0, 0, 1, 0],
-    "9": [0, 0, 1, 1],
-    "A": [0, 1, 1, 0],
-    "B": [1, 0, 0, 1]
+    "SINGLE": { "0": [0, 0, 0, 0], "1": [1, 1, 0, 0], "2": [0, 1, 0, 0],
+                "3": [0, 1, 0, 1], "4": [1, 0, 0, 0], "6": [0, 0, 0, 1],
+                "7": [1, 0, 1, 0], "8": [0, 0, 1, 0], "9": [0, 0, 1, 1],
+                "A": [0, 1, 1, 0], "B": [1, 0, 0, 1] },
+    "COUPLE": { "0": [0, 0, 0, 0], "1": [1, 1, 0, 0], "2": [0, 1, 0, 0],
+                "3": [0, 1, 0, 1], "4": [1, 0, 0, 0], "6": [0, 0, 0, 1],
+                "7": [1, 0, 1, 0], "8": [0, 0, 1, 0], "9": [0, 0, 1, 1],
+                "A": [0, 1, 1, 0], "B": [1, 0, 0, 1] },
+    "6PANEL": { "0": [0, 0, 0, 0, 0, 0], "1": [1, 0, 1, 0, 0, 0],
+                "2": [0, 0, 1, 0, 0, 0], "3": [0, 0, 1, 0, 0, 1],
+                "4": [1, 0, 0, 0, 0, 0], "6": [0, 0, 0, 0, 0, 1],
+                "7": [1, 0, 0, 1, 0, 0], "8": [0, 0, 0, 1, 0, 0],
+                "9": [0, 0, 0, 1, 0, 1], "A": [0, 0, 1, 1, 0, 0],
+                "B": [1, 0, 0, 0, 0, 1], "C": [0, 1, 0, 0, 0, 0],
+                "D": [0, 0, 0, 0, 0, 1], "E": [1, 1, 0, 0, 0, 0],
+                "F": [0, 1, 1, 0, 0 ,0], "G": [0, 1, 0, 1, 0, 0],
+                "H": [0, 1, 0, 0, 0, 1], "I": [1, 0, 0, 0, 1, 0],
+                "J": [0, 0, 1, 0, 1, 0], "K": [0, 0, 0, 1, 1, 0],
+                "L": [0 ,0, 0, 0, 1, 1], "M": [0, 1, 0, 0, 1, 0]
+                },
     }
+
+  diff_map = { "ANOTHER": "TRICK", "SMANIAC": "HARDCORE",
+               "S-MANIAC": "HARDCORE" }
+
+  game_map = { "SOLO": "6PANEL" }
 
   def __init__(self, filename, need_steps):
     GenericFile.__init__(self, filename, need_steps)
@@ -365,12 +379,16 @@ class DWIFile(GenericFile):
     for token in tokens:
       if len(token) == 0: continue
       parts = token.split(":")
+      if len(parts) > 3:
+        parts[0] = DWIFile.game_map.get(parts[0], parts[0])
+        parts[1] = DWIFile.diff_map.get(parts[1], parts[1])
       if len(parts) == 4 and parts[0] in games.SINGLE:
         if not self.difficulty.has_key(parts[0]):
           self.difficulty[parts[0]] = {}
           self.steps[parts[0]] = {}
         self.difficulty[parts[0]][parts[1]] = int(float(parts[2]))
-        if need_steps: self.parse_steps(parts[0], parts[1], parts[3])
+        if need_steps:
+          self.parse_steps(parts[0], parts[1], parts[3])
 
       elif len(parts) == 5 and parts[0] in games.COUPLE:
         if not self.difficulty.has_key(parts[0]):
@@ -415,15 +433,6 @@ class DWIFile(GenericFile):
 #      if self.info.has_key(key):
 #        self.info[key] = util.titlecase(self.info[key])
 
-    for game in self.difficulty:
-      for odiff, ndiff in (("ANOTHER", "TRICK"), ("SMANIAC", "HARDCORE")):
-        if self.difficulty[game].has_key(odiff):
-          self.difficulty[game][ndiff] = self.difficulty[game][odiff]
-          del(self.difficulty[game][odiff])
-          if need_steps:
-            self.steps[game][ndiff] = self.steps[game][odiff]
-            del(self.steps[game][odiff])
-
   def parse_steps(self, mode, diff, steps):
     step_type = "e"
     current_time = 0
@@ -432,13 +441,14 @@ class DWIFile(GenericFile):
     steplist = []
     steps = steps.replace(" ", "")
     steps = list(steps)
+    dwifile_steps = DWIFile.steps[mode]
     while len(steps) != 0:
       if steps[0] in DWIFile.modes: step_type = DWIFile.modes[steps.pop(0)]
-      elif steps[0] in DWIFile.steps:
-        step = list(DWIFile.steps[steps.pop(0)])
+      elif steps[0] in dwifile_steps:
+        step = list(dwifile_steps[steps.pop(0)])
         if len(steps) > 0 and steps[0] == "!":
           steps.pop(0)
-          holdstep = DWIFile.steps[steps.pop(0)]
+          holdstep = dwifile_steps[steps.pop(0)]
           for i in range(len(holdstep)):
             if holdstep[i]: step[i] |= 2
         steplist.append([step_type] + step)
@@ -645,7 +655,7 @@ class SongItem:
     # Sanity checks
     for k in ("bpm", "title", "artist", "filename"):
       if not self.info.has_key(k):
-        raise RuntimeError
+        raise RuntimeError(filename + " is missing: " + k)
 
     # Default values
     for k in ("subtitle", "background", "banner",

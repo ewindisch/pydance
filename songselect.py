@@ -251,7 +251,7 @@ class SongSelect:
     self.player_image = [pygame.image.load(os.path.join(image_path,
                                                         "player0.png"))]
 
-    locked = games.GAMES[gametype].locked
+    locked = games.GAMES[gametype].couple
 
     pygame.key.set_repeat(500, 30)
 
@@ -269,6 +269,8 @@ class SongSelect:
     
     self.index = 0
     preview = SongPreview()
+
+    self.maxplayers = games.GAMES[gametype].players
 
     self.game_config = copy.copy(game_config)
 
@@ -332,7 +334,8 @@ class SongSelect:
           changed = True
 
       # Player n+1 hit start, so add a new player
-      elif ev[1] == E_START and ev[0] == len(self.player_diffs):
+      elif (ev[1] == E_START and ev[0] == len(self.player_diffs) and
+            ev[0] < self.maxplayers):
         self.player_diffs.append(self.player_diffs[0])
         self.player_diff_names.append(self.player_diff_names[0])
 
