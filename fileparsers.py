@@ -722,15 +722,15 @@ class KSFFile(MSDFile):
         while line[-1] == ";": line = line[:-1]
         parts = line.split(":")
 
-        if parts[0] == "TITLE":
+        if parts[0] == "TITLE" and parts[1] != "":
           pts = parts[1].split(" - ")
           if len(pts) == 3:
             self.info["artist"], self.info["title"], difficulty = pts
           elif len(pts) == 2: self.info["artist"], self.info["title"] = pts
           elif len(pts) == 1: self.info["title"] = pts[0]
         elif parts[0] == "BPM": self.info["bpm"] = float(parts[1])
-        elif parts[0] == "TICKCOUNT": note_type = 4.0 / int(parts[1])
-        elif parts[0] == "STARTTIME": self.info["gap"] = -int(parts[1]) * 10
+        elif parts[0] == "TICKCOUNT": note_type = 4.0 / float(parts[1])
+        elif parts[0] == "STARTTIME": self.info["gap"] = -float(parts[1]) * 10
       elif line[0] == "2": break
       elif self.need_steps:
         if couple:
