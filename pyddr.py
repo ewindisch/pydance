@@ -10,12 +10,13 @@
 
 
 import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
-import os, time, sys, glob, random, fnmatch, types, operator, copy, string
+import os, sys, glob, random, fnmatch, types, operator, copy, string
 import pygame.transform
 
 # Run pyDDR from anywhere
-sys.path.append(os.path.realpath(sys.argv[0][:-9]))
-os.chdir(sys.argv[0][:-9])
+pyddr_path = os.path.split(os.path.abspath(sys.argv[0]))[0]
+sys.path.append(pyddr_path)
+os.chdir(pyddr_path)
 
 import fontfx
 from pygame.locals import *
@@ -574,9 +575,10 @@ class GradingScreen:
         gradetextpos = gradetext.get_rect()
         gradetextpos.right = 32 + screen.get_rect().centerx + 8-j
         gradetextpos.top = 64 + (i*24) + 8-j
-        screen.blit(gradetext, (320-font.size(rows[i])[0]/2,
+        r = screen.blit(gradetext, (320-font.size(rows[i])[0]/2,
                                 64 + (i*24) + 8-j))
-        pygame.display.flip()
+        update_screen(r)
+      pygame.time.wait(100)
 
     player = 0
 
@@ -586,7 +588,8 @@ class GradingScreen:
         font = pygame.font.Font(None, 100-(i*2))
         gradetext = font.render(grade, 1, (48 + i*16, 48 + i*16, 48 + i*16))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
-        screen.blit(gradetext, (200 + 250 * player - (font.size(grade))[0]/2, 150))
+        r = screen.blit(gradetext, (200 + 250 * player - (font.size(grade))[0]/2, 150))
+        update_screen(r)
         pygame.time.delay(48)
 
       totalsteps = (judge.marvelous + judge.perfect + judge.great + judge.ok +
@@ -609,8 +612,9 @@ class GradingScreen:
             graderect.left = 40
           else:
             graderect.right = 600
-          screen.blit(gradetext, graderect)
-          pygame.display.flip()
+          r = screen.blit(gradetext, graderect)
+          update_screen(r)
+        pygame.time.wait(100)
 
       # Total
       for j in range(4):
@@ -622,8 +626,9 @@ class GradingScreen:
           graderect.left = 40
         else:
           graderect.right = 600
-        screen.blit(gradetext, graderect)
-        pygame.display.flip()
+        r = screen.blit(gradetext, graderect)
+        update_screen(r)
+      pygame.time.wait(100)
 
       # Combo
       for j in range(4):
@@ -637,8 +642,9 @@ class GradingScreen:
           graderect.left = 40
         else:
           graderect.right = 600
-        screen.blit(gradetext, graderect)
-        pygame.display.flip()
+        r = screen.blit(gradetext, graderect)
+        update_screen(r)
+      pygame.time.wait(100)
 
       # Holds
       for j in range(4):
@@ -651,8 +657,9 @@ class GradingScreen:
           graderect.left = 40
         else:
           graderect.right = 600
-        screen.blit(gradetext, graderect)
-        pygame.display.flip()
+        r = screen.blit(gradetext, graderect)
+        update_screen(r)
+      pygame.time.wait(100)
 
       # Score
       for j in range(4):
@@ -665,8 +672,9 @@ class GradingScreen:
           graderect.left = 40
         else:
           graderect.right = 600
-        screen.blit(gradetext, graderect)
-        pygame.display.flip()
+        r = screen.blit(gradetext, graderect)
+        update_screen(r)
+      pygame.time.wait(100)
 
       player += 1
 
@@ -2759,6 +2767,38 @@ class RenderLayered(pygame.sprite.RenderClear):
       
       
 
+def text_fadeon(screen, font, message, center, fadetime=500):
+    start = pygame.time.get_ticks()
+    ticktime = fadetime / 30
+    for i in range(31):
+      color = 8*i, 8*i, 8*i
+      text = font.render(message, 1, color, (0,0,0))
+      trect = text.get_rect()
+      trect.center = center
+      r = screen.blit(text, trect)
+      update_screen(r)
+      pygame.time.delay(ticktime*i - (pygame.time.get_ticks() - start))
+def text_fadeoff(screen, font, message, center, fadetime=300):
+    start = pygame.time.get_ticks()
+    ticktime = fadetime / 30
+    for i in range(31):
+      color = 8*(30-i), 8*(30-i), 8*(30-i)
+      text = font.render(message, 1, color, (0,0,0))
+      trect = text.get_rect()
+      trect.center = center
+      r = screen.blit(text, trect)
+      update_screen(r)
+      pygame.time.delay(ticktime*i - (pygame.time.get_ticks() - start))
+
+
+def update_screen_hardware(dirty=None):
+    pass
+def update_screen_doublebuffer(dirty=None):
+    pygame.display.flip()
+def update_screen_software(dirty=None):
+    pygame.display.update(dirty)
+update_screen = update_screen_software
+
 
 # so it's currently in one routine. shut up, I'm learning python =]
 def main():
@@ -2792,12 +2832,6 @@ def main():
     else:
       difficulty = ['BASIC']
 
-  pygame.mixer.music.load("loading.ogg")
-  try:
-    pygame.mixer.music.play(4, 0.0)
-  except TypeError:
-    raise QuitGame("Sorry, pyDDR needs at least pygame 1.4.9")
-
   try:
     if int(mainconfig.get_value("vesacompat",default='0')):
       screen = pygame.display.set_mode((640, 480), 16)
@@ -2810,6 +2844,19 @@ def main():
   pygame.display.set_caption('pyDDR')
   pygame.mouse.set_visible(0)
   eventManager = EventManager()
+
+  global update_screen
+  if (screen.get_flags()&DOUBLEBUF == DOUBLEBUF):
+      update_screen = update_display_doublebuffer
+  elif screen.get_flags()&HWSURFACE:
+      update_screen = update_display_hardware
+  #else it defaults to software update rect
+
+  pygame.mixer.music.load("loading.ogg")
+  try:
+    pygame.mixer.music.play(4, 0.0)
+  except TypeError:
+    raise QuitGame("Sorry, pyDDR needs at least pygame 1.4.9")
 
   background = BlankSprite(screen.get_size())
 
@@ -2824,14 +2871,7 @@ def main():
     print "Entering debug mode. Not loading the song list."
     totalsongs = 1
   else:
-    for i in range(31):
-      text = font.render("Looking for songs..",1,(i*8,i*8,i*8))
-      trect = text.get_rect()
-      trect.centerx = 320
-      trect.centery = 240
-      screen.blit(text,trect)
-      pygame.display.flip()
-
+    text_fadeon(screen, font, "Looking for songs..", (320, 240))
     print 'Searching for STEP files..'
     # Search recursively for all STEP files
     fileList = find(songdir, '*.step')
@@ -2841,15 +2881,7 @@ def main():
     fileList.sort()
     # return the list of valid songs
     songs = filter(None,map(fastSong,fileList))
-
-    for i in range(31):
-      a = (31-i)*8
-      text = font.render("Looking for songs..",1,(a,a,a))
-      trect = text.get_rect()
-      trect.centerx = 320
-      trect.centery = 240
-      screen.blit(text,trect)
-      pygame.display.flip()
+    text_fadeoff(screen, font, "Looking for songs..", (320, 240))
 
   event = eventManager.poll()
 
@@ -2858,44 +2890,32 @@ def main():
   if totalsongs < 1:
     raise QuitGame("No songs? Download one: http://clickass.org/~tgz/pyddr/")
 
-  for i in range(31):
-    text = font.render("Prerendering....",1,(i*8,i*8,i*8))
-    trect = text.get_rect()
-    trect.centerx = 320
-    trect.centery = 240
-    screen.blit(text,trect)
-    pygame.display.flip()
 
+  text_fadeon(screen, font, "Prerendering....", (320, 240))
+  print 'Prerendering'
   if not debugmode:
     # prerender the list texts for songs, speed up song selector
-    ox = copy.copy(trect.left+4)
+    brect = Rect(220, 250, 180, 5)
+    ox = copy.copy(brect.left+4)
     pixelbar = pygame.surface.Surface((1,3))
     pixelbar.fill((192,192,192))
     fuxor = 1
     for n in songs:
-      x = trect.size[0] * fuxor/float(totalsongs)
+      x = brect.size[0] * fuxor/float(totalsongs)
+      dirty = []
       for i in range(x-ox):
-        screen.blit(pixelbar,(trect.left+ox+i,trect.bottom+3))
-      pygame.display.flip()
+        dirty.append(screen.blit(pixelbar,(brect.left+ox+i,brect.bottom+3)))
+      pygame.display.update(dirty)
       ox = copy.copy(x)-1
       n.renderListText(totalsongs,fuxor)
       fuxor += 1
 
-  print "Prerendering.."
   p1combo = ComboDisp(1)
   holdkey = keykludge()
   p2combo = ComboDisp(2)
   holdkey2 = keykludge()
   global p1combo, p2combo, holdkey, holdkey2, sortmode
-  
-  for i in range(31):
-    a = (31-i)*8
-    text = font.render("Prerendering....",1,(a,a,a))
-    trect = text.get_rect()
-    trect.centerx = 320
-    trect.centery = 240
-    screen.blit(text,trect)
-    pygame.display.flip()
+  text_fadeoff(screen, font, "Prerendering....", (320, 240))
 
   pygame.mixer.music.fadeout(500)
 #  pygame.time.delay(500)
@@ -3180,7 +3200,7 @@ def domenu():
           screen.blit(self.image, (0, 0))
           pygame.display.flip()
 
-        time.sleep(0.05)
+        pygame.time.delay(500)
 
   class TextZoomer:
     def __init__(self,text,r,g,b):
@@ -3442,7 +3462,7 @@ def domenu():
           screen.blit(blah.items[topitem+i].image,(224,80+i*48))
 
     pygame.display.flip()
-    time.sleep(0.01)
+    pygame.time.wait(1)
 
 def blatantplug():
   xiphlogo = pygame.image.load("xifish.png").convert()
@@ -3556,7 +3576,7 @@ def songSelect(songs,fooblah):
   songChanged = 1
   while 1:
     boink = 0
-    time.sleep(0.01)
+    pygame.time.wait(1)
     dirtyRects=[]
     dirtyRects2=[]
     for n in eraseRects: dirtyRects.append(background.draw(screen,n,n))
@@ -3687,10 +3707,10 @@ def songSelect(songs,fooblah):
       background.blit(screen,(0,0))
       for n in range(63):
         background.set_alpha(255-(n*4))
-        time.sleep(0.02)
         screen.fill(BLACK)
         background.draw(screen)
         pygame.display.flip()
+        pygame.time.wait(1)
         if (eventManager.poll() == E_QUIT): raise QuitGame("Quit right before playing?") # be nice..
       background.set_alpha()
       screen.fill(BLACK)
@@ -4437,7 +4457,7 @@ def dance(song,players,difficulty):
             if players == 2:
               dajudge2.changingbpm(ev.bpm)
         if ev.extra == 'TSTOP':
-          time.sleep(float(ev.bpm/1000))
+          pygame.time.wait(ev.bpm)
         if ev.feet:
           for (dir,num) in zip(['l','d','u','r'],ev.feet):
             if num & 8:
@@ -4723,9 +4743,9 @@ def dance(song,players,difficulty):
       gradetextpos = gradetext.get_rect()
       gradetextpos.centerx = screen.get_rect().centerx
       gradetextpos.bottom = screen.get_rect().bottom - 16
-      screen.blit(gradetext,gradetextpos)
-      pygame.display.flip()
-      time.sleep(0.0001)     # don't peg the CPU on the grading screen
+      r = screen.blit(gradetext,gradetextpos)
+      update_screen(r)
+      pygame.time.wait(1)     # don't peg the CPU on the grading screen
 
       if screenshot:
         pygame.image.save(pygame.transform.scale(screen, (640,480)),
