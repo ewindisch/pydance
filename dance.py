@@ -784,7 +784,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
     # This maps the old holdkey system to the new event ID one
     # We should phase this out
-    keymap_kludge = ({"u": E_UP, "k": E_UNMARK, "w": E_PGUP,
+    keymap_kludge = ({"u": E_UP, "k": E_UNMARK, "z": E_PGUP,
                       "d": E_DOWN, "l": E_LEFT, "r": E_RIGHT})
 
     for plr in players:
