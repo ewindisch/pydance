@@ -378,7 +378,7 @@ class GradingScreen:
     pygame.display.update()
 
     rows = ["MARVELOUS", "PERFECT", "GREAT", "OK", "BOO",
-            "MISS", "early", "late", "TOTAL", " ", "MAX COMBO",
+            "MISS", "early", "late", " ", "TOTAL", " ", "MAX COMBO",
             "HOLDS", " ", "SCORE"]
 
     for j in range(4):
@@ -1700,10 +1700,6 @@ def main():
     print "You don't have any songs, and you need one. Go here: http://icculus.org/pyddr/"
     sys.exit()
 
-  global sortmode
-  
-  screen.fill(colors.BLACK)
-    
   menudriver.do(screen, (songs, screen, playSequence, GradingScreen))
   mainconfig.write(os.path.join(rc_path, "pyddr.cfg"))
 

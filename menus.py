@@ -131,6 +131,7 @@ class Menu:
   # Postcondition: Screen buffer is in an unknown state!
   def display(self):
     screen = self.screen
+    Menu.bgimage.image.set_alpha(256)
     screen.blit(Menu.bgimage.image, TOPLEFT)
     curitem = 0
     topitem = 0
