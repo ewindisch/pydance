@@ -156,8 +156,6 @@ class TopArrow(pygame.sprite.Sprite):
       self.topimg.append(theme.get_arrow("s", self.direction, i).convert())
       self.topimg[i].set_colorkey(self.topimg[i].get_at((0, 0)), RLEACCEL)
 
-    # FIXME: These used to be indented one more level - if stuff breaks,
-    # that's why. FIXME
     self.image = self.topimg[0]
     self.rect = self.image.get_rect()
     self.rect.top = ypos

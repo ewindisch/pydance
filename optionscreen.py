@@ -20,7 +20,7 @@ def player_opt_driver(screen, configs):
                           (3, "Hide 3")]),
     ("Accel", "accel", [(0, "None"), (1, "Boost"), (2, "Brake")]),
     ("Scale", "scale", [(1, "Normal"), (0, "Shrink"), (2, "Grow")]),
-    ("Size", "size", [(0, "Off"), (1, "On Beat"), (2, "Beat & Half Beat")]),
+    ("Size", "size", [(0, "Off"), (1, "Tiny"), (2, "Little")]),
     ("Scroll", "scrollstyle", [(0, "Normal"), (1, "Reverse"), (2, "Center")]),
     ("Jumps", "jumps", [(0, "On"), (1, "Off"), (2, "Wide")]),
     ("Spin", "spin", [(0, "Off"), (1, "On")]),

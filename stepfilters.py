@@ -33,6 +33,26 @@ MAP_EQUIVS = {
 for mode, equivs in MAP_EQUIVS.items():
   for eq in equivs: STEP_MAPPINGS[eq] = STEP_MAPPINGS[mode]
 
+# Compress the steps to remove empty lines. FIXME: Do this in fileparsers.
+def compress(steps):
+  new_steps = []
+  beat_count = 0
+  last_event = None
+  for s in steps:
+    if not isinstance(s[0], float): # Not a step
+      if last_event is not None: new_steps.append([beat_count] + last_event)
+      last_event = None
+      beat_count = 0
+      new_steps.append(s)
+    elif s[1:].count(0) != (len(s) - 1) or last_event == None: # Non-empty
+      if last_event is not None: new_steps.append([beat_count] + last_event)
+      last_event = s[1:]
+      beat_count = s[0]
+    else: # Empty event
+      beat_count += s[0]
+
+  return new_steps
+
 # Rotate the steps according the player's rotation mode
 # Random and shuffle aren't really rotations but... whatever.
 def rotate(steps, opt, mode):
@@ -55,6 +75,8 @@ def rotate(steps, opt, mode):
         s[1:] = random_steps
 
 # Apply myriad additions/deletions to the step pattern
+# FIXME: Return a list rather than in-place modify.
+# FIXME: Big, quick, skippy.X
 def size(steps, opt):
   if opt == 1: little(steps, 4)
   elif opt == 2: little(steps, 2)
@@ -68,6 +90,7 @@ def little(steps, mod):
       beat += s[0]
     elif s[0] == "D": beat += s[1]
 
+# Pretty obvious.
 def remove_holds(steps, jump):
   for s in steps:
     if s[0] not in NOT_STEPS: s[1:] = [i & 1 for i in s[1:]]

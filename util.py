@@ -1,5 +1,23 @@
 import fnmatch, os, string
 
+# This is the standard order to present difficulties in.
+# DDR (USA home version) calls "beginner" "standard". Ignore that.
+# Beginner, light, basic, another, standard, trick, maniac, heavy, challenge,
+# and oni are from DDR. Smaniac is from DWI; s-maniac is a very common typo.
+# Hardcore is from pydance. Para and expert are from PPP. Easy, and hard are
+# from TM and PIU; medium is from TM; crazy is from PIU.
+DIFFICULTY_LIST = ["BEGINNER", "EASY", "LIGHT", "BASIC", "PARA", "ANOTHER",
+                   "NORMAL", "MEDIUM", "STANDARD", "TRICK", "DOUBLE", "HARD",
+                   "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI",
+                   "SMANIAC", "S-MANIAC", "CRAZY", "EXPERT"]
+
+def difficulty_sort(a, b):
+  if a in DIFFICULTY_LIST and b in DIFFICULTY_LIST:
+    return cmp(DIFFICULTY_LIST.index(a), DIFFICULTY_LIST.index(b))
+  elif a in DIFFICULTY_LIST: return -1
+  elif b in DIFFICULTY_LIST: return 1
+  else: return cmp(a, b)
+
 # FIXME: We should inline this. Really.
 def toRealTime(bpm, steps):
   return steps*0.25*60.0/bpm

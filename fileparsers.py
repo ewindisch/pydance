@@ -794,18 +794,10 @@ class KSFFile(MSDFile):
     self.difficulty[mode][difficulty] = ratings.get(difficulty, 5)
     self.steps[mode][difficulty] = steps
 
-DIFFICULTIES = ["BEGINNER", "LIGHT", "EASY", "BASIC", "ANOTHER", "NORMAL",
-                "STANDARD", "TRICK", "MEDIUM", "HARD", "MANIAC", "HEAVY",
-                "HARDCORE", "CHALLENGE", "SMANIAC", "ONI", "CRAZY"]
-
-def order_sort(a, b):
-  if a in DIFFICULTIES and b in DIFFICULTIES:
-    return cmp(DIFFICULTIES.index(a), DIFFICULTIES.index(b))
-  else: return cmp(a, b)
-
 def sorted_diff_list(difflist):
   keys = difflist.keys()
-  keys.sort((lambda a, b: cmp(difflist[a], difflist[b]) or order_sort(a, b)))
+  keys.sort((lambda a, b: cmp(difflist[a], difflist[b]) or
+             util.difficulty_sort(a, b)))
   return keys
 
 # Encapsulates and abstracts the above classes

@@ -80,12 +80,12 @@ class GameSelect(object):
     # Track our current state so Esc takes us back to the previous choice,
     # and not the menu.
     states = [self.select_mode, self.select_submode, self.select_selector]
-    values = [None, None, None]
+    self.values = [None, None, None]
     state = 0
 
     while state != -1: # Esc pressed from first choice, return to menu
       val = states[state]()
-      values[state] = val
+      self.values[state] = val
 
       # FIXME: When esc is pressed, return to the previously selected
       # choice, not the initial choice.
@@ -93,14 +93,14 @@ class GameSelect(object):
       else: state += 1
 
       if state == len(states): # All choices done, start the game
-        SELECTORS[values[2]](songitems, screen,
-                             MODES.get((values[0], values[1])))
+        SELECTORS[self.values[2]](songitems, screen,
+                                  MODES.get((self.values[0], self.values[1])))
 
         # After playing, reset to the first choice.
         # FIXME: Is going to the menu a better idea? Do more people exit the
         # SS to change options, or to play a different game type?
 
-        values = [None, None, None]
+        self.values = [None, None, None]
         self.images = [None, None, None]
         state = 0
 
@@ -123,7 +123,8 @@ class GameSelect(object):
                                                  "select-%s.png" % i.lower()))
       images[i].convert()
 
-    index = 0
+    if self.values[idx] != None: index = choices.index(self.values[idx])
+    else: index = 0
 
     ev = E_PASS
     while ev != E_QUIT:

@@ -77,6 +77,8 @@ class Steps(object):
     else:
       song_steps = stepfilters.generate_mode(song, difficulty, playmode, pid)
 
+    song_steps = stepfilters.compress(song_steps)
+
     if player.transform:
       stepfilters.rotate(song_steps, player.transform, playmode)
 

@@ -157,7 +157,7 @@ class EventManager(object):
 
       self.mergeEvents(A4B16, 0, emsusb2)
       self.mergeEvents(emsp2, 1, emsusb2)
-    # FIXME We can clean this up a lot
+
     elif mat != None:
       ddrmat = pygame.joystick.Joystick(mat)
       ddrmat.init()
