@@ -17,9 +17,9 @@ class Judge(object):
     self.failed_out = False
     self.lifebar = lifebar
     self.diff = diff
-    # DDR Extreme scoring
-    scorecoeff = (1000000.0 * feet) / ((stepcount * (stepcount + 1.0)) / 2.0)
-    self.score_coeff = int(scorecoeff) + 1
+    # Our own scoring algorithm! 0-40,000,000 for steps, 0-10,000,000 combo.
+    self.score_coeff = 10000000.0 / stepcount
+    self.combo_coeff = 10000000.0 / (stepcount * (stepcount + 1) / 2.0)
     self.score = score
     self.dance_score = 6 * holds
     self.badholds = 0
@@ -90,21 +90,21 @@ class Judge(object):
         self.combos.addcombo(curtime)
         if off <= 1:
           self.marvelous += 1
-          self.score.score += 10 * self.score_coeff * self.arrow_count
+          self.score.score += 4 * self.score_coeff
           self.dance_score += 2
           self.lifebar.update_life("V")
           text = "MARVELOUS"
           anncrange = (80, 100)
         elif off <= 4:
           self.perfect += 1
-          self.score.score += 9 * self.score_coeff * self.arrow_count
+          self.score.score += 3.5 * self.score_coeff
           self.dance_score += 2
           self.lifebar.update_life("P")
           text = "PERFECT"
           anncrange = (80, 100)
         else:
           self.great += 1
-          self.score.score += 5 * self.score_coeff * self.arrow_count
+          self.score.score += 2.5 * self.score_coeff
           self.dance_score += 1
           self.lifebar.update_life("G")
           text = "GREAT"
@@ -114,6 +114,7 @@ class Judge(object):
         self.combos.broke(curtime)
         if off < 9:
           self.ok += 1
+          self.score.score += 0.5 * self.score_coeff
           self.lifebar.update_life("O")
           text = "OK"
           anncrange = (40, 69)
@@ -124,12 +125,13 @@ class Judge(object):
           text = "BOO"
           anncrange = (20, 39)
 
+      self.score.score += self.combos.combo * self.combo_coeff
+
       if random.randrange(15) == 1: self.announcer.say('ingame', anncrange)
 
       self.display.judge(curtime, text)
 
     return text, dir, etime
-
 
   def expire_arrows(self, time):
     self.times = self.steps.keys()

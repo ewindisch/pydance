@@ -89,7 +89,7 @@ class ScoringDisp(pygame.sprite.Sprite):
   def update(self):
     if self.score != self.oldscore:
       self.image.blit(self.baseimage, (0,0))
-      scoretext = FONTS[28].render(str(self.score), 1, (192,192,192))
+      scoretext = FONTS[28].render(str(int(self.score)), 1, (192,192,192))
       self.image.blit(scoretext, (64 - (scoretext.get_rect().size[0] / 2),
                                     13))
       self.image.set_colorkey(self.image.get_at((0, 0)), RLEACCEL)

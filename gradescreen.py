@@ -148,8 +148,8 @@ class GradingScreen(object):
       pygame.time.wait(100)
 
       # Score
-      # Pete's suggestion, make it more readable
-      orig_score = str(judge.score.score)
+      # Pete's suggestion, make it more readable by adding commas.
+      orig_score = str(int(judge.score.score))
       score = ""
       while len(orig_score) > 3:
         score = orig_score[-3:] + "," + score
