@@ -826,6 +826,12 @@ class SongItem(object):
                "startat": 0.0,
                "revision": "1970.01.01",
                "gap": 0 }
+
+  # A table of equivalencies between step sets; if the value doesn't
+  # exist, it should be made the same as the key.
+  # FIXME: This probably belongs in games.py somewhere.
+  equivs = { "SINGLE": "VERSUS",
+             "5PANEL": "5VERSUS" }
   
   def __init__(self, filename, need_steps = True):
     song = None
@@ -877,6 +883,12 @@ class SongItem(object):
 
     if self.info["mix"] == "": self.info["mix"] = "No Mix"
   
+    for k, v in SongItem.equivs.items():
+      if self.difficulty.has_key(k) and not self.difficulty.has_key(v):
+        self.difficulty[v] = self.difficulty[k]
+        self.steps[v] = self.steps[k]
+
     self.diff_list = {}
     for key in self.difficulty:    
       self.diff_list[key] = sorted_diff_list(self.difficulty[key])
+
