@@ -36,7 +36,16 @@ A6B12 = { 1: E_PGUP, 3: E_PGDN, 8: E_SELECT, 4: E_LEFT, 5: E_RIGHT,
 A4B16 = { 0: E_MARK, 1: E_PGUP, 3: E_PGDN, 8: E_SELECT, 9: E_START,
           15: E_LEFT, 13: E_RIGHT, 12: E_UP, 14: E_DOWN }
 
+
+# Gravis Gamepad Pro USB
+# 0: Square, 1: X, 2: O, 3: Triangle
+# 4: L1, 5: R1, 6: L2, 7: R2
+# 8: Select, 9: Start
+A2B10 = { 0: E_LEFT, 1: E_DOWN, 2: E_RIGHT, 3: E_UP,
+         5: E_PGUP, 7: E_PGDN, 8: E_SELECT, 9: E_START }
+  
 # This is some sort of natively USB mat, I guess...
+# FIXME: I don't think it works.
 A2B8 = { E_UP: 4, E_DOWN: 6, E_LEFT: 5, E_RIGHT: 7,
          E_START: 2, E_MARK: 3, E_PGUP: 0, E_PGDN: 1 }
 
@@ -64,8 +73,11 @@ class EventManager:
         if mat == None: mat = i
         else: # A 4/16 should be P1 if available, overriding 6/12.
           mat2 = mat
-          mat = i
+          mat = i # FIXME We can clean this up a lot
       elif ddrmat.get_numbuttons() == 12 and ddrmat.get_numaxes() == 6:
+        if mat == None: mat = i
+        elif mat2 == None: mat2 = i
+      elif ddrmat.get_numbuttons() == 10 and ddrmat.get_numaxes() == 2:
         if mat == None: mat = i
         elif mat2 == None: mat2 = i
       elif ddrmat.get_numbuttons() == 8 and ddrmat.get_numaxes() == 2:
@@ -86,7 +98,7 @@ class EventManager:
 
       self.mergeEvents(A4B16, 0, "js" + str(emsusb2))
       self.mergeEvents(emsp2, 1, "js" + str(emsusb2))
-        
+    # FIXME We can clean this up a lot
     elif mat != None:
       ddrmat = pygame.joystick.Joystick(mat)
       ddrmat.init()
@@ -95,6 +107,8 @@ class EventManager:
         self.mergeEvents(A4B16, 0, "js" + str(mat))
       elif ddrmat.get_numbuttons() == 12:
         self.mergeEvents(A6B12, 0, "js" + str(mat))
+      elif ddrmat.get_numbuttons() == 10:
+        self.mergeEvents(A2B10, 0, "js" + str(mat))
       elif ddrmat.get_numbuttons() == 8:
         self.mergeEvents(A2B8, 0, "js" + str(mat))
       print "DDR mat 1 initialized: js", mat
@@ -106,6 +120,8 @@ class EventManager:
           self.mergeEvents(A4B16, 1, "js" + str(mat2))
         elif ddrmat.get_numbuttons() == 12:
           self.mergeEvents(A6B12, 1, "js" + str(mat2))
+        elif ddrmat.get_numbuttons() == 10:
+          self.mergeEvents(A2B10, 1, "js" + str(mat2))
         elif ddrmat.get_numbuttons() == 8:
           self.mergeEvents(A2B8, 1, "js" + str(mat2))
         print "DDR mat 2 initialized: js", mat2
