@@ -136,6 +136,8 @@ def do(screen, songdata):
         ("Themes ...",
          ["4 Panel", rotate_opt,
           ("4p-theme", ThemeFile.list_themes("SINGLE"))],
+         ["3 Panel", rotate_opt,
+          ("3p-theme", ThemeFile.list_themes("3PANEL"))],
          ["5 Panel", rotate_opt,
           ("5p-theme", ThemeFile.list_themes("5PANEL"))],
          ["Large 6 Panel", rotate_opt,
