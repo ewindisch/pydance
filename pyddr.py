@@ -1887,7 +1887,8 @@ def dance(song, players):
   song.cache()
   if song.crapout == 0:
     song.init()
-  else:
+  
+  if song.crapout != 0:
     font = None
     text = None
     text = FONTS[192].render('ERROR!', 1, (48,48,48))
@@ -1923,7 +1924,10 @@ def dance(song, players):
       ev = event.poll()
       if ev[1] == E_START or ev[1] == E_QUIT: break
       pygame.time.wait(50)
-
+    
+    print "crapping out: can't play this song."
+    return 0 #player didn't fail, so return 0 here.
+  
   screenshot = 0
 
 #  print "playmode: %r difficulty %r modes %r" % (playmode,difficulty,song.modes)
