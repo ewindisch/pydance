@@ -3,9 +3,9 @@ from constants import *
 from util import toRealTime
 from announcer import Announcer
 from listener import Listener
-import random
+from listener import Listener
 
-class AbstractJudge(object):
+class AbstractJudge(Listener):
   def __init__ (self):
     self.steps = {}
     self.failed = False
@@ -15,21 +15,18 @@ class AbstractJudge(object):
     self.bpm = bpm
     self.diff = difficulty
     self.tick = toRealTime(bpm, 0.16666666666666666)
-    self.holdsub = [0] * holds
+    self.holdsub = {}
     self.steps = {}
 
   def get_rating(self, dir, curtime):
     raise NotImplementedError("This class should not be instantiated.")
-        
+
   def bpm_change(self, bpm):
     if bpm >= 1: self.tick = toRealTime(bpm, 0.16666666666666666)
     self.bpm = bpm
 
-  def ok_hold(self, whichone): pass
-        
-  def broke_hold(self, whichone):
-    if self.holdsub[whichone] != -1:
-      self.holdsub[whichone] = -1
+  def broke_hold(self, dir, whichone):
+    if self.holdsub.get(whichone) != -1: self.holdsub[whichone] = -1
 
   def handle_key(self, dir, curtime):
     rating, dir, etime = self.get_rating(dir, curtime)

@@ -12,7 +12,7 @@ class GradingScreen(object):
       if player == None: continue
       print "Player %d:" % (player.pid + 1)
     
-      grade = player.grade.grade(player.judge.failed)
+      grade = player.grade.grade(player.get_judge().failed)
       totalsteps = player.stats.arrow_count
 
       steps = (grade, player.difficulty, player.stats.arrow_count,
@@ -66,7 +66,7 @@ class GradingScreen(object):
       pygame.time.wait(100)
 
     for player in self.players:
-      grade = player.grade.grade(player.judge.failed)
+      grade = player.grade.grade(player.get_judge().failed)
       for i in range(4):
         font = pygame.font.Font(None, 100-(i*2))
         gradetext = font.render(grade, 1, (48 + i*16, 48 + i*16, 48 + i*16))

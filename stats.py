@@ -16,11 +16,11 @@ class Stats(Listener):
     self.steps[rating] += 1
     self.arrow_count += 1
 
-  def ok_hold(self):
+  def ok_hold(self, dir, whichone):
     self.hold_count += 1
     self.good_holds += 1
 
-  def broke_hold(self):
+  def broke_hold(self, dir, whichone):
     self.hold_count += 1
     self.bad_holds += 1
 

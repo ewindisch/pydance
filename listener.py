@@ -8,10 +8,12 @@ class Listener(object):
     raise NotImplementedError("This class should never be instantiated.")
 
   # This is received when a hold is sucessfully completed ("OK").
-  def ok_hold(self): pass
+  # dir is the direction of this hold.
+  # whichone is a unique ID of the hold for this song.
+  def ok_hold(self, dir, whichone): pass
 
   # Received when a hold is broken ("NG") for the first time.
-  def broke_hold(self): pass
+  def broke_hold(self, dir, whichone): pass
 
   # Received when an arrow is stepped on or missed.
   # combo is the current combo count. rating is V (marvelous), P
@@ -23,7 +25,7 @@ class Listener(object):
   # Received when a new song is started. difficulty is the name as a
   # string; count is the number of arrows in the song; feet is the
   # song rating.
-  def set_song(self, difficulty, count, feet): pass
+  def set_song(self, bpm, difficulty, count, holds, feet): pass
 
   # Received when the BPM of the song changes. The new BPM is given.
   def change_bpm(self, bpm): pass

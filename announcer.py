@@ -1,9 +1,11 @@
 import os, random, dircache
 import pygame
 
+from listener import Listener
+
 from constants import *
 
-class Announcer:
+class Announcer(Listener):
 
   def themes(cls):
     theme_list = []
@@ -54,9 +56,6 @@ class Announcer:
       snd = pygame.mixer.Sound(filename)
       snd.play()
     self.lasttime = pygame.time.get_ticks()
-
-  def ok_hold(self): pass
-  def broke_hold(self): pass
 
   def stepped(self, curtime, rating, combo):
     if random.randrange(15) != 1: return

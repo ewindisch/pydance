@@ -1,6 +1,8 @@
 from constants import *
 from util import toRealTime
 from gfxtheme import GFXTheme
+from announcer import Announcer
+
 from listener import Listener
 
 from pygame.sprite import RenderUpdates, RenderClear
@@ -552,17 +554,20 @@ class Player(object):
     self.lifebar = Lifebar(pid, self.theme, songconf, game)
     self.judging_disp = JudgingDisp(self.pid, game)
     self.stats = stats.Stats()
+    self.announcer = Announcer(mainconfig["djtheme"])
 
     self.game = game
 
     self.listeners = [self.combos, self.score, self.grade, self.lifebar,
-                      self.judging_disp, self.stats]
+                      self.judging_disp, self.stats, self.announcer]
 
     if not game.double:
       self.judge = judge.judges[songconf["judge"]]()
+      self.listeners.append(self.judge)
     else:
       Judge = judge.judges[songconf["judge"]]
       self.judge = [Judge(), Judge()]
+      self.listeners.extend(self.judge)
 
   def set_song(self, song, diff, lyrics):
     self.difficulty = diff
@@ -598,14 +603,13 @@ class Player(object):
                        HoldJudgeDisp(self.pid * 2 + 1, self, self.game)]
 
       count = self.steps[0].totalarrows + self.steps[1].totalarrows
-      self.lifebar.set_song(diff, count, self.steps[0].feet)
-      self.score.set_song(diff, count, self.steps[0].feet)
+      total_holds = 0
 
       for i in range(2):
-        if self.steps[i].holdref: holds = len(self.steps[i].holdref)
-        else: holds = 0
-        self.judge[i].set_song(self.steps[i].bpm, diff, count,
-                               holds, self.steps[i].feet)
+        total_holds += len(self.steps[i].holdref)
+
+      args = (self.steps[0].bpm, diff, count, total_holds, self.steps[0].feet)
+      for l in self.listeners: l.set_song(*args)
 
     else:
       self.holding = [-1] * len(self.game.dirs)
@@ -622,10 +626,9 @@ class Player(object):
       if self.steps.holdref: holds = len(self.steps.holdref)
       else: holds = 0
 
-      self.score.set_song(diff, self.steps.totalarrows, self.steps.feet)
-      self.lifebar.set_song(diff, self.steps.totalarrows, self.steps.feet)
-      self.judge.set_song(self.steps.bpm, diff, self.steps.totalarrows,
-                          holds, self.steps.feet)
+      args = (self.steps.bpm, diff, self.steps.totalarrows,
+              holds, self.steps.feet)
+      for l in self.listeners: l.set_song(*args)
 
   def get_judge(self):
     if self.game.double: return self.judge[0]
@@ -750,14 +753,14 @@ class Player(object):
       dir_idx = self.game.dirs.index(dir)
       if current_hold is not None:
         if event.states[(pid, keymap_kludge[dir])]:
-          if judge.holdsub[holding[dir_idx]] != -1:
+          if judge.holdsub.get(holding[dir_idx]) != -1:
             toparrfx[dir].holding(1)
           holding[dir_idx] = current_hold
         else:
           holdtext.fillin(curtime, dir_idx, "NG")
-          if judge.holdsub[current_hold] != -1:
-            judge.broke_hold(current_hold)
-            for l in self.listeners: l.broke_hold()
+          if judge.holdsub.get(current_hold) != -1:
+            judge.broke_hold(dir, current_hold)
+            for l in self.listeners: l.broke_hold(dir, current_hold)
             botchdir, timef1, timef2 = steps.holdinfo[current_hold]
             # FIXME it's slow.
             for spr in arrows.sprites():
@@ -769,9 +772,9 @@ class Player(object):
               except: pass
       else:
         if holding[dir_idx] > -1:
-          if judge.holdsub[holding[dir_idx]] != -1:
-            judge.ok_hold(holding[dir_idx])
-            for l in self.listeners: l.ok_hold()
+          if judge.holdsub.get(holding[dir_idx]) != -1:
+            judge.ok_hold(dir, holding[dir_idx])
+            for l in self.listeners: l.ok_hold(dir, holding[dir_idx])
             holding[dir_idx] = -1
             holdtext.fillin(curtime, dir_idx, "OK")
 

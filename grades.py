@@ -13,11 +13,11 @@ class DancePointsGrade(AbstractGrade):
     self.hold_count = 0
     self.inc = { "V": 2, "P": 2, "G": 1, "B": -4, "M": -8 }
 
-  def ok_hold(self):
+  def ok_hold(self, dir, whichone):
     self.hold_count += 1
     self.score += 6
 
-  def broke_hold(self):
+  def broke_hold(self, dir, whichone):
     self.hold_count += 1
 
   def stepped(self, cur_time, rating, combo):
