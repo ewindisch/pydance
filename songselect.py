@@ -144,7 +144,7 @@ class SongPreview:
 
   def preview(self, song):
     if mainconfig["previewmusic"] and not song.isfolder:
-      start, length = song.song.info["preview"]
+      self.start, length = song.song.info["preview"]
       self.filename = song.song.info["filename"]
       if self.playing: audio.fadeout(500)
       self.playing = False
@@ -159,7 +159,7 @@ class SongPreview:
       try:
         audio.load(self.filename)
         audio.set_volume(0.01)
-        audio.play(0, self.start_time)
+        audio.play(0, self.start)
         self.playing = True
       except: # Filename not found? Song is too short? SMPEG blows?
         audio.stop()
