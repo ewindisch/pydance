@@ -443,8 +443,8 @@ class DWIFile(MSDFile):
       # don't support filenames. They're useless cross-platform.
       # Don't support genre, it's a dumbass tag
       if parts[0] == "GAP": self.info["gap"] = -int(float(rest))
-      elif parts[0] == "TITLE": self.info["title"] = rest
-      elif parts[0] == "ARTIST": self.info["artist"] = rest
+      elif parts[0] == "TITLE": self.info["title"] = rest.decode("iso-8859-1").encode("utf-8")
+      elif parts[0] == "ARTIST": self.info["artist"] = rest.decode("iso-8859-1").encode("utf-8")
       elif parts[0] == "MD5": self.info["md5sum"] = rest
       elif parts[0] == "BPM": self.info["bpm"] = float(rest)
       elif parts[0] == "SAMPLESTART":
@@ -573,13 +573,13 @@ class SMFile(MSDFile):
       if rest == "": continue
 
       if parts[0] == "OFFSET": self.info["gap"] = float(parts[1]) * 1000
-      elif parts[0] == "TITLE": self.info["title"] = ":".join(parts[1:])
-      elif parts[0] == "SUBTITLE": self.info["subtitle"] = ":".join(parts[1:])
-      elif parts[0] == "ARTIST": self.info["artist"] = ":".join(parts[1:])
-      elif parts[0] == "MUSIC": self.info["filename"] = ":".join(parts[1:])
-      elif parts[0] == "BANNER": self.info["banner"] = ":".join(parts[1:])
-      elif parts[0] == "BACKGROUND":
-        self.info["background"] = ":".join(parts[1:])
+      elif parts[0] == "TITLE": self.info["title"] = rest
+      elif parts[0] == "SUBTITLE": self.info["subtitle"] = rest
+      elif parts[0] == "ARTIST": self.info["artist"] = rest
+      elif parts[0] == "CREDIT": self.info["author"] = rest
+      elif parts[0] == "MUSIC": self.info["filename"] = rest
+      elif parts[0] == "BANNER": self.info["banner"] = rest
+      elif parts[0] == "BACKGROUND": self.info["background"] = rest
       elif parts[0] == "MD5": self.info["md5sum"] = parts[1]
       elif parts[0] == "SAMPLESTART":
         if self.info.has_key("preview"):
@@ -690,6 +690,8 @@ class KSFFile(MSDFile):
         self.info["background"] = fullname
 
     self.find_mixname()
+    self.info["title"] = self.info["title"].decode("cp949").encode("utf-8")
+    self.info["artist"] = self.info["artist"].decode("cp949").encode("utf-8")
 
   def parse_ksf(self, filename):
     steps = []
@@ -814,7 +816,6 @@ class SongItem(object):
              ("song.ogg", KSFFile),
              ("song.mp3", KSFFile),
              ("song.wav", KSFFile))
-             
 
   defaults = { "valid": 1,
                "mix": "No Mix",
@@ -839,10 +840,14 @@ class SongItem(object):
       if not self.info.has_key(k):
         raise RuntimeError(filename + " is missing: " + k)
 
+    for k in ("subtitle", "title", "artist", "author", "mix"):
+      if self.info.has_key(k): self.info[k] = self.info[k].decode("utf-8")
+
     # Default values
     for k in ("subtitle", "background", "banner",
                 "author", "revision", "md5sum", "movie"):
       if not self.info.has_key(k): self.info[k] = None
+
 
     for k in SongItem.defaults:
       if not self.info.has_key(k): self.info[k] = SongItem.defaults[k]
