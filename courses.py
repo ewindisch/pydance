@@ -41,7 +41,7 @@ class CRSFile:
                    "dark": ("dark", 1),
                    }
 
-  def __init__(self, filename):
+  def __init__(self, filename, all_songs):
     self.filename = filename
     self.songs = []
     self.name = "A Course"
@@ -75,7 +75,10 @@ class CRSFile:
           modifiers = modifiers.split(",")
         else: continue
 
-        name = name.replace("\\", "/") # DWI uses Windows-style.
+        if name[0:4] == "BEST" or name[0:5] == "WORST":
+          raise RuntimeError("Player's best and worst is not supported.")
+
+        name = name.replace("\\", "/") # DWI uses Windows-style separators.
 
         fullname = None
         for dir in mainconfig["songdir"].split(os.pathsep):
@@ -100,12 +103,11 @@ class CRSFile:
       else:
         self.image = NO_BANNER
         self.image.set_colorkey(self.image.get_at([0, 0]))
-        
 
 class CourseSelector(object):
-  def __init__(self, songitems, screen, gametype):
+  def __init__(self, songitems, courses, screen, gametype):
 
-    self.courses = []
+    self.courses = courses
     self.player_configs = [dict(player_config)]
     clock = pygame.time.Clock()
 
@@ -114,13 +116,6 @@ class CourseSelector(object):
 
     self.game_config = dict(game_config)
     self.gametype = gametype
-
-    for dir in [pydance_path, rc_path]:
-      dir = os.path.join(dir, "courses")
-      filelist = util.find(dir, ["*.crs"])
-      for fn in filelist:
-        try: self.courses.append(CRSFile(fn))
-        except RuntimeError, message: print "E:", message
 
     self.courses.sort(lambda a, b: cmp(a.filename, b.filename))
 

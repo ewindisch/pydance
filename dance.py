@@ -198,6 +198,7 @@ def play(screen, playlist, configs, songconf, playmode):
     print songdata.title.encode("ascii", "replace"), "by", songdata.artist.encode("ascii", "replace")
 
     if dance(screen, songdata, players, prevscr, first, game):
+      first = False
       break # Failed
     first = False
 

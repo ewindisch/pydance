@@ -76,6 +76,7 @@ class GradingScreen(object):
         pygame.time.delay(48)
 
       totalsteps = player.stats.arrow_count
+      if totalsteps == 0: totalsteps = 1
 
       rows = [player.stats[k] for k in ["V", "P", "G", "O", "B", "M"]]
       rows += [player.stats.early, player.stats.late]

@@ -255,7 +255,7 @@ class FolderDisplay(object):
       self.menuimage.blit(grouptext, (15, 32))
 
 class SongSelect(object):
-  def __init__(self, songitems, screen, gametype):
+  def __init__(self, songitems, courses, screen, gametype):
     clock = pygame.time.Clock()
 
     self.songs = [SongItemDisplay(s) for s in songitems

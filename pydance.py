@@ -8,14 +8,11 @@ from ui import ui
 from pad import pad
 
 import fontfx, menudriver, fileparsers, audio, colors
+from courses import CRSFile
 
 import os, sys, error, util, getopt
 
 os.chdir(pydance_path)
-
-if pydance_path[0:4] == "/usr": # We're installed systemwide.
-  try: import notgentoo
-  except ImportError: pass
 
 def SetDisplayMode(mainconfig):
   try:
@@ -40,14 +37,19 @@ def main():
 
   # FIXME Debug mode needs to be added again. Or some command line options.
 
-  fileList = []
+  song_list = []
+  course_list = []
   for dir in mainconfig["songdir"].split(os.pathsep):
     print "Searching", dir
-    fileList += util.find(dir, ['*.step', '*.dance', '*.dwi', '*.sm', '*/song.*']) # Python's matching SUCKS
+    song_list.extend(util.find(dir, ['*.step', '*.dance', '*.dwi',
+                                     '*.sm', '*/song.*']))
+  for dir in mainconfig["coursedir"].split(os.pathsep):
+    print "Searching", dir
+    course_list.extend(util.find(dir, ['*.crs']))
 
-  totalsongs = len(fileList)
-  parsedsongs = 0
-  songs = []
+  # Remove duplicates
+  song_list = list(dict(map(None, song_list, [])).keys())
+  course_list = list(dict(map(None, course_list, [])).keys())
 
   screen = SetDisplayMode(mainconfig)
   
@@ -57,24 +59,52 @@ def main():
   audio.load(os.path.join(sound_path, "menu.ogg"))
   audio.play(4, 0.0)
 
-  pbar = fontfx.TextProgress(FONTS[60], "Found " + str(totalsongs) +
-                             " files. Loading...", colors.WHITE, colors.BLACK)
+  total = len(song_list)
+  parsed = 0.0
+  songs = []
+
+  pbar = fontfx.TextProgress(FONTS[60], "Found " + str(total) +
+                             " songs. Loading...", colors.WHITE, colors.BLACK)
   r = pbar.render(0).get_rect()
   r.center = (320, 240)
-  for f in fileList:
+  for f in song_list:
     try: songs.append(fileparsers.SongItem(f, False))
     except RuntimeWarning, message:
       print "W:", message
     except RuntimeError, message:
       print "E:", message
     except Exception, message:
-      print "E: Unknown error loading " + f
+      print "E: Unknown error loading", f
       print "E:", message
       print "E: Please contact the developers (pydance-devel@icculus.org)."
-    img = pbar.render(parsedsongs / totalsongs)
+    img = pbar.render(parsed / total)
     pygame.display.update(screen.blit(img, r))
-    parsedsongs += 100
+    parsed += 100.0
 
+  screen.fill(colors.BLACK)
+  pygame.display.update()
+  total = len(course_list)
+  parsed = 0.0
+  courses = []
+  pbar = fontfx.TextProgress(FONTS[60], "Found " + str(total) +
+                             " courses. Loading...", colors.WHITE,colors.BLACK)
+  r = pbar.render(0).get_rect()
+  r.center = (320, 240)
+  for f in course_list:
+    try: courses.append(CRSFile(f, songs))
+    except RuntimeWarning, message:
+      print "W:", message
+    except RuntimeError, message:
+      print "E: Error loading", f
+      print "E:", message
+    except Exception, message:
+      print "E: Unknown error loading", f
+      print "E:", message
+      print "E: Please contact the developers (pydance-devel@icculus.org)."
+    img = pbar.render(parsed / total)
+    pygame.display.update(screen.blit(img, r))
+    parsed += 100.0
+        
   ui.empty()
 
   if len(songs) < 1:
@@ -88,7 +118,7 @@ def main():
     print "You don't have any songs. http://icculus.org/pyddr/get.php."
     sys.exit(1)
 
-  menudriver.do(screen, (songs, screen))
+  menudriver.do(screen, (songs, courses, screen))
   audio.stop()
   pygame.display.quit()
   mainconfig.write(os.path.join(rc_path, "pydance.cfg"))

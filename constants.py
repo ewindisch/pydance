@@ -56,8 +56,14 @@ if not sys.stdout.isatty():
   sys.stderr = sys.stdout
 
 # Set up the configuration file
-default_conf = { # Wow we have a lot of options
-  "djtheme": "none", "songdir": ".",
+default_conf = {
+  "djtheme": "none",
+  "songdir": os.pathsep.join([os.path.join(rc_path, "songs"),
+                              os.path.join(pydance_path, "songs"),
+                              "."]),
+  "coursedir": os.pathsep.join([os.path.join(rc_path, "courses"),
+                              os.path.join(pydance_path, "courses"),
+                              "."]),
   "stickycombo": 1,  "lowestcombo": 4, "stickyjudge": 1,
   "lyriccolor": "cyan/aqua",
   "onboardaudio": 0, "masteroffset": 0,

@@ -78,7 +78,7 @@ DESCRIPTIONS = {
   }
 
 class GameSelect(object):
-  def __init__(self, songitems, screen):
+  def __init__(self, songitems, courses, screen):
     self.screen = screen
 
     # Store previously selected images, to blit for each choice.
@@ -103,7 +103,7 @@ class GameSelect(object):
       else: state += 1
 
       if state == len(states): # All choices done, start the game
-        SELECTORS[self.values[2]](songitems, screen,
+        SELECTORS[self.values[2]](songitems, courses, screen,
                                   MODES.get((self.values[0], self.values[1])))
 
         # After playing, reset to the first choice.

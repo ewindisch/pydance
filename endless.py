@@ -63,7 +63,7 @@ class FakePlaylist(object):
             [c.diff(song.difficulty[self.mode]) for c in self.constraints])
 
 class Endless(object):
-  def __init__(self, songitems, screen, gametype):
+  def __init__(self, songitems, courses, screen, gametype):
 
     self.player_configs = [copy.copy(player_config)]
 
