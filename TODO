@@ -3,17 +3,86 @@ Required for 1.0
 Empty "Bugs" section of BUGS file.
 No crashes or major bugs for 5 days after the last CVS check in.
 
-Before 1.0 If "Time"
---------------------
-Announcer. Really. Look hard.
+A Comprehensive List of Features for pydance 1.2
+(with ideas on how to do them)
+------------------------------------------------
 
-Definitely Not Touching Until After 1.0
----------------------------------------
-Different game types for each player.
-Modifiers in courses (this is pretty high priority).
-Combat (Disney-style) versus.
-Challenge mode.
-4 players / 2 player doubles for some modes.
-Player profiles, if deemed necessary.
-Song information database.
-Background animation support.
+* UI Rework
+   Not really the extent that I reworked it between 0.8 and 0.9,
+   but tweak the existing ones, space them better, add more
+   animation/fading/etc. This is kind of a vague goal, but I
+   think at this point the UI should be developed iteratively.
+
+* MP3 Support
+   Pyxine, pymad, or waiting for libavcodec support in Pygame are
+   all options here. Note that Pyxine doesn't give enough timing
+   resolution by itself.
+
+* Hold Arrow Behavior
+   You should have to start holding arrows roughly when they start; in
+   the current version, you can just hold them down starting any time,
+   and it counts.
+
+* Automatic handling of different step ratings
+   This needs changes to the grading screen (to display them) and to
+   the JudgingDisplay code, to handle them.
+
+* Hold Arrow Drawing
+   Hold arrows should be split into three images, the top, the
+   repeating/stretched part, and the bottom. This requires some
+   big changes to all the themes, though.
+
+* A Free Announcer & Script
+   The announcer has to say at least one thing for each grade, a
+   dozen or so possibilities during song (preferrably around 30
+   or 40), and a few things for song selection.
+
+* Cleanup & Port to Python 2.3
+  - Replace a lot of 'i in range(len(x))' with 'i,o in enumerate(x)'.
+  - See if "string" in otherstring will help anywhere.
+  - Port pydance.log hackery to a Logger object!
+
+* Different game types for each player
+   This is the biggest feature I want. Have a game type list (rather
+   than single argument) passed to dance.play, probably in the
+   playlist itself. The real trick is making a sane UI for this.
+
+* Modifiers in courses
+   This requires players to reevaluate their modifiers between songs,
+   which shouldn't be too difficult. It might even half-work for some
+   modifiers already, but I haven't tested anything.
+
+* Combat (Disney-style / Dance Magic / Magic Dance) versus
+   This needs basically the same as the above, but player modifiers
+   need to be able to change even within songs (of course, if that
+   works, so does the above).
+
+* Challenge mode
+   This can probably be done in lifebars for various forms, or strange
+   Stats objects that will affect gameplay.  
+
+* Song Library
+   Sort of like DDR Max 2 USA, the idea is to have a database of songs
+   where you can just listen to them, or view information (like
+   DESCRIPTION) about them. Bonus points if you can watch the step
+   charts in the background or something.
+
+* BG Animation
+   This is probably a Sprite like BGMovie is now, but with complicated
+   timing information about when to change. For good support of
+   existing SM/DWI animations, we'll need avcodec support.
+
+* 4 Player Mode
+   A lot of things in the pydance code assume 2 players. I like to
+   think a lot doesn't too (I tried to generalize where possible), but
+   it's all untested and I know there's a lot of work to do here.
+
+* Fix main menu code
+   390 lines of code are spent on the main menu, which is a million
+   times simpler than any other UI in the game.
+
+* Fix endless mode
+   The UI is so ugly.
+
+* FIXME: There are a lot of FIXMEs in the code. Some of them get
+  obsoleted over time, but most will still need fixing.
