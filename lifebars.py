@@ -135,7 +135,7 @@ class TugLifeBarDisp(LifeBarDisp):
     if self.life < 0: self.gameover = FAILED
     if self.displayed_life < 0: self.displayed_life = 0
 
-    self.draw()
+    self.draw(time)
 
     if self.gameover == WON:
       self.image.blit(self.wontext, (70, 2))

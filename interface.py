@@ -115,7 +115,8 @@ class BPMDisplay(pygame.sprite.Sprite):
         self._bpm_idx = 1 % len(self._bpms)
         self._bpm_range = [min(bpms), max(bpms) - min(bpms)]
         if len(bpms) > 1:
-          p = (self._bpm - self._bpm_range[0]) / self._bpm_range[1]
+          # Some songs seem to start with a BPM of 0?
+          p = (self._bpm - self._bpm_range[0]) / min(0.001, self._bpm_range[1])
           self._color = [255 * math.sqrt(p), 255 * math.sqrt(1 - p), 0]
         else:
           self._color = [255, 255, 255]

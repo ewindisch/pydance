@@ -5,8 +5,10 @@
 import sys
 import os
 import locale
-VERSION = "1.0.0"
-locale.setlocale(locale.LC_ALL, '')
+VERSION = "1.0.1"
+
+try: locale.setlocale(locale.LC_ALL, '')
+except locale.Error: pass
 
 # Detect the name of the OS - Mac OS X is not really UNIX.
 osname = None
