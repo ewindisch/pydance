@@ -12,8 +12,8 @@ DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "ANOTHER", "STANDARD", "TRICK",
 def python_sucks_sort(a, b):
   if a in DIFFICULTIES and b in DIFFICULTIES:
     return cmp(DIFFICULTIES.index(a), DIFFICULTIES.index(b))
-  elif a in DIFFICULTIES: return a
-  elif b in DIFFICULTIES: return b
+  elif a in DIFFICULTIES: return -1
+  elif b in DIFFICULTIES: return 1
   else: return cmp(a, b)
 
 def check_constraints(constraints, diff):
