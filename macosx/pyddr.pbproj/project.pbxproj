@@ -276,7 +276,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				32BAE0B10371A5F400C91783,
-				F49A1F930431132500A5A4C8,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -285,40 +284,32 @@
 			buildActionMask = 2147483647;
 			files = (
 				0867D6ACFE840B52C02AAC07,
-				F49A1F850431132500A5A4C8,
-				F49A1F860431132500A5A4C8,
-				F49A1F870431132500A5A4C8,
-				F49A1F880431132500A5A4C8,
-				F49A1F890431132500A5A4C8,
-				F49A1F8A0431132500A5A4C8,
-				F49A1F8B0431132500A5A4C8,
-				F49A1F8C0431132500A5A4C8,
-				F49A1F8D0431132500A5A4C8,
-				F49A1F8E0431132500A5A4C8,
-				F49A1F8F0431132500A5A4C8,
-				F49A1F900431132500A5A4C8,
-				F49A1F920431132500A5A4C8,
-				F49A1F940431132500A5A4C8,
-				F49A1F950431132500A5A4C8,
-				F49A1F960431132500A5A4C8,
-				F49A1F970431132500A5A4C8,
-				F49A1F980431132500A5A4C8,
-				F49A1F990431132500A5A4C8,
-				F49A1F9A0431132600A5A4C8,
-				F49A1F9B0431132600A5A4C8,
-				F49A1F9C0431132600A5A4C8,
-				F49A1F9D0431132600A5A4C8,
-				F49A1F9E0431132600A5A4C8,
-				F49A1F9F0431132600A5A4C8,
-				F49A1FA00431132600A5A4C8,
-				F49A1FA10431132600A5A4C8,
-				F49A1FA20431132600A5A4C8,
-				F49A1FA30431132600A5A4C8,
-				F49A1FA40431132600A5A4C8,
-				F49A1FA50431132600A5A4C8,
-				F49A1FA60431132600A5A4C8,
-				F49A1FA70431132600A5A4C8,
-				F49A1FA80431132600A5A4C8,
+				F4BEABAC044252C500A5A4C8,
+				F4BEABAD044252C500A5A4C8,
+				F4BEABAE044252C500A5A4C8,
+				F4BEABAF044252C500A5A4C8,
+				F4BEABB0044252C500A5A4C8,
+				F4BEABB1044252C500A5A4C8,
+				F4BEABB2044252C500A5A4C8,
+				F4BEABB3044252C500A5A4C8,
+				F4BEABB4044252C500A5A4C8,
+				F4BEABB5044252C500A5A4C8,
+				F4BEABB6044252C500A5A4C8,
+				F4BEABB7044252C500A5A4C8,
+				F4BEABB8044252C500A5A4C8,
+				F4BEABB9044252C500A5A4C8,
+				F4BEABBA044252C500A5A4C8,
+				F4BEABBB044252C500A5A4C8,
+				F4BEABBC044252C500A5A4C8,
+				F4BEABBD044252C500A5A4C8,
+				F4BEABBE044252C500A5A4C8,
+				F4BEABBF044252C500A5A4C8,
+				F4BEABC0044252C500A5A4C8,
+				F4BEABC1044252C500A5A4C8,
+				F4BEABC2044252C500A5A4C8,
+				F4BEABC3044252C500A5A4C8,
+				F4BEABC4044252C500A5A4C8,
+				F4BEABC5044252C500A5A4C8,
 			);
 			isa = PBXResourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -386,446 +377,367 @@
 //F42
 //F43
 //F44
-		F49A1E810431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = announcer.py;
-			refType = 4;
-		};
-		F49A1E820431132500A5A4C8 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = pyddr.txt;
-			refType = 4;
-		};
-		F49A1E830431132500A5A4C8 = {
-			isa = PBXExecutableFileReference;
-			path = msd2step.py;
-			refType = 4;
-		};
-		F49A1E840431132500A5A4C8 = {
-			isa = PBXExecutableFileReference;
-			path = lyrictag.py;
-			refType = 4;
-		};
-		F49A1E850431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = announcer.pyc;
-			refType = 4;
-		};
-		F49A1E860431132500A5A4C8 = {
-			includeInIndex = 1;
-			isa = PBXFolderReference;
-			path = menuhelp;
-			refType = 4;
-		};
-		F49A1E920431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = "assist-d.wav";
-			refType = 4;
-		};
-		F49A1E930431132500A5A4C8 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = ChangeLog;
-			refType = 4;
-		};
-		F49A1E940431132500A5A4C8 = {
-			isa = PBXExecutableFileReference;
-			path = step2dwi.py;
-			refType = 4;
-		};
-		F49A1E950431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = menu.ogg;
-			refType = 4;
-		};
-		F49A1E960431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = "assist-u.wav";
-			refType = 4;
-		};
-		F49A1E970431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = "assist-l.wav";
-			refType = 4;
-		};
-		F49A1E990431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = "assist-r.wav";
-			refType = 4;
-		};
-		F49A1E9A0431132500A5A4C8 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = pyddr_Prefix.h;
-			refType = 4;
-		};
-		F49A1E9B0431132500A5A4C8 = {
-			isa = PBXExecutableFileReference;
-			path = findbpm.py;
-			refType = 4;
-		};
-		F49A1E9C0431132500A5A4C8 = {
-			isa = PBXExecutableFileReference;
-			path = instep.py;
-			refType = 4;
-		};
-		F49A1E9D0431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = fontfx.py;
-			refType = 4;
-		};
-		F49A1E9E0431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = fontfx.pyc;
-			refType = 4;
-		};
-		F49A1E9F0431132500A5A4C8 = {
-			isa = PBXExecutableFileReference;
-			path = stepshrink.py;
-			refType = 4;
-		};
-		F49A1EA00431132500A5A4C8 = {
-			isa = PBXExecutableFileReference;
-			path = pyjoy.py;
-			refType = 4;
-		};
-		F49A1EA10431132500A5A4C8 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = CREDITS;
-			refType = 4;
-		};
-		F49A1EA20431132500A5A4C8 = {
-			includeInIndex = 1;
-			isa = PBXFolderReference;
-			path = ddrmat;
-			refType = 4;
-		};
-		F49A1EA90431132500A5A4C8 = {
-			includeInIndex = 1;
-			isa = PBXFolderReference;
-			path = themes;
-			refType = 4;
-		};
-		F49A1F490431132500A5A4C8 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = INSTALL;
-			refType = 4;
-		};
-		F49A1F4A0431132500A5A4C8 = {
-			isa = PBXExecutableFileReference;
-			path = dwi2step.py;
-			refType = 4;
-		};
-		F49A1F4B0431132500A5A4C8 = {
-			includeInIndex = 1;
-			isa = PBXFolderReference;
-			path = English.lproj;
-			refType = 4;
-		};
-		F49A1F4E0431132500A5A4C8 = {
-			isa = PBXExecutableFileReference;
-			path = pyddr.py;
-			refType = 4;
-		};
-		F49A1F4F0431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = config.pyc;
-			refType = 4;
-		};
-		F49A1F500431132500A5A4C8 = {
-			includeInIndex = 1;
-			isa = PBXFolderReference;
-			path = build;
-			refType = 4;
-		};
-		F49A1F7F0431132500A5A4C8 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = stepfile.txt;
-			refType = 4;
-		};
-		F49A1F800431132500A5A4C8 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = pyddr.cfg;
-			refType = 4;
-		};
-		F49A1F810431132500A5A4C8 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = README;
-			refType = 4;
-		};
-		F49A1F820431132500A5A4C8 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = LICENSE;
-			refType = 4;
-		};
-		F49A1F830431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = bg.png;
-			refType = 4;
-		};
-		F49A1F840431132500A5A4C8 = {
-			isa = PBXFileReference;
-			path = config.py;
-			refType = 4;
-		};
-		F49A1F850431132500A5A4C8 = {
-			fileRef = F49A1E810431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F860431132500A5A4C8 = {
-			fileRef = F49A1E820431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F870431132500A5A4C8 = {
-			fileRef = F49A1E830431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F880431132500A5A4C8 = {
-			fileRef = F49A1E840431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F890431132500A5A4C8 = {
-			fileRef = F49A1E850431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F8A0431132500A5A4C8 = {
-			fileRef = F49A1E860431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F8B0431132500A5A4C8 = {
-			fileRef = F49A1E920431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F8C0431132500A5A4C8 = {
-			fileRef = F49A1E930431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F8D0431132500A5A4C8 = {
-			fileRef = F49A1E940431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F8E0431132500A5A4C8 = {
-			fileRef = F49A1E950431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F8F0431132500A5A4C8 = {
-			fileRef = F49A1E960431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F900431132500A5A4C8 = {
-			fileRef = F49A1E970431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F920431132500A5A4C8 = {
-			fileRef = F49A1E990431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F930431132500A5A4C8 = {
-			fileRef = F49A1E9A0431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F940431132500A5A4C8 = {
-			fileRef = F49A1E9B0431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F950431132500A5A4C8 = {
-			fileRef = F49A1E9C0431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F960431132500A5A4C8 = {
-			fileRef = F49A1E9D0431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F970431132500A5A4C8 = {
-			fileRef = F49A1E9E0431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F980431132500A5A4C8 = {
-			fileRef = F49A1E9F0431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F990431132500A5A4C8 = {
-			fileRef = F49A1EA00431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F9A0431132600A5A4C8 = {
-			fileRef = F49A1EA10431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F9B0431132600A5A4C8 = {
-			fileRef = F49A1EA20431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F9C0431132600A5A4C8 = {
-			fileRef = F49A1EA90431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F9D0431132600A5A4C8 = {
-			fileRef = F49A1F490431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F9E0431132600A5A4C8 = {
-			fileRef = F49A1F4A0431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1F9F0431132600A5A4C8 = {
-			fileRef = F49A1F4B0431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1FA00431132600A5A4C8 = {
-			fileRef = F49A1F4E0431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1FA10431132600A5A4C8 = {
-			fileRef = F49A1F4F0431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1FA20431132600A5A4C8 = {
-			fileRef = F49A1F500431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1FA30431132600A5A4C8 = {
-			fileRef = F49A1F7F0431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1FA40431132600A5A4C8 = {
-			fileRef = F49A1F800431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1FA50431132600A5A4C8 = {
-			fileRef = F49A1F810431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1FA60431132600A5A4C8 = {
-			fileRef = F49A1F820431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1FA70431132600A5A4C8 = {
-			fileRef = F49A1F830431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		F49A1FA80431132600A5A4C8 = {
-			fileRef = F49A1F840431132500A5A4C8;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F49A1FA90431133300A5A4C8 = {
 			children = (
-				F49A1E810431132500A5A4C8,
-				F49A1E820431132500A5A4C8,
-				F49A1E830431132500A5A4C8,
-				F49A1E840431132500A5A4C8,
-				F49A1E850431132500A5A4C8,
-				F49A1E860431132500A5A4C8,
-				F49A1E920431132500A5A4C8,
-				F49A1E930431132500A5A4C8,
-				F49A1E940431132500A5A4C8,
-				F49A1E950431132500A5A4C8,
-				F49A1E960431132500A5A4C8,
-				F49A1E970431132500A5A4C8,
-				F49A1E990431132500A5A4C8,
-				F49A1E9A0431132500A5A4C8,
-				F49A1E9B0431132500A5A4C8,
-				F49A1E9C0431132500A5A4C8,
-				F49A1E9D0431132500A5A4C8,
-				F49A1E9E0431132500A5A4C8,
-				F49A1E9F0431132500A5A4C8,
-				F49A1EA00431132500A5A4C8,
-				F49A1EA10431132500A5A4C8,
-				F49A1EA20431132500A5A4C8,
-				F49A1EA90431132500A5A4C8,
-				F49A1F490431132500A5A4C8,
-				F49A1F4A0431132500A5A4C8,
-				F49A1F4B0431132500A5A4C8,
-				F49A1F4E0431132500A5A4C8,
-				F49A1F4F0431132500A5A4C8,
-				F49A1F500431132500A5A4C8,
-				F49A1F7F0431132500A5A4C8,
-				F49A1F800431132500A5A4C8,
-				F49A1F810431132500A5A4C8,
-				F49A1F820431132500A5A4C8,
-				F49A1F830431132500A5A4C8,
-				F49A1F840431132500A5A4C8,
+				F4BEAAC2044252C400A5A4C8,
+				F4BEAAC3044252C400A5A4C8,
+				F4BEAAC4044252C400A5A4C8,
+				F4BEAAC5044252C400A5A4C8,
+				F4BEAAC6044252C400A5A4C8,
+				F4BEAAC7044252C400A5A4C8,
+				F4BEAACF044252C400A5A4C8,
+				F4BEAAD0044252C400A5A4C8,
+				F4BEAAD1044252C400A5A4C8,
+				F4BEAAD2044252C400A5A4C8,
+				F4BEAAD3044252C400A5A4C8,
+				F4BEAAD4044252C400A5A4C8,
+				F4BEAAD5044252C400A5A4C8,
+				F4BEAAD6044252C400A5A4C8,
+				F4BEAAD7044252C400A5A4C8,
+				F4BEAAD8044252C400A5A4C8,
+				F4BEAAE8044252C400A5A4C8,
+				F4BEAAEE044252C400A5A4C8,
+				F4BEAAFB044252C400A5A4C8,
+				F4BEAAFC044252C400A5A4C8,
+				F4BEAB07044252C400A5A4C8,
+				F4BEABA7044252C500A5A4C8,
+				F4BEABA8044252C500A5A4C8,
+				F4BEABA9044252C500A5A4C8,
+				F4BEABAA044252C500A5A4C8,
+				F4BEABAB044252C500A5A4C8,
 			);
 			isa = PBXGroup;
 			name = pyddr;
 			refType = 4;
+		};
+		F4BEAAC2044252C400A5A4C8 = {
+			isa = PBXExecutableFileReference;
+			name = setup.py;
+			path = /Users/dshadow/cvs/pyddr/setup.py;
+			refType = 0;
+		};
+		F4BEAAC3044252C400A5A4C8 = {
+			isa = PBXFileReference;
+			name = constants.py;
+			path = /Users/dshadow/cvs/pyddr/constants.py;
+			refType = 0;
+		};
+		F4BEAAC4044252C400A5A4C8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = stepfile.txt;
+			path = /Users/dshadow/cvs/pyddr/stepfile.txt;
+			refType = 0;
+		};
+		F4BEAAC5044252C400A5A4C8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = pyddr.txt;
+			path = /Users/dshadow/cvs/pyddr/pyddr.txt;
+			refType = 0;
+		};
+		F4BEAAC6044252C400A5A4C8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = pyddr.win32.cfg;
+			path = /Users/dshadow/cvs/pyddr/pyddr.win32.cfg;
+			refType = 0;
+		};
+		F4BEAAC7044252C400A5A4C8 = {
+			includeInIndex = 1;
+			isa = PBXFolderReference;
+			name = sound;
+			path = /Users/dshadow/cvs/pyddr/sound;
+			refType = 0;
+		};
+		F4BEAACF044252C400A5A4C8 = {
+			isa = PBXFileReference;
+			name = announcer.py;
+			path = /Users/dshadow/cvs/pyddr/announcer.py;
+			refType = 0;
+		};
+		F4BEAAD0044252C400A5A4C8 = {
+			isa = PBXExecutableFileReference;
+			name = dwi2step.py;
+			path = /Users/dshadow/cvs/pyddr/dwi2step.py;
+			refType = 0;
+		};
+		F4BEAAD1044252C400A5A4C8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = Makefile.posix;
+			path = /Users/dshadow/cvs/pyddr/Makefile.posix;
+			refType = 0;
+		};
+		F4BEAAD2044252C400A5A4C8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = LICENSE;
+			path = /Users/dshadow/cvs/pyddr/LICENSE;
+			refType = 0;
+		};
+		F4BEAAD3044252C400A5A4C8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = README;
+			path = /Users/dshadow/cvs/pyddr/README;
+			refType = 0;
+		};
+		F4BEAAD4044252C400A5A4C8 = {
+			isa = PBXFileReference;
+			name = input.py;
+			path = /Users/dshadow/cvs/pyddr/input.py;
+			refType = 0;
+		};
+		F4BEAAD5044252C400A5A4C8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = Makefile.general;
+			path = /Users/dshadow/cvs/pyddr/Makefile.general;
+			refType = 0;
+		};
+		F4BEAAD6044252C400A5A4C8 = {
+			isa = PBXExecutableFileReference;
+			name = pyddr.py;
+			path = /Users/dshadow/cvs/pyddr/pyddr.py;
+			refType = 0;
+		};
+		F4BEAAD7044252C400A5A4C8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = ChangeLog;
+			path = /Users/dshadow/cvs/pyddr/ChangeLog;
+			refType = 0;
+		};
+		F4BEAAD8044252C400A5A4C8 = {
+			includeInIndex = 1;
+			isa = PBXFolderReference;
+			name = images;
+			path = /Users/dshadow/cvs/pyddr/images;
+			refType = 0;
+		};
+		F4BEAAE8044252C400A5A4C8 = {
+			includeInIndex = 1;
+			isa = PBXFolderReference;
+			name = ddrmat;
+			path = /Users/dshadow/cvs/pyddr/ddrmat;
+			refType = 0;
+		};
+		F4BEAAEE044252C400A5A4C8 = {
+			includeInIndex = 1;
+			isa = PBXFolderReference;
+			name = docs;
+			path = /Users/dshadow/cvs/pyddr/docs;
+			refType = 0;
+		};
+		F4BEAAFB044252C400A5A4C8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = INSTALL;
+			path = /Users/dshadow/cvs/pyddr/INSTALL;
+			refType = 0;
+		};
+		F4BEAAFC044252C400A5A4C8 = {
+			includeInIndex = 1;
+			isa = PBXFolderReference;
+			name = utils;
+			path = /Users/dshadow/cvs/pyddr/utils;
+			refType = 0;
+		};
+		F4BEAB07044252C400A5A4C8 = {
+			includeInIndex = 1;
+			isa = PBXFolderReference;
+			name = themes;
+			path = /Users/dshadow/cvs/pyddr/themes;
+			refType = 0;
+		};
+		F4BEABA7044252C500A5A4C8 = {
+			isa = PBXFileReference;
+			name = fontfx.py;
+			path = /Users/dshadow/cvs/pyddr/fontfx.py;
+			refType = 0;
+		};
+		F4BEABA8044252C500A5A4C8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = CREDITS;
+			path = /Users/dshadow/cvs/pyddr/CREDITS;
+			refType = 0;
+		};
+		F4BEABA9044252C500A5A4C8 = {
+			isa = PBXFileReference;
+			name = menus.py;
+			path = /Users/dshadow/cvs/pyddr/menus.py;
+			refType = 0;
+		};
+		F4BEABAA044252C500A5A4C8 = {
+			isa = PBXFileReference;
+			name = config.py;
+			path = /Users/dshadow/cvs/pyddr/config.py;
+			refType = 0;
+		};
+		F4BEABAB044252C500A5A4C8 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = pyddr.posix.cfg;
+			path = /Users/dshadow/cvs/pyddr/pyddr.posix.cfg;
+			refType = 0;
+		};
+		F4BEABAC044252C500A5A4C8 = {
+			fileRef = F4BEAAC2044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABAD044252C500A5A4C8 = {
+			fileRef = F4BEAAC3044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABAE044252C500A5A4C8 = {
+			fileRef = F4BEAAC4044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABAF044252C500A5A4C8 = {
+			fileRef = F4BEAAC5044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABB0044252C500A5A4C8 = {
+			fileRef = F4BEAAC6044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABB1044252C500A5A4C8 = {
+			fileRef = F4BEAAC7044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABB2044252C500A5A4C8 = {
+			fileRef = F4BEAACF044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABB3044252C500A5A4C8 = {
+			fileRef = F4BEAAD0044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABB4044252C500A5A4C8 = {
+			fileRef = F4BEAAD1044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABB5044252C500A5A4C8 = {
+			fileRef = F4BEAAD2044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABB6044252C500A5A4C8 = {
+			fileRef = F4BEAAD3044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABB7044252C500A5A4C8 = {
+			fileRef = F4BEAAD4044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABB8044252C500A5A4C8 = {
+			fileRef = F4BEAAD5044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABB9044252C500A5A4C8 = {
+			fileRef = F4BEAAD6044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABBA044252C500A5A4C8 = {
+			fileRef = F4BEAAD7044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABBB044252C500A5A4C8 = {
+			fileRef = F4BEAAD8044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABBC044252C500A5A4C8 = {
+			fileRef = F4BEAAE8044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABBD044252C500A5A4C8 = {
+			fileRef = F4BEAAEE044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABBE044252C500A5A4C8 = {
+			fileRef = F4BEAAFB044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABBF044252C500A5A4C8 = {
+			fileRef = F4BEAAFC044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABC0044252C500A5A4C8 = {
+			fileRef = F4BEAB07044252C400A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABC1044252C500A5A4C8 = {
+			fileRef = F4BEABA7044252C500A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABC2044252C500A5A4C8 = {
+			fileRef = F4BEABA8044252C500A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABC3044252C500A5A4C8 = {
+			fileRef = F4BEABA9044252C500A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABC4044252C500A5A4C8 = {
+			fileRef = F4BEABAA044252C500A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F4BEABC5044252C500A5A4C8 = {
+			fileRef = F4BEABAB044252C500A5A4C8;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 	};
 	rootObject = 20286C28FDCF999611CA2CEA;
