@@ -2,8 +2,3 @@ Problem:
  On slow systems, some missed arrows won't actually get counted as a MISS.
 Possible cause:
  The sprite kills itself before expire_arrows is called.
-
-Problem:
- Some hold arrows behave oddly (cause an exception, overlap other arrows).
-Possible cause:
- Bugs in the hold arrow parser.

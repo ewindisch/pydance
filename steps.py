@@ -72,6 +72,7 @@ class Steps:
         coloring_mod = 0
         tail = tail.next
       elif words[0] in BEATS.keys():
+        print "got words", words
         cando = True
         if ((little == 1 and (coloring_mod % 4 == 1 or
                               coloring_mod % 4 == 3)) or
@@ -94,18 +95,20 @@ class Steps:
 
           # Check for holds
           for hold in range(len(feetstep)):
-            didnothold = True
             if feetstep[hold] & 2 and holding[hold] == 0:
+              print "got a hold at", hold
               holdtimes.insert(self.numholds, cur_time)
               holdlist.insert(self.numholds, hold)
+              releasetimes.append(None)
+              releaselist.append(None)
               holding[hold] = self.numholds
               self.numholds += 1
-              didnothold = False
 
             elif ((feetstep[hold] & 2 or feetstep[hold] & 1) and
-                  holding[hold] and didnothold):
-              releasetimes.insert(holding[hold], cur_time)
-              releaselist.insert(holding[hold], hold)
+                  holding[hold]):
+              print "got a release at", hold
+              releasetimes[holding[hold] - 1] = cur_time
+              releaselist[holding[hold] - 1] = hold
               feetstep[hold] = 0 # broken stepfile, junk the event
               holding[hold] = 0
 
