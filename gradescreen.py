@@ -13,16 +13,17 @@ class GradingScreen(object):
       print "Player "+repr(judges.index(judge)+1)+":"
     
       grade = judge.grade()
-      totalsteps = (judge.marvelous + judge.perfect + judge.great +
-                    judge.ok + judge.boo + judge.miss)
+      totalsteps = judge.arrow_count
+
       steps = (grade, judge.diff, totalsteps,
                judge.combos.bestcombo, judge.combos.combo)
 
       numholds = judge.numholds()
       goodholds = numholds - judge.badholds
 
-      steptypes = (judge.marvelous, judge.perfect, judge.great, judge.ok,
-                   judge.boo, judge.miss, goodholds, numholds)
+      steptypes = (judge.stats["V"], judge.stats["P"], judge.stats["G"],
+                   judge.stats["O"], judge.stats["B"], judge.stats["M"],
+                   goodholds, numholds)
       print ("GRADE: %s (%s) - total steps: %d best combo" +
              " %d current combo: %d") % steps
       print ("V: %d P: %d G: %d O: %d B: %d M: %d - %d/%d holds") % steptypes
@@ -33,8 +34,7 @@ class GradingScreen(object):
 
     if judge is None: return None
 
-    totalsteps = (judge.marvelous + judge.perfect + judge.great +
-                  judge.ok + judge.boo + judge.miss)
+    totalsteps = judge.arrow_count
 
     if totalsteps == 0: return None
 
@@ -81,10 +81,10 @@ class GradingScreen(object):
         pygame.display.update(r)
         pygame.time.delay(48)
 
-      totalsteps = (judge.marvelous + judge.perfect + judge.great + judge.ok +
-                    judge.boo + judge.miss)
-      rows = [judge.marvelous, judge.perfect, judge.great, judge.ok,
-              judge.boo, judge.miss, judge.early, judge.late]
+      totalsteps = judge.arrow_count
+
+      rows = [judge.stats[k] for k in ["M", "V", "G", "O", "B", "M"]]
+      rows += [judge.early, judge.late]
 
       for j in range(4):
         for i in range(len(rows)):

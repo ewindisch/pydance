@@ -239,11 +239,11 @@ class ArrowFX(pygame.sprite.Sprite):
     self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
     self.tintimg.blit(self.baseimg, (0,0))
     tinter = pygame.surface.Surface(self.baseimg.get_size())
-    if tinttype == 'MARVELOUS':
+    if tinttype == 'V':
       tinter.fill((255,255,255))
-    elif tinttype == 'PERFECT':
+    elif tinttype == 'P':
       tinter.fill((255,255,0))
-    elif tinttype == 'GREAT':
+    elif tinttype == 'G':
       tinter.fill((0,255,0))
     tinter.set_alpha(127)
     self.tintimg.blit(tinter,(0,0))

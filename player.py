@@ -145,7 +145,7 @@ class JudgingDisp(pygame.sprite.Sprite):
 
     self.sticky = mainconfig['stickyjudge']
     self.needsupdate = 1
-    self.stepped = 0
+    self.did_step = False
     self.laststep = 0
     self.judgetype = " "
     self.oldzoom = -1
@@ -176,9 +176,10 @@ class JudgingDisp(pygame.sprite.Sprite):
     
     self.image = self.space
 
-  def judge(self, curtime, judgetype):
+  def stepped(self, curtime, rating, combo):
     self.laststep = curtime
-    self.judgetype = judgetype
+    self.judgetype = { "V": "MARVELOUS", "P": "PERFECT", "G": "GREAT",
+                       "O": "OKAY", "B": "BOO", "M": "MISS", }.get(rating, " ")
 
   def update(self, curtime):
     self.laststep = min(curtime, self.laststep)
@@ -188,7 +189,7 @@ class JudgingDisp(pygame.sprite.Sprite):
       if   self.judgetype == "MARVELOUS": self.image = self.marvelous
       elif self.judgetype == "PERFECT": self.image = self.perfect
       elif self.judgetype == "GREAT": self.image = self.great
-      elif self.judgetype == "OK": self.image = self.ok
+      elif self.judgetype == "OKAY": self.image = self.ok
       elif self.judgetype == "BOO": self.image = self.boo
       elif self.judgetype == "MISS": self.image = self.miss
       elif self.judgetype == " ": self.image = self.space
@@ -197,13 +198,13 @@ class JudgingDisp(pygame.sprite.Sprite):
 
       if zoomzoom != self.oldzoom:
         self.needsupdate = True
-        if (steptimediff > 0.36) and (self.sticky == 0) and self.stepped:
+        if (steptimediff > 0.36) and (self.sticky == 0) and self.did_step:
           self.image = self.space
-          self.stepped = 0
+          self.did_step = True
 
         if steptimediff > 0.2: zoomzoom = 0.2
         self.image = pygame.transform.rotozoom(self.image, 0, 1-(zoomzoom*2))
-        self.stepped = 1
+        self.did_step = False
 
     if self.needsupdate:
       self.rect = self.image.get_rect()
@@ -832,16 +833,18 @@ class Player(object):
     
   def check_sprites(self, curtime, arrows, steps, fx_data, toparr, toparrfx, judge):
     judge.expire_arrows(curtime)
-    for text, dir, time in fx_data:
-      if (text == "MARVELOUS" or text == "PERFECT" or text == "GREAT"):
+    for rating, dir, time in fx_data:
+      if (rating == "V" or rating == "P" or rating == "G"):
         for spr in arrows.sprites():
           try:     # kill normal arrowsprites
-            if (spr.endtime == time) and (spr.dir == dir): spr.kill()
+            if (spr.endtime == time) and (spr.dir == dir):
+              spr.kill()
           except: pass
           try:     # unbreak hold arrows.
-            if (spr.timef1 == time) and (spr.dir == dir): spr.broken = 0
+            if (spr.timef1 == time) and (spr.dir == dir):
+              spr.broken = 0
           except: pass
-          toparrfx[dir].stepped(curtime, text)
+          toparrfx[dir].stepped(curtime, rating)
 
     arrows.update(curtime, judge.bpm, steps.lastbpmchangetime)
     for d in self.game.dirs:
