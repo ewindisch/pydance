@@ -5,7 +5,7 @@
 import sys
 import os
 import locale
-VERSION = "1.1.0pre"
+VERSION = "1.0.3"
 
 try: locale.setlocale(locale.LC_ALL, '')
 except locale.Error: pass
