@@ -14,6 +14,7 @@ legend:
 * Respace the arrows to be closer together in single/versus.
 * All 9 directions can always be done on the numeric pad for player 1.
  - azerty 2nd player start key changed to '+' on the numeric pad.
+* "Escape" changed from left+start to start+select.
 * Some more speed optimizations for slower processors.
 * Some DWI parser fixes for bad files.
 * 'usepsyco' option (on by default) to try and load the Psyco JIT compiler.
