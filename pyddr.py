@@ -192,6 +192,10 @@ class Judge:
       self.bestcombo = anotherjudge.bestcombo
     self.combo = anotherjudge.combo  
     self.totalcombos += anotherjudge.totalcombos
+
+    self.badholds += anotherjudge.badholds
+    for i in anotherjudge.holdsub:
+      self.holdsub.append(i)
     
     self.score += anotherjudge.score
     self.early += anotherjudge.early
@@ -1374,11 +1378,11 @@ class Song:
             if cando and arrtotal:
               feetstep = map(lambda x: int(x,16),rest)
 
-              arrowcount = 0
+              arrowcount = 0                             # keep track of the total arrows that will be hit at curtime
               for checkforjumps in range(4):             # guess what this function does
                   if (feetstep[checkforjumps] & 8):
                       if arrowcount and mainconfig['badknees'] and (holding[checkforjumps] == 0):
-                          feetstep[checkforjumps] ^= 8
+                          feetstep[checkforjumps] = 0    #don't xor, there could be a jump-hold
                       arrowcount += 1
               for checkforholds in range(4):             # guess what this function does
                   didnothold = 1
@@ -2364,6 +2368,7 @@ def songSelect(songs, players):
 
       realdiff = realdiff2 = -1
       songidx = scrolloff = s = difficulty = difficulty2 = 0
+      evenbiggerdifflist = []    # I know, I know, we should probably come up with a better name for this
       helpfiles = ["keyboard-ik.png","mat-updn.png","keyboard-s.png","keyboard-jl.png","mat-leftright.png","keyboard-scroll.png","mat-scroll.png","random.png","start.png"]
       oldhelp = CloneSprite(pygame.surface.Surface((1,1)))
       oldhelp.set_colorkey(oldhelp.get_at((0,0)))
@@ -2544,12 +2549,20 @@ def songSelect(songs, players):
     elif ev[1] == E_MARK:
       currentSong.listimage.blit(fontfx.embfade("T",18,3,(12,16),(255,255,0)),(536,28))
       print currentSong,":",
+
+      biggerdifflist = [diffList[difficulty]]
+      if players == 2:
+        biggerdifflist.append(diffList[difficulty2])
+      print "difficulty",biggerdifflist,
+      evenbiggerdifflist.append(biggerdifflist)
+
       try:
         taglist.append(currentSong)
         print "added to taglist."
       except:
         print "new taglist created."
         taglist = [currentSong]
+
     elif ev[0] and ev[1] == E_START: # If this isn't 0 a 2nd or higher player button was hit
       players = ev[0] + 1
     elif ev[1] == E_START:
@@ -2579,12 +2592,15 @@ def songSelect(songs, players):
       except:
         print "single song, no taglist"
         taglist = [currentSong]
-      
-      biggerdifflist = [diffList[difficulty]]
-      if players == 2:
-        biggerdifflist.append(diffList[difficulty2])
-      
-      megajudge = playSequence(players, biggerdifflist, taglist)
+
+      if not evenbiggerdifflist:
+        biggerdifflist = [diffList[difficulty]]
+        if players == 2:
+          biggerdifflist.append(diffList[difficulty2])
+
+        evenbiggerdifflist.append(biggerdifflist)
+
+      megajudge = playSequence(players, evenbiggerdifflist, taglist)
       fooblah = taglist[len(taglist)-1].fooblah
       oldfoo = 1
           
@@ -2595,6 +2611,8 @@ def songSelect(songs, players):
           grade.make_waitscreen(screen)
 
       del(taglist)
+      evenbiggerdifflist = []
+      
       totalredraw = 1
 
     if not totalredraw:
@@ -2855,10 +2873,15 @@ def songSelect(songs, players):
 def playSequence(players, diffList, songList):
   megajudge = []
   lifebars = []
+  print diffList
   for playerID in range(players):
-    megajudge.append(Judge(1, 1, 1, 1, 'Nonstop'))
+    if len(songList)-1:
+      megajudge.append(Judge(1, 0, 1, 1, 'NONSTOP'))
+    else:
+      megajudge.append(Judge(1, 0, 1, 1, diffList[0][playerID]))
+      
     lifebars.append(None)
-  
+    
   for thisSong in songList:
     combos = map(lambda plr: plr.combo, megajudge)
 
@@ -2868,7 +2891,7 @@ def playSequence(players, diffList, songList):
     prevscr = pygame.transform.scale(screen, (640,480))
     screen.fill(BLACK)
     
-    thisjudging, lifebars, prevscr = dance(mrsong, players, diffList, lifebars, combos, prevscr)
+    thisjudging, lifebars, prevscr = dance(mrsong, players, diffList.pop(0), lifebars, combos, prevscr)
     
     for playerID in range(players):
       megajudge[playerID].munch(thisjudging[playerID])
