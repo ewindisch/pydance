@@ -210,9 +210,9 @@ class StepFile:
       if parts[0] == "atsec": data[0] = float(parts[1])
       elif parts[0] == "waits": data[0] += float(parts[1])
       elif parts[0] == "lyric":
-        self.lyrics.append((data[0], 1, " ".join(parts[1:])))
+        self.lyrics.append((data[0] - 0.4, 1, " ".join(parts[1:])))
       elif parts[0] == "trans":
-        self.lyrics.append((data[0], 0, " ".join(parts[1:])))
+        self.lyrics.append((data[0] - 0.4, 0, " ".join(parts[1:])))
     return StepFile.LYRICS, data
 
   def parse_waiting(self, line, data):

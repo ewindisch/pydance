@@ -75,7 +75,7 @@ class Lyrics:
     if not self.channels.has_key(chan):
       color = self.colors[chan % len(self.colors)]
       self.channels[chan] = LyricChannel(480 - (chan + 1) * 32, color)
-    self.channels[chan].addlyric(time - 0.4, lyric)
+    self.channels[chan].addlyric(time, lyric)
 
   def update(self, curtime):
     for i in self.channels.values(): i.update(curtime)
