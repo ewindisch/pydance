@@ -26,7 +26,6 @@ else:
   print "Your platform (%s) is not supported by pyDDR. We're going to call it"
   print "POSIX, and then just let it crash."
 
-
 # Run pyDDR from anywhere
 pyddr_path = os.path.split(os.path.abspath(sys.argv[0]))[0]
 sys.path.append(pyddr_path)
@@ -119,7 +118,8 @@ mainconfig = Config({ # Wow we have a lot of options
   "arrowcolors": 4, "fpsdisplay": 1, "showlyrics": 1,
   "showcombo": 1, "showtoparrows": 1,
   "killsongonfail": 0,
-  "grading": 1
+  "grading": 1,
+  "keyboard": "qwerty"
   })
 
 if osname == "posix":
@@ -135,6 +135,19 @@ theme = mainconfig['gfxtheme']
 songdir = mainconfig['songdir']
 anncname = mainconfig['djtheme']
 annc = Announcer(os.path.join('themes','dj',anncname,'djtheme.cfg'))
+
+p1d = p1u = p1l = p1r = p2l = p2r = p2u = p2d = 0
+
+# Keyboard configuration
+if mainconfig["keyboard"] == "qwerty":
+  p1u, p1d, p1l, p1r = K_i, K_k, K_j, K_l
+  p2u, p2d, p2l, p2r = K_UP, K_DOWN, K_LEFT, K_RIGHT
+elif mainconfig["keyboard"] == "dvorak":
+  p1u, p1d, p1l, p1r = K_c, K_t, K_h, K_n
+  p2u, p2d, p2l, p2r = K_UP, K_DOWN, K_LEFT, K_RIGHT  
+
+if mainconfig["p1_keys"]: p1u, p1d, p1l, p1r = eval(mainconfig["p1_keys"])
+if mainconfig["p2_keys"]: p2u, p2d, p2l, p2r = eval(mainconfig["p2_keys"])
 
 """
 def colorMultiply(surf,color):
@@ -2270,19 +2283,19 @@ def joyEvent(button=None,axis=None,dir=None,pad=0):
   return ev
   
 KEYCONFIG = { E_QUIT:       [K_ESCAPE],
-              E_LEFT:       [K_j],
-              E_RIGHT:      [K_l],
-              E_UP:         [K_i],
-              E_DOWN:       [K_k],
+              E_LEFT:       [p1l],
+              E_RIGHT:      [p1r],
+              E_UP:         [p1u],
+              E_DOWN:       [p1d],
               E_FULLSCREEN: [K_f],
               E_SCREENSHOT: [K_s],
               E_START:      [13,271],
               E_PGUP:       [K_PAGEUP],
               E_PGDN:       [K_PAGEDOWN],
-              E_LEFT2:      [K_LEFT],
-              E_RIGHT2:     [K_RIGHT],
-              E_UP2:        [K_UP],
-              E_DOWN2:      [K_DOWN],
+              E_LEFT2:      [p2l],
+              E_RIGHT2:     [p2r],
+              E_UP2:        [p2u],
+              E_DOWN2:      [p2d],
               E_START2:     [K_2],
               E_SELECT:     [K_r]
             }
@@ -2992,18 +3005,18 @@ def domenu(songs):
             key = last_ev
             last_ev = key
           elif force_scroll == 30:
-            key = K_DOWN
+            key = p1d
           else:
             key = e.key
             last_ev = key
           screen.fill((0,0,0))
           force_scroll = 0
 
-          if key == K_UP:
+          if key == p1u or key == p2u:
             pos = pos - 1
             if pos == -1: pos = len(strings) - 1
 
-          elif key == K_DOWN:
+          elif key == p1d or key == p2d:
             pos = (pos + 1) % len(strings)
 
           elif key == K_ESCAPE or key == K_RETURN:
@@ -3191,11 +3204,11 @@ def domenu(songs):
   while 1:
     k = pygame.event.poll()
     if k.type == KEYDOWN:
-      if (k.key == K_DOWN) and (curitem < len(blah.items)-1):
+      if (k.key == p1d or k.key == p2d) and (curitem < len(blah.items)-1):
         curitem += 1
         if curitem >= topitem+7: 
           topitem += 1
-      elif (k.key == K_UP) and (curitem > 0):
+      elif (k.key == p1u or k.key == p2u) and (curitem > 0):
         curitem -= 1
         if curitem < topitem: 
           topitem = curitem
@@ -3210,9 +3223,9 @@ def domenu(songs):
           lasttext = lasttext[:-1]
           curitem=topitem=0
 
-      elif k.key == K_LEFT:
+      elif k.key == p1l or k.key == p2l:
         blah.items[curitem].change(-1)
-      elif k.key == K_RIGHT:
+      elif k.key == p1r or k.key == p2r:
         blah.items[curitem].change(1)
 
       elif k.key == K_RETURN:
@@ -3542,15 +3555,12 @@ def songSelect(songs, players):
       if players == 2:
         biggerdifflist.append(diffList[difficulty2])
 
-      try:
-        fooblah = currentSong.fooblah
-        mrsong = Song(fooblah)
-        pygame.mixer.quit()
-        oldfoo = 1
-        dance(mrsong,players,biggerdifflist)
-        #blatantplug()
-      except:
-        print "er, there was some exception in dance()."
+      fooblah = currentSong.fooblah
+      mrsong = Song(fooblah)
+      pygame.mixer.quit()
+      oldfoo = 1
+      dance(mrsong,players,biggerdifflist)
+      #blatantplug()
 
       totalredraw = 1
 #      return currentSong,biggerdifflist
