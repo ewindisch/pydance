@@ -212,7 +212,7 @@ class HoldArrowSprite(AbstractArrow):
   def update(self, curtime, curbpm, beat, lbct):
     AbstractArrow.update(self, curtime, curbpm, beat, lbct)
 
-    if beat > self.endbeat2 + 1:
+    if beat > self.endbeat2:
       self.kill()
       return
 

@@ -246,10 +246,6 @@ class TopArrow(Listener, pygame.sprite.Sprite):
     self.rect.top = ypos
     self.rect.left = left
 
-  def set_song(self, pid, bpm, diff, count, holds, feet):
-    self.endpresstime = -1
-    self._pressed = False
-
   # The arrow was pressed, so we have to change it for some time (s state).
   def stepped(self, pid, dir, time, rating, combo):
     if self.pid != pid or self.dir != dir or rating == "M": return

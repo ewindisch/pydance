@@ -11,10 +11,11 @@ Legend:
 + Input keys/buttons can now be remapped in the game.
  + Default keys are the numeric pad for player 1 and uiojklnm, for player 2.
  + Arrow keys, if unmapped, work for player 1 as well.
- - The 'keyboard' option is gone.
+ ! The 'keyboard' option is gone.
  ! The 'saveinput' option saves an input.cfg file (in . or ~/.pydance) on
    exit. Delete this file to reset your mappings to defaults.
 + Animated arrows in the 'ddresque' and 'soloesque' themes.
+ - This release may be slower, especially for animated arrows.
 + Gentoo's install system will no longer work for this release.
 * Several crashes were fixed.
 
