@@ -13,6 +13,10 @@ import os, sys, error, util, getopt
 
 os.chdir(pydance_path)
 
+if pydance_path[0:4] == "/usr": # We're installed systemwide.
+  try: import notgentoo
+  except ImportError: pass
+
 def SetDisplayMode(mainconfig):
   try:
     flags = HWSURFACE | DOUBLEBUF

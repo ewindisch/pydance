@@ -18,6 +18,7 @@ pad_defaults = {
   pad.UPRIGHT: PGUP,
   pad.DOWNRIGHT: PGDN,
   pad.UPLEFT: MARK,
+  pad.CENTER: START,
   pad.DOWNLEFT: UNMARK,
   pad.SELECT: SELECT,
   }
