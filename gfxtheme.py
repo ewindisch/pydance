@@ -172,11 +172,9 @@ class ArrowSet(object):
         else: color = cnum
         arrows[dir+repr(cnum)] = Arrow(theme, "c", dir, color, left)
 
-    # allow access by instance.l or instance.arrows['l']
-    for n in arrows: self.__dict__[n] = arrows[n] 
     self.arrows = arrows
 
-  # allow access by instance['l'] - FIXME - Still necessary?
+  # allow access by instance['l']
   def __getitem__ (self,item):
     return getattr(self,item)
 
