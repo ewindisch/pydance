@@ -1,6 +1,6 @@
 # Support for endless song playing!
 
-import random, copy, colors, audio, error, optionscreen
+import random, copy, colors, audio, error, optionscreen, dance
 from constants import *
 
 RESOLUTION = (640, 480)
@@ -71,7 +71,7 @@ class FakePlaylist:
             [c.diff(song.difficulty[self.mode]) for c in self.constraints])
 
 class Endless:
-  def __init__(self, songitems, screen, playSequence, gametype):
+  def __init__(self, songitems, screen, gametype):
     self.player_configs = [copy.copy(player_config)]
     self.game_config = copy.copy(game_config)
     songitems = [s for s in songitems if s.difficulty.has_key(gametype)]
@@ -112,9 +112,9 @@ class Endless:
       if ev[0] == 0 and ev[1] == E_START:
 
         if optionscreen.player_opt_driver(screen, self.player_configs):
-          playSequence(FakePlaylist(songitems, self.constraints,
-                                    screen, gametype),
-                       self.player_configs, self.game_config, gametype)
+          dance.play(screen, FakePlaylist(songitems, self.constraints,
+                                  screen, gametype),
+                     self.player_configs, self.game_config, gametype)
 
         audio.load(os.path.join(sound_path, "menu.ogg"))
         audio.play(4, 0.0)

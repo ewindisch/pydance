@@ -1,6 +1,7 @@
 from constants import *
 from util import toRealTime
 from gfxtheme import GFXTheme
+from judge import Judge
 
 import fontfx, spritelib, colors
 
@@ -232,13 +233,91 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
         elif self.slotnow[i] == '':
           self.image.blit(self.space,(x,0))
         self.slotold[i] = self.slotnow[i]
-          
+
+class ComboDisp(pygame.sprite.Sprite):
+  def __init__(self,playernum):
+    pygame.sprite.Sprite.__init__(self)
+    self.sticky = mainconfig['stickycombo']
+    self.lowcombo = mainconfig['lowestcombo']
+
+    self.trect = 296 + (mainconfig['totaljudgings'] * 24)
+    self.centerx = (320*playernum) + 160
+    
+    fonts = []
+    for x in range(11, 0, -1):
+      fonts.append(pygame.font.Font(None, 28+int(x*1.82)))
+
+    self.words = []
+    for f in fonts:
+      render = []
+      for w in ('0','1','2','3','4','5','6','7','8','9','x COMBO'):
+        img1 = f.render(w, 1, (16, 16, 16))
+        img2 = f.render(w, 1, (224, 224, 224))
+        img3 = pygame.Surface(img1.get_size())
+        img3.blit(img1, (-2, 2))
+        img3.blit(img1, (2, -2))
+        img3.blit(img2, (0, 0))
+        img3.set_colorkey(img3.get_at((0, 0)))
+        render.append(img3)
+      self.words.append(render)
+    self.space = pygame.surface.Surface((0,0)) #make a blank image
+    self.image = self.space
+    self.rect = Rect(0,0,0,0)
+
+  def update(self, xcombo, steptimediff):
+    if steptimediff < 0.36 or self.sticky:
+      self.drawcount = xcombo
+      self.drawsize = min(int(steptimediff*50), len(self.words)-1)
+      if self.drawsize < 0: self.drawsize = 0
+    else:
+      self.drawcount = 0
+    if self.drawcount >= self.lowcombo:
+      render = self.words[self.drawsize]
+      width = render[-1].get_width()
+      thousands = self.drawcount /1000
+      hundreds = self.drawcount / 100
+      tens = self.drawcount / 10
+      ones = self.drawcount % 10
+      #get width
+      if thousands:
+        thousands = render[thousands%10]
+        width += thousands.get_width()      
+      if hundreds:
+        hundreds = render[hundreds%10]
+        width += hundreds.get_width()
+      if tens:
+        tens = render[tens%10]
+        width += tens.get_width()
+      ones = render[ones]
+      width += ones.get_width()
+      height = render[-1].get_height()
+      self.image = pygame.surface.Surface((width,height))
+      self.image.set_colorkey(ones.get_at((0, 0)))
+      left = 0		      
+      #render
+      if thousands:
+        self.image.blit(thousands, (left,0))
+        left+= thousands.get_width()
+      if hundreds:
+        self.image.blit(hundreds, (left, 0))
+        left += hundreds.get_width()
+      if tens:
+        self.image.blit(tens, (left, 0))
+        left += tens.get_width()
+      self.image.blit(ones, (left, 0))
+      left += ones.get_width()
+      r = self.image.blit(render[-1], (left, 0))
+      self.rect = self.image.get_rect()
+      self.rect.top=self.trect
+      self.rect.left=self.centerx - width/ 2
+    else :
+      self.image = self.space #display the blank image
 
 class Player:
 
   lifebars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp]
 
-  def __init__(self, pid, combos, config, songconf):
+  def __init__(self, pid, config, songconf):
     self.theme = GFXTheme(mainconfig["gfxtheme"])
     self.pid = pid
 
@@ -255,13 +334,13 @@ class Player:
     self.judging_list = []
     self.total_judgings = mainconfig['totaljudgings']
     self.tempholding = [-1, -1, -1, -1]
-    self.combos = combos
+    self.combos = ComboDisp(pid)
     self.judge = None
     self.steps = None
     self.holds = None
     self.evt = None
 
-  def set_song(self, steps, Judge): # FIXME factor these out
+  def set_song(self, steps):
     self.steps = steps
     self.arrow_group = pygame.sprite.RenderUpdates()
     arr, arrfx = self.theme.toparrows(self.steps.bpm, self.top, self.pid)
@@ -333,4 +412,3 @@ class Player:
         if ((curtime - 15.0/self.steps.playingbpm > l[i][1])
             and (curtime < l[i][2])):
           return i
-

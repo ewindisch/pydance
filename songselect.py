@@ -1,10 +1,10 @@
 # The song selector; take songs with metadata, output pretty pictures,
 # let people select difficulties, and dance.
 
-import os, string, pygame, random, copy
+import os, string, pygame, random, copy, dance
 from constants import *
 
-import spritelib, announcer, audio, colors, optionscreen, error, games
+import announcer, audio, colors, optionscreen, error, games
 
 # FIXME: this needs to be moved elsewhere if we want theming
 ITEM_BG = pygame.image.load(os.path.join(image_path, "ss-item-bg.png"))
@@ -229,8 +229,7 @@ class FolderDisplay:
       self.menuimage.blit(grouptext, (15, 32))
 
 class SongSelect:
-  # FIXME We need to remove playSequence, by refactoring it elsewhere, too
-  def __init__(self, songitems, screen, playSequence, gametype):
+  def __init__(self, songitems, screen, gametype):
     self.songs = [SongItemDisplay(s) for s in songitems
                   if s.difficulty.has_key(gametype)]
 
@@ -383,8 +382,6 @@ class SongSelect:
         # If we added the current song with E_MARK earlier, don't readd it
         try: self.title_list[-1].index(self.current_song.info["title"])
         except: self.add_current_song()
-        background = spritelib.SimpleSprite(spr = pygame.transform.scale(self.screen,
-                                                                  (640,480)))
         ann = announcer.Announcer(mainconfig["djtheme"])
         ann.say("menu")
         # Wait for the announcer to finish
@@ -392,12 +389,12 @@ class SongSelect:
           while ann.chan.get_busy(): pygame.time.wait(1)
         except: pass
 
+        pygame.key.set_repeat()
         if optionscreen.player_opt_driver(screen, self.player_configs):
-          pygame.key.set_repeat()
           audio.fadeout(500)
 
-          playSequence(zip(self.song_list, self.diff_list),
-                       self.player_configs, self.game_config, gametype)
+          dance.play(screen, zip(self.song_list, self.diff_list),
+                     self.player_configs, self.game_config, gametype)
 
           audio.fadeout(500) # This is the just-played song
 
@@ -405,9 +402,9 @@ class SongSelect:
 
           while ev[1] != E_PASS: ev = event.poll() # Empty the queue
           self.screen.blit(self.bg, (0, 0))
-          pygame.key.set_repeat(500, 30)
           pygame.display.flip()
 
+        pygame.key.set_repeat(500, 30)
         changed = True
 
         # Reset the playlist
