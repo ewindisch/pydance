@@ -565,7 +565,9 @@ class SMFile(GenericFile):
     for measure in measures:
       measure = measure.replace(" ", "")
       notetype = len(measure)/count
-      note = SMFile.notetypes[notetype]
+      if notetype in SMFile.notetypes:
+        note = SMFile.notetypes[notetype]
+      else: note = 16 * notetype
       while len(measure) != 0:
         sd = measure[0:count]
         measure = measure[count:]
@@ -711,7 +713,7 @@ class SongItem:
           for step in self.steps[game][diff]:
             extra = ""
             if step[0] in ("B", "W", "S", "D"): extra = str(step[1])
-            elif step[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x"):
+            elif step[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x", "u"):
               extra = "".join([str(i) for i in step[1:]])
             elif step[0] == "L": extra = " ".join([str(i) for i in step[1:]])
             f.write(step[0] + " " + extra + "\n")
@@ -724,7 +726,7 @@ class SongItem:
               break
             else:
               if step1[0] in ("B", "W", "S", "D"): extra = str(step1[1])
-              elif step[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x"):
+              elif step[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x", "n"):
                 extra = "".join([str(i) for i in step1[1:]])
                 extra += " " + "".join([str(i) for i in step2[1:]])
               elif step1[0] == "L":

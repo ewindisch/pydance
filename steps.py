@@ -101,7 +101,8 @@ class Steps:
       elif words[0] == 'R':
         self.ready = cur_time
         coloring_mod = 0
-      elif words[0] in BEATS:
+      elif words[0] in BEATS or isinstance(words[0], int):
+        
         cando = True # FIXME: Do little correctly for 24th etc notes
         if ((little == 1 and (coloring_mod % 4 == 1 or
                               coloring_mod % 4 == 3)) or
@@ -151,6 +152,9 @@ class Steps:
           for arrowadder in feetstep:
             if arrowadder & 1:
               self.totalarrows += 1
+
+        if words[0] in BEATS: beat = BEATS[words[0]]
+        else: beat = words[0]
 
         cur_time += toRealTime(cur_bpm, BEATS[words[0]])
         cur_beat += BEATS[words[0]]
