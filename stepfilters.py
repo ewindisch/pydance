@@ -353,7 +353,10 @@ def generate_mode(song, difficulty, target_mode, pid):
   steps = song.steps[mode][difficulty]
   if mode in games.COUPLE: steps = steps[pid]
 
+  seed = song.info["bpm"]
+  if song.info["gap"] != 0: seed *= song.info["gap"]
+
   trans = PanelTransform(games.GAMES[mode].dirs, games.GAMES[target_mode].dirs,
-                         NonRandom(int(song.info["bpm"] * song.info["gap"])))
+                         NonRandom(int(song.info["bpm"])))
 
   return [trans.transform(s) for s in steps]
