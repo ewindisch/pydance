@@ -99,7 +99,7 @@ class ArrowSprite(AbstractArrow):
     self.life  = endtime - curtime
 
   def update(self, curtime, curbpm, lbct):
-    if (self.sample) and (curtime >= self.endtime -0.0125):
+    if self.sample and curtime >= self.endtime:
       self.sample.play()
       self.sample = None
 
@@ -192,7 +192,7 @@ class HoldArrowSprite(AbstractArrow):
     self.baseimage.blit(self.image,(0,-self.width / 2 + 1))
 
   def update(self,curtime,curbpm,lbct):
-    if self.sample and (curtime >= self.timef1 -0.0125):
+    if self.sample and curtime >= self.timef1:
       self.sample.play()
       self.sample = None
 
