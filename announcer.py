@@ -1,10 +1,22 @@
-import os
-import random
+import os, random, dircache
 import pygame
 
 from constants import *
 
 class Announcer:
+
+  def themes(cls):
+    theme_list = []
+    for path in search_paths:
+      checkpath = os.path.join(path, "themes", "dj")
+      if os.path.isdir(checkpath):
+        for name in dircache.listdir(checkpath):
+          if os.path.isfile(os.path.join(checkpath, name, "djtheme.cfg")):
+            theme_list.append(name)
+    return theme_list
+
+  themes = classmethod(themes)
+
   def __init__(self, name):
     self.sections = {}
     self.name = None

@@ -13,6 +13,9 @@ from constants import *
 
 from announcer import Announcer
 from config import Config
+from gfxtheme import GFXTheme
+from spritelib import *
+
 import fontfx, menudriver
 
 import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
@@ -42,23 +45,13 @@ if USE_GL:
 
 
 pygame_time_get_ticks = pygame.time.get_ticks
-BLACK=(0,0,0)
-WHITE=(255,255,255)
 
 # extend the sprite class with layering support
-DEFAULTZINDEX,PADZINDEX,ARROWZINDEX,XANIMZINDEX,BARSZINDEX = range(5)
 pygame.sprite.Sprite.zindex = DEFAULTZINDEX
 #def zcompare(self,other):
 #  return cmp(self.zindex,other.zindex)
 #pygame.sprite.Sprite.__cmp__ = zcompare
 
-class QuitGame:
-  def __init__(self,reason):
-    self.reason = reason
-
-  def __str__(self):
-    return self.reason
-  
 #_pixels3d   = pygame.surfarray.pixels3d
 #_blit_array = pygame.surfarray.blit_array
 
@@ -74,27 +67,6 @@ MAXPLAYERS = 2
 DIRECTIONS = ['l', 'd', 'u', 'r']
 
 songdir = mainconfig['songdir']
-
-class Theme:
-  def __init__(self, name):
-    self.name = name
-    self.path = None
-    for path in search_paths:
-      if os.path.isdir(os.path.join(path, "themes", "gfx", name)):
-        self.path = os.path.join(path, "themes", "gfx", name)
-    if self.path == None:
-      print "Error: Cannot load graphics theme '%s'." % name
-      sys.exit(1)
-
-    self.load()
-
-  def load(self):
-    self.arrows = ArrowSet(self.path)
-    self.bars = BarSet(self.path)
-    self.xanim = Xanim(self.path)
-
-  def __repr__(self):
-    return ('<Theme name=%r>' % self.name)
 
 class SongEvent:
   def __init__ (self, bpm, when=0.0, feet=None, next=None, extra=None, color=None):
@@ -593,12 +565,11 @@ class GradingScreen:
 
       i += idir
       ev = event.poll()
-      if (ev == E_QUIT) or (ev == E_START1) or (ev == E_START2):
+      if (ev[1] == E_QUIT) or (ev[1] == E_START):
         break
-      elif ev == E_FULLSCREEN:
-        print "fullscreen toggle"
+      elif ev[1] == E_FULLSCREEN:
         pygame.display.toggle_fullscreen()
-      elif ev == E_SCREENSHOT:
+      elif ev[1] == E_SCREENSHOT:
         print "writing next frame to screenshot.bmp"
         screenshot = 1
           
@@ -1730,7 +1701,7 @@ class fastSong:
     self.totarrows = 0
     chompNext = None
     self.variablecreationtime = pygame.time.get_ticks()
-    for fileline in open(fn).readlines():
+    for fileline in open(fn):
       fileline = fileline.strip()
       if fileline == '' or fileline[0] == '#': continue
       fsplit = fileline.split()
@@ -1862,111 +1833,6 @@ class fastSong:
     
   def __repr__ (self):
     return '<song song=%r group=%r bpm=%s file=%r>'%(self.song,self.group,repr(self.bpm)[:7],self.file)
-
-class ArrowSet: 
-  def __init__ (self, path, prefix='arr', imgtype='png', separator='_'):
-    # left, up, right, down
-    arrows = {'l': 12, 'd': 12+76, 'u': 12+2*76, 'r': 12+3*76}
-    for dir,left in arrows.items():
-      for cnum in range(4):
-        if cnum == 3:
-          casdf = 1
-        else:
-          casdf = cnum
-        arrows[dir+repr(cnum)] = Arrow(self,dir,path,prefix,imgtype,separator,left,casdf)
-    # allow access by instance.l or instance.arrows['l']
-    for n in arrows.keys(): self.__dict__[n] = arrows[n] 
-    self.arrows = arrows
-  def __getitem__ (self,item):
-    # allow access by instance['l']
-    return getattr(self,item)
-    
-class Arrow:
-  def __init__ (self, parent, dir, path, prefix, imgtype, separator,left=0,color=0):
-      # reference to ArrowSet
-      self.parent=parent
-      # direction (short) i.e. 'l'
-      self.dir = dir
-      # normal, pulse, stepped on, pulse & stepped on, colored, offbeat colored
-      states = {'c':None} #, 'p':None, 's':None, 'b':None, 'n':None, 'o':None}
-      for state in states.keys():
-        fn = os.path.join(path, separator.join([prefix,state,dir,repr(color)]) + '.' + imgtype)
-        states[state] = SimpleSprite(fn)
-        states[state].rect.left = left
-      # allow access by instance.n or instance.states['n']
-      for n in states.keys(): self.__dict__[n] = states[n]
-
-class SimpleSprite(pygame.sprite.Sprite):
-  def __init__ (self, file, zindex=DEFAULTZINDEX):
-    pygame.sprite.Sprite.__init__(self)
-    self.zindex=zindex
-    image = pygame.image.load(file).convert()
-    image.set_colorkey(image.get_at((0,0)))
-    self.fn = file
-    self.image = image
-    self.rect = image.get_rect()
-
-  def draw(self,surf,pos=None,rect=None):
-    if rect and pos:
-      return surf.blit(self.image,pos,rect)
-    elif pos:
-      return surf.blit(self.image,pos)
-    elif rect:
-      return surf.blit(self.image,(0,0),rect)
-    else:
-      return surf.blit(self.image,self.rect)
-
-  def update(self):
-    pass
-
-  def __getattr__(self,attr):
-    return getattr(self.image,attr)
-    
-  def __repr__(self):
-    return '<Sprite fn=%r rect=%r>'%(self.fn,self.rect)
-
-class BlankSprite(SimpleSprite):
-  def __init__ (self, res, fill=BLACK,zindex=DEFAULTZINDEX):
-    pygame.sprite.Sprite.__init__(self)
-    self.zindex=zindex
-    image = pygame.Surface(res)
-    if fill is not None: image.fill(fill)
-    self.image = image
-    self.rect = image.get_rect()
-
-  def __repr__(self):
-    return '<Sprite rect=%r>'%(self.rect)
-
-class CloneSprite(BlankSprite):
-  def __init__ (self, spr,zindex=DEFAULTZINDEX):
-    pygame.sprite.Sprite.__init__(self)
-    self.zindex=zindex
-    self.image = spr.convert()
-    try:
-      self.rect = Rect(spr.rect)
-    except:
-      self.rect = spr.get_rect()
-
-class TransformSprite(BlankSprite):
-  _rotozoom = pygame.transform.rotozoom
-  _rotate = pygame.transform.rotate
-  _flip = pygame.transform.flip
-  _scale = pygame.transform.scale
-  def __init__ (self, spr, scale=None, size=None, zindex=DEFAULTZINDEX,hflip=0,vflip=0,angle=None,filter=None):
-    pygame.sprite.Sprite.__init__(self)
-    self.zindex=zindex
-    image = None
-    try:
-      image = spr.image
-    except:
-      image = spr
-    if scale and not size:      size = map(lambda n,scale=scale: scale*n, spr.rect.size)
-    if angle and size:          image = self._rotozoom(image,angle,zoom)
-    elif angle:                 image = self._rotate(image,angle)
-    elif size:                  image = self._scale(image,size)
-    if hflip or vflip:          image = self._flip(image,hflip,vflip)
-    self.image = image
-    self.rect = self.image.get_rect()
 
 #DCY: Bottom of 640 gives lots of "update rejecting"    
 if mainconfig['reversescroll']:
@@ -2216,58 +2082,6 @@ class HoldArrowSprite(CloneSprite):
   
 #    print "alpha ",alp
     
-# acts like a subclass of Sprite
-class SimpleAnim:
-  def __init__ (self, path, prefix, separator, imgtype='png', frameNumbers=None, files=None, zindex=DEFAULTZINDEX):
-    frames = []
-    if files is None:
-      if frameNumbers is None:
-        files=glob.glob(os.path.join(path,separator.join([prefix,'*.'+imgtype])))
-      else:
-        files=[]
-        for i in frameNumbers: 
-          files.append(os.path.join(path,separator.join([prefix,"%d.%s"%(i,imgtype)])))
-    self.frames=map(lambda fn,SimpleSprite=SimpleSprite,zindex=zindex: SimpleSprite(fn,zindex=zindex), files)
-    self.curframe = 0
-
-  def update(self):
-    """swap the groups of old sprite into new sprite"""
-    oldspr = self.curframe
-    frames = self.frames
-    curframe = oldspr+1
-    if curframe>=len(frames): curframe=0
-    # degenerate case, a 1 frame animation
-    if oldspr == curframe: return
-    frames[curframe].rect = frames[oldspr].rect
-    # only one frames is the "sprite" at any given time
-    for n in frames[oldspr].groups: frames[curframe].add(n)
-    frames[oldspr].kill()
-    self.curframe = curframe
-
-  def __getattr__(self,attr):
-    """pretend we are a Sprite by overloading getattr with frames[curframe]"""
-    return getattr(self.frames[self.curframe],attr)
-
-#  def __setattr__(self,attr,val):
-#    if attr=='rect': setattr(self.frames[self.curframe],attr,val)
-#    else: self.__dict__[attr]=val 
-
-
-class Xanim(SimpleAnim):
-  def __init__ (self, path, prefix='x_out', separator='-', imgtype='png', frameNumbers=None, files=None):
-    SimpleAnim.__init__(self,path,prefix,separator,imgtype,frameNumbers,files,zindex=XANIMZINDEX)
-    
-
-class BarSet:
-  def __init__ (self, path, suffix='bar', imgtype='png'):
-    bars = {'red':None, 'org':None, 'yel':None, 'grn':None}
-    for color in bars.keys():
-      fn = os.path.join(path, ''.join([color,suffix,'.',imgtype]))
-      bars[color] = SimpleSprite(fn,zindex=BARSZINDEX)
-    self.bars = bars
-    for n in bars.keys(): self.__dict__[n] = bars[n]
-
-
 class RenderLayered(pygame.sprite.RenderClear):
 
   def draw(self,surface):
@@ -2472,22 +2286,6 @@ def main():
 
   domenu(songs)
     
-class TextSprite(BlankSprite):
-  def __init__(self, font=None, size=32, text='', color=WHITE, bold=None, italic=None, underline=None, antialias=1, bkgcolor=None):
-    pygame.sprite.Sprite.__init__(self)
-    surf = None
-    font = pygame.font.Font(font, size)
-    if bold:      font.set_bold(bold)
-    if italic:    font.set_italic(italic)
-    if underline: font.set_underline(underline)
-    if bkgcolor:
-      surf = font.render(text,antialias,color,bkgcolor)
-      surf.set_colorkey(bkgcolor)
-    else:
-      surf = font.render(text,antialias,color)
-    self.image = surf
-    self.rect = surf.get_rect()
-      
 def domenu(songs):
   global fooblah, screen
   
@@ -2559,7 +2357,7 @@ def songSelect(songs, players):
   pygame.mixer.music.fadeout(500)
   totalredraw = 1
 
-  currentTheme = Theme(mainconfig['gfxtheme'])
+  currentTheme = GFXTheme(mainconfig['gfxtheme'])
 
   fooblah = " "
 
@@ -2673,7 +2471,7 @@ def songSelect(songs, players):
         sys.exit()
   
     ev = event.poll()
-    if  ev == E_QUIT:
+    if  ev[1] == E_QUIT:
       pygame.mixer.music.fadeout(1000)
       pygame.time.delay(1000)
       pygame.mixer.music.stop()
@@ -2683,16 +2481,16 @@ def songSelect(songs, players):
       fooblah = currentSong.fooblah
       return None, None, None
     elif ev < 0:                                  pass # key up
-    elif ev == E_PASS:                            pass
-    elif ev == E_FULLSCREEN:
+    elif ev[1] == E_PASS:                            pass
+    elif ev[1] == E_FULLSCREEN:
       pygame.display.toggle_fullscreen()
       mainconfig["fullscreen"] = mainconfig["fullscreen"] ^ 1
-    elif ev == E_SCREENSHOT:                      s = 1
-    elif (ev == E_LEFT1):    difficulty -= 1
-    elif (ev == E_RIGHT1):   difficulty += 1
-    elif (ev == E_LEFT2):   difficulty2 -= 1
-    elif (ev == E_RIGHT2):  difficulty2 += 1
-    elif (ev == E_UP1) or (ev == E_UP2):
+    elif ev[1] == E_SCREENSHOT:                      s = 1
+    elif (ev == (0, E_LEFT)):    difficulty -= 1
+    elif (ev == (0, E_RIGHT)):   difficulty += 1
+    elif (ev == (1, E_LEFT)):   difficulty2 -= 1
+    elif (ev == (1, E_RIGHT)):  difficulty2 += 1
+    elif (ev[1] == E_UP):
       prevsong = songs[songidx]
       songChanged = 1
       if songidx>0:
@@ -2705,7 +2503,7 @@ def songSelect(songs, players):
         scrolloff = 60
         fontdisp = 1
         sod = 0
-    elif (ev == E_DOWN1) or (ev == E_DOWN2):
+    elif (ev[1] == E_DOWN):
       prevsong = songs[songidx]
       songChanged = 1
       if songidx<(totalsongs-1):
@@ -2718,7 +2516,7 @@ def songSelect(songs, players):
         scrolloff = -60
         fontdisp = 1
         sod = 0
-    elif ev == E_PGUP:
+    elif ev[1] == E_PGUP:
       prevsong = songs[songidx]
       songChanged = 1
       if songidx-5 > 0:
@@ -2731,7 +2529,7 @@ def songSelect(songs, players):
         scrolloff = 60
         fontdisp = 1
         sod = 0
-    elif ev == E_PGDN:
+    elif ev[1] == E_PGDN:
       prevsong = songs[songidx]
       songChanged = 1
       if songidx<(totalsongs-5):
@@ -2751,7 +2549,7 @@ def songSelect(songs, players):
       print "        to read the file it took", songs[songidx].filereadcreationtime - songs[songidx].variablecreationtime
       print "     to filter the modes it took", songs[songidx].modereadcreationtime - songs[songidx].filereadcreationtime
       '''
-    elif (ev == E_SELECT):
+    elif (ev[1] == E_SELECT):
       newidx = int(random.random()*len(songs))
       if newidx < songidx:
         scrolloff = 60
@@ -2762,7 +2560,7 @@ def songSelect(songs, players):
       songChanged = 1
       fontdisp = 1
       sod = 0
-    elif ev == E_MARK:
+    elif ev[1] == E_MARK:
       currentSong.listimage.blit(fontfx.embfade("T",18,3,(12,16),(255,255,0)),(536,28))
       print currentSong,":",
       try:
@@ -2771,9 +2569,9 @@ def songSelect(songs, players):
       except:
         print "new taglist created."
         taglist = [currentSong]
-    elif ev == E_START2 and players != 2:
-      players = 2
-    elif ev == E_START1 or ev == E_START2:
+    elif ev[0] and ev[1] == E_START: # If this isn't 0 a 2nd or higher player button was hit
+      players = ev[0] + 1
+    elif ev[1] == E_START:
       pygame.mixer.music.fadeout(1000)
       ann = Announcer(mainconfig["djtheme"])
       ann.say("menu")
@@ -2784,7 +2582,7 @@ def songSelect(songs, players):
         background.draw(screen)
         pygame.display.flip()
         pygame.time.wait(1)
-        if (event.poll() == E_QUIT): 
+        if (event.poll()[1] == E_QUIT): 
           print "song was cancelled!"
           break
       background.set_alpha()
@@ -3277,7 +3075,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
 
     while 1:
       ev = event.poll()
-      if ev == E_START1 or ev == E_START2 or ev == E_QUIT: break
+      if ev[1] == E_START or ev[1] == E_QUIT: break
       pygame.time.wait(50)
 
   screenshot = 0
@@ -3341,40 +3139,34 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
 
     ev = event.poll()
 
-    if ((event.states[E_START1] and event.states[E_RIGHT1]) or
-        (event.states[E_START2] and event.states[E_RIGHT2])):
-      print "holding right plus start quits. pyDDR now exiting."
-      sys.exit()
-    elif ((event.states[E_START1] and event.states[E_LEFT1]) or
-          (event.states[E_START2] and event.states[E_LEFT2])):
-      break
-    else:
-      pass
+    for i in range(players):
+      if (event.states[(i, E_START)] and event.states[(i, E_RIGHT)]):
+        print "holding right plus start quits. pyDDR now exiting."
+        sys.exit()
+      elif (event.states[(i, E_START)] and event.states[(i, E_LEFT)]):
+        break
+      else:
+        pass
 
-    while ev != E_PASS:
-      if ev == E_QUIT: break
-      elif ev == E_FULLSCREEN:
+    while ev[1] != E_PASS:
+      if ev[1] == E_QUIT: break
+      elif ev[1] == E_FULLSCREEN:
         pygame.display.toggle_fullscreen()
-      elif ev == E_SCREENSHOT:
+      elif ev[1] == E_SCREENSHOT:
         screenshot = 1
-      elif ev == E_LEFT1: key.append('l0')
-      elif ev == E_RIGHT1: key.append('r0')
-      elif ev == E_UP1: key.append('u0')
-      elif ev == E_DOWN1: key.append('d0')
-      elif players == 2:
-        if ev == E_LEFT2: key.append('l1')
-        elif ev == E_RIGHT2: key.append('r1')
-        elif ev == E_UP2: key.append('u1')
-        elif ev == E_DOWN2: key.append('d1')
+      elif ev[1] == E_LEFT: key.append((ev[0], 'l'))
+      elif ev[1] == E_RIGHT: key.append((ev[0], 'r'))
+      elif ev[1] == E_UP: key.append((ev[0], 'u'))
+      elif ev[1] == E_DOWN: key.append((ev[0], 'd'))
 
       ev = event.poll()
 
-    if ev == E_QUIT: break
+    if ev[1] == E_QUIT: break
   
     for keyAction in key:
-      playerID = int(keyAction[1])
+      playerID = keyAction[0]
       if playerID <= players:
-        keyPress = keyAction[0]
+        keyPress = keyAction[1]
         playerContents[playerID]['toparr'][keyPress].stepped(1, curtime+(song.offset*1000))
         holdkey[playerID].pressed(keyPress)
         playerContents[playerID]['fxData'].append( playerContents[playerID]['judge'].handle_key(keyPress, curtime) )
@@ -3382,8 +3174,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
 
     # This maps the old holdkey system to the new event ID one
     # We should phase this out
-    keymap_kludge = ({"u": E_UP1, "d": E_DOWN1, "l": E_LEFT1, "r": E_RIGHT1},
-                     {"u": E_UP2, "d": E_DOWN2, "l": E_LEFT2, "r": E_RIGHT2})
+    keymap_kludge = ({"u": E_UP, "d": E_DOWN, "l": E_LEFT, "r": E_RIGHT})
 
     for plr in playerContents:
       for checkhold in DIRECTIONS:
@@ -3391,7 +3182,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
         currenthold = plr['holdkey'].shouldhold(checkhold, curtime, song.holdinfo[song.modediff[playmode].index(plr['difficulty'])], song.playingbpm)
         dirID = DIRECTIONS.index(checkhold)
         if currenthold is not None:
-          if event.states[keymap_kludge[plr['playerID']][checkhold]]:
+          if event.states[(plr['playerID'], keymap_kludge[checkhold])]:
             if plr['judge'].holdsub[plr['tempholding'][dirID]] != -1:
               plr['toparrfx'][checkhold].holding(1)
             plr['tempholding'][dirID] = currenthold

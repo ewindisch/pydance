@@ -7,15 +7,10 @@ import os, sys
 def sanity_check():
   print "Checking for appropriate libraries."
   sys.stdout.write("Checking Python version... ")
-  if sys.version_info[0] < 2:
-    print "1.x!"
-    print "Versions of Python less than 2 are not supported by pyDDR."
+  if sys.version_info[0] < 2 and sys.version_info[1] < 2:
+    print "Versions of Python less than 2.2 are not supported by pyDDR."
     print "Visit http://www.python.org to upgrade."
     sys.exit(1)
-  elif sys.version_info[1] < 2:
-    print "2.1.x or 2.0.x"
-    print "Versions of Python less than 2.2 are not recommended."
-    print "Visit http://www.python.org to upgrade."
   else: print "2.2.x or greater"
 
   try:
@@ -78,7 +73,7 @@ if osname == "win32":
   print "Configuration for Win32 systems complete. No installation is needed."
   print "Make sure your pyddr.cfg file points to your song directory."
 elif osname == "macosx":
-  print "Hey DShadow, do something here."
+  print "This OSs support is not yet integrated into this program."
 elif osname == "posix":
   print "Configuration for UNIX-like systems complete. 'make install' should"
   print "properly install pyDDR, by default into /usr/local. You can override"

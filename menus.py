@@ -27,8 +27,8 @@ class MenuItem:
     # Dict of callbacks by keycodes, also "initial", "select", "unselect"
 
     # This looks something like:
-    # MenuItem({ 'initial': do_setup, E_START1: do_change,
-    #            E_START2: do_change }, (configdata, mystrings))
+    # MenuItem({ 'initial': do_setup, E_START: do_change,
+    #            E_START: do_change }, (configdata, mystrings))
     # When the button is pressed, do_change(configdata, mystrings) will be
     # called.
     self.callbacks = callbacks
@@ -45,23 +45,19 @@ class MenuItem:
   # text to display on the button, the new subtext to display, and
   # the RGB value of the text.
 
-  # Event IDs are those in constants.py.
-  def activate(self, ev_id):
-    if ev_id == E_START1 or ev_id == E_START2: ev_id = E_START
-    if ev_id == E_LEFT1 or ev_id == E_LEFT2: ev_id = E_LEFT
-    if ev_id == E_RIGHT1 or ev_id == E_RIGHT2: ev_id = E_RIGHT
+  def activate(self, ev): # Note - event ID, not an event tuple
     if self.callbacks == None:
-      if ev_id == E_START:
+      if ev == E_START:
         return E_QUIT # This is a back button
-      else: return ev_id # Shouldn't happen
-    if callable(self.callbacks.get(ev_id)):
-      text, subtext, rgb = self.callbacks[ev_id](*self.args)
+      else: return ev # Shouldn't happen
+    if callable(self.callbacks.get(ev)):
+      text, subtext, rgb = self.callbacks[ev](*self.args)
       if text: self.text = text
       if subtext: self.subtext = subtext
       if rgb: self.rgb = rgb
       self.render()
-      return ev_id
-    else: return ev_id
+      return ev
+    else: return ev
 
   # Render the image. If subtext is present, the main text gets smaller.
   def render(self):
@@ -115,12 +111,12 @@ class Menu:
 
     ev = E_PASS
     while ev != E_QUIT:
-      ev = event.poll()
+      ev = event.poll()[1]
 
       if ev == E_FULLSCREEN: pygame.display.toggle_fullscreen()
 
       # Scroll down through the menu
-      elif ev == E_DOWN1 or ev == E_DOWN2:
+      elif ev == E_DOWN:
         try: ev = self.items[curitem].activate("deselect")
         except AttributeError: pass
         curitem += 1
@@ -133,7 +129,7 @@ class Menu:
         except AttributeError: pass
 
       # Same as above, but up
-      elif ev == E_UP1 or ev == E_UP2:
+      elif ev == E_UP:
         try: ev = self.items[curitem].activate("deselect")
         except AttributeError: pass
         curitem -= 1
@@ -150,7 +146,7 @@ class Menu:
         try:
           ev = self.items[curitem].activate(ev)
         except AttributeError:
-          if ev == E_START1 or ev == E_START2:
+          if ev == E_START:
             # Except if we're not a button and the event was START, go to
             # the new menu.
             self.items[curitem].display(screen)

@@ -8,8 +8,8 @@ add to it.
 
 0.6.3
  - Player-as-object patch (possible 0.6.2).
- - Extend constants.py to cover themes directories.
- - Make theme-finding use rscdir (rsc_path?) and pyddr_path.
+ - Extend constants.py to cover themes directories. (done in a better way)
+ - Make theme-finding use rscdir (rsc_path?) and pyddr_path. (merged)
 
 0.6.4
  - Separate Song (makes arrow events out of patterns), and SongFile.

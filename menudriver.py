@@ -3,6 +3,8 @@
 import pygame, menus, os, sys
 
 from constants import *
+from announcer import Announcer
+from gfxtheme import GFXTheme
 
 # A simple on/off setting, 0 or 1
 def get_onoff(name):
@@ -93,6 +95,7 @@ def do(screen, songselect, songdata):
   m = (["Play Game", {E_START: songselect}, songdata],
        ("Game Options",
         ["Autofail", onoff_opt, ("killsongonfail",)],
+        ["Announcer", rotate_opt, ("djtheme", Announcer.themes())],
         ["Reverse", onoff_opt, ("reversescroll",)],
         ["Little", rotate_index_opt,
          ("little", ("show all", "no 16ths", "no 8ths",
@@ -109,7 +112,7 @@ def do(screen, songselect, songdata):
         ),
        ("Graphic Options",
         ["Fullscreen", {E_START: fullscreen_toggle}, (None,)],
-#        ["Graphics Theme", rotate_opt, ('gfxtheme', ['classic', 'bryan'])],
+        ["Graphics", rotate_opt, ('gfxtheme', GFXTheme.themes())],
         ["Exploding", rotate_index_opt,
          ('explodestyle', ('none', 'rotate', 'scale', 'rotate & scale'))],
         ["Backgrounds", onoff_opt, ('showbackground',)],
