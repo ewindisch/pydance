@@ -1111,7 +1111,7 @@ def dance(song, players, prevscr, ready_go):
     for arrowID in DIRECTIONS:
       if mainconfig['explodestyle'] > -1:
         plr.toparrfx[arrowID].add(fgroup)
-      if plr.toparrows:
+      if not plr.dark:
         plr.toparr[arrowID].add(sgroup)
       
   while 1:

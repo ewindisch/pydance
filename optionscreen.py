@@ -21,7 +21,7 @@ def player_opt_driver(screen, configs):
     ("Scroll", "scrollstyle", [(0, "Normal"), (1, "Reverse"), (2, "Center")]),
     ("Spin", "spin", [(0, "Off"), (1, "On")]),
     ("Flat", "colortype", [(4, "Off"), (1, "On")]),
-    ("Dark", "toparrows", [(1, "Off"), (0, "On")]),
+    ("Dark", "dark", [(0, "Off"), (1, "On")]),
     ("Jumps", "jumps", [(1, "On"), (0, "Off")]),
     ]
 

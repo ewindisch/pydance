@@ -88,7 +88,7 @@ player_config = {"spin": 0,
                  "sudden": 0,
                  "hidden": 0,
                  "little": 0,
-                 "toparrows": 1,
+                 "dark": 0,
                  "jumps": 1,
                  "colortype": 4,
                  "scrollstyle": 0 }

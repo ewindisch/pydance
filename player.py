@@ -62,7 +62,7 @@ class Player:
     self.fx_data = []
 
   def change_bpm(self, newbpm):
-    if self.toparrows:
+    if not self.dark:
       for d in self.toparr:
         self.toparr[d].tick = toRealTime(newbpm, 1)
         self.toparrfx[d].tick = toRealTime(newbpm, 1)
