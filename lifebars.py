@@ -46,7 +46,7 @@ class LifeBarDisp(AbstractLifeBar):
     self.life = self.maxlife / 2.0
     self.displayed_life = self.life
 
-    self.deltas = {"V": 0.08, "P": 0.08, "G": 0.04, "B": -0.04, "M": -0.08}
+    self.deltas = {"V": 0.008, "P": 0.008, "G": 0.004, "B": -0.04, "M": -0.08}
     self.empty = theme.theme_data.get_image('lifebar-empty.png')
     self.full = theme.theme_data.get_image('lifebar-full.png')
 
@@ -92,7 +92,7 @@ class TugLifeBarDisp(LifeBarDisp):
 
     self.wontext = fontfx.embfade("WON",28,3,(80,32),(224,32,32))
     self.wontext.set_colorkey(self.failtext.get_at((0,0)), RLEACCEL)
-    self.deltas = {"V": 0.04, "P": 0.04, "G": 0.02, "B": -0.02, "M": -0.04 }
+    self.deltas = {"V": 0.02, "P": 0.02, "G": 0.01, "B": -0.01, "M": -0.02 }
 
     # If we're player 1, it's a new game, so delete the old lifebars.
     if playernum == 0: TugLifeBarDisp.active_bars = [self]
@@ -138,8 +138,8 @@ class MediocreLifeBarDisp(AbstractLifeBar):
     AbstractLifeBar.__init__(self, playernum, 1.0, songconf, game)
     self.life = self.maxlife / 2
 
-    self.deltas = {"V": 0.08, "P": 0.08, "G": 0.04,
-                       "O": -0, "B": -0.04, "M": -0.08 }
+    self.deltas = {"V": 0.04, "P": 0.04, "G": 0.02,
+                       "O": -0, "B": -0.02, "M": -0.04 }
     self.image = pygame.surface.Surface([202, 28])
     self.image.fill([255, 255, 255])
 
