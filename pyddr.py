@@ -16,7 +16,7 @@ from gfxtheme import GFXTheme
 from player import Player
 from spritelib import *
 
-import fontfx, menudriver, fileparsers, colors, gradescreen
+import fontfx, menudriver, fileparsers, colors, gradescreen, steps
 
 import os, sys, glob, random, fnmatch, types, operator, copy, string
 
@@ -60,32 +60,6 @@ pygame.sprite.Sprite.zindex = DEFAULTZINDEX
 #  _blit_array(surf,narray.astype(Int8))
 
 songdir = mainconfig['songdir']
-
-class SongEvent:
-  def __init__ (self, bpm, when=0.0, feet=None, next=None, extra=None, color=None):
-    self.bpm  = bpm
-    self.when = when
-    self.feet = feet
-    self.next = next
-    self.extra = extra
-    self.color = color
-  def __repr__(self):
-    rest=[]
-    if self.feet: rest.append('feet=%r'%self.feet)
-    if self.extra: rest.append('extra=%r'%self.extra)
-    if self.extra: rest.append('color=%r'%self.color)
-    return '<SongEvent when=%r bpm=%r %s>' % (self.when,self.bpm,' '.join(rest))
-
-def emptyDictFromList(lst):
-  d = {}
-  for n in lst: d[n]=None
-  return d
-
-DIFFICULTYLIST = ['BASIC','TRICK','MANIAC','HARDCORE']
-DIFFICULTIES   = emptyDictFromList(DIFFICULTYLIST)
-MODELIST = ['SINGLE','DOUBLE']
-MODES = emptyDictFromList(MODELIST)
-BEATS = {'sixty':0.25,'thrty':0.5,'twtfr':2.0/3.0,'steps':1.0,'tripl':4.0/3.0,'eight':2.0,'qurtr':4.0,'halfn':8.0,'whole':16.0} 
 
 class BGmovie(pygame.sprite.Sprite):
   def __init__ (self, filename):
@@ -522,78 +496,6 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
             self.image.blit(self.space,(x,0))
           self.slotold[i] = self.slotnow[i]
           
-class LyricDispKludge(pygame.sprite.Sprite):
-  def __init__(self,top,clrs):
-      pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-      self.lyrics = []
-      self.times = []
-      self.prender = []
-      self.lasttime = -1000
-
-      self.space = pygame.surface.Surface((1,1))
-      self.space.fill(colors.BLACK)
-
-      self.oldlyric = -1
-      self.oldalp = 0
-      self.baseimage = self.space
-      self.image = self.baseimage
-      self.colors = clrs
-      self.darkcolors = colors.darken_div(clrs)
-      self.topimg = top
-
-      self.rect = self.image.get_rect()
-      self.rect.top = self.topimg
-      self.rect.centerx = 320
-      
-  def addlyric(self, time, lyric):
-    newlyric = ' '
-    for i in lyric:
-      newlyric += i + ' '
-    self.lyrics.append(newlyric)
-    self.times.append(time)
-
-    image1 = FONTS[32].render(newlyric,1,self.darkcolors)
-    image2 = FONTS[32].render(newlyric,1,self.colors)
-    rimage = pygame.Surface(image1.get_size(), 0, 16)
-    rimage.fill((64,64,64))
-    rimage.blit(image1,(-2,-2))
-    rimage.blit(image1,(2,2))
-    rimage.blit(image2,(0,0))
-    rimage.set_colorkey(rimage.get_at((0,0)))
-    image = rimage.convert()
-
-    self.prender.append(image)
-#    print "kludge addlyric:", newlyric, " at", time, " length",len(newlyric)
-    
-  def update(self, curtime):
-    self.currentlyric = -1
-    timediff = curtime - self.lasttime
-    for i in self.times:
-      if curtime >= i:
-#        print "curtime", curtime, "  i", i, "   index", self.times.index(i)
-        self.currentlyric = self.times.index(i)
-        self.lasttime = i
-
-    if self.currentlyric != self.oldlyric:
-      self.image = self.prender[self.currentlyric]
-      self.rect = self.image.get_rect()
-      self.rect.top = self.topimg
-      self.rect.centerx = 320
-    
-    if (self.currentlyric > -1):
-      holdtime = (len(self.lyrics[self.currentlyric])*0.045)
-      alp = 255
-      if timediff > holdtime:
-        alp = 255-(255*(timediff-holdtime))
-        if alp < 0:
-          alp = 0
-      if alp != self.oldalp:
-        alp = int(alp)
-        self.image.set_alpha(alp)
-        self.oldalp = alp
-
-    self.oldlyric = self.currentlyric
-      
 class fpsDisp(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
@@ -744,318 +646,6 @@ class TimeDisp(pygame.sprite.Sprite):
         self.blahmod = 0
       else:
         self.blahmod += 1
-
-class Song:
-  def __init__ (self, fn, path=None):
-    # note that I'm only copying DIFFICULTIES because it's the right size..
-    self.fn = fn
-    self.modes = modes = MODES.copy()
-    self.modelist = []
-    self.modediff = {}
-    self.modeinfo = {}
-    self.modeinfodict = {}
-    if path is None:
-      path = os.path.dirname(fn)
-    self.path = path
-    for key in MODELIST: modes[key]=DIFFICULTIES.copy()
-    curTime = 0.0
-    curBPM = 0.0
-    self.length = 0.0
-    self.offset = 0.0
-    self.isValid = 0
-    self.crapout = 0
-    self.startsec = 0.0
-    self.endsec = -1.0
-    self.bpm = 146.0
-    self.lastbpmchangetime = [[0.0,self.bpm]]
-    self.bgfile = ' '
-    self.file = None
-    self.moviefile = ' '
-    self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
-    self.mixerclock = mainconfig['mixerclock']
-    self.lyricdisplay = LyricDispKludge(400,
-                                        colors.color[mainconfig['lyriccolor']])
-    self.transdisplay = LyricDispKludge(428,
-                                        colors.color[mainconfig['transcolor']])
-    little = mainconfig["little"]
-    coloringmod = 0
-    self.totarrows = {}
-    self.holdinfo = []
-    self.holdref = []
-    for i in DIFFICULTYLIST:
-      self.holdinfo.append(None)
-      self.holdref.append(None)
-    numholds = 1
-    holdlist = []
-    releaselist = []
-    holdtimes = []
-    releasetimes = []
-    holding = [0,0,0,0]
-    chompNext = None
-    difficulty = None
-    for fileline in open(fn).readlines():
-      fileline = fileline.strip()
-      if fileline == '' or fileline[0] == '#': continue
-      fsplit = fileline.split()
-      firstword = fsplit[0]
-      if len(fsplit)>1:                nextword, rest = fsplit[1], fsplit[1:]
-      else:                            nextword, rest = None, None
-      if chompNext is not None:
-        if len(chompNext) == 1:
-          # look for the DIFFICULTY keyword, we already know which MODE
-          modeDict, = chompNext
-          curTime = float(self.offset)
-          curBPM = self.bpm
-          difficulty = firstword
-          self.totarrows[difficulty] = 0
-          modeDict[difficulty] = SongEvent(when=curTime,bpm=curBPM,extra=int(rest[0]))
-          chompNext = modeDict,modeDict[difficulty]
-        elif len(chompNext) == 2:
-          modeDict, tail = chompNext
-          if firstword == 'end':
-            # mark the end of the song
-            if self.length < curTime + toRealTime(curBPM,BEATS['halfn']):
-              self.length = curTime + toRealTime(curBPM,BEATS['halfn'])
-
-            # reset the colormask to the first one          
-            coloringmod = 0
-
-            # append the hold info for this mode
-            if difficulty:
-              self.holdinfo[DIFFICULTYLIST.index(difficulty)] = zip(holdlist,holdtimes,releasetimes)
-              self.holdref[DIFFICULTYLIST.index(difficulty)] = zip(holdlist,holdtimes)
-
-            # reset all the hold arrow stuff and operate on next mode
-            holdlist = []
-            releaselist = []
-            holdtimes = []
-            releasetimes = []
-            holding = [0,0,0,0]
-            numholds = 1
-            
-            chompNext = None
-          elif firstword == 'atsec':
-            curTime = float(nextword)
-            tail.next = SongEvent(when=curTime,bpm=curBPM,extra='ATSEC')
-            chompNext = modeDict, tail.next
-          elif firstword == 'waits':
-            curTime += float(nextword)
-            tail.next = SongEvent(when=curTime,bpm=curBPM,extra='WAITS')
-            chompNext = modeDict, tail.next
-          elif firstword == 'ready':     
-            tail.next = SongEvent(when=curTime,bpm=curBPM,extra='READY')
-            coloringmod = 0
-            chompNext = modeDict, tail.next
-          elif firstword in BEATS.keys():
-            cando = 1
-            # make sure that this arrow is allowed in the current mode
-            if (little==1) and (coloringmod%4==1):    cando = 0
-            if (little==1) and (coloringmod%4==3):    cando = 0
-            if (little==2) and (coloringmod%4==2):    cando = 0
-            if (little==3) and (coloringmod%4==1):    cando = 0
-            if (little==3) and (coloringmod%4==2):    cando = 0
-            if (little==3) and (coloringmod%4==3):    cando = 0
-            # make sure that we're not creating an arrow event with no arrows
-            arrtotal = 0
-            for i in rest:
-              arrtotal += int(i)
-            # create it
-            if cando and arrtotal:
-              feetstep = map(lambda x: int(x,16),rest)
-
-              arrowcount = 0                             # keep track of the total arrows that will be hit at curtime
-              for checkforjumps in range(4):             # guess what this function does
-                  if (feetstep[checkforjumps] & 8):
-                      if arrowcount and mainconfig['badknees'] and (holding[checkforjumps] == 0):
-                          feetstep[checkforjumps] = 0    #don't xor, there could be a jump-hold
-                      arrowcount += 1
-              for checkforholds in range(4):             # guess what this function does
-                  didnothold = 1
-                  if (feetstep[checkforholds] & 128) and (holding[checkforholds] == 0):
-                      holdtimes.insert(numholds,curTime)
-                      holdlist.insert(numholds,checkforholds)
-                      numholds += 1
-                      holding[checkforholds] = numholds-1  # set the holding status to what's being held
-                      didnothold = 0
-                  elif ((feetstep[checkforholds] & 128) or (feetstep[checkforholds] & 8)) and holding[checkforholds] and didnothold:
-                      releasetimes.insert(holding[checkforholds],curTime)
-                      releaselist.insert(holding[checkforholds],checkforholds)
-                      feetstep[checkforholds] = 0       # drop the whole event in the event of a broken stepfile
-                      holding[checkforholds] = 0
-              tail.next = SongEvent(when=curTime,
-                                    bpm=curBPM,
-                                    feet=feetstep,
-                                    extra=firstword,
-                                    color=(coloringmod%4))
-              for arrowadder in feetstep:
-                if arrowadder & 8:
-                  self.totarrows[difficulty] += 1
-              chompNext = modeDict, tail.next
-            curTime += toRealTime(curBPM,BEATS[firstword])
-            coloringmod += BEATS[firstword]
-          elif firstword == 'delay':
-            curTime += toRealTime(curBPM,BEATS['qurtr']*float(nextword))
-            coloringmod += (4*float(nextword))
-            tail.next = SongEvent(when=curTime,bpm=curBPM,extra="DELAY")
-            chompNext = modeDict, tail.next
-          elif firstword == 'chbpm':
-            curBPM = float(nextword)
-            tail.next = SongEvent(when=curTime,bpm=curBPM,extra="CHBPM")
-            chompNext = modeDict, tail.next
-          elif firstword == 'tstop':
-            tail.next = SongEvent(when=curTime,bpm=float(nextword),extra="TSTOP")
-            curTime += float(nextword)/1000
-            print "found total stop at",curTime
-            chompNext = modeDict, tail.next
-          elif firstword == 'lyric':
-             self.lyricdisplay.addlyric(curTime-0.4,rest)
-             tail.next = SongEvent(when=curTime,bpm=curBPM,extra=('LYRIC',rest))
-             chompNext = None,tail.next
-          elif firstword == 'trans':
-             self.transdisplay.addlyric(curTime-0.4,rest)
-             tail.next = SongEvent(when=curTime,bpm=curBPM,extra=('TRANS',rest))
-             chompNext = None,tail.next
-      elif firstword == 'LYRICS':
-        curTime = 0.0
-        curBPM = self.bpm
-        difficulty = None
-        self.lyrics = SongEvent(when=curTime,bpm=curBPM)
-        chompNext = None,self.lyrics
-      elif firstword == 'song':        self.song = " ".join(rest)
-      elif firstword == 'group':       self.group = " ".join(rest)
-      elif firstword == 'bpm':
-        self.bpm = float(nextword) 
-        if mainconfig['onboardaudio']:
-          self.bpm = self.bpm * float(48000/44128.0)
-        self.playingbpm = self.bpm
-      elif firstword in modes.keys():  chompNext=(modes[firstword],)
-      elif firstword == 'file':        self.file = " ".join(rest)
-      elif firstword == 'bg':
-        self.bgfile = os.path.join(os.path.split(fn)[0], " ".join(rest))
-      elif firstword == 'movie':
-        self.moviefile = os.path.join(os.path.split(fn)[0], " ".join(rest))
-      elif firstword == 'startat':     self.startsec = float(nextword)
-      elif firstword == 'endat':       self.endsec = float(nextword)
-      elif firstword == 'offset':      
-        self.offset = float(-int(nextword)-mainconfig['masteroffset'])/1000.0
-        if mainconfig['onboardaudio']:
-          self.offset = self.offset * float(48000/44128.0)
-      elif firstword == 'version':     self.version = float(nextword)
-    for mkey,mval in modes.items():
-      if mval is not None:
-        for dkey,dval in mval.items():
-          if dval is None: del(mval[dkey])
-        if len(mval.keys()) == 0: mval = None
-      if mval is None: del(modes[key])
-    if len(modes.keys()): 
-      print repr(self)
-    self.isValid=1
-    # setup lists to make it easy and in order for the osong selector
-    self.modelist = filter(lambda m,modes=modes: modes.has_key(m), MODELIST)
-
-    if path is None:
-      self.path = os.path.dirname(fn)
-
-    if self.file is None:
-      self.file = string.join(fn[len(self.path)+1:-5].split("/")[-1:],"")
-      for ext in [".ogg",".mp3",".wav",".mid"]:
-        if os.path.isfile(os.path.join(self.path,self.file+ext)):
-          self.file = self.file+ext
-
-    self.osfile=os.path.join(self.path,self.file)
-
-    for m in self.modelist:
-      # get filtered list of difficulties in proper order
-      self.modediff[m] = filter(lambda d,diffs=modes[m]: diffs.has_key(d), DIFFICULTYLIST)
-      tmp = []
-      # head of every difficulty list is just difficulty info, get info and discard head
-      for d in self.modediff[m]:
-        tmp.append(modes[m][d].extra)
-        modes[m][d] = modes[m][d].next
-      # zip together the difficulties and their "hardness" for easy usage
-      self.modeinfo[m] = zip(self.modediff[m],tmp)
-      self.modeinfodict[m] = dict(self.modeinfo[m])
-
-  def init(self):
-    try:
-      pygame.mixer.music.load(self.osfile)
-    except pygame.error:
-      print "Not a supported filetype"
-      self.crapout = 1
-    if self.startsec > 0.0:
-      print "Skipping %f seconds" % self.startsec
-
-  def play(self,mode,difficulty,actuallyplay):
-    try:
-      if self.crapout == 0 and actuallyplay:
-        pygame.mixer.music.play(0, self.startsec)
-    except TypeError:
-      print "Sorry, pyDDR needs a more up to date Pygame or SDL than you have."
-      sys.exit(1)
-
-    self.curtime = 0.0
-    self.tickstart = pygame.time.get_ticks()
-    self.head = self.fhead = self.modes[mode][difficulty]
-
-  def kill(self):
-#    self.ss.stop()
-    pygame.mixer.music.stop()
-
-  def get_time(self):
-    if self.mixerclock:
-      self.curtime = float(pygame.mixer.music.get_pos())/1000.0 # -self.tickstart causes desync
-    else:
-      self.curtime = float(pygame.time.get_ticks() - self.tickstart)/1000.0
-    return self.curtime
-
-  def get_events(self):
-    events,nevents = [],[]
-    time = self.get_time()
-    end = self.endsec
-    head = self.head
-    fhead = self.fhead
-    arrowtime = None
-    bpm = None
-    events_append,nevents_append = events.append,nevents.append
-    while (head and head.when <= (time + 2*toRealTime(head.bpm, 1))):
-#    while (head and head.when <= (time + 2*toRealTime(self.playingbpm, 1))):
-      events_append(head)
-      head=head.next
-    self.head = head
-
-    if (time>=end and end>0):
-      self.kill()
-      return None
-    elif not pygame.mixer.music.get_busy():
-      self.kill()
-#      print "not busy"
-      return None
-    
-    if head and fhead:
-      bpm = self.playingbpm
-      arrowtime = 512.0/bpm
-      ntime = time + (arrowtime*1.5)
-      while (fhead and fhead.when <= ntime):
-        self.playingbpm = fhead.bpm
-        nevents_append(fhead)
-        fhead=fhead.next
-      self.fhead=fhead
-    return events,nevents,time,bpm
-
-  def isOver(self):
-    if (not pygame.mixer.music.get_busy()) or (self.endtime>0 and self.curtime>=self.endtime):
-      return 1
-    return 0
-  
-  def __nonzero__ (self):
-    return self.isValid
-    
-  def __repr__ (self):
-    return '<song song=%r group=%r bpm=%s file=%r>'%(self.song,self.group,repr(self.bpm)[:7],self.file)
-
-#  def __getattr__ (self,attr):
-#    # act like a pygame.movie instance
-#    return getattr(self.ss,attr)
 
 # Search the directory specified by path recursively for files that match
 # the shell wildcard pattern. A list of all matching file names is returned,
@@ -1403,20 +993,6 @@ def main():
     else:
       difficulty = ['BASIC']
 
-  SetDisplayMode(mainconfig)
-  
-  pygame.display.set_caption('pyDDR')
-  pygame.mouse.set_visible(0)
-
-  pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
-  try:
-    pygame.mixer.music.play(4, 0.0)
-  except TypeError:
-    print "Sorry, pyDDR needs a more up to date Pygame or SDL than you have."
-    sys.exit()
-
-  background = BlankSprite(screen.get_size())
-
   if debugmode:
     print "Entering debug mode. Not loading the song list."
     totalsongs = 1
@@ -1430,6 +1006,20 @@ def main():
   totalsongs = len(fileList)
   parsedsongs = 0
   songs = []
+
+  SetDisplayMode(mainconfig)
+  
+  pygame.display.set_caption('pyDDR')
+  pygame.mouse.set_visible(0)
+
+  pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
+  try:
+    pygame.mixer.music.play(4, 0.0)
+  except TypeError:
+    print "Sorry, pyDDR needs a more up to date Pygame or SDL than you have."
+    sys.exit()
+
+  background = BlankSprite(screen.get_size())
 
   pbar = fontfx.TextProgress(FONTS[60], "Found " + str(totalsongs) +
                              " files. Loading...", colors.WHITE, colors.BLACK)
@@ -1445,8 +1035,6 @@ def main():
 
   ev = event.poll()
   while ev[1] != E_PASS: ev = event.poll()
-
-  difWrap = 2*len(DIFFICULTIES)
 
   if len(songs) < 1:
     print "You don't have any songs, and you need one. Go here: http://icculus.org/pyddr/"
@@ -1542,19 +1130,23 @@ def playSequence(numplayers, playlist):
 
   players = []
   for playerID in range(numplayers):
-    plr = Player(playerID, ARROWPOS, HoldJudgeDisp(ARROWPOS,playerID), ComboDisp(playerID), DIFFICULTYLIST)
+    plr = Player(playerID, ARROWPOS, HoldJudgeDisp(ARROWPOS,playerID), ComboDisp(playerID))
     players.append(plr)
     
   for songfn, diff in playlist:
-    current_song = Song(songfn)
+    current_song = fileparsers.SongItem(songfn)
     pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
 #    screen.fill(colors.BLACK)
+    songdata = steps.SongData(current_song)
 
-    for pid in range(len(players)):
-      players[pid].set_song(copy.copy(current_song), diff[pid], Judge)
+    for pid in range(len(players)): #FIXME new lyrics system
+      players[pid].set_song(steps.Steps(current_song, diff[pid],
+                                        lyrics = songdata.lyricdisplay,
+                                        trans = songdata.transdisplay), Judge)
 
-    if dance(current_song, players, ARROWPOS, prevscr): break # Failed
+    if dance(songdata, players, ARROWPOS, prevscr):
+      break # Failed
 
   judges = [player.judge for player in players]
 
@@ -1593,25 +1185,17 @@ def dance(song, players, ARROWPOS, prevscr):
   # dancer group
   #dgroup = RenderLayered()
 
-  if song.moviefile != ' ':
-    backmovie = BGmovie(song.moviefile)
+  if song.movie != None:
+    backmovie = BGmovie(song.movie)
     backmovie.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
   else:
     backmovie = BGmovie(None)
     
-  if song.bgfile != ' ':
-    backimage = BGimage(song.bgfile)
-  else:
-    try:
-      bifn = song.fn[:-5] + '-bg.png'
-      backimage = BGimage(bifn)
-    except pygame.error:
-      bifn = os.path.join(image_path, 'bg.png')
-      backimage = BGimage(os.path.join(image_path, 'bg.png'))
+  backimage = BGimage(song.background)
 
   if mainconfig['showbackground'] > 0:
     if backmovie.filename == None:
-      bgkludge = pygame.image.load(bifn).convert()
+      bgkludge = pygame.image.load(song.background).convert()
       bgkrect = bgkludge.get_rect()
       if (bgkrect.size[0] == 320) and (bgkrect.size[1] == 240):
         bgkludge = pygame.transform.scale2x(bgkludge)
@@ -1671,8 +1255,8 @@ def dance(song, players, ARROWPOS, prevscr):
   bg = pygame.Surface(screen.get_size())
   bg.fill((0,0,0))
 
-  songtext = zztext(song.song,480,12)
-  grptext = zztext(song.group,160,12)
+  songtext = zztext(song.title, 480,12)
+  grptext = zztext(song.artist, 160,12)
 
   songtext.zin()
   grptext.zin()
@@ -1684,7 +1268,7 @@ def dance(song, players, ARROWPOS, prevscr):
   screenshot=0
 
   song.init()
-  
+
   if song.crapout != 0:
     font = None
     text = None
@@ -1738,6 +1322,7 @@ def dance(song, players, ARROWPOS, prevscr):
     extbox = Blinky(song.bpm)
     extbox.add(tgroup)
 
+  song.play()
   for plr in players:
     plr.start_song()
     for arrowID in DIRECTIONS:
@@ -1746,9 +1331,6 @@ def dance(song, players, ARROWPOS, prevscr):
       if mainconfig['showtoparrows']:
         plr.toparr[arrowID].add(sgroup)
       
-  oldbpm = song.playingbpm
-  bpmchanged = 0
-  
   while 1:
     if mainconfig['autofail']:
       songFailed = True
@@ -1761,13 +1343,9 @@ def dance(song, players, ARROWPOS, prevscr):
 
     for plr in players: plr.get_next_events()
 
-    if players[0].evt is None:
-      if song.isOver():
-        break
-    else:
-      # we need the current time for a few things, and it should be the same for all players
-      curtime = players[0].evt[2]
-    
+    if song.is_over(): break
+    else: curtime = pygame.mixer.music.get_pos()/1000.0
+
     key = []
 
     ev = event.poll()
@@ -1802,7 +1380,7 @@ def dance(song, players, ARROWPOS, prevscr):
       playerID = keyAction[0]
       if playerID < len(players):
         keyPress = keyAction[1]
-        players[playerID].toparr[keyPress].stepped(1, curtime+(song.offset*1000))
+        players[playerID].toparr[keyPress].stepped(1, curtime+(players[playerID].steps.offset*1000))
         players[playerID].fx_data.append(players[playerID].judge.handle_key(keyPress, curtime) )
 
     # This maps the old holdkey system to the new event ID one
@@ -1822,7 +1400,7 @@ def dance(song, players, ARROWPOS, prevscr):
           else:
             plr.judge.botchedhold(currenthold)
             plr.holdtext.fillin(curtime, dirID, "NG")
-            botchdir, timef1, timef2 = song.holdinfo[diffnum][currenthold]
+            botchdir, timef1, timef2 = plr.steps.holdinfo[currenthold]
             for spr in plr.arrow_group.sprites():
               try:
                 if (spr.timef1 == timef1) and (DIRECTIONS.index(spr.dir) == dirID): spr.broken = 1
@@ -1840,7 +1418,7 @@ def dance(song, players, ARROWPOS, prevscr):
         for ev in events:
           #print "current event: %r"%ev
           if ev.extra == 'CHBPM':
-            if (bpm != plr.judge.getbpm()):
+            if (ev.bpm != plr.judge.getbpm()):
               plr.judge.changingbpm(ev.bpm)
           elif ev.extra == 'TSTOP' and plr.pid == 0:
             # FIXME only pause for the first player
@@ -1853,7 +1431,7 @@ def dance(song, players, ARROWPOS, prevscr):
         for ev in nevents:
           #print "future event: %r"%ev
           if ev.extra == 'CHBPM' and plr.pid == 0:
-            song.lastbpmchangetime.append([ev.when,ev.bpm])
+            plr.steps.lastbpmchangetime.append([ev.when,ev.bpm])
             print [ev.when,ev.bpm], "was added to the bpm changelist"
           
           if ev.feet:
@@ -1863,24 +1441,21 @@ def dance(song, players, ARROWPOS, prevscr):
                   ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
 
               if num & 128:
-                diffnum = DIFFICULTYLIST.index(plr.difficulty)
-                holdindex = song.holdref[diffnum].index((DIRECTIONS.index(dir),ev.when))
-                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
-          
-    if len(song.lastbpmchangetime) > 1:
-      if (curtime >= song.lastbpmchangetime[1][0]):
-        nbpm = song.lastbpmchangetime[1][1]
-        for plr in players:  plr.change_bpm(nbpm)
-        print "BPM changed from", oldbpm, "to", nbpm
-        print "Last changed BPM at", song.lastbpmchangetime
-        oldbpm = nbpm
-        song.lastbpmchangetime.pop(0)
-        bpmchanged = 0
+                holdindex = plr.steps.holdref.index((DIRECTIONS.index(dir),ev.when))
+                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, plr.steps.holdinfo[holdindex], ev.bpm, plr.steps.lastbpmchangetime[0], plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
+
+    for plr in players:
+      if len(plr.steps.lastbpmchangetime) > 1:
+        if (curtime >= plr.steps.lastbpmchangetime[1][0]):
+          nbpm = plr.steps.lastbpmchangetime[1][1]
+          for plr in players:  plr.change_bpm(nbpm)
+          print "Last changed BPM at", plr.steps.lastbpmchangetime
+          plr.steps.lastbpmchangetime.pop(0)
      
     for plr in players: plr.check_sprites(curtime)
 
     if(mainconfig['strobe']):
-      extbox.update(curtime+(song.offset*1000.0))
+      extbox.update(curtime+(players[0].steps.offset*1000.0))
     
     song.lyricdisplay.update(curtime)
     song.transdisplay.update(curtime)
@@ -1941,7 +1516,7 @@ def dance(song, players, ARROWPOS, prevscr):
       #dgroup.clear(screen,background.image)
       sgroup.clear(screen,background.image)
 
-    if (curtime > song.length - 1) and (songtext.zdir == 0) and (songtext.zoom > 0):
+    if (curtime > players[0].steps.length - 1) and (songtext.zdir == 0) and (songtext.zoom > 0):
       songtext.zout()
       grptext.zout()
 

@@ -169,7 +169,7 @@ class ArrowFX(pygame.sprite.Sprite):
           scale = 1.54
         else:
           scale = 1.0 + (steptimediff * 4.0) * (1.0+(combo/256.0))
-        newsize = [int(x*scale) for x in self.image.get_size()]
+        newsize = [max(0, int(x*scale)) for x in self.image.get_size()]
         self.image = pygame.transform.scale(self.image, newsize)
       if self.rotating:
         angle = steptimediff * 230.0 * self.direction

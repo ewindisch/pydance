@@ -68,7 +68,8 @@ class StepFile:
     dir, name = os.path.split(filename)
 
     for t in (("banner", ".png"), ("banner", "-full.png"),
-              ("bg", "-bg.png"), ("file", ".ogg"), ("file", ".mp3")):
+              ("bg", "-bg.png"), ("file", ".ogg"), ("file", ".mp3"),
+              ("movie", ".mpg")):
       if self.info.has_key(t[0]):
         if not os.path.isfile(self.info[t[0]]):
           self.info[t[0]] = os.path.join(dir, self.info[t[0]])

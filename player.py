@@ -4,7 +4,7 @@ from gfxtheme import GFXTheme
 import fontfx, spritelib, colors
 
 class Player:
-  def __init__(self, pid, POS, holdtext, combos, difflist, mode = "SINGLE"):
+  def __init__(self, pid, POS, holdtext, combos, mode = "SINGLE"):
     self.theme = GFXTheme(mainconfig["gfxtheme"])
     self.pos = POS
     self.pid = pid
@@ -20,30 +20,30 @@ class Player:
     self.tempholding = [-1, -1, -1, -1]
     self.combos = combos
     self.judge = None
-    self.song = None
+    self.steps = None
     self.holds = None
     self.evt = None
     self.mode = mode
-    self.difficultylist = difflist
 
     self.sudden = mainconfig['sudden']
     self.hidden = mainconfig['hidden']
 
-  def set_song(self, song, diff, Judge): # FIXME factor these out
-    self.song = song
-    arr, arrfx = self.theme.toparrows(self.song.bpm, self.pos['top'], self.pid)
+  def set_song(self, steps, Judge): # FIXME factor these out
+    self.steps = steps
+    arr, arrfx = self.theme.toparrows(self.steps.bpm, self.pos['top'],
+                                      self.pid)
     self.toparr = arr
     self.toparrfx = arrfx
     self.judging_list = []
-    self.difficulty = diff
-    self.score.set_text(diff)
-    difflist = self.song.modediff[self.mode]
-    holds = self.song.holdref[self.difficultylist.index(self.difficulty)]
+    self.difficulty = steps.difficulty
+    self.score.set_text(steps.difficulty)
+    
+    holds = self.steps.holdref
     if holds: self.holds = len(holds)
     else: self.holds = 0
-    j = Judge(self.song.bpm, self.holds,
-              self.song.modeinfo[self.mode][difflist.index(self.difficulty)][1],
-              self.song.totarrows[self.difficulty],
+    j = Judge(self.steps.bpm, self.holds,
+              self.steps.feet,
+              self.steps.totalarrows,
               self.difficulty,
               self.lifebar)
     self.lifebar.next_song()
@@ -51,10 +51,10 @@ class Player:
     self.judge = j
 
   def start_song(self):
-    self.song.play(self.mode, self.difficulty, self.pid == 0)
+    self.steps.play()
 
   def get_next_events(self):
-    self.evt = self.song.get_events()
+    self.evt = self.steps.get_events()
     self.fx_data = []
 
   def change_bpm(self, newbpm):
@@ -87,17 +87,17 @@ class Player:
         self.toparrfx[dir].stepped(curtime, text)
 
     for spr in self.arrow_group.sprites():
-      spr.update(curtime, self.judge.getbpm(), self.song.lastbpmchangetime,
+      spr.update(curtime, self.judge.getbpm(), self.steps.lastbpmchangetime,
                  self.hidden, self.sudden)
     for d in DIRECTIONS:
-      self.toparr[d].update(curtime + self.song.offset * 1000)
+      self.toparr[d].update(curtime + self.steps.offset * 1000)
       self.toparrfx[d].update(curtime, self.judge.combo)
 
   def should_hold(self, direction, curtime):
-    l = self.song.holdinfo[self.difficultylist.index(self.difficulty)]
+    l = self.steps.holdinfo
     for i in range(len(l)):
       if l[i][0] == DIRECTIONS.index(direction):
-        if ((curtime - 15.0/self.song.playingbpm > l[i][1])
+        if ((curtime - 15.0/self.steps.playingbpm > l[i][1])
             and (curtime < l[i][2])):
           return i
 

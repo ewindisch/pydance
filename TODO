@@ -3,11 +3,11 @@ Bug Fixes
  - Support A2B8 pads, if they don't work.
 
 UI Fixes & Improvements
- - In-game help (menu context help, mostly).
- - Go faster after scrolling through a few songs
+ - In-game help (menu context help, mostly)
+ - Go faster after scrolling through a few songs (not necessary w/ new code?)
  - Up/down indicators on menus
  - Menu and song select theming (including new songselect.pys)
- - Make quitting from the menus more difficult?
+ - Make quitting from the menus more difficult (make esc not exit last menu)
  - Per player themes
  - "Ready? Go!" screen
 
