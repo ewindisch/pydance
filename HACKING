@@ -6,12 +6,12 @@ Basic Design Philosophies
 -------------------------
 Everything should be strongly object-oriented. Code and data should be
 moved as much as possible into common parent classes. We should not
-sacrifice code clarity for speed.
+sacrifice code clarity for speed except in extreme cases.
 
 Overview of Program Flow
 ------------------------
 First pydance.py is started. constants.py is imported, and constants and
-some top-level variables are defined, such as 'event' the event handler
+some top-level variables are defined, such as the event handlers
 and the configuration files.
 
 From there pydance.py loads all files it finds it finds in the 'songdir'
@@ -42,7 +42,7 @@ configuration file out and then exits the program.
 Naming Conventions
 ------------------
 Class names LookLikeThis. Local variables and functions look_like_this,
-although short ones may for convenience looklikethis.
+although short ones may for convenience looklikethis, or llt.
 
 Exceptions are to be used for exceptional circumstances only. They
 should not be used where an 'if' condition would suffice.
@@ -50,8 +50,8 @@ should not be used where an 'if' condition would suffice.
 Class names should begin with Abstract iff they are not to be instantiated,
 but are to provide functionality for subclasses.
 
-Private functions and variables should begin with _, if the object is
-to be exposed anywhere (SongSelect, for example, is not).
+Private functions and variables should begin with _. Variables that
+begin with _ must be private.
 
 Use GvR's tuple/list distinction rather than the immutable vs. mutable one.
 This means sequences with different types in them should be tuples, and
