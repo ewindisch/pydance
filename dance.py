@@ -308,6 +308,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
   autofail = mainconfig['autofail']
 
+  pad.empty()
   while 1:
     if autofail:
       songFailed = True
@@ -335,7 +336,8 @@ def dance(screen, song, players, prevscr, ready_go, game):
         pass
 
     while ev[1] != pad.PASS:
-      if ev[1] == pad.QUIT: break
+      if ev[1] == pad.QUIT:
+        break
       elif ev[1] == pad.LEFT: key.append((ev[0], 'l'))
       elif ev[1] == pad.DOWNLEFT: key.append((ev[0], 'w'))
       elif ev[1] == pad.UPLEFT: key.append((ev[0], 'k'))

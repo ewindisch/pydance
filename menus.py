@@ -179,6 +179,7 @@ class Menu(object):
       elif ev != ui.PASS and ev != ui.QUIT:
         if ev == ui.START: Menu.click_sound.play()
         ev = self.items[curitem].activate(ev)
+        ui.ui.clear()
         changed = True
 
       toprotater.iterate()

@@ -170,6 +170,7 @@ class GradingScreen(object):
     return 1
     
   def make_waitscreen(self, screen):
+    ui.ui.clear()
     idir = -4
     i = 192
     screenshot = 0

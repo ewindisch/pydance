@@ -1,5 +1,5 @@
 import os, random, pygame
-from math import sin
+from math import sin, cos
 
 from constants import *
 

@@ -125,7 +125,7 @@ class Endless(object):
         audio.load(os.path.join(sound_path, "menu.ogg"))
         audio.play(4, 0.0)
 
-        while ev[1] != ui.PASS: ev = ui.ui.poll()
+        ui.ui.clear()
 
       if ev[1] == ui.SELECT:
         optionscreen.game_opt_driver(screen, self.game_config)

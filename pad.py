@@ -177,7 +177,7 @@ class Pad(object):
   # Otherwise, return pass.
   def poll(self, passthrough = False):
     ev = self.handler.poll()
-    t = ''
+    t = -1
     v = 0
     if ev.type == JOYBUTTONDOWN or ev.type == JOYBUTTONUP:
       t, v = ev.joy, ev.button
@@ -199,11 +199,11 @@ class Pad(object):
 
     ret = self.events.get((t, v), default)
 
-    if ev.type == JOYBUTTONUP or ev.type == KEYUP and ret[0] != -2:
-      self.states[ret] = False
+    if ev.type == JOYBUTTONUP or ev.type == KEYUP:
+      if ret[0] != -2: self.states[ret] = False
       ret = (ret[0], -ret[1])
-    elif ev.type == JOYBUTTONDOWN or ev.type == KEYDOWN and ret[0] != -2:
-      self.states[ret] = True
+    elif ev.type == JOYBUTTONDOWN or ev.type == KEYDOWN:
+      if ret[0] != -2: self.states[ret] = True
 
     return ret
 
@@ -215,8 +215,8 @@ class Pad(object):
     return ev
 
   def empty(self):
-    ev = (0, E_QUIT)
-    while ev[1] != E_PASS: ev = self.poll()
+    ev = (0, QUIT)
+    while ev[1] != PASS: ev = self.poll()
 
   def write(self, fn):
     pickle.dump(self.events, file(fn, "w"))
@@ -256,8 +256,10 @@ class PadConfig(object):
 
   def map_key(self):
     dir = self.loc[1] + 2
-    keyb = self.loc[0] % 2 == 0
-    pid = self.loc[0] > 1
+    if self.loc[0] % 2 == 0: keyb = True
+    else: keyb = False
+    if self.loc[0] > 1: pid = 1
+    else: pid = 0
 
     if keyb:
       wanted_type = KEYDOWN

@@ -83,6 +83,8 @@ class UI(object):
     ev = (0, QUIT)
     while ev[1] != PASS: ev = self.poll()
 
-  def set_repeat(*args): pass
+  def clear(self):
+    self.empty()
+    for k in self.states: self.states[k] = False
 
 ui = UI(pad.pad)
