@@ -1981,13 +1981,13 @@ class ArrowSprite(CloneSprite):
     if mainconfig['assist']:
       self.playedsound = None
       if self.dir == 'u':
-        self.sample = pygame.mixer.Sound("assist-u.wav")
+        self.sample = pygame.mixer.Sound(os.path.join("sound", "assist-u.wav"))
       elif self.dir == 'd':
-        self.sample = pygame.mixer.Sound("assist-d.wav")
+        self.sample = pygame.mixer.Sound(os.path.join("sound", "assist-d.wav"))
       elif self.dir == 'l':
-        self.sample = pygame.mixer.Sound("assist-l.wav")
+        self.sample = pygame.mixer.Sound(os.path.join("sound", "assist-l.wav"))
       elif self.dir == 'r':
-        self.sample = pygame.mixer.Sound("assist-r.wav")
+        self.sample = pygame.mixer.Sound(os.path.join("sound", "assist-r.wav"))
     else:
       self.playedsound = 1
     self.r = 0
@@ -2678,7 +2678,7 @@ def main():
       update_screen = update_display_hardware
   #else it defaults to software update rect
 
-  pygame.mixer.music.load("menu.ogg")
+  pygame.mixer.music.load(os.path.join("sound", "menu.ogg"))
   try:
     pygame.mixer.music.play(4, 0.0)
   except TypeError:
@@ -3230,9 +3230,10 @@ def domenu(songs):
     pygame.time.wait(10)
 
 def blatantplug():
-  xiphlogo = pygame.image.load("xifish.png").convert()
-  pygamelogo = pygame.image.load("pygamelogo.png").convert()
-  oddlogo = pygame.image.load("oddlogos.png").convert()
+  xiphlogo = pygame.image.load(os.path.join("images", "xifish.png")).convert()
+  pygamelogo = pygame.image.load(os.path.join("images",
+                                              "pygamelogo.png")).convert()
+  oddlogo = pygame.image.load(os.path.join("images", "oddlogos.png")).convert()
   xiphlogo.set_colorkey(xiphlogo.get_at((0,0)))
   pygamelogo.set_colorkey(pygamelogo.get_at((0,0)))
   oddlogo.set_colorkey(oddlogo.get_at((0,0)))
@@ -3247,7 +3248,7 @@ def blatantplug():
   pygamelogorect.centerx = 320;  pygamelogorect.centery = 256
   xiphlogorect.centerx = 320;  xiphlogorect.centery = 384
     
-  pygame.mixer.music.load("menu.ogg")
+  pygame.mixer.music.load(os.path.join("sound", "menu.ogg"))
   pygame.mixer.music.play(0,14.75)
   pygame.mixer.music.set_volume(0)
   
@@ -3399,7 +3400,7 @@ def songSelect(songs, players):
         pygame.mixer.music.set_volume(0)
         pygame.mixer.music.stop()
     else:
-      pygame.mixer.music.load("menu.ogg")
+      pygame.mixer.music.load(os.path.join("sound", "menu.ogg"))
       try:
         pygame.mixer.music.play(4, 0.0)
       except TypeError:
@@ -3411,7 +3412,7 @@ def songSelect(songs, players):
       pygame.mixer.music.fadeout(1000)
       pygame.time.delay(1000)
       pygame.mixer.music.stop()
-      pygame.mixer.music.load("menu.ogg")
+      pygame.mixer.music.load(os.path.join("sound", "menu.ogg"))
       pygame.mixer.music.play(4, 0.0)
       pygame.mixer.music.set_volume(1.0)
       fooblah = currentSong.fooblah
@@ -3639,7 +3640,7 @@ def songSelect(songs, players):
       if helptime+4000 < pygame.time.get_ticks():
         helptime = pygame.time.get_ticks()
         oldhelp = CloneSprite(curhelp)
-        curhelp = CloneSprite(pygame.image.load(os.path.join("menuhelp",helpfiles[0])).convert())
+        curhelp = CloneSprite(pygame.image.load(os.path.join("images",helpfiles[0])).convert())
         helpfiles.append(helpfiles.pop(0))
         curhelp.rect.left = 128
         curhelp.rect.top = 400
