@@ -79,7 +79,7 @@ class TimeJudge(AbstractJudge):
 class BeatJudge(AbstractJudge):
 
   def set_song(self, pid, bpm, difficulty, count, holds, feet):
-    AbstractJudge.set_song(pid, bpm, difficulty, count, holds, feet)
+    AbstractJudge.set_song(self, pid, bpm, difficulty, count, holds, feet)
     self.tick = toRealTime(bpm, 0.16666666666666666)
 
   def change_bpm(self, pid, curtime, bpm):
