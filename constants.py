@@ -96,7 +96,8 @@ player_config = {"spin": 0,
                  "scrollstyle": 0 }
 
 game_config = {"battle": 0,
-               "lifebar": "normal",
+               "diff": 1,
+               "lifebar": 0,
                "onilives": 3,
                }
 

@@ -40,10 +40,11 @@ def game_opt_driver(screen, config):
   ev = (0, E_QUIT)
   start = pygame.time.get_ticks()
   menu =  [
-    ("Battle", "battle", [(0, "Off"), (1, "On")]),
-    ("Lifebar", "lifebar", [("normal", "Normal"), ("oni", "Oni"),
-                            ("suck", "Suck")]),
+    ("Lifebar", "lifebar", [(0, "Normal"), (1, "Oni"), (2, "Drop"),
+                            (3, "Suck")]),
     ("Oni Life", "onilives", [(1, "1"), (3, "3"), (5, "5"), (9, "9")]),
+    ("Difficulty", "diff", [(1, "Normal"), (1.5, "Easy"), (0.75, "Hard")]),
+    ("Battle", "battle", [(0, "Off"), (1, "On")]),
     ]
   clrs = [colors.color["green"]]
 
@@ -160,13 +161,18 @@ class OptionScreen:
         for plr in range(len(self.players)):
           self.players[plr]
           if values[k][0] == self.players[plr][opt]:
+            FONTS[28].set_underline(True)
             newcolor = self.colors[plr]
             if not color: color = newcolor
             else: color = colors.average(color, newcolor)
-        if not color: color = colors.WHITE
+        if not color:
+            FONTS[28].set_underline(False)
+            color = colors.WHITE
 
         text = FONTS[28].render(values[k][1], 1, color)
         blankimage.blit(text, (120 + width * k, 70 + 32 * i))
+
+      FONTS[28].set_underline(False)
 
     if len(self.current) > 1:
       faketext = " / ".join([str(i+1) for i in range(len(self.current))])
