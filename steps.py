@@ -66,7 +66,8 @@ class Steps:
     if player.arrows == -1:
       self.mapping = copy.copy(STEP_MAPPINGS[playmode][0])
       random.shuffle(self.mapping)
-    else: self.mapping = STEP_MAPPINGS[playmode][player.arrows]
+    elif player.arrows >= 0:
+      self.mapping = STEP_MAPPINGS[playmode][player.arrows]
 
     holdlist = []
     holdtimes = []
@@ -115,9 +116,13 @@ class Steps:
 
         if cando and arrowcount != 0:
           origsteps = words[1:]
-          feetstep = copy.copy(origsteps)
-          for i in range(len(origsteps)):
-            feetstep[self.mapping[i]] = origsteps[i]
+          if player.arrows == -2:
+            feetstep = list(origsteps)
+            random.shuffle(feetstep)
+          else:
+            feetstep = copy.copy(origsteps)
+            for i in range(len(origsteps)):
+              feetstep[self.mapping[i]] = origsteps[i]
           # Check for jumps on this note
           arrowcount = 0
           for jump in range(len(feetstep)):

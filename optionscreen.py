@@ -13,7 +13,7 @@ def player_opt_driver(screen, configs):
     ("Speed", "speed", [(0.25, ".25x"), (0.5, ".5x"), (1, "1x"), (2, "2x"),
                         (3, "3x"), (4, "4x"), (8, "8x")]),
     ("Steps", "arrows", [(0, "Normal",), (1, "Mirror"), (2, "Left"),
-                         (3, "Right"), (-1, "Shuffle")]),
+                         (3, "Right"), (-1, "Shuffle"), (-2, "Random")]),
     ("Sudden", "sudden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
                           (3, "Hide 3")]),
     ("Hidden", "hidden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
@@ -153,7 +153,7 @@ class OptionScreen:
 
       item = self.menu[i]
       name, opt, values = item
-      text = FONTS[28].render(name, 1, color)
+      text = FONTS[26].render(name, 1, color)
       blankimage.blit(text, (10, 70 + 32 * i))
       width = 480 / (len(values) + 1)
       for k in range(len(values)):
@@ -161,18 +161,18 @@ class OptionScreen:
         for plr in range(len(self.players)):
           self.players[plr]
           if values[k][0] == self.players[plr][opt]:
-            FONTS[28].set_underline(True)
+            FONTS[26].set_underline(True)
             newcolor = self.colors[plr]
             if not color: color = newcolor
             else: color = colors.average(color, newcolor)
         if not color:
-            FONTS[28].set_underline(False)
+            FONTS[26].set_underline(False)
             color = colors.WHITE
 
-        text = FONTS[28].render(values[k][1], 1, color)
+        text = FONTS[26].render(values[k][1], 1, color)
         blankimage.blit(text, (120 + width * k, 70 + 32 * i))
 
-      FONTS[28].set_underline(False)
+      FONTS[26].set_underline(False)
 
     if len(self.current) > 1:
       faketext = " / ".join([str(i+1) for i in range(len(self.current))])
