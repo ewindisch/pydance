@@ -62,7 +62,7 @@ def set_display_mode():
 # given difficulty.
 def play_and_quit(fn, mode, difficulty):
   print "Entering debug (play-and-quit) mode."
-  screen = set_display_mode(mainconfig)  
+  screen = set_display_mode()  
   pygame.display.set_caption("pydance " + VERSION)
   pygame.mouse.set_visible(0)
   pc = games.GAMES[mode].players
