@@ -12,7 +12,7 @@ GS_HELP = [
   "Enter / Up Right: Advance your choice",
   "Escape / Up Left: Back up or exit",
   "F11: Toggles fullscreen",
-  "Enjoy pydance 0.8.3!",
+  "Enjoy pydance %s!" % VERSION,
   ]
 
 GAMES = ["4 panel", "5 panel", "6 panel", "8 panel", "9 panel",
