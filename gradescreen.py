@@ -13,21 +13,16 @@ class GradingScreen(object):
       print "Player %d:" % (player.pid + 1)
     
       grade = player.grade.grade(player.judge.failed)
-      totalsteps = player.judge.arrow_count()
+      totalsteps = player.stats.arrow_count
 
-      steps = (grade, player.difficulty, totalsteps,
-               player.combos.bestcombo, player.combos.combo)
+      steps = (grade, player.difficulty, player.stats.arrow_count,
+               player.stats.maxcombo)
 
-      numholds = player.judge.numholds
-      goodholds = player.judge.numholds - player.judge.badholds
-
-      steptypes = (player.judge.stats["V"], player.judge.stats["P"],
-                   player.judge.stats["G"], player.judge.stats["O"],
-                   player.judge.stats["B"], player.judge.stats["M"],
-                   goodholds, numholds)
-      print ("GRADE: %s (%s) - total steps: %d best combo" +
-             " %d current combo: %d") % steps
-      print ("V: %d P: %d G: %d O: %d B: %d M: %d - %d/%d holds") % steptypes
+      steptypes = (player.stats["V"], player.stats["P"], player.stats["G"],
+                   player.stats["O"], player.stats["B"], player.stats["M"],
+                   player.stats.good_holds, player.stats.hold_count)
+      print "GRADE: %s (%s) - total steps: %d best combo %d" % steps
+      print "V: %d P: %d G: %d O: %d B: %d M: %d - %d/%d holds" % steptypes
       print
  
   def make_gradescreen(self, screen, background):
@@ -35,7 +30,7 @@ class GradingScreen(object):
 
     if player is None: return None
 
-    totalsteps = player.judge.arrow_count()
+    totalsteps = player.stats.arrow_count
 
     if totalsteps == 0: return None
 
@@ -80,10 +75,10 @@ class GradingScreen(object):
         pygame.display.update(r)
         pygame.time.delay(48)
 
-      totalsteps = player.judge.arrow_count()
+      totalsteps = player.stats.arrow_count
 
-      rows = [player.judge.stats[k] for k in ["V", "P", "G", "O", "B", "M"]]
-      rows += [player.judge.early, player.judge.late]
+      rows = [player.stats[k] for k in ["V", "P", "G", "O", "B", "M"]]
+      rows += [player.stats.early, player.stats.late]
 
       for j in range(4):
         for i in range(len(rows)):
@@ -134,8 +129,7 @@ class GradingScreen(object):
 
       # Holds
       for j in range(4):
-        text = "%d / %d" % (player.judge.numholds - player.judge.badholds,
-                            player.judge.numholds)
+        text = "%d / %d" % (player.stats.good_holds, player.stats.hold_count)
         gradetext = fontfx.shadefade(text,28,j,(FONTS[28].size(text)[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()

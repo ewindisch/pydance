@@ -6,7 +6,7 @@ from listener import Listener
 from pygame.sprite import RenderUpdates, RenderClear
 
 import fontfx, colors, steps, random
-import lifebars, scores, combos, grades, judge
+import lifebars, scores, combos, grades, judge, stats
 
 # This class keeps an ordered list of sprites in addition to the dict,
 # so we can draw in the order the sprites were added.
@@ -551,11 +551,12 @@ class Player(object):
     Lifebar = lifebars.bars[songconf["lifebar"]]
     self.lifebar = Lifebar(pid, self.theme, songconf, game)
     self.judging_disp = JudgingDisp(self.pid, game)
+    self.stats = stats.Stats()
 
     self.game = game
 
     self.listeners = [self.combos, self.score, self.grade, self.lifebar,
-                      self.judging_disp]
+                      self.judging_disp, self.stats]
 
     if not game.double:
       self.judge = judge.judges[songconf["judge"]]()
@@ -753,18 +754,19 @@ class Player(object):
             toparrfx[dir].holding(1)
           holding[dir_idx] = current_hold
         else:
-          judge.broke_hold(current_hold)
-          for l in self.listeners: l.broke_hold()
           holdtext.fillin(curtime, dir_idx, "NG")
-          botchdir, timef1, timef2 = steps.holdinfo[current_hold]
-          # FIXME it's slow.
-          for spr in arrows.sprites():
-            try:
-              if (spr.timef1 == timef1 and
-                  self.game.dirs.index(spr.dir) == dir_idx):
-                spr.broken = True
-                break
-            except: pass
+          if judge.holdsub[current_hold] != -1:
+            judge.broke_hold(current_hold)
+            for l in self.listeners: l.broke_hold()
+            botchdir, timef1, timef2 = steps.holdinfo[current_hold]
+            # FIXME it's slow.
+            for spr in arrows.sprites():
+              try:
+                if (spr.timef1 == timef1 and
+                    self.game.dirs.index(spr.dir) == dir_idx):
+                  spr.broken = True
+                  break
+              except: pass
       else:
         if holding[dir_idx] > -1:
           if judge.holdsub[holding[dir_idx]] != -1:
@@ -780,12 +782,14 @@ class Player(object):
       pid = ev[0] & 1
       self.toparr[pid][ev[1]].stepped(1, time + self.steps[pid].soffset)
       rating, dir, etime = self.judge[pid].handle_key(ev[1], time)
-      for l in self.listeners: l.stepped(time, rating, self.combos.combo)
+      if rating != None:
+        for l in self.listeners: l.stepped(time, rating, self.combos.combo)
       self.fx_data[pid].append((rating, dir, etime))
     else:
       self.toparr[ev[1]].stepped(1, time + self.steps.soffset)
       rating, dir, etime = self.judge.handle_key(ev[1], time)
-      for l in self.listeners: l.stepped(time, rating, self.combos.combo)
+      if rating != None:
+        for l in self.listeners: l.stepped(time, rating, self.combos.combo)
       self.fx_data.append((rating, dir, etime))
 
   def check_bpm_change(self, time, steps, judge, toparr, toparrfx):

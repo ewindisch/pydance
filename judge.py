@@ -2,16 +2,13 @@ from constants import *
 
 from util import toRealTime
 from announcer import Announcer
+from listener import Listener
 import random
 
 class AbstractJudge(object):
   def __init__ (self):
     self.steps = {}
-    self.stats = { "V": 0, "P": 0, "G": 0, "O": 0, "B": 0, "M": 0 }
-    self.early = self.late = self.ontime = 0
     self.failed = False
-    self.numholds = 0
-    self.badholds = 0
     announcer = Announcer(mainconfig["djtheme"])
 
   def set_song(self, bpm, difficulty, count, holds, feet):
@@ -27,27 +24,17 @@ class AbstractJudge(object):
   def bpm_change(self, bpm):
     if bpm >= 1: self.tick = toRealTime(bpm, 0.16666666666666666)
     self.bpm = bpm
+
+  def ok_hold(self, whichone): pass
         
   def broke_hold(self, whichone):
     if self.holdsub[whichone] != -1:
       self.holdsub[whichone] = -1
-      self.badholds += 1
-      self.numholds += 1
-
-  def ok_hold(self, whichone):
-    self.numholds += 1
 
   def handle_key(self, dir, curtime):
     rating, dir, etime = self.get_rating(dir, curtime)
 
-    if rating != None: self.stats[rating] += 1
-
     return rating, dir, etime
-
-  def arrow_count(self):
-    c = 0
-    for k in self.stats: c += self.stats[k]
-    return c
 
   def handle_arrow(self, key, etime):
     if etime in self.steps: self.steps[etime] += key
@@ -85,8 +72,6 @@ class TimeJudge(AbstractJudge):
       if (time < curtime - 0.180) and self.steps[time]:
         n = len(self.steps[time]) 
         del(self.steps[time])
-        for i in range(n):
-          self.stats["M"] += 1
         misses += n
     return misses
 
@@ -127,7 +112,6 @@ class BeatJudge(AbstractJudge):
       if (time < curtime - self.tick * 12) and self.steps[time]:
         n = len(self.steps[time]) 
         del(self.steps[time])
-        for i in range(n): self.stats["M"] += 1
         misses += n
 
     return misses
