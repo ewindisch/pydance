@@ -185,8 +185,9 @@ class FolderDisplay(object):
     self.numsongs = numsongs
 
   def find_banner(self):
+    name = self.name.encode("ascii", "ignore")
     for path in (rc_path, pyddr_path):
-      filename = os.path.join(path, "banners", self.type, self.name + ".png")
+      filename = os.path.join(path, "banners", self.type, name + ".png")
       if os.path.exists(filename):
         banner = pygame.image.load(filename).convert()
         if banner.get_rect().size[0] != banner.get_rect().size[1]:
@@ -201,7 +202,7 @@ class FolderDisplay(object):
       if self.type == "mix":
         for dir in mainconfig["songdir"].split(":"):
           dir = os.path.expanduser(dir)
-          filename = os.path.join(dir, self.name, "banner.png")
+          filename = os.path.join(dir, name, "banner.png")
           if os.path.exists(filename):
             banner = pygame.image.load(filename).convert()
             if banner.get_rect().size[0] != banner.get_rect().size[1]:

@@ -196,7 +196,7 @@ def play(screen, playlist, configs, songconf, playmode):
       players[pid].set_song(current_song, diff[pid], songdata.lyricdisplay)
 
     print "Playing", songfn
-    print songdata.title.encode("ascii", "ignore"), "by", songdata.artist.encode("ascii", "ignore")
+    print songdata.title.encode("ascii", "replace"), "by", songdata.artist.encode("ascii", "replace")
 
     try:
       if dance(screen, songdata, players, prevscr, first, game):
