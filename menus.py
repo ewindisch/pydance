@@ -82,8 +82,9 @@ class Menu:
 
   bgimage = None
   click_sound = pygame.mixer.Sound(os.path.join(sound_path, "clicked.ogg"))
+  click_sound.set_volume(0.35)
   move_sound = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
-  move_sound.set_volume(0.5)
+  back_sound = pygame.mixer.Sound(os.path.join(sound_path, "back.ogg"))
 
   # Menus are defined based on a tree of tuples (submenus) ending
   # in a list (the final item). The first item of the tuple is
@@ -190,6 +191,6 @@ class Menu:
       pygame.time.wait(30)
 
     if ev == E_QUIT:
-      Menu.click_sound.play()
+      Menu.back_sound.play()
       self.items[curitem].activate(E_UNSELECT)
 
