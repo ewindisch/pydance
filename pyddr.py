@@ -1095,6 +1095,9 @@ def dance(song, players, prevscr):
     util.ErrorMessage(screen, ("The audio file for this song", song.filename,
                                "could not be found."))
     return False # The player didn't fail.
+
+  print "Playing", song.filename
+  print song.title, "by", song.artist
   
   screenshot = 0
 
