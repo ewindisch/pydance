@@ -19,7 +19,7 @@ from pygame.sprite import RenderUpdates
 
 import fontfx, menudriver, fileparsers, colors, gradescreen, steps, audio
 
-import os, sys, random, operator, error, util, getopt
+import os, sys, random, operator, error, util, getopt, math
 
 os.chdir(pyddr_path)
 
@@ -515,6 +515,7 @@ class ArrowSprite(CloneSprite):
     self.arrowspin = player.spin
     self.arrowscale = player.scale
     self.speed = player.speed
+    self.accel = player.accel
 
     self.goalcenterx = self.rect.centerx + 320 * player.pid
     if self.battle:
@@ -532,28 +533,36 @@ class ArrowSprite(CloneSprite):
       return
 
     top = self.top
-    
+
+    beatsleft = 0
+
     if len(lbct) == 0:
       onebeat = float(60.0/curbpm) # == float(60000.0/curbpm)/1000
       doomtime = self.endtime - curtime
       beatsleft = float(doomtime / onebeat)
-      top = top - int( (beatsleft/8.0*self.speed)*self.diff)
     else:
-      oldbpmsub = [curtime,curbpm]
-      bpmbeats = 0
+      oldbpmsub = [curtime, curbpm]
       for bpmsub in lbct:
         if bpmsub[0] <= self.endtime:
           onefbeat = float(60.0/oldbpmsub[1]) # == float(60000.0/curbpm)/1000
           bpmdoom = bpmsub[0] - oldbpmsub[0]
-          bpmbeats = float(bpmdoom / onefbeat)
-          top = top - int(bpmbeats*self.diff/8.0 * self.speed)
+          beatsleft += float(bpmdoom / onefbeat)
           oldbpmsub = bpmsub
         else: break
 
       onefbeat = float(60000.0/oldbpmsub[1])/1000
       bpmdoom = self.endtime - oldbpmsub[0]
-      bpmbeats = float(bpmdoom / onefbeat)
-      top = top - int(bpmbeats*self.diff/8.0 * self.speed)
+      beatsleft += float(bpmdoom / onefbeat)
+
+    if beatsleft > 0:
+      if self.accel == 1:
+        beatsleft *= 6 # Rationale for magic number: aesthetically pleasing
+        beatsleft = math.sqrt(beatsleft)
+      elif self.accel == 2:
+        beatsleft *= beatsleft
+        beatsleft /= 6
+
+    top = top - int(beatsleft / 8.0 * self.speed * self.diff)
 
     self.cimage = self.bimage
     
@@ -649,6 +658,7 @@ class HoldArrowSprite(CloneSprite):
     self.arrowspin = player.spin
     self.arrowscale = player.scale
     self.speed = player.speed
+    self.accel = player.accel
     
     self.goalcenterx = self.rect.centerx + 320 * player.pid
     if self.battle:
@@ -668,16 +678,17 @@ class HoldArrowSprite(CloneSprite):
     top = self.top
     bottom = self.top
 
+    beatsleft_top = 0
+    beatsleft_bottom = 0
+
     if len(lbct) == 0:
       onebeat = float(60000.0/curbpm)/1000
       doomtime = self.timef1 - curtime
       if self.broken == 0 and doomtime < 0: doomtime = 0
-      beatsleft = float(doomtime / onebeat)
-      top = top - int( (beatsleft/8.0)*self.diff * self.speed)
+      beatsleft_top = float(doomtime / onebeat)
 
       doomtime = self.timef2 - curtime
-      beatsleft = float(doomtime / onebeat)
-      bottom = bottom - int( (beatsleft/8.0)*self.diff *self.speed)
+      beatsleft_bottom = float(doomtime / onebeat)
     else:
       oldbpmsub = [curtime, curbpm]
       bpmbeats = 0
@@ -685,15 +696,13 @@ class HoldArrowSprite(CloneSprite):
         if bpmsub[0] <= self.timef1:
           onefbeat = float(60000.0/oldbpmsub[1])/1000
           bpmdoom = bpmsub[0] - oldbpmsub[0]
-          bpmbeats = float(bpmdoom / onefbeat)
-          top = top - int(bpmbeats*self.diff/8.0 * self.speed)
+          beatsleft_top += float(bpmdoom / onefbeat)
           oldbpmsub = bpmsub
         else: break
 
       onefbeat = float(60000.0/oldbpmsub[1])/1000
       bpmdoom = self.timef1 - oldbpmsub[0]
-      bpmbeats = float(bpmdoom / onefbeat)
-      top = top - int(bpmbeats*self.diff/8.0 * self.speed)
+      beatsleft_top += float(bpmdoom / onefbeat)
 
       oldbpmsub = [curtime, curbpm]
       bpmbeats = 0
@@ -701,15 +710,32 @@ class HoldArrowSprite(CloneSprite):
         if bpmsub[0] <= self.timef2:
           onefbeat = float(60000.0/oldbpmsub[1])/1000
           bpmdoom = bpmsub[0] - oldbpmsub[0]
-          bpmbeats = float(bpmdoom / onefbeat)
-          bottom = bottom - int(bpmbeats*self.diff/8.0 * self.speed)
+          beats_bottom += float(bpmdoom / onefbeat)
           oldbpmsub = bpmsub
         else: break
 
       onefbeat = float(60000.0/oldbpmsub[1])/1000
       bpmdoom = self.timef2 - oldbpmsub[0]
-      bpmbeats = float(bpmdoom / onefbeat)
-      bottom = bottom - int(bpmbeats*self.diff/8.0 * self.speed)
+      beats_bottom += float(bpmdoom / onefbeat)
+
+    if beatsleft_top > 0:
+      if self.accel == 1:
+        beatsleft_top *= 6
+        beatsleft_top = math.sqrt(beatsleft_top)
+      elif self.accel == 2:
+        beatsleft_top *= beatsleft_top
+        beatsleft_top /= 6
+
+    if beatsleft_bottom > 0:
+      if self.accel == 1:
+        beatsleft_bottom *= 6
+        beatsleft_bottom = math.sqrt(beatsleft_bottom)
+      elif self.accel == 2:
+        beatsleft_bottom *= beatsleft_bottom
+        beatsleft_bottom /= 6
+
+    top = top - int(beatsleft_top / 8.0 * self.diff * self.speed)
+    bottom = bottom - int(beatsleft_bottom / 8.0 * self.diff *self.speed)
 
     if bottom > 480: bottom = 480
 

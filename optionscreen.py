@@ -18,6 +18,7 @@ def player_opt_driver(screen, configs):
                           (3, "Hide 3")]),
     ("Hidden", "hidden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
                           (3, "Hide 3")]),
+    ("Accel", "accel", [(0, "None"), (1, "Boost"), (2, "Brake")]),
     ("Size", "scale", [(1, "Normal"), (0, "Shrink"), (2, "Grow")]),
     ("Little", "little", [(0, "Off"), (1, "No 16ths"), (3, "No 16ths/8ths")]),
     ("Scroll", "scrollstyle", [(0, "Normal"), (1, "Reverse"), (2, "Center")]),

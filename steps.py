@@ -80,7 +80,9 @@ class Steps:
     cur_beat = 0
     cur_bpm = self.bpm
     self.speed = player.speed
-    self.nbeat_offset = 64 / player.speed
+    # If too small, arrows don't appear fast enough
+    if player.accel: self.nbeat_offset = 104 / player.speed
+    else:  self.nbeat_offset = 64 / player.speed
     self.lastbpmchangetime = []
     self.events = [SongEvent(when = cur_time, bpm = cur_bpm, beat = cur_beat,
                              extra = song.difficulty[playmode][difficulty])]
