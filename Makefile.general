@@ -1,0 +1,13 @@
+MANPAGES += docs/man
+UTILS += utils/*.py
+PYMODS += config.py announcer.py fontfx.py
+DATA += themes images sound
+
+clean:
+	rm -f *.pyc
+
+distclean: clean
+	rm -f pyddr.cfg Makefile
+
+cvsclean: distclean
+	rm -rf CVS */CVS */*/CVS menuhelp

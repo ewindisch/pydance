@@ -1,0 +1,23 @@
+#!/usr/bin/env make -f
+
+PREFIX ?= /usr/local
+
+all:
+
+include Makefile.general
+
+install:
+	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/games $(DESTDIR)$(PREFIX)/share/games/pyddr
+	install -d $(DESTDIR)$(PREFIX)/share/games/pyddr/songs
+	install -d $(DESTDIR)$(PREFIX)/share/man/man1 $(DESTDIR)$(PREFIX)/share/man/man6
+	install -m 644 $(PYMODS) $(DESTDIR)$(PREFIX)/share/games/pyddr
+	install -m 755 pyddr.py $(DESTDIR)$(PREFIX)/share/games/pyddr
+	ln -sf ../share/games/pyddr/pyddr.py $(DESTDIR)$(PREFIX)/games/pyddr.py
+	cp pyddr.posix.cfg pyddr.cfg
+	install -D -m 644 pyddr.cfg $(DESTDIR)/etc/pyddr.cfg
+	for U in $(UTILS); do\
+	  install -m 755 $$U `echo $(DESTDIR)$(PREFIX)/bin/$$U | sed 's/\.py//' | sed 's/utils\///'`;\
+	done
+	cp -R $(DATA) $(DESTDIR)$(PREFIX)/share/games/pyddr
+	cp docs/man/*.1 $(DESTDIR)$(PREFIX)/share/man/man1
+	cp docs/man/*.6 $(DESTDIR)$(PREFIX)/share/man/man6
