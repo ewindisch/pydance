@@ -7,7 +7,6 @@
 #psyco.jit()
 #from psyco.classes import *
 
-
 import pygame
 pygame.init()
 from constants import *
@@ -15,7 +14,6 @@ from constants import *
 from announcer import Announcer
 from config import Config
 import fontfx, menudriver
-
 
 import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
 import os, sys, glob, random, fnmatch, types, operator, copy, string
@@ -75,30 +73,28 @@ class QuitGame:
 MAXPLAYERS = 2
 DIRECTIONS = ['l', 'd', 'u', 'r']
 
-DefaultThemeDir = os.path.join('themes','gfx')
-theme = mainconfig['gfxtheme']
 songdir = mainconfig['songdir']
-anncname = mainconfig['djtheme']
-annc = Announcer(os.path.join('themes','dj',anncname,'djtheme.cfg'))
 
 class Theme:
-  def __init__(self,name,themeDir=DefaultThemeDir):
+  def __init__(self, name):
     self.name = name
-    self.themeDir = themeDir
+    self.path = None
+    for path in search_paths:
+      if os.path.isdir(os.path.join(path, "themes", "gfx", name)):
+        self.path = os.path.join(path, "themes", "gfx", name)
+    if self.path == None:
+      print "Error: Cannot load graphics theme '%s'." % name
+      sys.exit(1)
+
     self.load()
 
   def load(self):
-    name=self.name
-    if self.themeDir: 
-      path=os.path.join(self.themeDir,name)
-    else:
-      path=name
-    self.arrows = ArrowSet(path)
-    self.bars   = BarSet(path)
-    self.xanim  = Xanim(path)
+    self.arrows = ArrowSet(self.path)
+    self.bars = BarSet(self.path)
+    self.xanim = Xanim(self.path)
 
   def __repr__(self):
-    return '<Theme name=%r>'%self.name
+    return ('<Theme name=%r>' % self.name)
 
 class SongEvent:
   def __init__ (self, bpm, when=0.0, feet=None, next=None, extra=None, color=None):
@@ -222,6 +218,7 @@ class Judge:
     self.score_coeff = int(scorecoeff) + 1
     self.score = 0
     self.badholds = 0
+    self.announcer = Announcer(mainconfig["djtheme"])
     self.holdsub = []
     for i in range(holds):
       self.holdsub.append(0)
@@ -335,7 +332,7 @@ class Judge:
 #        print "Ack! off is", off
 
       if random.randrange(15) == 1:
-        annc.say('ingame',anncrange)
+        self.announcer.say('ingame', anncrange)
         #    print self.text, 'at', time
       self.recentsteps.insert(0, text)
       self.recentsteps.pop()
@@ -909,7 +906,7 @@ class fpsDisp(pygame.sprite.Sprite):
         self.loops = 0
 
 class TopArrow(pygame.sprite.Sprite):
-  def __init__ (self, bpm, direction, ypos, playernum):
+  def __init__ (self, bpm, direction, ypos, playernum, theme):
     pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
     self.presstime = -1
 #    self.steps = {}
@@ -927,7 +924,8 @@ class TopArrow(pygame.sprite.Sprite):
     for i in range(8):
       if i < 4:        ftemp = 'n_'
       else:            ftemp = 's_'
-      fn = os.path.join('themes','gfx',theme,'arr_') + ftemp + self.direction + '_' + repr(i) + '.png'
+      fn = os.path.join(theme.path,
+                        'arr_'+ftemp+self.direction+'_'+repr(i)+'.png')
       self.topimg.append(pygame.image.load(fn))
       self.topimg[i].set_colorkey(self.topimg[i].get_at((0,0)),RLEACCEL)
 
@@ -988,7 +986,7 @@ class Blinky(pygame.sprite.Sprite):
       self.oldframe = self.frame
 
 class ArrowFX(pygame.sprite.Sprite):
-  def __init__ (self, bpm, direction, ypos, playernum):
+  def __init__ (self, bpm, direction, ypos, playernum, theme):
     pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
     self.presstime = -1000000
     self.tick = toRealTime(bpm, 1);
@@ -996,7 +994,7 @@ class ArrowFX(pygame.sprite.Sprite):
     self.centerx = {'l':44, 'd':120, 'u':196, 'r':272}[direction]
     self.playernum = playernum
     
-    fn = os.path.join('themes','gfx',theme,'arr_n_') + direction + '_3.png'
+    fn = os.path.join(theme.path, 'arr_n_' + direction + '_3.png')
     self.baseimg = pygame.image.load(fn).convert(16)
     self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
 
@@ -1063,7 +1061,7 @@ class ArrowFX(pygame.sprite.Sprite):
       self.rect.left += (320*self.playernum)
 
 class LifeBarDisp(pygame.sprite.Sprite):
-    def __init__(self, playernum, previously = None):
+    def __init__(self, playernum, theme, previously = None):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
         self.playernum = playernum
         if previously:
@@ -1089,10 +1087,14 @@ class LifeBarDisp(pygame.sprite.Sprite):
         self.samt = -2
         self.mamt = -4
         
-        self.redbar = pygame.image.load(os.path.join('themes','gfx',theme,'redbar.png')).convert()
-        self.orgbar = pygame.image.load(os.path.join('themes','gfx',theme,'orgbar.png')).convert()
-        self.yelbar = pygame.image.load(os.path.join('themes','gfx',theme,'yelbar.png')).convert()
-        self.grnbar = pygame.image.load(os.path.join('themes','gfx',theme,'grnbar.png')).convert()
+        self.redbar = pygame.image.load(os.path.join(theme.path,
+                                                     'redbar.png')).convert()
+        self.orgbar = pygame.image.load(os.path.join(theme.path,
+                                                     'orgbar.png')).convert()
+        self.yelbar = pygame.image.load(os.path.join(theme.path,
+                                                     'yelbar.png')).convert()
+        self.grnbar = pygame.image.load(os.path.join(theme.path,
+                                                     'grnbar.png')).convert()
         self.redbar_pos = self.redbar.get_rect()
         self.orgbar_pos = self.orgbar.get_rect()
         self.yelbar_pos = self.yelbar.get_rect()
@@ -2403,7 +2405,6 @@ def main():
   background = BlankSprite(screen.get_size())
 
   print "Loading Images.."
-  currentTheme = Theme(theme)
 
   playmode = 'SINGLE'
   
@@ -2557,6 +2558,8 @@ def songSelect(songs, players):
   global screen,background,currentTheme,playmode
   pygame.mixer.music.fadeout(500)
   totalredraw = 1
+
+  currentTheme = Theme(mainconfig['gfxtheme'])
 
   fooblah = " "
 
@@ -2772,7 +2775,8 @@ def songSelect(songs, players):
       players = 2
     elif ev == E_START1 or ev == E_START2:
       pygame.mixer.music.fadeout(1000)
-      annc.say('menu')
+      ann = Announcer(mainconfig["djtheme"])
+      ann.say("menu")
       background.blit(screen,(0,0))
       for n in range(63):
         background.set_alpha(255-(n*4))
@@ -2786,7 +2790,7 @@ def songSelect(songs, players):
       background.set_alpha()
       screen.fill(BLACK)
       try:
-        while annc.chan.get_busy():
+        while ann.chan.get_busy():
           pass
       except:
         pass
@@ -3099,7 +3103,7 @@ def playSequence(players, diffList, songList):
 
 def dance(song,players,difficulty,prevlife,combos,prevscr):
   global screen,background,eventManager,currentTheme,playmode
-  
+
   songL = [song]
   for i in range(1, players):
     songL.append(copy.copy(song))
@@ -3174,7 +3178,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
     plr = {
       'playerID': playerID,
       'score': ScoringDisp(playerID, difficulty[playerID]),
-      'lifebar': LifeBarDisp(playerID, prevlife[playerID]),
+      'lifebar': LifeBarDisp(playerID, currentTheme, prevlife[playerID]),
       'holdtext': HoldJudgeDisp(playerID),
       'arrowGroup': RenderLayered(),
       
@@ -3301,8 +3305,8 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
     plr['toparr'] = {}
     plr['toparrfx'] = {}
     for arrowID in DIRECTIONS:
-      plr['toparr'][arrowID] = TopArrow(song.bpm, arrowID, ARROWTOP, plr['playerID'])
-      plr['toparrfx'][arrowID] = ArrowFX(song.bpm, arrowID, ARROWTOP, plr['playerID'])
+      plr['toparr'][arrowID] = TopArrow(song.bpm, arrowID, ARROWTOP, plr['playerID'], currentTheme)
+      plr['toparrfx'][arrowID] = ArrowFX(song.bpm, arrowID, ARROWTOP, plr['playerID'], currentTheme)
       
       if mainconfig['explodestyle'] > -1:
         plr['toparrfx'][arrowID].add(fgroup)
@@ -3366,7 +3370,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
       ev = event.poll()
 
     if ev == E_QUIT: break
-
+  
     for keyAction in key:
       playerID = int(keyAction[1])
       if playerID <= players:
@@ -3443,7 +3447,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
             for arrID in DIRECTIONS:
               if mainconfig['showtoparrows']:
                 plr['toparr'][arrID].remove(sgroup)
-              plr['toparr'][arrID] = TopArrow(nbpm, arrID, ARROWTOP, plr['playerID'])
+              plr['toparr'][arrID] = TopArrow(nbpm, arrID, ARROWTOP, plr['playerID'], currentTheme)
               if mainconfig['showtoparrows']:
                 plr['toparr'][arrID].add(sgroup)
             plr['judge'].changebpm(nbpm)

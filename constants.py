@@ -31,7 +31,6 @@ sys.path.append(pyddr_path)
 # Set up some bindings for common directories
 image_path = os.path.join(pyddr_path, "images")
 sound_path = os.path.join(pyddr_path, "sound")
-theme_path = os.path.join(pyddr_path, "themes")
 
 # Set a binding for our savable resource directory
 rc_path = None
@@ -43,6 +42,8 @@ elif osname == "nt":
   rc_path = "."
 
 if not os.path.isdir(rc_path): os.mkdir(rc_path)
+
+search_paths = (pyddr_path, rc_path)
 
 lyric_colors = (('cyan', (0, 244, 244)),
                 ('aqua', (0, 244, 122)),
@@ -61,7 +62,7 @@ mainconfig = config.Config({ # Wow we have a lot of options
   "gfxtheme": "classic", "djtheme": "none", "songdir": ".",
   "stickycombo": 1,  "lowestcombo": 4,  "totaljudgings": 1,  "stickyjudge": 1,
   "lyriccolor": "cyan",  "transcolor": "aqua",
-  "mixerclock": 0, "onboardaudio": 0, "masteroffset": 0,
+  "mixerclock": 1, "onboardaudio": 0, "masteroffset": 0,
   "reversescrolls": 0, "scrollspeed": 1,
   "explodestyle": 3, "arrowspin": 0, "arrowscale" : 1,
   "vesacompat": 0, "fullscreen": 0,

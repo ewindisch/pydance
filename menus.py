@@ -53,15 +53,15 @@ class MenuItem:
     if self.callbacks == None:
       if ev_id == E_START:
         return E_QUIT # This is a back button
-      else: return E_PASS # Shouldn't happen
+      else: return ev_id # Shouldn't happen
     if callable(self.callbacks.get(ev_id)):
       text, subtext, rgb = self.callbacks[ev_id](*self.args)
       if text: self.text = text
       if subtext: self.subtext = subtext
       if rgb: self.rgb = rgb
       self.render()
-      return E_PASS
-    else: return E_PASS
+      return ev_id
+    else: return ev_id
 
   # Render the image. If subtext is present, the main text gets smaller.
   def render(self):

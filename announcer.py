@@ -2,15 +2,24 @@ import os
 import random
 import pygame
 
+from constants import *
+
 class Announcer:
-  def __init__(self, filename):
+  def __init__(self, name):
     self.sections = {}
     self.name = None
     self.author = None
     self.rev = None
     self.date = None
-    prefix = os.path.split(filename)[0]
-    fi = open(filename, "r")
+    filename = None
+    for path in search_paths:
+      if os.path.isfile(os.path.join(path,"themes","dj",name,"djtheme.cfg")):
+        filename = os.path.join(path, "themes", "dj", name)
+    if filename == None:
+      print "Error: Cannot load announcer theme '%s'." % name
+      sys.exit(1)
+
+    fi = open(os.path.join(filename, "djtheme.cfg"), "r")
     sec = ""
     self.lasttime = -1000000
     for line in fi:
@@ -25,7 +34,7 @@ class Announcer:
         elif key == "rev": self.rev = val
         elif key == "date": self.date = val
       else:
-        self.sections[sec].append(os.path.join(prefix, line.strip()))
+        self.sections[sec].append(os.path.join(filename, line.strip()))
 
   def __play(self, filename):
     if (pygame.time.get_ticks() - self.lasttime > 6000):
