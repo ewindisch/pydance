@@ -160,7 +160,7 @@ class OptionScreen(object):
 
       item = self.menu[i]
       name, opt, values = item
-      text = FONTS[26].render(name, 1, color)
+      text = FONTS[24].render(name, 1, color)
       blankimage.blit(text, (10, 70 + 28 * i))
       width = 480 / (len(values) + 1)
       for k in range(len(values)):
@@ -168,18 +168,18 @@ class OptionScreen(object):
         for plr in range(len(self.players)):
           self.players[plr]
           if values[k][0] == self.players[plr][opt]:
-            FONTS[26].set_underline(True)
+            FONTS[24].set_underline(True)
             newcolor = self.colors[plr]
             if not color: color = newcolor
             else: color = colors.average(color, newcolor)
         if not color:
-            FONTS[26].set_underline(False)
+            FONTS[24].set_underline(False)
             color = colors.WHITE
 
-        text = FONTS[26].render(values[k][1], 1, color)
+        text = FONTS[24].render(values[k][1], 1, color)
         blankimage.blit(text, (120 + width * k, 70 + 28 * i))
 
-      FONTS[26].set_underline(False)
+      FONTS[24].set_underline(False)
 
     if len(self.current) > 1:
       faketext = " / ".join([str(i+1) for i in range(len(self.current))])

@@ -6,6 +6,10 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
+0.8.1
++ Choose between pydance, DDR 1st/2nd, 3rd, 4th, or 5th/Max2/Ex
+  score calculation methods.
+
 0.8.0 - That's the second largest ChangeLog I've ever seen!	[2003.08.22]
 + New options:
  + "Wide" to add jumps.
