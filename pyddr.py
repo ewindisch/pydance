@@ -1656,12 +1656,12 @@ def main():
     try: songs.append(fileparsers.SongItem(f))
     except:
       print "Error loading " + f
-    img = pbar.render(parsedsongs * 100.0 / totalsongs)
+    img = pbar.render(parsedsongs / totalsongs)
     r = img.get_rect()
     r.center = (320, 240)
     screen.blit(img, r)
     pygame.display.flip()
-    parsedsongs += 1
+    parsedsongs += 100.0
 
   ev = event.poll()
   while ev[1] != E_PASS: ev = event.poll()

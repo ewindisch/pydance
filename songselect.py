@@ -295,6 +295,8 @@ class SongSelect:
           pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
           pygame.mixer.music.play(4, 0.0)
 
+        while ev[1] != E_PASS: ev = event.poll() # Empty the queue
+
       # Add the current song to the playlist
       elif ev[1] == E_MARK:
         self.add_current_song()
@@ -302,10 +304,11 @@ class SongSelect:
 
       # Remove the most recently added song
       elif ev[1] == E_UNMARK:
-        self.title_list.pop()
-        self.diff_list.pop()
-        self.song_list.pop()
-        needs_update = True
+	if self.title_list != []:
+          self.title_list.pop()
+          self.diff_list.pop()
+          self.song_list.pop()
+          needs_update = True
 
       # Remove all songs on the playlist
       elif ev[1] == E_CLEAR:

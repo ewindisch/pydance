@@ -88,6 +88,8 @@ class Endless:
         pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
         pygame.mixer.music.play(4, 0.0)
 
+        while ev[1] != E_PASS: ev = event.poll()
+
       # Player 2 on
       elif ev[0] == len(self.constraints) and ev[1] == E_START:
         self.constraints.append(Constraint())
