@@ -18,6 +18,8 @@ Legend:
 + Changing BPMs are colored (thanks to xsdg).
 + A great attack lifebar was added (thanks to Jooon).
 + Lifebars are now animated.
++ Select (Random) behaves differently when viewing the folder list.
++ A comprehensive new manual is available in docs/manual.html!
 * Movies work again (thanks to Jon Åslund).
 ! .step support removed.
 ! All your records will be deleted upon running this.

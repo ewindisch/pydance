@@ -171,6 +171,7 @@ class SongSelect(InterfaceWindow):
     self._game = game
     self._config = dict(game_config)
     self._all_songs = self._songs
+    self._all_valid_songs = [s for s in self._songs if s.info["valid"]]
 
     self._list = ListBox(pygame.font.Font(None, 26),
                          [255, 255, 255], 26, 16, 220, [408, 56])
@@ -262,7 +263,25 @@ class SongSelect(InterfaceWindow):
           self._diff_names[pid] = name
 
       elif ev == ui.SELECT:
-        self._index = random.randrange(len(self._songs))
+        if self._song.isfolder:
+          if len(self._all_valid_songs) > 0:
+            self._song = random.choice(self._all_valid_songs)
+            fol = self._song.folder[SORT_NAMES[mainconfig["sortmode"]]]
+            self._create_song_list(fol)
+            self._index = self._songs.index(self._song)      
+          else:
+            error.ErrorMessage(screen, ["You don't have any songs",
+                                        "that are marked \"valid\"",
+                                        "for random selection."])
+        else:
+          valid_songs = [s for s in self._songs if s.info["valid"]]
+          if len(valid_songs) > 0:
+            self._song = random.choice(valid_songs)
+            self._index = self._songs.index(self._song)
+          else:
+            error.ErrorMessage(screen, ["You don't have any songs",
+                                        "here that are marked \"valid\"",
+                                        "for random selection."])
 
       elif ev == ui.START:
         options.OptionScreen(self._configs, self._config, self._screen)
