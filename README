@@ -1,392 +1,90 @@
-
-                                 About pydance
-
-   pydance is a dancing simulator, primarily for GNU/Linux, but it also
-   runs on other UNIX-like operating systems, Windows, and Mac OS X. The
-   basic game idea is simple. There's a mat with directional arrows you
-   can step on, and the game scrolls arrows up the screen while playing a
-   song. When the arrows reach the top of the screen (not sooner and not
-   later, since they pass over stationary arrows), you hit the
-   corresponding arrow on the pad, and given that you hit it on time with
-   the beat, you score points. The idea is that the game is supposed to
-   either teach you to dance, or simulate dancing. It works to a degree.
-   =]
-
-   There are many different types of games like this, such as Dance Dance
-   Revolution, Pump It Up, Pop'n Stage, Technomotion, and so on. However,
-   they all have this same basic pattern in common, and so pydance is
-   capable of playing many different game modes.
-
-   If you're just hearing about this game (or you're broke), you don't
-   actually need a mat to play pydance (although it definitely makes it
-   more fun). You can use a keyboard or regular joystick instead.
-
-   This document assumes you've managed to install pydance already. If
-   not, you might want to look at the INSTALL file included with the
-   source.
-
-                                Playing pydance
-
-Controls
-
-   All instructions are given in terms of directions. By default, for
-   player 1, this means the number pad on a qwerty keyboard, or uiojklm,.
-   for player 2. "Start" refers to enter, and "select" refers to tab, or
-   0 on the numeric pad. If you are using a dvorak keyboard, or a
-   keyboard without a number pad, you can remap the keys in Interface
-   Options / Map Keys.
-
-   In addition, unless mapped otherwise, the arrow keys will always
-   control player 1.
-
-Starting the Game
-
-   To play the game, just select "Play Game" from the menu. Use left,
-   right, and start, to select what directions you want to use, how many
-   people you want playing, and whether you want to use the song
-   selector, course selector, or random endless songs. Once in the song
-   selector, use left and right to select a song, up and down to change
-   your difficulty, and start to start playing.
-
-   Oh wait, now there's all these arrows scrolling up the screen - what
-   should you do? Actually, it's pretty simple. When the arrows get to
-   the top (which is in time with the music), step on the direction of
-   the arrow on your pad (or press the direction on the keyboard).
-
-   In the song selector, you can hold down start when selecting a song to
-   bring up a screen full of game modifiers, that affect how the arrows
-   are displayed. You can also hold down select to bring up a second
-   screen of game-wide options, like oni or battle mode.
-
-   If you need to exit the game or back out of menus, just press escape.
-
-Nonstop Mode
-
-   From the normal song selector you can set up Nonstop Mode. Select a
-   song and difficulty you want to play, and press up left. That song is
-   now on your nonstop playlist. You can add a lot of songs this way,
-   then play them all in succession without returning to the song
-   selector. To remove a song, press down left.
-
-Endless Mode
-
-   The Endless Mode option on the Play Game menu takes you into a
-   different selector. In this one, you can select a difficulty (either
-   by name, or by rating), and just keep playing until you fail.
-
-                              Configuring pydance
-
-   The easy way to configure pydance is to use the in-game configuration
-   menus. Just select the menu item you want to change and hit enter, or
-   left and right. If you need more precise configuration, read on.
-
-   pydance reads from configuration files in appropriate places. This
-   means /etc/pydance.cfg and ~/.pydance/pydance.cfg on POSIX systems
-   like GNU/Linux, /Library/Preferences/pydance/pydance.cfg and
-   ~/Library/Preferences/pydance/pydance.cfg on Mac OS X, and pydance.cfg
-   in the current directory on all platforms (note that this is the only
-   configuration file Windows systems will read). Files are read in the
-   order listed above.
-
-Adding Songs
-
-   To add songs, you just need to put the .dance file, music file, and
-   (if they exist) background and banner files into one of your song
-   directories. This is the songdir configuration variable. On POSIX
-   systems this is /usr/share/games/pydance/songs,
-   /usr/local/share/games/pydance/songs, and ~/.pydance/songs. On
-   Windows, this is anywhere in the directory pydance was installed in.
-   On Mac OS X, this is the 'pydance Songs' folder in your Music folder.
-   You can change this by editing pydance.cfg.
-
-   If your files are .sm, .dwi, or .ksf instead of .dance, then you have
-   to use a specific directory layout. The files need to go in
-   <tsongdir>/Mix Name/Song Name/. This is a limitation of the DWI and SM
-   formats.
-
-Adding Courses
-
-   To add courses, put them in one of the directories in your "coursedir"
-   configuration variable (replace "songs" with "courses" in the above
-   examples to find out where this is by default), or a subdirectory of
-   that directory. In addition, if the file is named Course.crs, then if
-   a file named Course.png is found, it will be displayed with the course
-   in the course selection screen.
-
-Adding Graphics
-
-   If you want folders to have banners in the song select (like songs
-   do), you can put them in a banners directory (replace "songs" in the
-   examples with "banners", again). Within the banners directory, create
-   subdirectories like "mix", "title", and "artist". Then, when a a
-   folder named "Foo" in a display mode is found, it checks
-   <banners>/<display_mode>/Foo.png. For example, if you want to have a
-   banner associated with the folder "Dancing Stage MegaMix" when you're
-   sorting by mix, make the image <banners>/mix/Dancing Stage
-   MegaMix.png.
-
-pydance.cfg
-
-  Gameplay Options
-
-   assist 0|1
-          In this mode, pydance will play a sound when you are supposed
-          to hit an arrow. It's useful if you can't see the screen, or
-          need help getting on beat in a particular song.
-
-   autofail 1|0
-          If this is turned off, the game will continue, even when your
-          lifebars runs out.
-
-   autogen 1|0
-          Normally pydance generates steps automatically from the "base"
-          4 panel modes for other modes (like 6 or 8 panel), if they
-          aren't defined for that file. Turning this option off prevents
-          pydance from doing that. Generally this is a bad idea.
-
-   grading 1|0
-          pydance will normally display a grade at the end of every song.
-          Turning this option off will bring you back to the song
-          selector immediately instead.
-
-  Graphical Options
-
-   bgbrightness [num] (default 127)
-          This option determines how bright the background during the
-          song is. Higher numbers mean a brighter background.
-
-   explodestyle [0|1|2|3] (default 3)
-          pydance usually displays an effect if you successfully hit an
-          arrow, rotating and scaling the arrow at the top. If this is
-          too CPU intensive (or you just don't like it), you can set it
-          to 0 for no effect, 1 for rotating, 2 for scaling, and 3 for
-          rotating and scaling.
-
-   fpsdisplay 1|0
-          If this is on pydance will display an FPS counter in the
-          corner, and a timer in the top center. See the FAQ for what to
-          do if your FPS is very low.
-
-   gratuitous 1|0
-          This turns on some graphical effects that may slow down the
-          game and interface considerably, but look nice.
-
-   lyriccolor [colors] (default cyan)
-          Set the colors that lyrics appear in. Possible values are cyan,
-          aqua, yellow, white, black, red, purple, or orange. If you list
-          more than one color, separated by /s, other lines of lyrics
-          will appear in those colors.
-
-   showbackground 1|0
-          Many songs in pydance and other dancing games have a background
-          image that displays when you play them; however, this can make
-          the game slightly slower. If you're desperate for more frames,
-          try turning this off to remove the background.
-
-   showcombo 1|0
-          Normally when you get a combo, pydance will display your
-          current combo length on the screen. Turning this off will
-          remove that display.
-
-   showlyrics 1|0
-          Some songs have lyrics or other text that will appear at the
-          bottom of the screen. Turning this off will remove those
-          lyrics.
-
-   stickycombo 1|0
-          If this is off, your combo is erased from the screen after a
-          period of time, even if you don't miss an arrow.
-
-   stickyjudge 1|0
-          This is like stickycombo, but for judgings (good, marvelous,
-          and so on), rather than your combo.
-
-  Sound Options
-
-   djtheme [themename]
-          Sets your announcer theme. By default pydance comes with the
-          'none' theme (no announcer). Copies from the official website
-          also have a 'mrt' theme, which is not distributed with various
-          other packages for legal reasons. The pydance development team
-          is looking for people willing to do voice acting for free
-          announcer samples! New themes can be installed in themes/dj.
-
-   masteroffset [num] (default 0)
-          Some systems have speakers or displays that take measurable
-          time (in terms of affecting gameplay) to output a signal. If
-          you have one of these, you can add an offset in milliseconds to
-          every song you have.
-
-          This should not be used if you have a lot of step files that
-          are a specific number of milliseconds off. If you use it for
-          this, all new files you get will be wrong, and no one else will
-          be able to use your original files.
-
-   onboardaudio 0|1
-          Some systems (especially laptops) use sound cards or drivers
-          that resample sound in strange ways, which may make pydance
-          play songs such that they "drift" in relation to the steps. If
-          you seem to be having drifting issues in all the songs you
-          play, you should try turning this on.
-
-   previewmusic 1|0
-          If this is on, the song selection screen will play a brief
-          sound clip from the middle of the song when you move the
-          selector over it.
-
-  Interface Options
-
-   saveinput 1|0
-          Normally when pydance exits it saves your current keymap to
-          ~/.pydance/input.cfg (or just input.cfg). Turning this option
-          off stops that behavior.
-
-   sortmode 0|1|2|3 (default 0)
-          This sets the sorting mode for the song select screen. 0 sorts
-          by mix, 1 by song name, 2 by artist name, and 3 by BPM.
-
-          This can also be changed by pressing 's' on the song select
-          screen.
-
-   folders 1|0
-          If you have over 60 songs, and this option is on, pydance will
-          organize them into "folders" based on your sorting mode in the
-          song selector.
-
-  System Options
-
-   songdir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)
-          This is a list of directories where pydance should look for
-          songs (.dance files, backgrounds and banners, and the audio
-          itself). Generally installing pydance gives you a system-wide
-          location to place songs (that all users will have access to),
-          and a local one in your home directory.
-
-   coursedir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)
-          This is a list of directories where pydance should look for
-          courses (.crs files). Installing pydance gives you a
-          system-wide location to place courses (that all users will have
-          access to), and a local one in your home directory.
-
-  Obscure Options
-
-   strobe 0|1
-          Turning this on results in a little blinking light in the
-          bottom right corner of the screen. With various light detection
-          equipment, this can be used to make pydance communicate with a
-          strobe lighting system.
-
-   usepsyco 1|0
-          Try to use the Psyco optimizing compiler for Python
-          ([1]http://psyco.sf.net). This is on by default, and can give
-          30-50% speed gains on slower systems. However, it also uses
-          substantially more memory (which is usually not a problem,
-          since pydance's code memory footprint is small relative to its
-          song data). Psyco is currently only available for IA32 systems.
-
-   vesacompat 0|1
-          Try to work on really old broken displays, like svgalib. Don't
-          ever turn this option on.
-
-                                  Using a Mat
-
-   The recommended adapter for pydance is the [2]EMSUSB2 from Level Six.
-   pydance easily supports two players with it, and it works on all
-   operating systems. Also known to work is the parallel port adapter
-   that comes with [3]BNS pads. Any other 6 axis, 12 button or 4 axis, 16
-   button joysticks that behave like those two adapters will also work.
-
-   If you use a mat, you may need to remap your keyboard or joystick
-   buttons. From the main menu, go to Interface Options, then Map Keys.
-   From here you can rebind your joystick or keyboard buttons. In
-   addition, you will need to go here if you plug in a joystick while
-   pydance is running; otherwise it will not be detected until you
-   restart.
-
-GNU/Linux
-
-   For parallel adapters, you can use the ddrmat.o driver available at
-   [4]http://icculus.org/pyddr/get.php (which is a modified gamecon.o
-   from the 2.4 kernel). Once compiled, just run insmod ddrmat gc=0,7
-   (where 7 is the IRQ of your parallel port, which is probably 7). Note
-   that your lp (parallel printer) module cannot be loaded at the same
-   time. The normal gamecon.o module might work too, although you may
-   have to rotate your pad 45 degrees.
-
-   USB drivers are much easier. If your kernel has USB joystick support,
-   just plug it in and it should work. If it doesn't, make sure the
-   input, hid, and joydev modules are loaded (the first two are required
-   for any USB input device).
-
-Mac OS X
-
-   Just plug in your pad using the USB adapter, and off you go. Parallel
-   port adapters are not supported.
-
-Windows
-
-   This OS's hardware support is too unreliable and inconsistent to
-   describe the process here. All we can say is "make sure the
-   appropriate driver is installed".
-
-Other
-
-   As long as [5]Pygame supports your OS's joysticks, pydance will too.
-   pydance specifically is looking for 4 axis 16 button, or 6 axis 12
-   button joysticks (and also the 32 button EMSUSB2).
-
-                                Other Programs
-
-findbpm
-
-   This program plays a song and lets you tap a key along with the beat.
-   It averages the number of times you tap over the length of the song,
-   and calculates a BPM. This method sounds crude, but if you have a good
-   sense of rhythm, it's actually highly accurate. Run it using findbpm
-   song.ogg.
-
-pyjoy
-
-   This program reports information about your joystick, and lets you see
-   what button number each button triggers when you press it. Run it from
-   a terminal.
-
-                                      FAQ
-
-   The FAQ is available online at
-   [6]http://www.icculus.org/pyddr/faq.php. Please read it before
-   contacting the developers.
-
-                                   Contacts
-
-   There are several different ways to get in touch with the pydance
-   developers.
-
-Email
-
-   The primary email address is the pyddr-discuss mailing list on
-   icculus.org. To subscribe, email
-   [7]pyddr-discuss-subscribe@icculus.org. You can then send email to
-   [8]pyddr-discuss@icculus.org to talk about pydance. If you want to see
-   about having pydance at a convention or show, contact [9]Brendan
-   Becker <tgz@orotech.net>, or show up on the IRC channel.
-
-IRC
-
-   If you need a bit more real-time help than email offers, pydance has
-   an IRC channel on the [10]Freenode IRC network. Surprisingly, the
-   channel is named #pyddr. The main developers are often in the channel
-   as P2E (Brendan) and piman (Joe).
-
-References
-
-   1. http://psyco.sf.net/
-   2. http://levelsix.com/products/pc/EMSUSB2.shtml
-   3. http://www.buynshop.com/
-   4. http://icculus.org/pyddr/get.php
-   5. http://www.pygame.org/
-   6. http://www.icculus.org/pyddr/faq.php
-   7. mailto:pyddr-discuss-subscribe@icculus.org
-   8. mailto:pyddr-discuss@icculus.org
-   9. mailto:tgz@orotech.net
-  10. http://www.freenode.net/
+About pydance -- http://icculus.org/pyddr/
+------------------------------------------
+Have you ever gone to an arcade and seen some crazy girl busting moves
+on some sort of metal panel of sorts, or a guy making a fool of
+himself trying to dance without watching the screen? Well, that game
+is probably Dance Dance Revolution, or DDR for short, which has been a
+hit in Asian countries for awhile and is finally getting popular in
+Europe and North America. It might also have been a similar game, such
+as Pump It Up, or EZ2 Dancer.
+
+pydance lets you play these games, and others like them, on your
+computer, either with the keyboard or with a custom controller. What
+you do is watch the screen as colored arrows move up the screen. As
+soon as they cover up stationary arrows at the top, you step (or
+press) the corresponding direction, in time with the beat of the
+music.
+
+This manual is designed to guide you through the process of getting
+and installing pydance, finding songs, setting it up, and dancing the
+night away. In addition, it has instructions for making your own dance
+patterns or arrow graphics.
+
+You don't need a dance mat to play pydance! It's a lot more fun if you
+do, but you can also use your keyboard or gamepad.
+
+System Requirements
+-------------------
+These are rough guidelines. Depending on your graphical theme,
+operating system, and so on, these requirements can differ. Although
+it is possible to install and play pydance on systems slower than
+this, the frame rate (and input latency) will be high enough that it
+won't be much fun.
+
+Operating System
+    GNU/Linux (Debian is the easiest to use with pydance), Mac OS X,
+    or Windows 2000 or higher. If Windows is your OS of choice, we can't
+    help you debug. If Mac OS X is your OS of choice, we'll have plenty of
+    trouble as well, but it's likely to work in the end.
+Video Card
+    A video card capable of doing 640x480x16bpp, which is most video
+    cards made since 1995. More recent cards will be faster, but many old
+    cards (ATI Radeon 7000, Matrox G200, nVidia TNT1) will be able to run
+    pydance acceptably.
+Processor
+    We recommend a 1 GHz IA32 or 600 MHz PPC processor, or better, for
+    pydance. However, pydance will run acceptably on a P3-500 or
+    equivalent.
+RAM
+    At least 64MB is required. 128MB is very strongly
+    recommended. pydance uses RAM to cache graphics, so more RAM means the
+    UI will respond faster.
+Hard Disk Space
+    pydance requires about 5MB (around 50MB if you don't already have
+    Python, SDL, or Pygame installed) of hard drive space to
+    install. Songs take 1MB to 6MB each, on average. If your RAM is low,
+    you will also need hard drive space for swap.
+
+Getting pydance
+---------------
+To get the latest version of pydance, visit the pydance download
+page at http://icculus.org/pyddr/get.php. It is available as a .zip or
+a .tar.gz file. The site also contains information about installing
+from packages for Debian, Mandrake, and Gentoo GNU/Linux, and also has
+a disk image for Mac OS X users.
+
+Otherwise, to run pydance, you can often just download the source,
+unpack it, and double click on pydance.py (or run ./pydance.py). The
+INSTALL file included with pydance has detailed installation
+instructions for Unix.
+
+Complete documentation is available in docs/manual.html.
+
+Contact
+-------
+Two mailing lists exist for pydance, pyddr-discuss@lists.debian.org
+and pyddr-devel@lists.debian.org. The pydance manual has more
+information about them.
+
+If you don't want to sign up for a mailing list but do want to report
+a bug, you can email the Debian Bug Tracking System at
+submit@bugs.debian.org. The first line of your email should be
+"Package: pydance". You can also email them directly to Joe Wreschnig
+<piman@debian.org> if you don't feel comfortable using the Debian BTS.
+
+pydance has an IRC channel, #pyddr, on irc.freenode.net. It is usually
+active, and can help you fix problems with pydance (if you've already
+tried the instructions in the manual, and the ones in the official
+FAQ). The main developers are in the channel as "piman" (Joe
+Wreschnig) and "P2E" (Brendan Becker). This is not, however, a good
+place to report bugs, since they can get lost easily.
