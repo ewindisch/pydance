@@ -24,6 +24,12 @@ STEP_MAPPINGS = {
              [3, 0, 1, 7, 2, 4, 5, 6], [1, 2, 4, 0, 5, 6, 7, 3]],
   "9PANEL": [[0, 1, 2, 3, 4, 5, 6, 7, 8], [6, 7, 8, 5, 4, 3, 0, 1, 2],
              [3, 0, 1, 8, 4, 2, 5, 6, 7], [1, 2, 5, 0, 4, 6, 7, 8, 3]],
+  "DMX": [[0, 1, 2, 3], [2, 3, 0, 1], [3, 0, 1, 2], [1, 2, 3, 0]],
+  "EZ2SINGLE": [[0, 1, 2, 3, 4], [4, 3, 2, 1, 0], [4, 3, 2, 1, 0],
+                [4, 3, 2, 1, 0]],
+  "EZ2REAL": [[0, 1, 2, 3, 4, 5, 6], [6, 4, 5, 3, 1, 2, 0],
+              [3, 2, 4, 6, 1, 5, 0], [6, 4, 1, 0, 2, 5, 3]],
+  
   }
 
 MAP_EQUIVS = {
@@ -33,6 +39,8 @@ MAP_EQUIVS = {
   "8PANEL": ["8DOUBLE", "8COUPLE", "8VERSUS"],
   "9PANEL": ["9DOUBLE", "9COUPLE", "9VERSUS"],
   "PARAPARA": ["PARADOUBLE", "PARACOUPLE", "PARAVERSUS"],
+  "EZ2SINGLE": ["EZ2VERSUS", "EZ2DOUBLE", "EZ2COUPLE"],
+  "EZ2REAL": ["REALVERSUS", "REALCOUPLE", "REALDOUBLE"],
   }
 
 for mode, equivs in MAP_EQUIVS.items():
