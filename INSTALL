@@ -8,7 +8,7 @@ pydance can be gotten from http://www.icculus.org/pyddr/get.php.
 In all installations, you need the following things:
  - A sufficiently recent SDL.
  - The [currently] latest SDL_mixer (1.2.5).
- - SMPEG, if you want MP3 support.
+ - SMPEG, if you want bad MP3 support.
  - Libvorbis, if you want Ogg Vorbis support (you need this).
  - Python 2.3 or higher (2.2 might run, but is unsupported; 2.1 won't).
  - Pygame 1.5.6 or higher (1.5.5 is acceptable but may crash on some files).
