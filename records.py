@@ -21,8 +21,7 @@ except: records = {}
 
 def add(filename, diff, game, rank, name):
   game = games.VERSUS2SINGLE.get(game, game)
-  newfn = os.path.join(os.path.split(os.path.split(filename)[0])[1],
-                       os.path.split(filename)[1])
+  newfn = os.path.join(*filename.split(os.sep)[-3:])
   if newfn in records:
     if rank > records[newfn][0]:
       records[(newfn, diff, game)][0] = (rank, name)
@@ -34,8 +33,7 @@ def add(filename, diff, game, rank, name):
 
 def get(filename, diff, game):
   game = games.VERSUS2SINGLE.get(game, game)
-  newfn = os.path.join(os.path.split(os.path.split(filename)[0])[1],
-                       os.path.split(filename)[1])
+  newfn = os.path.join(*filename.split(os.sep)[-3:])
   return records.get((newfn, diff, game), (-1, ""))
 
 def write():
