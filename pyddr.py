@@ -329,6 +329,7 @@ class Judge:
     self.early = self.late = self.ontime = 0
     self.totalcombos = 1
     self.bpm = bpm
+    self.oldbpm = bpm
     self.diff = diff
     scorecoeff = (((5000000.0 * (feet + 1.0)) / 10.0) /
                   (stepcount * (stepcount + 1.0) / 2.0)) # 5th mix
@@ -341,6 +342,7 @@ class Judge:
     
   def changebpm(self, bpm):
     self.tick = toRealTime(bpm, 1)
+    self.oldbpm = copy.copy(self.bpm)
     self.bpm = copy.copy(bpm)
         
   def getbpm(self):
@@ -584,46 +586,78 @@ class GradingScreen:
       rows = [judge.marvelous, judge.perfect, judge.great, judge.ok,
               judge.crap, judge.shit, judge.miss, judge.early, judge.late]
 
+      testf = pygame.font.Font(None,28)
+
       for j in range(4):
         for i in range(len(rows)):
           fc = ((j*32)+96-(i*8))
           if fc < 0: fc=0
           text = "%d (%d%%)" % (rows[i], 100 * rows[i] / totalsteps)
-          gradetext = fontfx.shadefade(text,28,j,(224,32), (fc,fc,fc))
+          gradetext = fontfx.shadefade(text,28,j,(testf.size(text)[0]+8,32), (fc,fc,fc))
           gradetext.set_colorkey(gradetext.get_at((0,0)))
-          screen.blit(gradetext, (40 + 500 * player - j, 72 + (i*24) - j))
+          graderect = gradetext.get_rect()
+          graderect.top = 72 + (i*24) - j
+          if player == 0:
+            graderect.left = 40
+          else:
+            graderect.right = 600
+          screen.blit(gradetext, graderect)
           pygame.display.flip()
 
       # Total
       for j in range(4):
-        gradetext = fontfx.shadefade(str(totalsteps),28,j,(224,32), (fc,fc,fc))
+        gradetext = fontfx.shadefade(str(totalsteps),28,j,(testf.size(str(totalsteps))[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
-        screen.blit(gradetext, (40 + 500*player - j, 288 - j))
+        graderect = gradetext.get_rect()
+        graderect.top = 288-j
+        if player == 0:
+          graderect.left = 40
+        else:
+          graderect.right = 600
+        screen.blit(gradetext, graderect)
         pygame.display.flip()
 
       # Combo
       for j in range(4):
         text = "%d (%d%%)" % (judge.bestcombo,
                               judge.bestcombo * 100 / totalsteps)
-        gradetext = fontfx.shadefade(text,28,j,(224,32), (fc,fc,fc))
+        gradetext = fontfx.shadefade(text,28,j,(testf.size(text)[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
-        screen.blit(gradetext, (40 + 500*player - j, 336 - j))
+        graderect = gradetext.get_rect()
+        graderect.top = 336-j
+        if player == 0:
+          graderect.left = 40
+        else:
+          graderect.right = 600
+        screen.blit(gradetext, graderect)
         pygame.display.flip()
 
       # Holds
       for j in range(4):
         text = "%d / %d" % (judge.numholds() - judge.badholds, judge.numholds())
-        gradetext = fontfx.shadefade(text,28,j,(224,32), (fc,fc,fc))
+        gradetext = fontfx.shadefade(text,28,j,(testf.size(text)[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
-        screen.blit(gradetext, (40 + 500*player - j, 360 - j))
+        graderect = gradetext.get_rect()
+        graderect.top = 360-j
+        if player == 0:
+          graderect.left = 40
+        else:
+          graderect.right = 600
+        screen.blit(gradetext, graderect)
         pygame.display.flip()
 
       # Score
       for j in range(4):
         gradetext = fontfx.shadefade(str(judge.score), 28, j,
-                                     (224,32), (fc,fc,fc))
+                                     (testf.size(str(judge.score))[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
-        screen.blit(gradetext, (40 + 500*player - j, 412 - j))
+        graderect = gradetext.get_rect()
+        graderect.top = 412-j
+        if player == 0:
+          graderect.left = 40
+        else:
+          graderect.right = 600
+        screen.blit(gradetext, graderect)
         pygame.display.flip()
 
       player += 1
