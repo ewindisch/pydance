@@ -28,15 +28,14 @@ class LyricChannel(pygame.sprite.Sprite):
  
     image1 = FONTS[32].render(lyric,1,self.darkcolor)
     image2 = FONTS[32].render(lyric,1,self.color)
-    rimage = pygame.Surface(image1.get_size(), 0, 16)
+    rimage = pygame.Surface(image1.get_size())
     rimage.fill((64,64,64))
     rimage.blit(image1,(-2,-2))
     rimage.blit(image1,(2,2))
     rimage.blit(image2,(0,0))
-    rimage.set_colorkey(rimage.get_at((0,0)))
-    image = rimage.convert()
+    rimage.set_colorkey(rimage.get_at((0,0)), RLEACCEL)
  
-    self.prender.append(image)
+    self.prender.append(rimage)
 
   def update(self, curtime):
     self.currentlyric = -1

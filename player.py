@@ -42,7 +42,7 @@ class AbstractLifeBar(pygame.sprite.Sprite):
     self.deltas = {}
 
     self.failtext = fontfx.embfade("FAILED",28,3,(80,32),(224,32,32))
-    self.failtext.set_colorkey(self.failtext.get_at((0,0)))
+    self.failtext.set_colorkey(self.failtext.get_at((0,0)), RLEACCEL)
         
     self.rect = self.image.get_rect()
     self.rect.top = 30
@@ -202,7 +202,7 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
 
     self.image = pygame.surface.Surface((len(game.dirs) * game.width, 24))
     self.image.fill((0, 0, 0))
-    self.image.set_colorkey((0, 0, 0))
+    self.image.set_colorkey((0, 0, 0), RLEACCEL)
 
     self.okimg = fontfx.shadefade("OK", 28, 3, (48, 24), (112, 224, 112))
     self.ngimg = fontfx.shadefade("NG", 28, 3, (48, 24), (224, 112, 112))
@@ -262,12 +262,12 @@ class JudgingDisp(pygame.sprite.Sprite):
     self.miss      = fontfx.shadefade("MISS"     ,48,4,(tx,40),(224, 32, 32))
     self.space     = FONTS[48].render( " ",       1, (  0,   0,   0) )
 
-    self.marvelous.set_colorkey(self.marvelous.get_at((0,0)),RLEACCEL)
-    self.perfect.set_colorkey(self.perfect.get_at((0,0)),RLEACCEL)
-    self.great.set_colorkey(self.great.get_at((0,0)),RLEACCEL)
-    self.ok.set_colorkey(self.ok.get_at((0,0)),RLEACCEL)
-    self.boo.set_colorkey(self.boo.get_at((0,0)),RLEACCEL)
-    self.miss.set_colorkey(self.miss.get_at((0,0)),RLEACCEL)
+    self.marvelous.set_colorkey(self.marvelous.get_at((0,0)), RLEACCEL)
+    self.perfect.set_colorkey(self.perfect.get_at((0,0)), RLEACCEL)
+    self.great.set_colorkey(self.great.get_at((0,0)), RLEACCEL)
+    self.ok.set_colorkey(self.ok.get_at((0,0)), RLEACCEL)
+    self.boo.set_colorkey(self.boo.get_at((0,0)), RLEACCEL)
+    self.miss.set_colorkey(self.miss.get_at((0,0)), RLEACCEL)
     
     self.image = self.space
         
@@ -297,7 +297,7 @@ class JudgingDisp(pygame.sprite.Sprite):
       self.rect = self.image.get_rect()
       self.rect.centerx = self.centerx
       self.rect.bottom = self.bottom
-      self.image.set_colorkey(self.image.get_at((0,0)))
+      self.image.set_colorkey(self.image.get_at((0,0)), RLEACCEL)
       self.needsupdate = False
 
 class ComboDisp(pygame.sprite.Sprite):
@@ -323,7 +323,7 @@ class ComboDisp(pygame.sprite.Sprite):
         img3.blit(img1, (-2, 2))
         img3.blit(img1, (2, -2))
         img3.blit(img2, (0, 0))
-        img3.set_colorkey(img3.get_at((0, 0)))
+        img3.set_colorkey(img3.get_at((0, 0)), RLEACCEL)
         render.append(img3)
       self.words.append(render)
     self.space = pygame.surface.Surface((0,0)) #make a blank image
@@ -358,7 +358,7 @@ class ComboDisp(pygame.sprite.Sprite):
       width += ones.get_width()
       height = render[-1].get_height()
       self.image = pygame.surface.Surface((width,height))
-      self.image.set_colorkey(ones.get_at((0, 0)))
+      self.image.set_colorkey(ones.get_at((0, 0)), RLEACCEL)
       left = 0		      
       #render
       if thousands:
@@ -444,6 +444,8 @@ class Player:
       jd.add(self.text_group)
     self.text_group.add([self.score, self.lifebar, self.holdtext])
     if mainconfig["showcombo"]: self.text_group.add(self.combos)
+    self.sprite_groups = [self.toparr_group, self.arrow_group,
+                          self.fx_group, self.text_group]
 
   def get_next_events(self):
     self.evt = self.steps.get_events()
@@ -536,14 +538,8 @@ class Player:
 
   def update_sprites(self, screen):
     rects = []
-    rects.extend(self.toparr_group.draw(screen))
-    rects.extend(self.arrow_group.draw(screen))
-    rects.extend(self.fx_group.draw(screen))
-    rects.extend(self.text_group.draw(screen))
+    for g in self.sprite_groups: rects.extend(g.draw(screen))
     return rects
 
   def clear_sprites(self, screen, bg):
-    self.text_group.clear(screen, bg)
-    self.fx_group.clear(screen, bg)
-    self.arrow_group.clear(screen, bg)
-    self.toparr_group.clear(screen, bg)
+    for g in self.sprite_groups: g.clear(screen, bg)

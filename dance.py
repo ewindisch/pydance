@@ -44,36 +44,36 @@ class BGmovie(pygame.sprite.Sprite):
         self.oldframe = curframe
 
 class fpsDisp(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.oldtime = -10000000
-        self.loops = 0
-        self.image = pygame.surface.Surface((1,1))
-        self.lowest = 1000
-        self.highest = -1
-        self.fpses = []
+  def __init__(self):
+    pygame.sprite.Sprite.__init__(self)
+    self.oldtime = -10000000
+    self.loops = 0
+    self.image = pygame.surface.Surface((1,1))
+    self.lowest = 1000
+    self.highest = -1
+    self.fpses = []
 
-    def fpsavg(self):
-      return reduce(operator.add,self.fpses[2:])/(len(self.fpses)-2)
+  def fpsavg(self):
+    return reduce(operator.add,self.fpses[2:])/(len(self.fpses)-2)
 
-    def update(self, time):
-      self.loops += 1
-      if (time - self.oldtime) > 1:
-        text = repr(self.loops) + " loops/sec"
-        self.image = FONTS[16].render(text,1,(160,160,160))
-        self.rect = self.image.get_rect()
-        self.image.set_colorkey(self.image.get_at((0,0)))
-        self.rect.bottom = 480
-        self.rect.right = 640
+  def update(self, time):
+    self.loops += 1
+    if (time - self.oldtime) > 1:
+      text = repr(self.loops) + " loops/sec"
+      self.image = FONTS[16].render(text,1,(160,160,160))
+      self.rect = self.image.get_rect()
+      self.image.set_colorkey(self.image.get_at((0,0)), RLEACCEL)
+      self.rect.bottom = 480
+      self.rect.right = 640
 
-        if self.loops > self.highest:
-          self.highest = self.loops
-        if (self.loops < self.lowest) and len(self.fpses)>2:
-          self.lowest = self.loops
+      if self.loops > self.highest:
+        self.highest = self.loops
+      if (self.loops < self.lowest) and len(self.fpses)>2:
+        self.lowest = self.loops
 
-        self.fpses.append(self.loops)
-        self.oldtime = time
-        self.loops = 0
+      self.fpses.append(self.loops)
+      self.oldtime = time
+      self.loops = 0
 
 class Blinky(pygame.sprite.Sprite):
   def __init__ (self, bpm):
@@ -119,7 +119,7 @@ class TimeDisp(pygame.sprite.Sprite):
     nowtime = repr(time)[:repr(time).index('.')+3]
     if (nowtime != self.oldtime) and (self.blahmod > 1):
       self.image = FONTS[40].render(nowtime,1,(224,224,224))
-      self.image.set_colorkey(self.image.get_at((0,0)),RLEACCEL)
+      self.image.set_colorkey(self.image.get_at((0,0)), RLEACCEL)
       self.oldtime = nowtime
       self.rect = self.image.get_rect()
       self.rect.top = 0
@@ -312,10 +312,10 @@ class HoldArrowSprite(pygame.sprite.Sprite):
     self.broken = 1
     self.oimage = pygame.surface.Surface((64,32))
     self.oimage.blit(self.image,(0,-32))
-    self.oimage.set_colorkey(self.oimage.get_at((0,0)))
+    self.oimage.set_colorkey(self.oimage.get_at((0,0)), RLEACCEL)
     self.oimage2 = pygame.surface.Surface((64,32))
     self.oimage2.blit(self.image,(0,0))
-    self.oimage2.set_colorkey(self.oimage.get_at((0,0)))
+    self.oimage2.set_colorkey(self.oimage.get_at((0,0)), RLEACCEL)
     self.bimage = pygame.surface.Surface((64,1))
     self.bimage.blit(self.image,(0,-31))
 
@@ -411,7 +411,7 @@ class HoldArrowSprite(pygame.sprite.Sprite):
     if holdsize < 0:
       holdsize = 0
     self.cimage = pygame.surface.Surface((64,holdsize+64))
-    self.cimage.set_colorkey(self.cimage.get_at((0,0)))
+    self.cimage.set_colorkey(self.cimage.get_at((0,0)), RLEACCEL)
     self.cimage.blit( pygame.transform.scale(self.bimage, (64,holdsize)), (0,32) )
     self.cimage.blit(self.oimage2,(0,0))
     self.cimage.blit(self.oimage,(0,holdsize+32))
@@ -570,7 +570,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
   for player in players:
     ready_go_time = min(player.steps.ready, ready_go_time)
   rgs = ReadyGoSprite(ready_go_time)
-  tgroup.add(rgs)
+  if ready_go: tgroup.add(rgs)
 
   if mainconfig['showbackground'] > 0:
     if backmovie.filename == None:
@@ -706,20 +706,22 @@ def dance(screen, song, players, prevscr, ready_go, game):
                 plr.judge.handle_arrow(dir, ev.when)
          
         for ev in nevents:
+          newsprites = []
           if ev.feet:
             for (dir,num) in zip(game.dirs, ev.feet):
               dirstr = dir + repr(int(ev.color) % plr.colortype)
-              groups = (plr.arrow_group)
-              if num & 1:
-                if not (num & 2):
-                  ArrowSprite(plr.theme.arrows[dirstr],
-                              curtime, ev.when, plr, song).add(groups)
+              if num & 1 and not (num & 2):
+                ns = ArrowSprite(plr.theme.arrows[dirstr], curtime,
+                                 ev.when, plr, song)
+                newsprites.append(ns)
 
-              if num & 2:
+              elif num & 2:
                 holdindex = plr.steps.holdref.index((game.dirs.index(dir),
                                                      ev.when))
-                HoldArrowSprite(plr.theme.arrows[dirstr], curtime,
-                                plr.steps.holdinfo[holdindex], plr, song).add(groups)
+                ns = HoldArrowSprite(plr.theme.arrows[dirstr], curtime,
+                                     plr.steps.holdinfo[holdindex], plr, song)
+                newsprites.append(ns)
+          plr.arrow_group.add(newsprites)
 
     for plr in players: plr.check_bpm_change(curtime)
     for plr in players: plr.check_sprites(curtime)

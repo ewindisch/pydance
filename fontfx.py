@@ -110,7 +110,7 @@ class TextProgress:
         self.offcolor = [c^40 for c in color]
         self.notcolor = [c^0xFF for c in color]
         self.text = font.render(message, 0, (255,0,0), self.notcolor)
-        self.text.set_colorkey(1)
+        self.text.set_colorkey(1, RLEACCEL)
         self.outline = self.textHollow(font, message, color)
         self.bar = pygame.Surface(self.text.get_size())
         self.bar.fill(self.offcolor)
@@ -124,15 +124,15 @@ class TextProgress:
         size = base.get_width() + 2, base.get_height() + 2
         img = pygame.Surface(size, 16)
         img.fill(self.notcolor)
-        base.set_colorkey(0)
+        base.set_colorkey(0, RLEACCEL)
         img.blit(base, (0, 0))
         img.blit(base, (2, 0))
         img.blit(base, (0, 2))
         img.blit(base, (2, 2))
-        base.set_colorkey(0)
+        base.set_colorkey(0, RLEACCEL)
         base.set_palette_at(1, self.notcolor)
         img.blit(base, (1, 1))
-        img.set_colorkey(self.notcolor)
+        img.set_colorkey(self.notcolor, RLEACCEL)
         return img
 
     def render(self, percent=50):
@@ -144,7 +144,7 @@ class TextProgress:
             surf.fill(self.color)
         surf.blit(self.text, (0,0))
         surf.blit(self.outline, (-1,-1))
-        surf.set_colorkey(self.notcolor)
+        surf.set_colorkey(self.notcolor, RLEACCEL)
         return surf
 
 class zztext(pygame.sprite.Sprite):
