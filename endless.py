@@ -151,8 +151,7 @@ class Endless(InterfaceWindow):
         c = Constraint("name", songitems[0].difficulty[gametype].keys()[0])
         self.constraints.append(c)
 
-    for i in range(len(self.constraints)):
-      c = self.constraints[i]
+    for i, c in enumerate(self.constraints):
       EndlessDiffDisplay(i, c).add(self._sprites)
 
     self._sprites.add(HelpText(ENDLESS_HELP, [255, 255, 255], [0, 0, 0],

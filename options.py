@@ -179,7 +179,7 @@ O_HELP = [
 
 def index_of(value, name):
   values = OPTIONS[name][VALUES]
-  for i, v in zip(range(len(values)), values):
+  for i, v in enumerate(values):
     if v[VALUE] == value: return i
   return None
 
@@ -317,7 +317,7 @@ class OptionScreen(InterfaceWindow):
 
   def loop(self):
     pid, ev = ui.ui.poll()
-    for i in range(len(self._lists)): self._lists[i].set_index(self._index[i])
+    for i, l in enumerate(self._lists): l.set_index(self._index[i])
     for i in range(self._players):
       opt = OPTS[self._index[i]]
       self._displayers[i].set_index(index_of(self._configs[i][opt], opt))

@@ -59,14 +59,14 @@ class WrapFont(object):
     image = pygame.Surface([self._width, len(lines) * self._ls + self._ds],
                            SRCALPHA, 32)
     image.fill([0, 0, 0, 0])
-    for i in range(len(lines)):
+    for i, line in enumerate(lines):
       if centered:
-        r = lines[i].get_rect()
+        r = line.get_rect()
         r.centerx = self._width / 2
         r.y = i * self._font.get_linesize()
-        image.blit(lines[i], r)
+        image.blit(line, r)
       else:
-        image.blit(lines[i], [0, i * self._font.get_linesize()])
+        image.blit(line, [0, i * self._font.get_linesize()])
     return image
 
 # EMBFADE - does a 3d emboss-like effect

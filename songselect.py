@@ -319,8 +319,8 @@ class SongSelect(InterfaceWindow):
           self._index = 0
         else:
           music.fadeout(500)
-          diffs = [self._song.diff_list[self._game][self._diffs[i]]
-                   for i in range(len(self._diffs))]
+          diffs = [self._song.diff_list[self._game][d]
+                   for i, d in enumerate(self._diffs)]
           dance.play(self._screen, [(self._song.filename, diffs)],
                      self._configs, self._config, self._game)
           music.fadeout(500) # The just-played song

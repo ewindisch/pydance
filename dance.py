@@ -204,8 +204,8 @@ def play(screen, playlist, configs, songconf, playmode):
     prevscr = pygame.transform.scale(screen, (640,480))
     songdata = steps.SongData(current_song, songconf)
 
-    for pid in range(len(players)):
-      players[pid].set_song(current_song, diff[pid], songdata.lyricdisplay)
+    for pid, player in enumerate(players):
+      player.set_song(current_song, diff[pid], songdata.lyricdisplay)
 
     print "Playing", songfn
     print songdata.title.encode("ascii", "replace"), "by",

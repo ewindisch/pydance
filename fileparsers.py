@@ -212,8 +212,7 @@ class MSDFile(GenericFile):
       elif line[0] == "#": lines.append(line[1:]) # A new tag
       else: lines[-1] += line
 
-    for i in range(len(lines)):
-      line = lines[i]
+    for i, line in enumerate(lines):
       while line[-1] == ";": line = line[:-1] # Some lines have two ;s.
       lines[i] = line.split(":")
 
