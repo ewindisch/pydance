@@ -3397,17 +3397,17 @@ def songSelect(songs, players):
           # Just an arbitrary start position, an attempt to pick up the chorus or
           # the most recognizable part of the song.
 
-          pygame.mixer.music.set_volume(0.2)
-          length = 1
-          lastgp = 1
-          while 1:
-            pygame.mixer.music.play(0, currentSong.startsec + length)
-            if (pygame.mixer.music.get_pos() == 0) and (lastgp == 0):
-              length -= 2
-              break
-            lastgp = pygame.mixer.music.get_pos()
-            length += 1
-          print "this song is",length,"secongs long"
+#          pygame.mixer.music.set_volume(0.2)
+#          length = 1
+#          lastgp = 1
+#          while 1:
+#            pygame.mixer.music.play(0, currentSong.startsec + length)
+#            if (pygame.mixer.music.get_pos() == 0) and (lastgp == 0):
+#              length -= 2
+#              break
+#            lastgp = pygame.mixer.music.get_pos()
+#            length += 1
+#          print "this song is",length,"secongs long"
           previewStart = 45
           pygame.mixer.music.set_volume(1.0)
           pygame.mixer.music.play(0, currentSong.startsec + previewStart)
@@ -3549,7 +3549,7 @@ def songSelect(songs, players):
 
       fooblah = currentSong.fooblah
       mrsong = Song(fooblah)
-      mrsong.length = length
+#      mrsong.length = length
       pygame.mixer.quit()
       oldfoo = 1
       screen.fill(BLACK)
@@ -4287,7 +4287,7 @@ def dance(song,players,difficulty):
 #    time.sleep(0.0066667)
 #    time.sleep(0.0096066)
 
-    if (curtime > song.length - 1) and (songtext.zdir == 0) and (songtext.zoom > 0):
+    if (pygame.mixer.music.get_pos() == 0) and (songtext.zdir == 0) and (songtext.zoom > 0):
       songtext.zout()
       grptext.zout()
 
