@@ -641,7 +641,7 @@ class HoldArrowSprite(CloneSprite):
     
     self.centerx = self.rect.centerx + 320 * player.pid
     
-  def update (self,curtime,curbpm,lbct):
+  def update(self,curtime,curbpm,lbct):
     if (self.playedsound is None) and (curtime >= self.timef1 -0.0125):
       self.sample.play()
       self.playedsound = 1
@@ -750,6 +750,47 @@ class HoldArrowSprite(CloneSprite):
 
     if alp != self.image.get_alpha(): self.image.set_alpha(alp)
 
+class ReadyGoSprite(pygame.sprite.Sprite):
+  def __init__(self, time):
+    pygame.sprite.Sprite.__init__(self)
+    ready = os.path.join(pyddr_path, "images", "ready.png")
+    go = os.path.join(pyddr_path, "images", "go.png")
+    self.time = time
+    self.ready = pygame.image.load(ready).convert()
+    self.ready.set_colorkey(self.ready.get_at((0, 0)), RLEACCEL)
+    self.go = pygame.image.load(go).convert()
+    self.go.set_colorkey(self.go.get_at((0, 0)), RLEACCEL)
+    self.pick_image(min(0, time))
+
+  def update(self, cur_time):
+    if cur_time > self.time: self.kill()
+    elif self.alive(): self.pick_image(cur_time)
+
+  def pick_image(self, cur_time):
+    ttl = self.time - cur_time # time to live
+    if ttl < 0.25:
+      self.image = self.go
+      alpha = ttl / 0.25
+    elif ttl < 0.750:
+      self.image = self.go
+      alpha = 1
+    elif ttl < 1.00:
+      self.image = self.go
+      alpha = (1 - ttl) / 0.25
+    elif ttl < 1.5:
+      self.image = self.ready
+      alpha = (ttl - 1.0) / 0.5
+    elif cur_time < 0.5:
+      self.image = self.ready
+      alpha = cur_time / 0.5
+    else:
+      self.image = self.ready
+      alpha = 1
+
+    self.image.set_alpha(int(256 * alpha))
+    self.rect = self.image.get_rect()
+    self.rect.center = (320, 240)
+      
 def SetDisplayMode(mainconfig):
   try:
     flags = HWSURFACE | DOUBLEBUF
@@ -885,6 +926,8 @@ def playSequence(playlist, configs, playmode):
 
   numplayers = len(configs)
 
+  first = True
+
   players = []
   for playerID in range(numplayers):
     plr = Player(playerID, ComboDisp(playerID), configs[playerID])
@@ -904,8 +947,9 @@ def playSequence(playlist, configs, playmode):
     print "Playing", songfn
     print songdata.title, "by", songdata.artist
   
-    if dance(songdata, players, prevscr):
+    if dance(songdata, players, prevscr, first):
       break # Failed
+    first = False
 
   judges = [player.judge for player in players]
 
@@ -917,7 +961,7 @@ def playSequence(playlist, configs, playmode):
 
   return judges
 
-def dance(song, players, prevscr):
+def dance(song, players, prevscr, ready_go):
   global screen
 
   songFailed = False
@@ -948,6 +992,12 @@ def dance(song, players, prevscr):
     backmovie = BGmovie(None)
     
   backimage = BGimage(song.background)
+
+  ready_go_time = 100
+  for player in players:
+    ready_go_time = min(player.steps.ready, ready_go_time)
+  rgs = ReadyGoSprite(ready_go_time)
+  tgroup.add(rgs)
 
   if mainconfig['showbackground'] > 0:
     if backmovie.filename == None:
@@ -1170,6 +1220,7 @@ def dance(song, players, prevscr):
 
     songtext.update()
     grptext.update()
+    rgs.update(curtime)
 
     if fpsdisplay:
       fpstext.update(curtime)

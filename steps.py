@@ -51,6 +51,7 @@ class Steps:
 
     self.lastbpmchangetime = []
     self.totalarrows = 0
+    self.ready = None
 
     holdlist = []
     holdtimes = []
@@ -81,8 +82,7 @@ class Steps:
         cur_time += float(words[1])
         cur_beat += cur_bpm * float(words[1]) / 60
       elif words[0] == 'R':
-        self.events.append(SongEvent(when = cur_time, bpm = cur_bpm,
-                                     beat = cur_beat, extra= 'READY'))
+        self.ready = cur_time
         coloring_mod = 0
       elif words[0] in BEATS:
         cando = True # FIXME: Do little correctly for 24th etc notes
@@ -159,6 +159,9 @@ class Steps:
 
     self.holdinfo = zip(holdlist, holdtimes, releasetimes)
     self.holdref = zip(holdlist, holdtimes)
+
+    if self.ready == None:
+      self.ready = self.events[1].when - toRealTime(self.events[1].bpm, 16)
 
   def play(self):
     self.curtime = 0.0
