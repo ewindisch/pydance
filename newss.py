@@ -491,7 +491,7 @@ class MainWindow(object):
       d = DifficultyBox(i, 2)
       if not self._song.isfolder:
         diff_name = self._song.diff_list[game][self._diffs[i]]
-        rank = records.get(self._song.filename, diff_name, game)[0]
+        rank = records.get(self._song.filename, diff_name, self._game)[0]
         grade = grades.grades[self._config["grade"]].grade_by_rank(rank)
         d.set(diff_name, DIFF_COLORS.get(diff_name, [127, 127, 127]),
               self._song.difficulty[game][diff_name], grade)
@@ -615,7 +615,7 @@ class MainWindow(object):
         if not self._song.isfolder:
           for i in range(len(self._diffs)):
             name = self._song.diff_list[self._game][self._diffs[i]]
-            rank = records.get(self._song.filename, name, game)[0]
+            rank = records.get(self._song.filename, name, self._game)[0]
             grade = grades.grades[self._config["grade"]].grade_by_rank(rank)
             self._diff_widgets[i].set(name,
                                       DIFF_COLORS.get(name, [127,127,127]),
@@ -623,7 +623,7 @@ class MainWindow(object):
                                     grade)
 
       self.update()
-      self._clock.tick(20)
+      self._clock.tick(60)
       pid, ev = ui.ui.poll()
 
   def update(self):
