@@ -3,7 +3,7 @@ add to it.
 
 0.6.3
  - Have installer files for Mac OS X.
- - better help in game (context-sensitive menu help, key maps) (sort of)
+ - better help in game (sort of done)
  - Clean up the main select/dance/judge loop. (3/4th done)
  - Player-as-object patch
    - Removal of keykludge
@@ -23,11 +23,15 @@ add to it.
  - High score files (0.6.4?)
  - Savable courses (0.6.4?)
  - Endless (0.6.3?)
- - DWI loader natively using the SongItem interface (0.6.
- - Sort by popularity
+ - DWI loader natively using the SongItem interface
+ - Sort by popularity (uses high score mechanism)
  - Themable menus
  - Credits screen
  - MD5 checksums in files for the music they go with
+
+UI changes (doable at any time):
+ - Go faster after scrolling through a few songs
+ - Up/down indicators on menus
 
 Far Future:
  - More game modes
