@@ -59,7 +59,6 @@ class Detail:
     self.detail = detail
     (self.key, self.label) = self.dwi2step[label]
 
-    if self.key == 'file': self.detail = (self.detail[:-4]).lower() + ".mp3"
     if self.key == 'offset': self.detail = - int(self.detail)
     if self.key == 'bpm': self.detail = "%.2f" % float(self.detail)
     
