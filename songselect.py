@@ -15,8 +15,12 @@ MOVE_SOUND = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
 # FIXME: We need more difficulties here
 difficulty_colors = { "BEGINNER": colors.color["yellow"],
                       "BASIC": colors.color["orange"],
+                      "LIGHT": colors.color["orange"],
                       "TRICK": colors.color["red"],
+                      "ANOTHER": colors.color["red"],
+                      "STANDARD": colors.color["red"],
                       "MANIAC": colors.color["green"],
+                      "HEAVY": colors.color["green"],
                       "HARDCORE": colors.color["purple"]
                      }
 
