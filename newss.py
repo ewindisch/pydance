@@ -91,21 +91,21 @@ def folder_name(name, type):
 
 def load_banner(filename):
   banner = pygame.image.load(filename)
-  size = banner.get_rect().size
+  size = banner.get_size()
   if size <= (100, 100): # Parapara-style... no idea what to do.
     return banner, None
   elif size == (177, 135): # KSF-style 1
     return banner, None
   elif size == (300, 200): # KSF-style 2
-    banner.set_colorkey(banner.get_at([0, 0]))
+    banner.set_colorkey(banner.get_at([0, 0]), RLEACCEL)
     return banner, None
   elif abs(size[0] - size[1]) < 3: # "Square", need to rotate.
     banner = banner.convert()
     banner.set_colorkey(banner.get_at([0, 0]), RLEACCEL)
     return pygame.transform.rotozoom(banner, -45, 1.0), [51, 50, 256, 80]
   else: # 256x80, standard banner, I hope.
-    banner = pygame.transform.scale(banner, [256, 80])
-    b2 = make_box([0, 0, 0], banner.get_size())
+    if size != (256, 80): banner = pygame.transform.scale(banner, [256, 80])
+    b2 = make_box([0, 0, 0], [256, 80])
     b2.blit(banner, [4, 4])
     return b2, None
 
@@ -129,8 +129,7 @@ class SongItemDisplay(object):
 
   def render(self):
     if self.banner: return
-    
-    if self._song.info["banner"]:
+    elif self._song.info["banner"]:
       self.banner, self.clip = load_banner(self._song.info["banner"])
     else: self.banner = SongItemDisplay.no_banner
 
@@ -162,8 +161,7 @@ class FolderDisplay(object):
         for dir in mainconfig["songdir"].split(os.pathsep):
           dir = os.path.expanduser(dir)
           fn = os.path.join(dir, name, "banner.png")
-          if os.path.exists(fn):
-            self.banner, self.clip = load_banner(fn)
+          if os.path.exists(fn): self.banner, self.clip = load_banner(fn)
 
     if self.banner == None: self.banner = SongItemDisplay.no_banner
 
@@ -178,10 +176,8 @@ class TextDisplay(pygame.sprite.Sprite):
 
   def _render(self):
     self._needs_update = False
-    self.image = pygame.Surface(self._size, SRCALPHA, 32)
-    self.image.fill([0, 0, 0, 0])
     img = fontfx.shadow(self._text, self._font, 1, [255, 255, 255], [0, 0, 0])
-    self.image.blit(img, [0, 0])
+    self.image = img
     self.rect = self.image.get_rect()
     self.rect.topleft = self._topleft
 
@@ -348,38 +344,33 @@ class BannerDisplay(pygame.sprite.Sprite):
 
     self._title = fontfx.shadow(song.info["title"],
                                 pygame.font.Font(None, 20), 1, c1, c2)
+    self._r_t = self._title.get_rect()
+    self._r_t.center = [179, 240]
     self._artist = fontfx.shadow(song.info["artist"],
                                  pygame.font.Font(None, 20), 1, c1, c2)
+
+    self._r_a = self._artist.get_rect()
+    self._r_a.center = [179, 320]
 
     if song.info["subtitle"]:
       self._subtitle = fontfx.shadow(song.info["subtitle"],
                                      pygame.font.Font(None, 20), 1, c1, c2)
+      self._r_s = self._subtitle.get_rect()
+      self._r_s.center = [179, 270]
     else: self._subtitle = None
     self._clip = song.clip
     self._banner = song.banner
+    self._r_b = self._banner.get_rect()
+    self._r_b.center = (179, 100)
 
   def _render(self):
-    self._box = make_box(self._color, [350, 350])
-    self.image = pygame.Surface(self._box.get_size(), SRCALPHA, 32)
-    self.image.blit(self._box, [0, 0])
-    self.image.set_clip(self._clip)
-    r_b = self._banner.get_rect()
-    r_b.center = (self.image.get_rect().size[0] / 2, 100)
-    self.image.blit(self._banner, r_b)
+    self.image = make_box(self._color, [350, 350])
+    self.image.blit(self._banner, self._r_b)
     self.image.set_clip(None)
     
-    r_t = self._title.get_rect()
-    r_t.center = [179, 240]
-    self.image.blit(self._title, r_t)
-
-    r_a = self._artist.get_rect()
-    r_a.center = [179, 320]
-    self.image.blit(self._artist, r_a)
-
-    if self._subtitle:
-      r_s = self._subtitle.get_rect()
-      r_s.center = [179, 270]
-      self.image.blit(self._subtitle, r_s)
+    self.image.blit(self._title, self._r_t)
+    self.image.blit(self._artist, self._r_a)
+    if self._subtitle: self.image.blit(self._subtitle, self._r_s)
 
     self.rect = self.image.get_rect()
     self.rect.center = self._center
