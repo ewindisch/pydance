@@ -26,10 +26,12 @@ def SetDisplayMode(mainconfig):
   return screen
 
 def load_files(screen, files, type, Ctr, args):
-  # Remove duplicates
+  if len(files) == 0: return []
+
   screen.fill(colors.BLACK)
   pct = 0
   inc = 100.0 / len(files)
+  # Remove duplicates
   files = list(dict(map(None, files, [])).keys())
   objects = []
   message = "Found %d %s. Loading..." % (len(files), type)

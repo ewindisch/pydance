@@ -80,6 +80,8 @@ DESCRIPTIONS = {
 class GameSelect(object):
   def __init__(self, songitems, courses, screen):
     self.screen = screen
+    if len(courses): self.courses = True
+    else: self.courses = False
 
     # Store previously selected images, to blit for each choice.
     self.images = [None, None, None]
@@ -122,7 +124,9 @@ class GameSelect(object):
     return self.select_general(1, ["SINGLE", "VERSUS", "COUPLE", "DOUBLE"])
 
   def select_selector(self):
-    return self.select_general(2, ["Normal", "Endless", "Nonstop"])
+    s = ["Normal", "Endless"]
+    if self.courses: s.append("Nonstop")
+    return self.select_general(2, s)
 
   # idx is the index in self.images to modify with this choice.
   def select_general(self, idx, choices):

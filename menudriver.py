@@ -156,6 +156,7 @@ def do(screen, songdata):
         ["Back", None, None]
         ),
        ("Graphic Options",
+        ["Animation", onoff_opt, ('animation',)],
         ["Arrow Effects", rotate_index_opt,
          ('explodestyle', ('none', 'rotate', 'scale', 'rotate & scale'))],
         ["Backgrounds", onoff_opt, ('showbackground',)],

@@ -77,6 +77,7 @@ default_conf = {
   "fpsdisplay": 1, "showlyrics": 1,
   "showcombo": 1,
   "autofail": 1,
+  "animation": 1,
   "grading": 1,
   "saveinput": 1,
   "strobe": 0,
