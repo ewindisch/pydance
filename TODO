@@ -2,6 +2,7 @@ This is my (piman's) rough outline of where I want to be. Other people,
 add to it.
 
 0.6.3
+ - Have installer files for Mac OS X.
  - better help in game (context-sensitive menu help, key maps)
  - Clean up the main select/dance/judge loop. (half done)
  - Player-as-object patch
