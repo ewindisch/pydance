@@ -18,17 +18,19 @@ dl.faq dt { font-weight: bold }
     <h1>About pydance</h1>
     <p>pydance is a dancing simulator, primarily for GNU/Linux, but it also
       runs on other UNIX-like operating systems, Windows, and Mac OS
-      X. DDR stands for "Dance Dance Revolution", a game that's slowly
-      earning popularity in the  United States and other countries,
-      that comes from Japan. The game idea is simple. There's a mat with
-      four directional arrows  you can step on, and the game scrolls
+      X. The basic game idea is simple. There's a mat with
+      directional arrows  you can step on, and the game scrolls
       arrows up the screen while playing a song. When the arrows reach
       the top of the screen (not sooner and not later, since they pass
       over stationary arrows), you hit the corresponding arrow on the
       pad, and given that you hit it on time with the beat, you score
       points. The idea is that the game is supposed to either teach you
       to dance, or simulate dancing. It works to a degree. =]</p>
-    <p>However, if you're just hearing about this game (or you're broke), you
+<p>There are many different types of games like this, such as Dance Dance
+Revolution, Pump It Up, Pop'n Stage, Technomotion, and so on. However, they
+all have this same basic pattern in common, and so pydance is capable of
+playing many different game modes.</p>
+    <p>If you're just hearing about this game (or you're broke), you
       don't actually <em>need</em> a mat to play pydance (although it
       definitely makes it more fun). You can use a keyboard or regular
       joystick instead.</p>
@@ -36,32 +38,38 @@ dl.faq dt { font-weight: bold }
       If not, you might want to look at the INSTALL file included with
       the source.</p>
     <h1>Playing pydance</h1>
-    <p>To play the game, just select "Play Game" from the menu, then
-    select "Regular", and select
-      a song. Press j and l to change your difficulty setting
-    (more bars means more difficult). Hit enter when you're on a
-    difficulty and song you like.</p>
+<h2>Controls</h2>
+<p>All instructions are given in terms of directions. By default, for
+player 1, this means the uiojklm,. keys on a qwerty keyboard, or
+the numeric pad for player 2. "Start" refers to enter, and 'select'
+refers to tab, or 0 on the numeric pad. Configuration notes for a dvorak
+keyboard are given later.</p>
+<h2>Starting the Game</h2>
+    <p>To play the game, just select "Play Game" from the menu. Use
+left, right, and start, to select what directions you want to
+use, how many people you want playing, and whether you want to use the
+song selector or random endless songs. Once in the song selector, use
+left and right to select a song, up and down to change your difficulty,
+and start to start playing.</p>
     <p>Oh wait, now there's all these arrows scrolling up the screen -
     what should you do? Actually, it's pretty simple. When the arrows
     get to the top (which is in time with the music), step on the
-    direction of the arrow on your pad. If you're using the keyboard,
-    you can just IJKL for up/down/left/right.</p>
-    <p>If you want to play a versus game, just hit start on the second
-    player's dance mat, or '2' on the keyboard (or on the numeric keypad
-    for azerty keyboard users); The second player uses the arrow keys.</p>
+    direction of the arrow on your pad (or press the direction on the
+keyboard).</p>
     <p>In the song selector, you can hold down start when selecting
       a song to bring up a screen full of game modifiers, that affect
-      how the arrows are displayed. You can also hold down select (or
-      tab) to bring up a screen of game-wide options, like oni or
+      how the arrows are displayed. You can also hold down select
+      to bring up a second screen of game-wide options, like oni or
       battle mode.</p>
     <p>If you need to exit the game or back out of menus, just press
     escape.</p>
     <h2>Nonstop Mode</h2>
     <p>From the normal song selector you can set up <em>Nonstop
     Mode</em>. Select a song and difficulty you want to play, and
-    press <kbd>m</kbd>. That song is now on your nonstop playlist. You
+    press down left. That song is now on your nonstop playlist. You
     can add a lot of songs this way, then play them all in succession
-    without returning to the song selector.</p>
+    without returning to the song selector. To remove a song, press
+    up left.</p>
     <h2>Endless Mode</h2>
     <p>The <em>Endless Mode</em> option on the Play Game menu takes
     you into a different selector. In this one, you can select a
@@ -74,7 +82,7 @@ dl.faq dt { font-weight: bold }
     configuration, read on.</p>
     <p>pydance reads from configuration files in appropriate
     places. This means <tt>/etc/pydance.cfg</tt> and
-    <tt>~/.pydance/pydance.cfg</tt> on POSIX,
+    <tt>~/.pydance/pydance.cfg</tt> on POSIX systems like GNU/Linux,
     <tt>/Library/Preferences/pydance/pydance.cfg</tt> and
     <tt>~/Library/Preferences/pydance/pydance.cfg</tt> on Mac OS X, and
       <tt>pydance.cfg</tt> in the current directory on all platforms
@@ -100,7 +108,7 @@ dl.faq dt { font-weight: bold }
 
       <dt>autofail 1|0</dt>
       <dd><p>If this is turned off, the game will continue, even when
-      your lifebar runs out.</p></dd>
+      your lifebars runs out.</p></dd>
 
       <dt>grading 1|0</dt>
       <dd><p>pydance will normally display a grade at the end of every
@@ -125,25 +133,15 @@ dl.faq dt { font-weight: bold }
       corner, and a timer in the top center. See the FAQ for what to
       do if your FPS is very low.</p></dd>
 
-      <dt>gfxtheme [themename]</dt>
-      <dd><p>Sets your graphical theme (affecting the look of the arrows
-      and your lifebar). pydance comes with the 'classic' and 'bryan'
-      themes. More themes can be installed by putting them in your
-      <tt>themes/gfx</tt> directory.</p></dd>
-
       <dt>gratuitous 1|0</dt>
       <dd><p>This turns on some graphical effects that may slow down the
       game and interface considerably, but look nice.</p></dd>
 
-      <dt>ingamehelp 1|0</dt>
-      <dd><p>Normally pydance displays some messages about how to use the
-	  menus. If these annoy you, turn this off.</p></dd>
-
       <dt>lyriccolor [colors] (default cyan)</dt>
       <dd><p>Set the colors that lyrics appear in. Possible values are
 	  cyan, aqua, yellow, white, black, red, purple, or orange. If you
-	  list more than one color, other lines of lyrics will appear
-	  in those colors.</p></dd>
+	  list more than one color, separated by /s, other lines of lyrics
+will appear in those colors.</p></dd>
 
       <dt>showbackground 1|0</dt>
       <dd><p>Many songs in pydance and other dancing games have a
@@ -206,18 +204,22 @@ dl.faq dt { font-weight: bold }
     <h3>Interface Options</h3>
     <dl class="options">
       <dt>keyboard qwerty|rqwerty|dvorak|rdvorak</dt>
-      <dd><p>Your keyboard type. 'ijkl', while convenient on qwerty
+      <dd><p>Your keyboard type. uiojklm,., while convenient on qwerty
       (standard) keyboards, doesn't work at all on dvorak
       ones. Setting this option to dvorak will redefine your keys to
       'chtn'. The "r" variants swap controls (so player 1 uses the
-      arrows, and player 2 uses the letters).</p></dd>
+      numeric pad, and player 2 uses the letters).</p></dd>
 
-      <dt>sortmode 0|1|2|3|4 (default 0)</dt>
+      <dt>sortmode 0|1|2|3 (default 0)</dt>
       <dd><p>This sets the sorting mode for the song select screen. 0
-      sorts by mix, 1 by song name, 2 by artist name, 3 by BPM, and 4
-      by difficulty.</p>
+      sorts by mix, 1 by song name, 2 by artist name, and 3 by BPM.</p>
       <p>This can also be changed by pressing 's' on the song select
       screen.</p></dd>
+
+<dt>folders 1|0</dt>
+<dd><p>If you have over 60 songs, and this option is on, pydance will
+organize them into "folders" based on your sorting mode in the song
+selector.</p></dd>
     </dl>
     <h3>System Options</h3>
     <dl class="options">
@@ -252,11 +254,15 @@ problem, since pydance's code memory footprint is small relative to
 its song data). Psyco is currently only available for IA32
 systems.</p></dd>
 
+<dt>vesacompat 0|1</dt>
+<dd>Try to work on really old broken displays, like svgalib.
+Don't ever turn this option on.</dd>
+
     </dl>
     <h1>Using a Mat</h1>
     <p>The recommended adapter for pydance is the <a
     href="http://levelsix.com/products/pc/EMSUSB2.shtml">EMSUSB2</a>
-    from Level Six. pydance easily supports two player with it, and it
+    from Level Six. pydance easily supports two players with it, and it
     works on all operating systems. Also known to work is the parallel
     port adapter that comes with <a href="http://www.buynshop.com">BNS
     pads</a>. Any other 6 axis, 12 button or 4 axis, 16 button
@@ -275,9 +281,8 @@ systems.</p></dd>
     sure the input, hid, and joydev modules are loaded (the first two
     are required for any USB input device).</p>
     <h2>Mac OS X</h2>
-    <p>Plug-and-play, or so I've heard. Just plug in your pad using
-    the USB adapter, and off you go. Parallel port adapters are not
-    supported.</p>
+    <p>Just plug in your pad using the USB adapter, and off you go.
+Parallel port adapters are not supported.</p>
     <h2>Windows</h2>
     <p>This OS's hardware support is too unreliable and inconsistent
     to describe the process here. All we can say is "make sure the
@@ -288,18 +293,16 @@ systems.</p></dd>
     for 4 axis 16 button, or 6 axis 12 button joysticks (and also the
     32 button EMSUSB2).</p>
     <h1>Other Programs</h1>
-    <h2>any2dance</h2>
-    <p>This program will convert any file pydance can read (such as .step
-      or .dwi files) to pydance's native .dance format. In addition to
-      using it on one file, it will recurse directories. It also has a
-      <kbd>--delete</kbd> option to delete the old files once it is done
-      converting them.</p>
     <h2>findbpm</h2>
     <p>This program plays a song and lets you tap a key along with the
     beat. It averages the number of times you tap over the length of
     the song, and calculates a BPM. This method sounds crude, but if
     you have a good sense of rhythm, it's actually highly
     accurate. Run it using <tt>findbpm song.ogg</tt>.</p>
+    <h2>pyjoy</h2>
+    <p>This program reports information about your joystick, and lets you
+see what button number each button triggers when you press it. Run it from
+a terminal.</p>
     <h1>FAQ</h1>
       <p>The FAQ is available online at <a
     href="http://www.icculus.org/pyddr/faq.php">http://www.icculus.org/pyddr/faq.php</a>. Please read it before contacting the developers.</p>
