@@ -1,11 +1,14 @@
 # Read in various file formats and translate them to the internal structure
 # that Steps and SongData want.
 
-from constants import *
-
-import os, stat, util, string, dircache, copy
+import os
+import dircache
+import string
 
 import games
+import util
+
+from constants import *
 
 # The basic skeleton parser/song class.
 class GenericFile(object):
@@ -16,7 +19,7 @@ class GenericFile(object):
     self.info = {}
     self.lyrics = []
     self.description = None
-    self.need_steps = need_steps
+    self._need_steps = need_steps
 
   # Find a list of files with a given extension in the directory.
   # We call this a lot (2x / DWI/SM), so it should be as fast as possible.
@@ -35,7 +38,7 @@ class GenericFile(object):
   # Try to extract a subtitle from formats that don't support it (DWI, step)
   # Recognize ()s, []s, --s, or ~~s.
   def find_subtitle(self):
-    if not self.info.has_key("subtitle"):
+    if "subtitle" in self.info:
       for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
         if pair[0] in self.info["title"] and self.info["title"][-1] == pair[1]:
           l = self.info["title"][0:-1].rindex(pair[0])
@@ -49,7 +52,7 @@ class GenericFile(object):
   def resolve_files_sanely(self):
     dir, name = os.path.split(self.filename)
     for t in ("banner", "filename", "movie", "background"):
-      if self.info.has_key(t):
+      if t in self.info:
         if not os.path.isfile(self.info[t]):
           self.info[t] = os.path.join(dir, self.info[t])
           if not os.path.isfile(self.info[t]): del(self.info[t])
@@ -101,7 +104,7 @@ class DanceFile(GenericFile):
       elif state == DanceFile.STEPS and not need_steps: pass
       else: state = parsers[state](line, state_data)
 
-    if self.info.has_key("preview"):
+    if "preview" in self.info:
       start, length = self.info["preview"].split()
       self.info["preview"] = (float(start), float(length))
 
@@ -116,10 +119,10 @@ class DanceFile(GenericFile):
   def parse_waiting(self, line, data):
     if line == "DESCRIPTION": return DanceFile.DESCRIPTION
     elif line == "LYRICS": return DanceFile.LYRICS
-    elif line == "BACKGROUND": return DanceFile.LYRICS
+    elif line == "BACKGROUND": return DanceFile.BACKGROUND
     else:
       data[0] = line
-      if not self.difficulty.has_key(line):
+      if line not in self.difficulty:
         self.difficulty[line] = {}
         self.steps[line] = {}
       return DanceFile.GAMETYPE
@@ -137,12 +140,12 @@ class DanceFile(GenericFile):
     return DanceFile.STEPS
 
   def parse_steps(self, line, data):
-    if not self.need_steps: return DanceFile.STEPS
+    if not self._need_steps: return DanceFile.STEPS
 
     parts = line.split()
     if data[0] in games.COUPLE:
       steps = [[parts[0]], [parts[0]]]
-      if parts[0] in ("B", "W", "S", "D"):
+      if parts[0] in ["B", "W", "S", "D"]:
         steps[0].append(float(parts[1]))
         steps[1].append(float(parts[1]))
       elif parts[0] in DanceFile.BEATS:
@@ -157,7 +160,7 @@ class DanceFile(GenericFile):
 
     else:
       steps = [parts[0]]
-      if parts[0] in ("B", "W", "S", "D"): steps.append(float(parts[1]))
+      if parts[0] in ["B", "W", "S", "D"]: steps.append(float(parts[1]))
       elif parts[0] in DanceFile.BEATS:
         steps = [DanceFile.BEATS[parts[0]]]
         steps.extend([int(s) for s in parts[1]])
@@ -207,23 +210,23 @@ class StepFile(GenericFile):
       if line != "" and line[0] != "#":
         state, state_data = parsers[state](line, state_data)
 
-    for old, new in (("song", "title"), ("group", "artist"),
+    for old, new in [("song", "title"), ("group", "artist"),
                      ("offset", "gap"), ("bg", "background"),
-                     ("file", "filename")):
-      if self.info.has_key(old):
+                     ("file", "filename")]:
+      if old in self.info:
         self.info[new] = self.info[old]
         del(self.info[old])
 
     self.info["gap"] = int(self.info.get("gap", 0))
     self.info["bpm"] = float(self.info["bpm"])
 
-    if self.info.has_key("version"): del(self.info["version"])
+    if "version" in self.info: del(self.info["version"])
 
     dir, name = os.path.split(self.filename)
-    for t in (("banner", ".png"), ("banner", "-full.png"),
+    for t in [("banner", ".png"), ("banner", "-full.png"),
               ("background", "-bg.png"), ("filename", ".ogg"),
-              ("filename", ".mp3"), ("movie", ".mpg")):
-      if not self.info.has_key(t[0]):
+              ("filename", ".mp3"), ("movie", ".mpg")]:
+      if t[0] not in self.info:
         possible = os.path.join(dir, name.replace(".step", t[1]))
         possible = os.path.realpath(possible)
         if os.path.isfile(possible): self.info[t[0]] = possible
@@ -237,7 +240,7 @@ class StepFile(GenericFile):
       parts = line.split()
       if len(parts) == 1:
         data[0] = line
-        if not self.difficulty.has_key(line):
+        if line not in self.difficulty:
           self.difficulty[line] = {}
           self.steps[line] = {}
         return StepFile.GAMETYPE, data
@@ -294,8 +297,8 @@ class StepFile(GenericFile):
     if line == "LYRICS": return StepFile.LYRICS, data
     elif line == line.upper():
       data[0] = line
-      if not self.steps.has_key(data[0]): self.steps[data[0]] = {}
-      if not self.difficulty.has_key(data[0]): self.difficulty[data[0]] = {}
+      if data[0] not in self.steps: self.steps[data[0]] = {}
+      if data[0] not in self.difficulty: self.difficulty[data[0]] = {}
       return StepFile.GAMETYPE, data
 
 # Parse a file using MSD-style syntax, that is:
@@ -353,8 +356,7 @@ class MSDFile(GenericFile):
     return self.find_files(["ogg", "mp3", "wav", ".xm"])
 
   # DWI finds files based on their image size, not on any naming conventions.
-  # However, naming conventions combined with file size appears to be a
-  # useful and accurate heuristic.
+  # However, naming conventions are a useful and accurate heuristic.
 
   # Many SMs actually contain accurate information about their filenames,
   # so do some checks to avoid unnecessary searching.
@@ -440,11 +442,11 @@ class DWIFile(MSDFile):
       elif parts[0] == "MD5": self.info["md5sum"] = rest
       elif parts[0] == "BPM": self.info["bpm"] = float(rest)
       elif parts[0] == "SAMPLESTART":
-        if self.info.has_key("preview"):
+        if "preview" in self.info:
           self.info["preview"][0] = self.parse_time(rest)
         else: self.info["preview"] = [self.parse_time(rest), 10]
       elif parts[0] == "SAMPLELENGTH":
-        if self.info.has_key("preview"):
+        if "preview" in self.info:
           self.info["preview"][1] = self.parse_time(rest)
         else: self.info["preview"] = [45, self.parse_time(rest)]
       elif parts[0] == "CHANGEBPM":
@@ -456,7 +458,7 @@ class DWIFile(MSDFile):
         self.freezes = [(float(beat), float(wait)/1000) for beat, wait in
                         [change.split("=") for change in rest.split(",")]]
       elif len(parts) == 4 and parts[0] not in games.COUPLE:
-        if not self.difficulty.has_key(parts[0]):
+        if parts[0] not in self.difficulty:
           self.difficulty[parts[0]] = {}
           self.steps[parts[0]] = {}
         self.difficulty[parts[0]][parts[1]] = int(float(parts[2]))
@@ -464,7 +466,7 @@ class DWIFile(MSDFile):
           self.parse_steps(parts[0], parts[1], parts[3])
 
       elif len(parts) == 5 and parts[0] in games.COUPLE:
-        if not self.difficulty.has_key(parts[0]):
+        if parts[0] not in self.difficulty:
           self.difficulty[parts[0]] = {}
           self.steps[parts[0]] = {}
         self.difficulty[parts[0]][parts[1]] = int(float(parts[2]))
@@ -574,11 +576,11 @@ class SMFile(MSDFile):
       elif parts[0] == "BACKGROUND": self.info["background"] = rest
       elif parts[0] == "MD5": self.info["md5sum"] = parts[1]
       elif parts[0] == "SAMPLESTART":
-        if self.info.has_key("preview"):
+        if "preview" in self.info:
           self.info["preview"][0] = float(parts[1])
         else: self.info["preview"] = [float(parts[1]), 10]
       elif parts[0] == "SAMPLELENGTH":
-        if self.info.has_key("preview"):
+        if "preview" in self.info:
           self.info["preview"][1] = float(parts[1])
         else: self.info["preview"] = [45, float(parts[1])]
       elif parts[0] == "BPMS":
@@ -593,7 +595,7 @@ class SMFile(MSDFile):
       elif parts[0] == "NOTES":
         if parts[1] in SMFile.gametypes:
           game = SMFile.gametypes[parts[1]]
-          if not self.difficulty.has_key(game):
+          if game not in self.difficulty:
             self.difficulty[game] = {}
             self.steps[game] = {}
           if parts[2] == "": parts[2] = parts[3]
@@ -726,7 +728,7 @@ class KSFFile(MSDFile):
         elif parts[0] == "TICKCOUNT": note_type = 4.0 / float(parts[1])
         elif parts[0] == "STARTTIME": self.info["gap"] = -float(parts[1]) * 10
       elif line[0] == "2": break
-      elif self.need_steps:
+      elif self._need_steps:
         if couple:
           s = []
           for i in range(5):
@@ -780,7 +782,7 @@ class KSFFile(MSDFile):
     ratings = { "EASY": 3, "NORMAL": 5, "HARD": 7, "CRAZY": 9 }
     difficulty = difficulty.upper()
 
-    if not self.difficulty.has_key(mode):
+    if mode not in self.difficulty:
       self.difficulty[mode] = {}
       self.steps[mode] = {}
     self.difficulty[mode][difficulty] = ratings.get(difficulty, 5)
@@ -836,12 +838,12 @@ class SongItem(object):
 
     # Sanity checks
     for k in ("bpm", "filename"):
-      if not self.info.has_key(k):
+      if k not in self.info:
         raise RuntimeError(filename + " is missing: " + k)
 
     for k in ("subtitle", "title", "artist", "author", "mix"):
       try:
-        if self.info.has_key(k): self.info[k] = self.info[k].decode("utf-8")
+        if k in self.info: self.info[k] = self.info[k].decode("utf-8")
       except UnicodeError:
         print "W: Non-Unicode key in %s: %s" % (filename, k)
         self.info[k] = self.info[k].decode("ascii", "ignore")
@@ -878,7 +880,7 @@ class SongItem(object):
     if self.info["mix"] == "Unknown": self.info["mix"] = "No Mix"
 
     for k, v in SongItem.equivs.items():
-      if self.difficulty.has_key(k) and not self.difficulty.has_key(v):
+      if k in self.difficulty and v not in self.difficulty:
         self.difficulty[v] = self.difficulty[k]
         self.steps[v] = self.steps[k]
 
@@ -891,27 +893,27 @@ class SongItem(object):
 
         elif game in games.SINGLE:
           if "SINGLE" in self.difficulty:
-            self.difficulty[game] = copy.copy(self.difficulty["SINGLE"])
+            self.difficulty[game] = dict(self.difficulty["SINGLE"])
           elif "5PANEL" in self.difficulty:
-            self.difficulty[game] = copy.copy(self.difficulty["5PANEL"])
+            self.difficulty[game] = dict(self.difficulty["5PANEL"])
         
         elif game in games.VERSUS:
           if "VERSUS" in self.difficulty:
-            self.difficulty[game] = copy.copy(self.difficulty["VERSUS"])
+            self.difficulty[game] = dict(self.difficulty["VERSUS"])
           elif "5VERSUS" in self.difficulty:
-            self.difficulty[game] = copy.copy(self.difficulty["5VERSUS"])
+            self.difficulty[game] = dict(self.difficulty["5VERSUS"])
 
         elif game in games.DOUBLE:
           if "DOUBLE" in self.difficulty:
-            self.difficulty[game] = copy.copy(self.difficulty["DOUBLE"])
+            self.difficulty[game] = dict(self.difficulty["DOUBLE"])
           elif "5DOUBLE" in self.difficulty:
-            self.difficulty[game] = copy.copy(self.difficulty["5DOUBLE"])
+            self.difficulty[game] = dict(self.difficulty["5DOUBLE"])
 
         elif game in games.COUPLE:
           if "COUPLE" in self.difficulty:
-            self.difficulty[game] = copy.copy(self.difficulty["COUPLE"])
+            self.difficulty[game] = dict(self.difficulty["COUPLE"])
           elif "5COUPLE" in self.difficulty:
-            self.difficulty[game] = copy.copy(self.difficulty["5COUPLE"])
+            self.difficulty[game] = dict(self.difficulty["5COUPLE"])
 
     self.diff_list = {}
     for key in self.difficulty:    
