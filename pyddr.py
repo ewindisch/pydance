@@ -10,9 +10,14 @@
 
 from announcer import Announcer
 from config import Config
+import fontfx
+
 import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
 import os, sys, glob, random, fnmatch, types, operator, copy, string
 import pygame.transform
+
+from pygame.locals import *
+from stat import *
 
 osname = None
 if os.name == "nt": osname = "nt"
@@ -44,10 +49,6 @@ elif osname == "nt":
   rscdir = "."
 
 if not os.path.isdir(rscdir): os.mkdir(rscdir)
-
-import fontfx
-from pygame.locals import *
-from stat import *
 
 USE_GL = 0
 

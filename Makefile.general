@@ -1,6 +1,6 @@
 MANPAGES += docs/man
 UTILS += utils/*.py
-PYMODS += config.py announcer.py fontfx.py
+PYMODS += config.py announcer.py fontfx.py input.py constants.py
 DATA += themes images sound
 
 clean:
