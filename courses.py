@@ -1,20 +1,25 @@
 # Like DWI and SM files, CRS files are a variant of the MSD format.
 
+# NB - If you are reading this code and are a better programmer than me,
+# I apologize for this file. However, if you are reading this code and
+# only *think* you are a better programmer than me, I suggest you try
+# parsing CRS files quickly on your own, and then come back to this.
+
 from constants import *
 import audio
 import optionscreen
 import pygame
 import dance
+import random
 import games
 import colors
 import util
+import error
 import ui
 
 NO_BANNER = pygame.image.load(os.path.join(image_path, "no-banner.png"))
 
-# FIXME: Parse random songs (*)
-# FIXME: Parse player's best
-class CRSFile:
+class CRSFile(object):
   # Map modifier names to internal pydance names.
   modifier_map = { "0.5x" : ("speed", 0.5),
                    "0.75x" : ("speed", 0.75),
@@ -46,6 +51,7 @@ class CRSFile:
     self.songs = []
     self.name = "A Course"
     self.mixname = " "
+    self.all_songs = all_songs
     lines = []
     f = open(filename)
     for line in f:
@@ -80,22 +86,13 @@ class CRSFile:
 
         name = name.replace("\\", "/") # DWI uses Windows-style separators.
 
-        fullname = None
-        for dir in mainconfig["songdir"].split(os.pathsep):
-          path = os.path.join(dir, name)
-          file_list = util.find(path, ["*.sm", "*.dwi"])
-          if len(file_list) != 0:
-            fullname = file_list[-1]
-            break
-        else: raise RuntimeError("Unable to find %s in song paths." % name)
-
         mods = {}
         for mod in modifiers:
           if mod in CRSFile.modifier_map:
             key, value = CRSFile.modifier_map[mod]
             mods[key] = value
         
-        self.songs.append((fullname, diff, mods))
+        self.songs.append((name, diff, mods))
 
       image_name = self.filename[:-3] + "png"
       if os.path.exists(image_name):
@@ -103,6 +100,89 @@ class CRSFile:
       else:
         self.image = NO_BANNER
         self.image.set_colorkey(self.image.get_at([0, 0]))
+
+  def setup(self, screen, player_configs, game_config, gametype):
+    self.player_configs = player_configs
+    self.game_config = game_config
+    self.index = 0
+    self.gametype = gametype
+    self.screen = screen
+
+  def done(self):
+    self.screen = self.player_configs = self.game_config = None
+
+  def _find_difficulty(self, song, diff):
+    if self.gametype not in song.difficulty: return False
+    elif isinstance(diff, str):
+      if diff in song.difficulty[self.gametype]: return diff
+      else: return False
+    elif isinstance(diff, list):
+      possible = []
+      for name, rating in song.difficulty[self.gametype].items():
+        if rating in diff: possible.append(name)
+      if len(possible) > 0: return random.choice(possible)
+    return False
+
+  def __iter__(self): return self
+
+  def next(self):
+    if self.index == len(self.songs): raise StopIteration
+    
+    name, diff, mods = self.songs[self.index]
+    fullname = None
+
+    a, b = 0, 0
+    if diff.find("..") != -1: a, b = map(int, diff.split(".."))
+    elif len(diff) < 3: a, b = int(diff), int(diff)
+    if a or b: diff = range(a, b + 1)
+
+    if name[-1] == "*": # A random song
+      if "/" in name:
+        folder, dummy = name.split("/")
+        folder = folder.lower()
+        if folder in self.all_songs:
+          songs = self.all_songs[folder].values()
+        else:
+          error.ErrorMessage(self.screen, [folder, "was not found."])
+          raise StopIteration
+
+      else:
+        songs = []
+        for v in self.all_songs.values(): songs.extend(v.values())
+
+      songs = [s for s in songs if self._find_difficulty(s, diff)]
+
+      if len(songs) == 0:
+        error.ErrorMessage(self.screen, ["No valid songs were found."])
+        raise StopIteration
+      else:
+        song = random.choice(songs)
+        diff = self._find_difficulty(song, diff)
+        fullname = song.filename
+        
+    else:
+      for path in mainconfig["songdir"].split(os.pathsep):
+        fn = os.path.join(path, name)
+        if os.path.isfile(fn): fullname = fn
+        elif os.path.isdir(fn):
+          file_list = util.find(fn, ["*.sm", "*.dwi"])
+          if len(file_list) != 0: fullname = file_list[0]
+
+        if not fullname: # Still haven't found it...
+          folder, song = name.split("/")
+          song = self.all_songs.get(folder.lower(), {}).get(song.lower())
+          fullname = song.filename
+
+        if fullname: break
+
+    if not fullname:
+      error.ErrorMessage(self.screen, [name, "was not found."])
+      raise StopIteration
+
+    self.index += 1
+
+    return (fullname, [diff] * len(self.player_configs))
+
 
 class CourseSelector(object):
   def __init__(self, songitems, courses, screen, gametype):
@@ -153,12 +233,10 @@ class CourseSelector(object):
 
   def play(self, screen):
     course = self.courses[self.course_idx]
-    playlist = []
-    for song in course.songs:
-      # FIXME: Support modifiers
-      playlist.append((song[0], [song[1]] * len(self.player_configs)))
-    dance.play(screen, playlist, self.player_configs,
+    course.setup(screen, self.player_configs, self.game_config, self.gametype)
+    dance.play(screen, course, self.player_configs,
                self.game_config, self.gametype)
+    course.done()
 
   def render(self, screen):
     screen.fill(colors.BLACK)

@@ -25,6 +25,39 @@ def SetDisplayMode(mainconfig):
     sys.exit()
   return screen
 
+def load_files(screen, files, type, Ctr, args):
+  # Remove duplicates
+  screen.fill(colors.BLACK)
+  pct = 0
+  inc = 100.0 / len(files)
+  files = list(dict(map(None, files, [])).keys())
+  objects = []
+  message = "Found %d %s. Loading..." % (len(files), type)
+  pbar = fontfx.TextProgress(FONTS[60], message, colors.WHITE, colors.BLACK)
+  r = pbar.render(0).get_rect()
+  r.center = (320, 240)
+  for f in files:
+    try: objects.append(Ctr(*((f,) + args)))
+    except RuntimeWarning, message:
+      print "W:", f
+      print "W:", message
+      print
+    except RuntimeError, message:
+      print "E", f
+      print "E:", message
+      print
+    except Exception, message:
+      print "E: Unknown error loading", f
+      print "E:", message
+      print "E: Please contact the developers (pydance-devel@icculus.org)."
+      print
+    pct += inc
+    img = pbar.render(pct)
+    pygame.display.update(screen.blit(img, r))
+
+  return objects
+
+
 def main():
   print "pydance", VERSION, "<pydance-discuss@icculus.org> - irc.freenode.net/#pyddr"
 
@@ -47,10 +80,6 @@ def main():
     print "Searching", dir
     course_list.extend(util.find(dir, ['*.crs']))
 
-  # Remove duplicates
-  song_list = list(dict(map(None, song_list, [])).keys())
-  course_list = list(dict(map(None, course_list, [])).keys())
-
   screen = SetDisplayMode(mainconfig)
   
   pygame.display.set_caption('pydance ' + VERSION)
@@ -59,52 +88,21 @@ def main():
   audio.load(os.path.join(sound_path, "menu.ogg"))
   audio.play(4, 0.0)
 
-  total = len(song_list)
-  parsed = 0.0
-  songs = []
+  songs = load_files(screen, song_list, "songs",
+                     fileparsers.SongItem, (False,))
 
-  pbar = fontfx.TextProgress(FONTS[60], "Found " + str(total) +
-                             " songs. Loading...", colors.WHITE, colors.BLACK)
-  r = pbar.render(0).get_rect()
-  r.center = (320, 240)
-  for f in song_list:
-    try: songs.append(fileparsers.SongItem(f, False))
-    except RuntimeWarning, message:
-      print "W:", message
-    except RuntimeError, message:
-      print "E:", message
-    except Exception, message:
-      print "E: Unknown error loading", f
-      print "E:", message
-      print "E: Please contact the developers (pydance-devel@icculus.org)."
-    img = pbar.render(parsed / total)
-    pygame.display.update(screen.blit(img, r))
-    parsed += 100.0
+  song_dict = {}
+  for song in songs:
+    mix = song.info["mix"].lower()
+    title = song.info["title"].lower()
+    if song.info["subtitle"]: title += song.info["subtitle"].lower()
+    if not song_dict.has_key(mix): song_dict[mix] = {}
+    song_dict[mix][title] = song
 
-  screen.fill(colors.BLACK)
-  pygame.display.update()
-  total = len(course_list)
-  parsed = 0.0
-  courses = []
-  pbar = fontfx.TextProgress(FONTS[60], "Found " + str(total) +
-                             " courses. Loading...", colors.WHITE,colors.BLACK)
-  r = pbar.render(0).get_rect()
-  r.center = (320, 240)
-  for f in course_list:
-    try: courses.append(CRSFile(f, songs))
-    except RuntimeWarning, message:
-      print "W:", message
-    except RuntimeError, message:
-      print "E: Error loading", f
-      print "E:", message
-    except Exception, message:
-      print "E: Unknown error loading", f
-      print "E:", message
-      print "E: Please contact the developers (pydance-devel@icculus.org)."
-    img = pbar.render(parsed / total)
-    pygame.display.update(screen.blit(img, r))
-    parsed += 100.0
-        
+  courses = load_files(screen, course_list, "courses", CRSFile, (song_dict,))
+
+  song_list = None
+  course_list = None
   ui.empty()
 
   if len(songs) < 1:
