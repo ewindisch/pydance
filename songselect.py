@@ -23,7 +23,7 @@ difficulty_colors = { "BEGINNER": colors.color["yellow"],
 
 ITEM_SIZE = (344, 60)
 ITEM_X = [240, 250, 270, 300, 340, 390, 460]
-BANNER_LOCATION = (5, 5)
+BANNER_CENTER = (133, 45)
 BANNER_SIZE = (256, 80)
 DIFF_BOX_SIZE = (15, 25)
 DIFF_LOCATION = (8, 120)
@@ -79,6 +79,8 @@ class SongItemDisplay:
       else:
         self.banner = NO_BANNER
         self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
+      self.banner_rect = self.banner.get_rect()
+      self.banner_rect.center = BANNER_CENTER
     if self.menuimage == None:
       rcolors = ["green", "orange", "yellow", "red", "white",
                  "purple", "aqua"]
@@ -380,10 +382,8 @@ class SongSelect:
       self.screen.blit(self.songs[idx].menuimage, (x,y))
 
     # The banner
-    r = self.songs[self.index].banner.get_rect()
-    r.center = (BANNER_LOCATION[0] + BANNER_SIZE[0] / 2,
-                BANNER_LOCATION[1] + BANNER_SIZE[1] / 2)
-    self.screen.blit(self.songs[self.index].banner, r)
+    self.screen.blit(self.songs[self.index].banner,
+                     self.songs[self.index].banner_rect)
 
     # Difficulty list rendering
     difficulty = self.songs[self.index].song.difficulty[self.gametype]
@@ -463,7 +463,15 @@ class SongSelect:
         img = self.songs[idx].menuimage
         img.set_alpha(226 - int(40 * (abs(k) * q + abs(k + 1) * p)))
         self.screen.blit(self.songs[idx].menuimage, (x,y))
+      self.songs[self.oldindex].banner.set_alpha(255 * q)
+      self.screen.blit(self.songs[self.oldindex].banner,
+                       self.songs[self.oldindex].banner_rect)
+      self.songs[self.index].banner.set_alpha(255 * p)
+      self.screen.blit(self.songs[self.index].banner,
+                       self.songs[self.index].banner_rect)
       pygame.display.flip()
+    self.songs[self.oldindex].banner.set_alpha(255)
+    self.songs[self.index].banner.set_alpha(255)
 
   def scroll_down(self):
     if not mainconfig["gratuitous"]: return
@@ -479,7 +487,15 @@ class SongSelect:
         img = self.songs[idx].menuimage
         img.set_alpha(226 - int(40 * (abs(k) * q + abs(k - 1) * p)))
         self.screen.blit(self.songs[idx].menuimage, (x,y))
+      self.songs[self.oldindex].banner.set_alpha(255 * q)
+      self.screen.blit(self.songs[self.oldindex].banner,
+                       self.songs[self.oldindex].banner_rect)
+      self.songs[self.index].banner.set_alpha(255 * p)
+      self.screen.blit(self.songs[self.index].banner,
+                       self.songs[self.index].banner_rect)
       pygame.display.flip()
+    self.songs[self.oldindex].banner.set_alpha(255)
+    self.songs[self.index].banner.set_alpha(255)
 
   def scroll_out(self, index):
     if not mainconfig["gratuitous"]: return
