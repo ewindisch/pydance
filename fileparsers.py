@@ -41,8 +41,8 @@ class GenericFile(object):
     if "subtitle" not in self.info:
       title, subtitle = util.find_subtitle(self.info["title"])
       if subtitle:
-        self.info["title"] = title
-        self.info["subtitle"] = subtitle
+        self.info["title"] = title.strip()
+        self.info["subtitle"] = subtitle.strip()
 
   # If a filename isn't found, try joining it with the path of the song's
   # filename.
@@ -882,7 +882,7 @@ class SongItem(object):
   def __init__(self, filename, need_steps = True):
     song = None
     for pair in SongItem.formats:
-      if filename[-len(pair[0]):].lower() == pair[0]:
+      if filename.lower().endswith(pair[0]):
         song = pair[1](filename, need_steps)
         break
     if song == None:
