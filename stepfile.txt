@@ -1,3 +1,10 @@
+==============================================================================
+NOTE: The step file format is deprecated. Future versions of pyDDR will
+use the .dance format described in the docs/dance-spec.txt file. If you
+do make .step files, pyDDR will continue reading them, but will load them
+slower, and the .dance format is better anyway.
+==============================================================================
+
 Okay, this is a mini-HOWTO because I get a sizable amount of questions 
 about how to make a STEP file.
 
