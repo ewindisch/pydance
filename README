@@ -23,10 +23,10 @@
 
                                  Playing pyDDR
 
-   To play the game, just select "Play Game" from the menu and select a
-   song. Press j and l to change your difficulty setting (more bars means
-   more difficult). Hit enter when you're on a difficulty and song you
-   like.
+   To play the game, just select "Play Game" from the menu, then select
+   "Regular", and select a song. Press j and l to change your difficulty
+   setting (more bars means more difficult). Hit enter when you're on a
+   difficulty and song you like.
 
    Oh wait, now there's all these arrows scrolling up the screen - what
    should you do? Actually, it's pretty simple. When the arrows get to
@@ -39,6 +39,27 @@
    arrow keys.
 
    If you need to exit the game or back out of menus, just press escape.
+
+Nonstop Mode
+
+   From the normal song selector you can set up Nonstop Mode. Select a
+   song and difficulty you want to play, and press m. That song is now on
+   your nonstop playlist. You can add a lot of songs this way, then play
+   them all in succession without returning to the song selector.
+
+Endless Mode
+
+   The Endless Mode option on the Play Game menu takes you into a
+   different selector. In this one, you can select a difficulty (either
+   by name, or by rating), and just keep playing until you fail.
+
+Oni Mode
+
+   In the Play Game menu, there's an option called Oni Mode. This is a
+   more difficult mode of play where you only have a set amount of life
+   (usually 3-5 bars), and whenever you break a hold or combo, you lose
+   one bar. When your bars run out, the game is over, and the only way to
+   get them back is by passing songs in nonstop.
 
                                Configuring pyDDR
 
@@ -153,14 +174,23 @@ pyddr.cfg
           rotating and scaling.
 
    fpsdisplay 1|0
-          If this is on pyDDR will display an FPS counter in the corner.
-          See the FAQ for what to do if your FPS is very low.
+          If this is on pyDDR will display an FPS counter in the corner,
+          and a timer in the top center. See the FAQ for what to do if
+          your FPS is very low.
 
    gfxtheme [themename]
           Sets your graphical theme (affecting the look of the arrows and
           your lifebar). pyDDR comes with the 'classic' and 'bryan'
           themes. More themes can be installed by putting them in your
           themes/gfx directory.
+
+   gratuitous 1|0
+          This turns on some graphical effects that may slow down the
+          game and interface considerably.
+
+   ingamehelp 1|0
+          Normally pyDDR displays some messages about how to use the
+          menus. If these annoy you, turn this off.
 
    lyriccolor [color] (default cyan)
           Set the color that lyrics appear in. Possible values are cyan,
@@ -284,13 +314,13 @@ pyddr.cfg
 
 GNU/Linux
 
-   For parallel adapters, you can use the ddrmat.o driver included with
-   pyDDR (which is a modified gamecon.o from the 2.4 kernel). Once
-   compiled, just run insmod ddrmat gc=0,7 (where 7 is the IRQ of your
-   parallel port, which is probably 7). Note that your lp (parallel
-   printer) module cannot be loaded at the same time. The normal
-   gamecon.o module may work too, although you may have to rotate your
-   pad 45 degrees.
+   For parallel adapters, you can use the ddrmat.o driver available at
+   [3]http://icculus.org/pyddr/get.php (which is a modified gamecon.o
+   from the 2.4 kernel). Once compiled, just run insmod ddrmat gc=0,7
+   (where 7 is the IRQ of your parallel port, which is probably 7). Note
+   that your lp (parallel printer) module cannot be loaded at the same
+   time. The normal gamecon.o module may work too, although you may have
+   to rotate your pad 45 degrees.
 
    USB drivers are much easier. If your kernel has USB joystick support,
    just plug it in and it should work. If it doesn't, make sure the
@@ -310,7 +340,7 @@ Windows
 
 Other
 
-   As long as [3]Pygame supports your OS's joysticks, pyDDR will too.
+   As long as [4]Pygame supports your OS's joysticks, pyDDR will too.
    pyDDR specifically is looking for 4 axis 16 button, or 6 axis 12
    button joysticks (and also the 32 button EMSUSB2).
 
@@ -347,79 +377,9 @@ lyrictag
 
                                       FAQ
 
-   The old FAQ is currently at [4]http://www.icculus.org/pyddr/faq.php.
-   Eventually that will be replaced with this one.
-
-   My MP3 fails to load.
-          pyDDR's MP3 support comes via the SMPEG, which is suboptimal,
-          but integrates with SDL's mixer library easily. You have three
-          options. The first is to try stripping ID3 tags from your MP3
-          files; you can do this with [5]id3ed for regular ID3 tags, or
-          [6]v2strip for ID3v2 tags. Secondly, you can convert them to
-          the [7]Ogg Vorbis format. [8]mp32ogg can do this nicely. The
-          third possibility is to merge [9]pymad support into pyDDR, and
-          send us the patches.
-
-   My soft mat sucks. Can I improve it?
-          Yes, you can 'convert' a soft mat into a hard mat in a number
-          of ways. One popular, simple, and fast way is to buy some
-          plywood and staple-gun some vinyl hardwood-floor covering to
-          the board over your DDR mat. Another thing you can do is take
-          your soft mat apart and reenforce it with extra foam, wood, and
-          sheet metal. One of the pyDDR developers has written a
-          [10]guide on doing this.
-
-   I bought this adapter from Radio Shack, and...
-          Take it back, now. The Radio Shack adapter works by mapping the
-          up/down/left/right button to the X and Y joystick axes. This
-          means that it can only read one of up/down or left/right at the
-          same time (that is, jumps are impossible, and leaving your foot
-          on an opposite arrow is also impossible). Besides the
-          recommended EMSUSB2 adapter, pyDDR should work on anything that
-          maps the directional arrows to buttons. Make sure your adapter
-          does that.
-
-   Why do I get weird colors or graphic artifacts?
-          You may be running 8 or 24 bit color. pyDDR shouldn't actually
-          run at 8 bit color at all, and it's not supported. The issues
-          with 24 bit color should be fixed; contact the developers with
-          a bug report if they're not.
-
-   Why doesn't pyDDR use DWI files?
-          Because it's not called Dance With Intensity. :) More
-          realistically, it's because it was easier to write a new file
-          format than support DWI's (whose documentation is lacking)
-          initially. Also, since pyDDR has no step editor yet, it was
-          necessary to have a format that was human readable.
-
-          Right now, you can use dwi2step to convert DWIs to pyDDR's
-          .step format. In a future version, pyDDR will be able to read
-          from DWI files without conversion.
-
-   While I was building SMPEG, I got undefined symbol problems.
-          If you're using gcc 3.2, you may need to add these -lgcc_s and
-          -lsupc++ to the compilation options.
-
-   pyDDR is way, way too slow.
-          There's no "answer" to this - the program needs work. However,
-          there are a couple of things you can try.
-
-          + Turn off backgrounds, and arrow explosions. These often make
-            the biggest difference performance-wise.
-          + Switch from 24 bit to 16 bit color. This greatly increases
-            the frame rate on many computers.
-          + Run pyDDR in fullscreen mode. It has to deal with less
-            refresh events in such a case.
-          + Upgrade your video card. pyDDR is very video-intensive; a
-            high-powered processor with a bad video card will perform
-            terribly.
-
-   What about <insert feature here>?
-          If that feature is one of the following, you have incurred our
-          wrath: OpenGL support, internet play. Otherwise, we almost
-          certainly have it planned already. If you have some "great new
-          idea" for pyDDR that already exists in regular DDR, you can
-          also enjoy our wrath.
+   The FAQ is available online at
+   [5]http://www.icculus.org/pyddr/faq.php. Please read it before
+   contacting the developers.
 
                                    Contacts
 
@@ -430,32 +390,26 @@ Email
 
    The primary email address is the pyddr-discuss mailing list on
    icculus.org. To subscribe, email
-   [11]pyddr-discuss-subscribe@icculus.org. You can then send email to
-   [12]pyddr-discuss@icculus.org to talk about pyDDR. If you want to see
-   about having pyDDR at a convention or show, contact [13]Brendan Becker
+   [6]pyddr-discuss-subscribe@icculus.org. You can then send email to
+   [7]pyddr-discuss@icculus.org to talk about pyDDR. If you want to see
+   about having pyDDR at a convention or show, contact [8]Brendan Becker
    <tgz@orotech.net>, or show up on the IRC channel.
 
 IRC
 
    If you need a bit more real-time help than email offers, pyDDR has an
-   IRC channel on the [14]Freenode IRC network. Surprisingly, the channel
+   IRC channel on the [9]Freenode IRC network. Surprisingly, the channel
    is named #pyddr. The main developers are often in the channel as P2E
-   (Brendan) and piman (Joe). Jerub and DShadow may also be able to
-   answer questions about bugs.
+   (Brendan), piman (Joe), and DShadow (John).
 
 References
 
    1. http://levelsix.com/products/pc/EMSUSB2.shtml
    2. http://www.buynshop.com/
-   3. http://www.pygame.org/
-   4. http://www.icculus.org/pyddr/faq.php
-   5. http://www.dakotacom.net/~donut/programs/id3ed.html
-   6. http://www.geocities.com/matsp888/unix/
-   7. http://www.vorbis.com/
-   8. http://faceprint.com/code/
-   9. http://spacepants.org/src/pymad/
-  10. http://clickass.org/~tgz/pyddr/hardmat/
-  11. mailto:pyddr-discuss-subscribe@icculus.org
-  12. mailto:pyddr-discuss@icculus.org
-  13. mailto:tgz@orotech.net
-  14. http://www.freenode.net/
+   3. http://icculus.org/pyddr/get.php
+   4. http://www.pygame.org/
+   5. http://www.icculus.org/pyddr/faq.php
+   6. mailto:pyddr-discuss-subscribe@icculus.org
+   7. mailto:pyddr-discuss@icculus.org
+   8. mailto:tgz@orotech.net
+   9. http://www.freenode.net/
