@@ -5,24 +5,25 @@ from constants import *
 # FIXME - This whole thing needs reworking/documentation
 
 class GradingScreen(object):
-  def __init__(self, judges):
-    self.judges = judges
+  def __init__(self, players):
+    self.players = players
 
-    for judge in judges:
-      if judge == None: continue
-      print "Player %d:" % (judges.index(judge) + 1)
+    for player in players:
+      if player == None: continue
+      print "Player %d:" % (player.pid + 1)
     
-      grade = judge.grade.grade(judge.failed)
-      totalsteps = judge.arrow_count()
+      grade = player.grade.grade(player.judge.failed)
+      totalsteps = player.judge.arrow_count()
 
-      steps = (grade, judge.diff, totalsteps,
-               judge.combos.bestcombo, judge.combos.combo)
+      steps = (grade, player.difficulty, totalsteps,
+               player.combos.bestcombo, player.combos.combo)
 
-      numholds = judge.numholds
-      goodholds = judge.numholds - judge.badholds
+      numholds = player.judge.numholds
+      goodholds = player.judge.numholds - player.judge.badholds
 
-      steptypes = (judge.stats["V"], judge.stats["P"], judge.stats["G"],
-                   judge.stats["O"], judge.stats["B"], judge.stats["M"],
+      steptypes = (player.judge.stats["V"], player.judge.stats["P"],
+                   player.judge.stats["G"], player.judge.stats["O"],
+                   player.judge.stats["B"], player.judge.stats["M"],
                    goodholds, numholds)
       print ("GRADE: %s (%s) - total steps: %d best combo" +
              " %d current combo: %d") % steps
@@ -30,11 +31,11 @@ class GradingScreen(object):
       print
  
   def make_gradescreen(self, screen, background):
-    judge = self.judges[0]
+    player = self.players[0]
 
-    if judge is None: return None
+    if player is None: return None
 
-    totalsteps = judge.arrow_count()
+    totalsteps = player.judge.arrow_count()
 
     if totalsteps == 0: return None
 
@@ -69,22 +70,20 @@ class GradingScreen(object):
         pygame.display.update(r)
       pygame.time.wait(100)
 
-    player = 0
-
-    for judge in self.judges:
-      grade = judge.grade.grade(judge.failed)
+    for player in self.players:
+      grade = player.grade.grade(player.judge.failed)
       for i in range(4):
         font = pygame.font.Font(None, 100-(i*2))
         gradetext = font.render(grade, 1, (48 + i*16, 48 + i*16, 48 + i*16))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
-        r = screen.blit(gradetext, (200 + 250 * player - (font.size(grade))[0]/2, 150))
+        r = screen.blit(gradetext, (200 + 250 * player.pid - (font.size(grade))[0]/2, 150))
         pygame.display.update(r)
         pygame.time.delay(48)
 
-      totalsteps = judge.arrow_count()
+      totalsteps = player.judge.arrow_count()
 
-      rows = [judge.stats[k] for k in ["V", "P", "G", "O", "B", "M"]]
-      rows += [judge.early, judge.late]
+      rows = [player.judge.stats[k] for k in ["V", "P", "G", "O", "B", "M"]]
+      rows += [player.judge.early, player.judge.late]
 
       for j in range(4):
         for i in range(len(rows)):
@@ -95,9 +94,9 @@ class GradingScreen(object):
           gradetext.set_colorkey(gradetext.get_at((0,0)))
           graderect = gradetext.get_rect()
           graderect.top = 72 + (i*24) - j
-          if player == 0:
+          if player.pid == 0:
             graderect.left = 40
-          else:
+          elif player.pid == 1:
             graderect.right = 600
           r = screen.blit(gradetext, graderect)
           pygame.display.update(r)
@@ -109,9 +108,9 @@ class GradingScreen(object):
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()
         graderect.top = 288-j
-        if player == 0:
+        if player.pid == 0:
           graderect.left = 40
-        else:
+        elif player.pid == 1:
           graderect.right = 600
         r = screen.blit(gradetext, graderect)
         pygame.display.update(r)
@@ -119,14 +118,15 @@ class GradingScreen(object):
 
       # Combo
       for j in range(4):
-        text = "%d (%d%%)" % (judge.combos.bestcombo, judge.combos.bestcombo * 100 / totalsteps)
+        text = "%d (%d%%)" % (player.combos.bestcombo,
+                              player.combos.bestcombo * 100 / totalsteps)
         gradetext = fontfx.shadefade(text,28,j,(FONTS[28].size(text)[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()
         graderect.top = 336-j
-        if player == 0:
+        if player.pid == 0:
           graderect.left = 40
-        else:
+        elif player.pid == 1:
           graderect.right = 600
         r = screen.blit(gradetext, graderect)
         pygame.display.update(r)
@@ -134,14 +134,15 @@ class GradingScreen(object):
 
       # Holds
       for j in range(4):
-        text = "%d / %d" % (judge.numholds - judge.badholds, judge.numholds)
+        text = "%d / %d" % (player.judge.numholds - player.judge.badholds,
+                            player.judge.numholds)
         gradetext = fontfx.shadefade(text,28,j,(FONTS[28].size(text)[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()
         graderect.top = 360-j
-        if player == 0:
+        if player.pid == 0:
           graderect.left = 40
-        else:
+        elif player.pid == 1:
           graderect.right = 600
         r = screen.blit(gradetext, graderect)
         pygame.display.update(r)
@@ -149,7 +150,7 @@ class GradingScreen(object):
 
       # Score
       # Pete's suggestion, make it more readable by adding commas.
-      orig_score = str(int(judge.score.score))
+      orig_score = str(int(player.score.score))
       score = ""
       while len(orig_score) > 3:
         score = orig_score[-3:] + "," + score
@@ -162,15 +163,13 @@ class GradingScreen(object):
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()
         graderect.top = 412-j
-        if player == 0:
+        if player.pid == 0:
           graderect.left = 40
-        else:
+        elif player.pid == 1:
           graderect.right = 600
         r = screen.blit(gradetext, graderect)
         pygame.display.update(r)
       pygame.time.wait(100)
-
-      player += 1
 
     background.set_alpha()
 

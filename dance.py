@@ -210,7 +210,7 @@ def play(screen, playlist, configs, songconf, playmode):
   judges = [player.get_judge() for player in players]
 
   if mainconfig['grading']:
-    grade = gradescreen.GradingScreen(judges)
+    grade = gradescreen.GradingScreen(players)
     background = pygame.transform.scale(screen, (640,480))
     if grade.make_gradescreen(screen, background):
       grade.make_waitscreen(screen)

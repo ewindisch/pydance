@@ -5,22 +5,14 @@ from announcer import Announcer
 import random
 
 class AbstractJudge(object):
-  def __init__ (self, combos, score, display, grade, lifebar):
+  def __init__ (self):
     self.steps = {}
     self.stats = { "V": 0, "P": 0, "G": 0, "O": 0, "B": 0, "M": 0 }
-    self.combos = combos
     self.early = self.late = self.ontime = 0
     self.failed = False
-    self.lifebar = lifebar
-    self.score = score
-    self.grade = grade
     self.numholds = 0
     self.badholds = 0
-    # combos must be told first, or the combo count is inaccurate when
-    # the other listeners get it.
     announcer = Announcer(mainconfig["djtheme"])
-    self.listeners = [self.combos, announcer, display, self.grade,
-                      self.lifebar, self.score]
 
   def set_song(self, bpm, difficulty, count, holds, feet):
     self.bpm = bpm
@@ -41,18 +33,14 @@ class AbstractJudge(object):
       self.holdsub[whichone] = -1
       self.badholds += 1
       self.numholds += 1
-      for l in self.listeners: l.broke_hold()
 
   def ok_hold(self, whichone):
     self.numholds += 1
-    for l in self.listeners: l.ok_hold()
 
   def handle_key(self, dir, curtime):
     rating, dir, etime = self.get_rating(dir, curtime)
 
-    if rating != None:
-      self.stats[rating] += 1
-      for l in self.listeners: l.stepped(curtime, rating, self.combos.combo)
+    if rating != None: self.stats[rating] += 1
 
     return rating, dir, etime
 
@@ -92,13 +80,15 @@ class TimeJudge(AbstractJudge):
 
   def expire_arrows(self, curtime):
     times = self.steps.keys()
+    misses = 0
     for time in times:
       if (time < curtime - 0.180) and self.steps[time]:
         n = len(self.steps[time]) 
         del(self.steps[time])
         for i in range(n):
           self.stats["M"] += 1
-          for l in self.listeners: l.stepped(curtime, "M", self.combos.combo)
+        misses += n
+    return misses
 
 class BeatJudge(AbstractJudge):
   def get_rating(self, dir, curtime):
@@ -132,13 +122,15 @@ class BeatJudge(AbstractJudge):
 
   def expire_arrows(self, curtime):
     times = self.steps.keys()
+    misses = 0
     for time in times:
       if (time < curtime - self.tick * 12) and self.steps[time]:
         n = len(self.steps[time]) 
         del(self.steps[time])
-        for i in range(n):
-          self.stats["M"] += 1
-          for l in self.listeners: l.stepped(curtime, "M", self.combos.combo)
+        for i in range(n): self.stats["M"] += 1
+        misses += n
+
+    return misses
   
 judges = [TimeJudge, BeatJudge]
 judge_opt = [(0, "Time"), (1, "Beat")]
