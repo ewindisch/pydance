@@ -38,11 +38,6 @@ A Comprehensive List of Features for pydance 1.2
    repeating/stretched part, and the bottom. This requires some
    big changes to all the themes, though.
 
-* A Free Announcer & Script
-   The announcer has to say at least one thing for each grade, a
-   dozen or so possibilities during song (preferrably around 30
-   or 40), and a few things for song selection.
-
 * Cleanup & Port to Python 2.3
   - Replace a lot of 'i in range(len(x))' with 'i,o in enumerate(x)'.
   - See if "string" in otherstring will help anywhere.

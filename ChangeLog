@@ -1,4 +1,4 @@
-pydance ChangeLog
+dpydance ChangeLog
 
 Legend:
 + New feature added or made an existing one better
@@ -7,11 +7,16 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
-1.0.1 -								[2004.03.12]
+1.0.2 - Moist!							[2004.07.06]
+* Defafult announcer theme courtsey of DJ Nz17!
+* Minor typos in the manual fixed.
+
+1.0.1 -	blah blah BLAH blah blah BLAH bla			[2004.03.12]
 * Tug of War lifebar no longer crashes.
 * Standard make install target works correctly again.
 * Fix a possible divide-by-zero related crash in the song selector.
 * Avoid locale-setting error on Mac OS X.
+* Fullscreen toggling on OS X and Windows works again.
 
 1.0.0 - Oh, it's a snaaaaaaaaaaake! (on a dancepad!)		[2004.03.01]
 + The TODO file has been revised with plans for pydance 1.2.
