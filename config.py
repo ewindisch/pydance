@@ -1,5 +1,7 @@
 # A generic configuration file parser
 
+import os
+
 class Config:
   def __init__(self, data = None):
     self.user = {}
@@ -25,10 +27,12 @@ class Config:
     if self.master.has_key(key): del(self.master[key])
     if self.user.has_key(key): del(self.user[key])
 
-  def load(self, filename, master = False):
+  def load(self, filename, master = False, shouldExist = False):
     d = None
     if master: d = self.master
     else: d = self.user
+
+    if not os.path.isfile(filename) and not shouldExist: return
 
     fi = open(filename, "r")
     for line in fi:

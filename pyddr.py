@@ -15,12 +15,33 @@ import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.m
 import os, sys, glob, random, fnmatch, types, operator, copy, string
 import pygame.transform
 
+osname = None
+if os.name == "nt": osname = "nt"
+elif os.name == "posix":
+  if os.path.islink("/System/Library/CoreServices/WindowServer"):
+    osname = "macosx"
+  elif os.environ.has_key("HOME"):
+    osname = "posix"
+else:
+  print "Your platform (%s) is not supported by pyDDR. We're going to call it"
+  print "POSIX, and then just let it crash."
+
+
 # Run pyDDR from anywhere
 pyddr_path = os.path.split(os.path.abspath(sys.argv[0]))[0]
 sys.path.append(pyddr_path)
 os.chdir(pyddr_path)
 
-rscdir = os.path.join(os.environ["HOME"], ".pyddr")
+rscdir = None
+
+if osname == "posix":
+  rscdir = os.path.join(os.environ["HOME"], ".pyddr")
+  if not os.path.isdir(rscdir): os.mkdir(rscdir)
+elif osname == "macosx":
+  rscdir = os.path.join(os.environ["HOME"], "Library", "Preferences", "pyDDR")
+elif osname == "nt":
+  rscdir = "."
+
 if not os.path.isdir(rscdir): os.mkdir(rscdir)
 
 import fontfx
@@ -101,10 +122,13 @@ mainconfig = Config({ # Wow we have a lot of options
   "grading": 1
   })
 
-if os.path.isfile("/etc/pyddr.cfg"): mainconfig.load("/etc/pyddr.cfg", True)
-if os.path.isfile("pyddr.cfg"): mainconfig.load("pyddr.cfg")
-if os.path.isfile(os.path.join(rscdir, "pyddr.cfg")):
-  mainconfig.load(os.path.join(rscdir, "pyddr.cfg"))
+if osname == "posix":
+  mainconfig.load("/etc/pyddr.cfg", True)
+elif osname == "macosx":
+  mainconfig.load("/Library/Preferences/pyDDR/pyddr.cfg")
+
+mainconfig.load("pyddr.cfg")
+mainconfig.load(os.path.join(rscdir, "pyddr.cfg"))
 
 DefaultThemeDir = os.path.join('themes','gfx')
 theme = mainconfig['gfxtheme']
@@ -2624,7 +2648,7 @@ def SetDisplayMode(mainconfig):
       screen = pygame.display.set_mode((640, 480), 16)
     
     elif int(mainconfig["fullscreen"]):
-      if os.path.islink("/System/Library/CoreServices/WindowServer") : # Mac OS X hack
+      if osname == "macosx":
         screen = pygame.display.set_mode((640, 480), FULLSCREEN, 16)
       else:
         screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF|FULLSCREEN, 16)
@@ -3108,8 +3132,11 @@ def domenu(songs):
   def fullscreen_toggle():
     mainconfig["fullscreen"] = int(mainconfig["fullscreen"]) ^ 1
     if mainconfig["fullscreen"] == 1:
-      screen = pygame.display.set_mode((640, 480),
-                                       HWSURFACE|DOUBLEBUF|FULLSCREEN, 16)
+      if osname == "macosx":
+        screen = pygame.display.set_mode((640, 480), FULLSCREEN, 16)
+      else:
+        screen = pygame.display.set_mode((640, 480),
+                                         HWSURFACE|DOUBLEBUF|FULLSCREEN, 16)
     else:
       screen = pygame.display.set_mode((640, 480),
                                        HWSURFACE|DOUBLEBUF, 16)
@@ -3144,7 +3171,7 @@ def domenu(songs):
                                            ["file", "song", "group", "bpm",
                                             "difficulty", "mix"])),
                 ("Save Changes",
-                 (lambda : mainconfig.write(os.path.join(os.environ["HOME"], ".pyddr", "pyddr.cfg")))),
+                 (lambda : mainconfig.write(os.path.join(rscdir, "pyddr.cfg")))),
                 ("Back", None)
                 ]],
               ('HELP', help_strings),
