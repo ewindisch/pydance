@@ -1287,9 +1287,9 @@ class ArrowSprite(CloneSprite):
       self.pos = POS
     if (self.pos['mode'] == 'centered') or (self.pos['mode'] == 'switchy'):
       if random.choice([0,1]):
-        self.pos['bot'] = int(236 + (mainconfig['scrollspeed']*576))
+        self.pos['bot'] = int(236 + (mainconfig['scrollspeed']*512))
       else:
-        self.pos['bot'] = int(236 - (mainconfig['scrollspeed']*576))
+        self.pos['bot'] = int(236 - (mainconfig['scrollspeed']*512))
       self.pos['diff'] = float(self.pos['top']-self.pos['bot'])
     self.playernum = playernum
     self.bimage = self.image
@@ -1362,15 +1362,23 @@ class ArrowSprite(CloneSprite):
     else:
       self.image = self.cimage
 
-    hiddenzone = ( 64 + int(64.0*hidden) )
-    suddenzone = ( 480 - int(64.0*sudden) )
     alp = 0
     self.curalpha = self.get_alpha()
-    if self.rect.top < hiddenzone:
-      alp = 255-(hiddenzone-self.rect.top)*4
-    if self.rect.top > hiddenzone:
-      if self.rect.top < suddenzone:
-        alp = (suddenzone-self.rect.top)*4
+
+    if self.pos['top'] < self.pos['bot']:
+      hiddenzone = ( (self.pos['top']) + int(64.0*hidden) )
+      suddenzone = ( (64+self.pos['bot']) - int(64.0*sudden) )
+      atest = self.rect.top
+    else:    # test for alpha using the bottom of the arrow instead of the top in the case of reverse scrolling
+      hiddenzone = ( (self.pos['bot']) + int(64.0*hidden) )
+      suddenzone = ( (64+self.pos['top']) - int(64.0*sudden) )
+      atest = self.rect.bottom-64
+
+    if atest < hiddenzone:
+      alp = 255-(hiddenzone-atest)*4
+    if atest > hiddenzone:
+      if atest < suddenzone:
+        alp = (suddenzone-atest)*4
     if alp < 0:      alp = 0
     if alp > 255:    alp = 255
     if alp != self.curalpha:
@@ -1391,9 +1399,9 @@ class HoldArrowSprite(CloneSprite):
       self.pos = POS
     if (self.pos['mode'] == 'centered') or (self.pos['mode'] == 'switchy'):
       if random.choice([0,1]):
-        self.pos['bot'] = int(236 + (mainconfig['scrollspeed']*576))
+        self.pos['bot'] = int(236 + (mainconfig['scrollspeed']*512))
       else:
-        self.pos['bot'] = int(236 - (mainconfig['scrollspeed']*576))
+        self.pos['bot'] = int(236 - (mainconfig['scrollspeed']*512))
       self.pos['diff'] = float(self.pos['top']-self.pos['bot'])
     self.playernum = playernum
     self.curalpha = -1
@@ -1514,14 +1522,16 @@ class HoldArrowSprite(CloneSprite):
     else:
       self.image = self.cimage
 
-    hiddenzone = ( 64 + int(64.0*hidden) )
-    suddenzone = ( 480 - int(64.0*sudden) )
     alp = 255
     self.curalpha = self.get_alpha()
 
     if self.pos['top'] < self.pos['bot']:
+      hiddenzone = ( (self.pos['top']) + int(64.0*hidden) )
+      suddenzone = ( (64+self.pos['bot']) - int(64.0*sudden) )
       atest = self.rect.top
     else:    # test for alpha using the bottom of the arrow instead of the top in the case of reverse scrolling
+      hiddenzone = ( (self.pos['bot']) + int(64.0*hidden) )
+      suddenzone = ( (64+self.pos['top']) - int(64.0*sudden) )
       atest = self.rect.bottom-64
 
     if atest < hiddenzone:
@@ -1743,11 +1753,11 @@ def playSequence(numplayers, playlist):
   #DCY: Bottom of 640 gives lots of "update rejecting"    
   if mainconfig['reversescroll'] == 2:
     ARROWPOS['top']  = 236
-    ARROWPOS['bot']  = int(236 + (mainconfig['scrollspeed']*576))
+    ARROWPOS['bot']  = int(236 + (mainconfig['scrollspeed']*512))
     ARROWPOS['mode'] = 'centered'
   elif mainconfig['reversescroll'] == 3:    # this is more of a bug than a feature but some people might like it
     ARROWPOS['top']  = 236
-    ARROWPOS['bot']  = int(236 + (mainconfig['scrollspeed']*576))
+    ARROWPOS['bot']  = int(236 + (mainconfig['scrollspeed']*512))
     ARROWPOS['mode'] = 'switchy'
   elif mainconfig['reversescroll']:
     ARROWPOS['top']  = 408
