@@ -1,6 +1,6 @@
 # Support for endless song playing!
 
-import random, copy, colors, audio, error
+import random, copy, colors, audio, error, optionscreen
 from constants import *
 
 RESOLUTION = (640, 480)
@@ -72,6 +72,8 @@ class FakePlaylist:
 class Endless:
   def __init__(self, songitems, screen, playSequence,
                numplayers = 1, gametype = "SINGLE"):
+    self.player_configs = [copy.copy(player_config)]
+
     songitems = [s for s in songitems if s.difficulty.has_key(gametype)]
     oldaf = mainconfig["autofail"]
     diffs = []
@@ -108,8 +110,10 @@ class Endless:
 
       # Start game
       if ev[0] == 0 and ev[1] == E_START:
-        playSequence(FakePlaylist(songitems, self.constraints, screen),
-                     len(self.constraints) * [player_config])
+
+        if self.optionscreen(screen):
+          playSequence(FakePlaylist(songitems, self.constraints, screen),
+                       self.player_configs)
                      
 
         audio.load(os.path.join(sound_path, "menu.ogg"))
@@ -120,10 +124,13 @@ class Endless:
       # Player 2 on
       elif ev[0] == len(self.constraints) and ev[1] == E_START:
         self.constraints.append(Constraint())
+        self.player_configs.append(copy.copy(player_config))
 
       # Player 2 off
       elif ev[0] < len(self.constraints) and ev[1] == E_START:
-        while len(self.constraints) > ev[0]: self.constraints.pop()
+        while len(self.constraints) > ev[0]:
+          self.constraints.pop()
+          self.player_configs.pop()
 
       # Ignore unknown events
       elif ev[0] >= len(self.constraints): pass
@@ -189,3 +196,16 @@ class Endless:
       self.screen.blit(vtext, vtext_r)
 
     pygame.display.flip()
+
+  def optionscreen(self, screen):
+    ev = (0, E_QUIT)
+    start = pygame.time.get_ticks()
+
+    while (event.states[(0, E_START)] and
+           pygame.time.get_ticks() - start < 1500):
+      ev = event.poll()
+
+    if event.states[(0, E_START)]:
+      op = optionscreen.OptionScreen(self.player_configs, "Endless")
+      return op.display(screen)
+    else: return True
