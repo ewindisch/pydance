@@ -188,6 +188,7 @@ class LifeBarDisp(AbstractLifeBar):
   def __init__(self, playernum, theme):
     AbstractLifeBar.__init__(self, playernum, 100)
     self.life = 50.0
+    self.displayed_life = 50.0
 
     self.deltas = {"V": 0.8, "P": 0.5, "G": 0.0,
                        "O": -1.0, "B": -4.0, "M": -8.0}
@@ -197,9 +198,18 @@ class LifeBarDisp(AbstractLifeBar):
                                                'lifebar-full.png'))
 
   def update(self, judges):
-    if AbstractLifeBar.update(self, judges) == False: return
+    if self.displayed_life < self.life:  self.displayed_life += 1
+    elif self.displayed_life > self.life:  self.displayed_life -= 1
+
+    if abs(self.displayed_life - self.life) < 1:
+      self.displayed_life = self.life
+
+    if (AbstractLifeBar.update(self, judges) == False and
+        self.displayed_life <= 0): return
+
+    if self.displayed_life < 0: self.displayed_life = 0
     self.image.blit(self.empty, (0, 0))
-    self.image.set_clip((0, 0, int(202 * self.life / 100.0), 28))
+    self.image.set_clip((0, 0, int(202 * self.displayed_life / 100.0), 28))
     self.image.blit(self.full, (0, 0))
     self.image.set_clip()
 
