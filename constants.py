@@ -71,6 +71,7 @@ mainconfig = config.Config({ # Wow we have a lot of options
   "autofail": 1,
   "grading": 1,
   "keyboard": "qwerty",
+  "ingamehelp": 1,
   "strobe": 0
   })
 
