@@ -6,7 +6,7 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
-0.7.1 - OUCH MY BLADDER                                         [2003.XX.XX]
+0.7.1 - OUCH MY BLADDER                                         [2003.07.01]
 + Support for COUPLE mode.
  + And battle mode.
  - any2dance doesn't always convert COUPLE from DWI to .dance correctly.
