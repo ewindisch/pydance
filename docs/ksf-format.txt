@@ -109,8 +109,23 @@ A 2 (or a line of 13 2s) indicates the end of the step pattern.
 
 BPM Changes
 -----------
-TODO
-BUNKI in centiseconds
+BPM changes are handled by header values; they are specified by a pair
+of values #BPMx and #BUNKIx, where x is an integer. An example is:
+
+#BPM:146.10;
+#BPM2:180.20;
+#BPM3:195.00;
+#TICKCOUNT:2;
+#STARTTIME:0;
+#BUNKI:4200;
+#BUNKI2:10000;
+
+BPMn+1 starts at the time specified in centiseconds by BUNKIn (where n
+is omitted if it is 1). In the above, 42 seconds (4200 centiseconds)
+into the song, the BPM changes from its initial 146.1 to 180.2, and
+then 100 seconds into the song, from 180.2 to 195.
+
+BUNKIs can be a decimal value.
 
 Syntax Exceptions
 -----------------
@@ -139,4 +154,4 @@ Acknowledgements
 ----------------
 This document is based primarily off of extensive work done by Matt Reppert.
 The Stepmania KSF loader source code (src/NotesLoaderKSF.cpp) also proved
-useful in verifying the information.
+useful in verifying some information.
