@@ -217,10 +217,6 @@ class Arrow(object):
       self._image.set_colorkey(self._image.get_at([0, 0]))
       self._image = pygame.transform.rotate(self._image, rotate)
 
-    if realnum != color and self._beatcount >= color:
-      self._images = (self._images[self._fpb * color:] +
-                      self._images[:self._fpb * color])
-
     if not mainconfig["animation"] and not self._image and type == "c":
       self._image = self._images[0]
 
