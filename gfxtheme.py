@@ -19,10 +19,11 @@ class GFXTheme:
 
   themes = classmethod(themes)
 
-  def __init__(self, name, game):
+  def __init__(self, name, pid, game):
     self.name = name
     self.game = game
     self.path = None
+    self.pid = pid
     for path in search_paths:
       if os.path.isdir(os.path.join(path, "themes", "gfx", name)):
         self.path = os.path.join(path, "themes", "gfx", name)
@@ -33,24 +34,24 @@ class GFXTheme:
     self.load()
 
   def load(self):
-    self.arrows = ArrowSet(self.path, self.game)
+    self.arrows = ArrowSet(self.path, self.game, self.pid)
 
-  def toparrows(self, bpm, ypos, playernum):
+  def toparrows(self, bpm, ypos, pid):
     arrs = {}
     arrfx = {}
     for d in self.game.dirs:
-      arrs[d] = TopArrow(bpm, d, ypos, playernum, self.path, self.game)
-      arrfx[d] = ArrowFX(bpm, d, ypos, playernum, self.path, self.game)
+      arrs[d] = TopArrow(bpm, d, ypos, pid, self.path, self.game)
+      arrfx[d] = ArrowFX(bpm, d, ypos, pid, self.path, self.game)
     return arrs, arrfx
 
   def __repr__(self):
     return ('<GFXTheme name=%r>' % self.name)
 
 class ArrowSet: 
-  def __init__ (self, path, game):
+  def __init__ (self, path, game, pid):
     arrows = {}
     for dir in game.dirs:
-      left = game.left_off + game.width * game.dirs.index(dir)
+      left = game.left_off(pid) + game.width * game.dirs.index(dir)
       for cnum in range(4):
         if cnum == 3: color = 1
         else: color = cnum
@@ -64,7 +65,7 @@ class ArrowSet:
 
 class TopArrow(pygame.sprite.Sprite):
 
-  def __init__ (self, bpm, direction, ypos, playernum, path, game):
+  def __init__ (self, bpm, direction, ypos, pid, path, game):
     pygame.sprite.Sprite.__init__(self)
     self.presstime = -1
     self.tick = toRealTime(bpm, 1);
@@ -75,7 +76,6 @@ class TopArrow(pygame.sprite.Sprite):
     self.adder = 0
     self.direction = direction
     self.topimg = []
-    self.playernum = playernum
     self.ypos = ypos
 
     for i in range(8):
@@ -89,9 +89,9 @@ class TopArrow(pygame.sprite.Sprite):
       self.image = self.topimg[0]
       self.rect = self.image.get_rect()
       self.rect.top = self.ypos
-      self.rect.left = game.left_off + (game.dirs.index(direction) *
-                                        game.width)
-      self.rect.left += 320 * self.playernum
+      self.rect.left = game.left_off(pid) + (game.dirs.index(direction) *
+                                             game.width)
+      self.rect.left += 320 * pid
 
   def stepped(self, modifier, time):
     if modifier:    self.adder = 4
@@ -110,14 +110,14 @@ class TopArrow(pygame.sprite.Sprite):
       self.oldframe = self.frame
 
 class ArrowFX(pygame.sprite.Sprite):
-  def __init__ (self, bpm, direction, ypos, playernum, path, game):
+  def __init__ (self, bpm, direction, ypos, pid, path, game):
     pygame.sprite.Sprite.__init__(self)
     self.presstime = -1000000
     self.tick = toRealTime(bpm, 1);
     self.centery = ypos + 32
-    self.centerx = (game.left_off + game.dirs.index(direction) * game.width +
-                   game.width / 2)
-    self.playernum = playernum
+    self.centerx = (game.left_off(pid) +
+                    game.dirs.index(direction) * game.width + game.width / 2)
+    self.pid = pid
     
     fn = os.path.join(path, 'arr_n_' + direction + '_3.png')
     self.baseimg = pygame.image.load(fn).convert(16)
@@ -183,7 +183,7 @@ class ArrowFX(pygame.sprite.Sprite):
       self.rect = self.image.get_rect()
       self.rect.center = self.centerx, self.centery
 
-      self.rect.left += (320*self.playernum)
+      self.rect.left += (320 * self.pid)
 
 class ScrollingArrow:
   def __init__ (self, path, dir, color, left):

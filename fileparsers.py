@@ -436,6 +436,7 @@ class DWIFile(GenericFile):
 #        self.info[key] = util.titlecase(self.info[key])
 
   def parse_steps(self, mode, diff, steps):
+    if mode not in DWIFile.steps: return
     step_type = "e"
     current_time = 0
     bpmidx = 0

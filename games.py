@@ -30,14 +30,14 @@ class GameType:
 
     # The offset to start drawing the arrows at, centered within the field
     # (Unless the mode isdoubled - see left_offset(self,pid) below.
-    self.left_off = (640 / self.players - self.width * len(self.dirs)) / 2
+    self.left_offset = (640 / self.players - self.width * len(self.dirs)) / 2
 
     # The center of the playfield, for non-arrow sprites (score, lifebar, etc)
     self.sprite_center = 320 / self.players
 
   # In double modes, we need to have the fields adjacent and dependent on pid.
   # sprite_center will be fine; player_offset will be fine.
-  def left_offset(self, pid):
+  def left_off(self, pid):
     if not self.double: return self.left_offset
     elif pid & 1: return 0
     else: return self.left_offset * 2
