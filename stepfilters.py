@@ -86,7 +86,6 @@ def rotate(steps, opt, mode):
 
 # Apply myriad additions/deletions to the step pattern
 # FIXME: Return a list rather than in-place modify.
-# FIXME: Big, quick, skippy.X
 def size(steps, opt):
   if opt == 1: little(steps, 4) # Tiny
   elif opt == 2: little(steps, 2) # Little
