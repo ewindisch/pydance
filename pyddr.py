@@ -1481,8 +1481,10 @@ class Song:
         self.playingbpm = self.bpm
       elif firstword in modes.keys():  chompNext=(modes[firstword],)
       elif firstword == 'file':        self.file = " ".join(rest)
-      elif firstword == 'bg':          self.bgfile = " ".join(rest)
-      elif firstword == 'movie':       self.moviefile = " ".join(rest)
+      elif firstword == 'bg':
+        self.bgfile = os.path.join(os.path.split(fn)[0], " ".join(rest))
+      elif firstword == 'movie':
+        self.moviefile = os.path.join(os.path.split(fn)[0], " ".join(rest))
       elif firstword == 'startat':     self.startsec = float(nextword)
       elif firstword == 'endat':       self.endsec = float(nextword)
       elif firstword == 'offset':      
