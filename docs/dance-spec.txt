@@ -1,5 +1,5 @@
-=== THIS IS THE DRAFT OF THE .DANCE SPECIFICATION v1.0 ===
-=== THIS IS NOT THE FINAL VERSION OF THE SPECIFICATION ===
+This document describes the .dance format version 1.0. It was published
+on June 1st, 2003.
 
 The "Dance" Format
 ------------------
@@ -102,8 +102,8 @@ subtitle Crazy Mix
 artist Someone
 end
 DESCRIPTION
- This is an example song.
- It's pretty uninteresting.
+This is an example song.
+It's pretty uninteresting.
 end
 SINGLE
 BASIC 0
@@ -252,14 +252,18 @@ work fine without them.
 New note types and commands. These would be new lowercase or uppercase
 single characters in the song section.
 
-Game Modes
-----------
+Standard Game Modes
+-------------------
 SINGLE - Normal single player DDR, or versus mode
 DOUBLE - Doubles DDR
 6PANEL - 6 panels (upleft and upright)
 
 Changes:
 --------
+2003.06.01
+ - Version 1.0
+ - No more I command.
+
 2003.05.23:
  - Started changes.
  - v1.0 draft preparation.
