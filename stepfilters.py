@@ -110,16 +110,24 @@ def little(steps, mod):
 # Inspired by Stepmania's function of the same name, in src/NoteData.cpp.
 def insert_taps(steps, interval, offset, not_same):
   new_steps = []
+  holds = []
   beat = 0.0
   rand = NonRandom(int(interval * offset * len(steps)))
   for i in range(len(steps) - 1):
     if isinstance(steps[i][0], float): # This is a note...
+      for j in range(len(steps[i][1:])):
+        if steps[i][j + 1] & 2: holds.append(j)
+        elif steps[i][j + 1] & 1 and j in holds: holds.remove(j)
+      
       if not isinstance(steps[i + 1][0], float):
         new_steps.append(steps[i]) # Next isn't a note.
 
       elif (steps[i][1:].count(0) == len(steps[i][1:]) or
             steps[i + 1][1:].count(0) == len(steps[i + 1][1:])):
         # The surrounding notes are both empty.
+        new_steps.append(steps[i])
+
+      elif len(holds) > 1: # Don't add things during two holds
         new_steps.append(steps[i])
 
       elif steps[i][0] == interval and beat % interval == 0: # Bingo!
