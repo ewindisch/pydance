@@ -528,7 +528,7 @@ class ArrowSprite(CloneSprite):
       self.sample.play()
       self.sample = None
 
-    if curtime > self.endtime + (240.0/curbpm): # == 0.004 * 60000 / curbpm
+    if curtime > self.endtime + (240.0/curbpm):
       self.kill()
       return
 
@@ -554,15 +554,15 @@ class ArrowSprite(CloneSprite):
       bpmdoom = self.endtime - oldbpmsub[0]
       beatsleft += float(bpmdoom / onefbeat)
 
-    if beatsleft > 0:
-      if self.accel == 1:
-        beatsleft *= 6 # Rationale for magic number: aesthetically pleasing
-        beatsleft = math.sqrt(beatsleft)
-      elif self.accel == 2:
-        beatsleft *= beatsleft
-        beatsleft /= 6
+    if self.accel == 1:
+      p = min(1, max(0, -0.125 * (beatsleft * self.speed - 8)))
+      speed = 3 * p * self.speed + self.speed * (1 - p)
+    elif self.accel == 2:
+      p = min(1, max(0, -0.125 * (beatsleft * self.speed - 8)))
+      speed = p * self.speed / 2.0 + self.speed * (1 - p)
+    else: speed = self.speed
 
-    top = top - int(beatsleft / 8.0 * self.speed * self.diff)
+    top = top - int(beatsleft / 8.0 * speed * self.diff)
 
     self.cimage = self.bimage
     
@@ -594,14 +594,14 @@ class ArrowSprite(CloneSprite):
     alp = 256
     if self.top < self.bottom: 
       if self.rect.top > self.suddenzone:
-        alp = 256 - 4 * (self.rect.top - self.suddenzone)
+        alp = 256 - 4 * (self.rect.top - self.suddenzone) / self.speed
       elif self.rect.top < self.hiddenzone:
-        alp = 256 - 4 * (self.hiddenzone - self.rect.top)
+        alp = 256 - 4 * (self.hiddenzone - self.rect.top) / self.speed
     else:
       if self.rect.top < self.suddenzone:
-        alp = 256 - 4 * (self.suddenzone - self.rect.top)
+        alp = 256 - 4 * (self.suddenzone - self.rect.top) / self.speed
       elif self.rect.top > self.hiddenzone:
-        alp = 256 - 4 * (self.rect.top - self.hiddenzone)
+        alp = 256 - 4 * (self.rect.top - self.hiddenzone) / self.speed
 
     if alp > 256: alp = 256
     elif alp < 0: alp = 0
@@ -717,24 +717,20 @@ class HoldArrowSprite(CloneSprite):
       bpmdoom = self.timef2 - oldbpmsub[0]
       beatsleft_bottom += float(bpmdoom / onefbeat)
 
-    if beatsleft_top > 0:
-      if self.accel == 1:
-        beatsleft_top *= 6
-        beatsleft_top = math.sqrt(beatsleft_top)
-      elif self.accel == 2:
-        beatsleft_top *= beatsleft_top
-        beatsleft_top /= 6
+    if self.accel == 1:
+      p = min(1, max(0, -0.125 * (beatsleft_top * self.speed - 8)))
+      speed_top = 3 * p * self.speed + self.speed * (1 - p)
+      p = min(1, max(0, -0.125 * (beatsleft_bottom * self.speed - 8)))
+      speed_bottom = 3 * p * self.speed + self.speed * (1 - p)
+    elif self.accel == 2:
+      p = min(1, max(0, -0.125 * (beatsleft_top * self.speed - 8)))
+      speed_top = p * self.speed / 2.0 + self.speed * (1 - p)
+      p = min(1, max(0, -0.125 * (beatsleft_bottom * self.speed - 8)))
+      speed_bottom = p * self.speed / 2.0 + self.speed * (1 - p)
+    else: speed_top = speed_bottom = self.speed
 
-    if beatsleft_bottom > 0:
-      if self.accel == 1:
-        beatsleft_bottom *= 6
-        beatsleft_bottom = math.sqrt(beatsleft_bottom)
-      elif self.accel == 2:
-        beatsleft_bottom *= beatsleft_bottom
-        beatsleft_bottom /= 6
-
-    top = top - int(beatsleft_top / 8.0 * self.diff * self.speed)
-    bottom = bottom - int(beatsleft_bottom / 8.0 * self.diff *self.speed)
+    top = top - int(beatsleft_top / 8.0 * self.diff * speed_top)
+    bottom = bottom - int(beatsleft_bottom / 8.0 * self.diff * speed_bottom)
 
     if bottom > 480: bottom = 480
 
@@ -783,14 +779,14 @@ class HoldArrowSprite(CloneSprite):
     alp = 256
     if self.top < self.bottom: 
       if self.rect.top > self.suddenzone:
-        alp = 256 - 4 * (self.rect.top - self.suddenzone)
+        alp = 256 - 4 * (self.rect.top - self.suddenzone) / self.speed
       elif self.rect.top < self.hiddenzone:
-        alp = 256 - 4 * (self.hiddenzone - self.rect.top)
+        alp = 256 - 4 * (self.hiddenzone - self.rect.top) / self.speed
     else:
       if self.rect.bottom < self.suddenzone:
-        alp = 256 - 4 * (self.suddenzone - self.rect.bottom)
+        alp = 256 - 4 * (self.suddenzone - self.rect.bottom) / self.speed
       elif self.rect.bottom > self.hiddenzone:
-        alp = 256 - 4 * (self.rect.bottom - self.hiddenzone)
+        alp = 256 - 4 * (self.rect.bottom - self.hiddenzone) / self.speed
 
     if alp > 256: alp = 256
     elif alp < 0: alp = 0
