@@ -332,7 +332,23 @@
     want to add new lyrics.</p>
     <h1>FAQ</h1>
       <p>The official FAQ is currently at <a
-    href="http://www.icculus.org/pyddr/faq.php">http://www.icculus.org/pyddr/faq.php</a>.</p>
+    href="http://www.icculus.org/pyddr/faq.php">http://www.icculus.org/pyddr/faq.php</a>. Eventually that will be replaced with this one.</p>
+    <dl>
+      <dt>My MP3 fails to load.</dt>
+      <dd>pyDDR's MP3 support comes via the SMPEG, which is
+      suboptimial, but integrates with SDL's mixer library
+      easily. You have three options. The first is to try stripping
+      ID3 tags from your MP3 files; you can do this with <a
+      href="http://www.dakotacom.net/~donut/programs/id3ed.html">id3ed</a>
+      for regular ID3 tags, or <a
+      href="http://www.geocities.com/matsp888/unix/">v2strip</a> for
+      ID3v2 tags. Secondly, you can convert them to the <a
+      href="http://www.vorbis.com">Ogg Vorbis</a> format. <a
+      href="http://faceprint.com/code/">mp32ogg</a> can do this
+      nicely. The third possibility is to merge <a
+      href="http://spacepants.org/src/pymad/">pymad</a> support into
+      pyDDR, and send us the patches.</dd>
+    </dl>
     <h1>Contacts</h1>
     <p>There are several different ways to get in touch with the pyDDR
       developers.</p>
