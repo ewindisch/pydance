@@ -11,7 +11,8 @@ Legend:
 + Display the average time off (in milliseconds) when grading.
 + Page up and page down work again; they are back left and back right
   on the pad.
-+ The manual now includes instructions for step and theme making.
++ The manual now includes instructions for step and theme making, as
+  well as a table of contents.
 * Don't crash sometimes on slower systems when failing.
 * Commas (or periods) are displayed on the grading screen in the score again.
 * Fix a rare mixer-related crash.
