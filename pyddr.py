@@ -296,7 +296,26 @@ class Judge:
     self.holdsub = []
     for i in range(holds):
       self.holdsub.append(0)
+
+  def munch(self, anotherjudge):
+    self.marvelous += anotherjudge.marvelous
+    self.perfect   += anotherjudge.perfect
+    self.great     += anotherjudge.great
+    self.ok        += anotherjudge.ok
+    self.crap      += anotherjudge.crap
+    self.shit      += anotherjudge.shit
+    self.miss      += anotherjudge.miss
+
+    if self.bestcombo < anotherjudge.bestcombo:
+      self.bestcombo = anotherjudge.bestcombo
+    self.combo = anotherjudge.combo  
+    self.totalcombos += anotherjudge.totalcombos
     
+    self.score += anotherjudge.score
+    self.early += anotherjudge.early
+    self.late += anotherjudge.late
+    self.ontime += anotherjudge.ontime
+        
   def changingbpm(self, bpm):
     self.oldtick = toRealTime(bpm, 1)
     self.oldbpm = bpm
@@ -641,7 +660,42 @@ class GradingScreen:
       player += 1
 
     background.set_alpha()
+
     return 1
+    
+  def make_waitscreen(self, screen):
+    idir = -4
+    i = 192
+    screenshot = 0
+    font = pygame.font.Font(None, 32)
+    while 1:
+      if i < 32:        idir =  4
+      elif i > 224:     idir = -4
+
+      i += idir
+      event = eventManager.poll()
+      if (event == E_QUIT) or (event == E_START):
+        break
+      elif event == E_FULLSCREEN:  #f
+        print "fullscreen toggle"
+        pygame.display.toggle_fullscreen()
+      elif event == E_SCREENSHOT: #s
+        print "writing next frame to screenshot.bmp"
+        screenshot = 1
+          
+      gradetext = font.render("Press ESC/ENTER/START",1, (i,128,128) )
+      gradetextpos = gradetext.get_rect()
+      gradetextpos.centerx = screen.get_rect().centerx
+      gradetextpos.bottom = screen.get_rect().bottom - 16
+      r = screen.blit(gradetext,gradetextpos)
+      update_screen(r)
+      pygame.time.wait(1)     # don't peg the CPU on the grading screen
+
+      if screenshot:
+        pygame.image.save(pygame.transform.scale(screen, (640,480)), "screenshot.bmp")
+        screenshot = 0
+
+    return
 
 class zztext(pygame.sprite.Sprite):
     def __init__(self,text,x,y):
@@ -1087,11 +1141,19 @@ class ArrowFX(pygame.sprite.Sprite):
       self.rect.left += (320*self.playernum)
 
 class LifeBarDisp(pygame.sprite.Sprite):
-    def __init__(self,playernum):
+    def __init__(self,playernum,previously=None):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
         self.playernum = playernum
-        self.oldlife = self.failed = 0
+        if previously:
+          self.oldlife = -1
+          self.failed = previously.failed
+          self.prevlife = previously.life
+        else:
+          self.oldlife = self.failed = 0
+          self.prevlife = 25
+
         self.life = 25
+
         self.image = pygame.Surface((204,28))
         self.blkbar = pygame.Surface((3,24))
         self.bugbar = pygame.Surface((2,24))
@@ -1148,6 +1210,8 @@ class LifeBarDisp(pygame.sprite.Sprite):
       
       if self.life > 0: #If you failed, you failed. You can't gain more life afterwards
         self.life = 25 + (judges.marvelous * self.vamt) + (judges.perfect * self.pamt) + (judges.great * self.gamt) + (judges.ok * self.oamt) + (judges.crap * self.camt) + (judges.shit * self.samt) + (judges.miss * self.mamt)
+        
+        self.life += (self.prevlife-25)
         
         if self.life < 0: #FAILED but we don't do anything yet
           self.failed = 1
@@ -2250,7 +2314,7 @@ class HoldArrowSprite(CloneSprite):
 #    print "alpha ",alp
       
 # enum would be nice
-E_PASS,E_QUIT,E_LEFT,E_RIGHT,E_UP,E_DOWN,E_FULLSCREEN,E_START,E_SCREENSHOT,E_HCENTER,E_VCENTER,E_PGUP,E_PGDN,E_LEFT2,E_RIGHT2,E_UP2,E_DOWN2,E_START2,E_SELECT = range(19)
+E_PASS,E_QUIT,E_LEFT,E_RIGHT,E_UP,E_DOWN,E_FULLSCREEN,E_START,E_SCREENSHOT,E_HCENTER,E_VCENTER,E_PGUP,E_PGDN,E_LEFT2,E_RIGHT2,E_UP2,E_DOWN2,E_START2,E_SELECT,E_MARK = range(20)
 
 HAXIS,VAXIS = 0,1
 ZERO,NEGATIVE,POSITIVE = 0,1,2
@@ -2286,7 +2350,8 @@ KEYCONFIG = { E_QUIT:       [K_ESCAPE],
               E_UP2:        [p2u],
               E_DOWN2:      [p2d],
               E_START2:     [K_2],
-              E_SELECT:     [K_r]
+              E_SELECT:     [K_r],
+              E_MARK:       [K_t]
             }
 
 EMS2CONFIG= { E_QUIT:       [],
@@ -2305,6 +2370,7 @@ EMS2CONFIG= { E_QUIT:       [],
               E_DOWN2:      [joyEvent( button=30 )],
               E_START2:     [joyEvent( button=25)],
               E_SELECT:     [joyEvent( button=8 )],
+              E_MARK:       [joyEvent( button=0 )]
             }
 J2CONFIG  = { E_LEFT2:      [joyEvent( button=mainconfig["joy_left"])],
               E_RIGHT2:     [joyEvent( button=mainconfig['joy_right'])],
@@ -3525,6 +3591,16 @@ def songSelect(songs, players):
       songChanged = 1
       fontdisp = 1
       sod = 0
+    elif event == E_MARK:
+      currentSong.listimage.blit(fontfx.embfade("T",18,3,(12,16),(255,255,0)),(536,28))
+      print currentSong,":",
+      try:
+        taglist.append(currentSong)
+        print "added to taglist."
+      except:
+        print "new taglist created."
+        taglist = []
+        taglist.append(currentSong)
     elif event == E_START or ((event == E_START2) and (players==2)):
       pygame.mixer.music.fadeout(1000)
       annc.say('menu')
@@ -3546,19 +3622,52 @@ def songSelect(songs, players):
       except:
         pass
 
-      biggerdifflist = [diffList[difficulty]]
+      try:
+        print "nonstop: taglist is",taglist
+      except:
+        print "single song, no taglist"
+        taglist = []
+        taglist.append(currentSong)
+
+      megajudge = Judge(1,1,1,1,"NONSTOP")
       if players == 2:
-        biggerdifflist.append(diffList[difficulty2])
+        megajudge2 = Judge(1,1,1,1,"NONSTOP")
+      for thisSong in taglist:
+        try:
+          tmptmp = lifebars
+        except:
+          lifebars = [None, None]
 
-      fooblah = currentSong.fooblah
-      mrsong = Song(fooblah)
-      pygame.mixer.quit()
-      oldfoo = 1
-      screen.fill(BLACK)
-      dance(mrsong,players,biggerdifflist)
+        biggerdifflist = [diffList[difficulty]]
+        combos = [megajudge.combo]
+        if players == 2:
+          biggerdifflist.append(diffList[difficulty2])
+          combos.append(megajudge2.combo)
 
+        fooblah = thisSong.fooblah
+        mrsong = Song(fooblah)
+        pygame.mixer.quit()
+        oldfoo = 1
+        prevscr = pygame.transform.scale(screen, (640,480))
+        screen.fill(BLACK)
+        thisjudging, lifebars, prevscr = dance(mrsong,players,biggerdifflist,lifebars,combos,prevscr)
+        megajudge.munch(thisjudging[0])
+        if players == 2:
+          megajudge2.munch(thisjudging[1])
+
+        thisSong.listimage.blit(pygame.surface.Surface((12,16)),(536,28))
+          
+      if mainconfig['grading']:
+        if players == 2:
+          grade = GradingScreen([megajudge, megajudge2])
+        else:
+          grade = GradingScreen([megajudge])
+
+        if grade.make_gradescreen(screen):
+          grade.make_waitscreen(screen)
+
+      del(taglist)
       totalredraw = 1
-#      return currentSong,biggerdifflist
 
     if not totalredraw:
       # No difficulty selected.
@@ -3818,7 +3927,7 @@ def songSelect(songs, players):
         songidx = songs.index(currentSong)
         s = 0
 
-def dance(song,players,difficulty):
+def dance(song,players,difficulty,prevlife,combos,prevscr):
   global screen,background,eventManager,currentTheme,playmode
   
   songL = [song]
@@ -3902,7 +4011,7 @@ def dance(song,players,difficulty):
     plr = {
       'playerID': playerID,
       'score': ScoringDisp(playerID, difficulty[playerID]),
-      'lifebar': LifeBarDisp(playerID),
+      'lifebar': LifeBarDisp(playerID,prevlife[playerID]),
       'holdtext': HoldJudgeDisp(playerID),
       'arrowGroup': RenderLayered(),
       
@@ -3919,7 +4028,7 @@ def dance(song,players,difficulty):
     plr['score'].add(tgroup)
     plr['lifebar'].add(tgroup)
     plr['holdtext'].add(tgroup)
-    
+
     for i in range(tj):
       plr['judgingList'][i].add(tgroup)
     playerContents.append(plr)
@@ -4039,6 +4148,7 @@ def dance(song,players,difficulty):
     plr['song'].play(playmode, plr['difficulty'], plr['playerID'] == 0)
     plr['holds'] = len(song.holdref[song.modediff[playmode].index(plr['difficulty'])])
     plr['judge'] = Judge(song.bpm, plr['holds'], song.modeinfo[playmode][difflist.index(plr['difficulty'])][1], song.totarrows[plr['difficulty']], plr['difficulty'])
+    plr['judge'].combo = combos[plr['playerID']]
     plr['toparr'] = {}
     plr['toparrfx'] = {}
     for arrowID in DIRECTIONS:
@@ -4293,53 +4403,16 @@ def dance(song,players,difficulty):
       songtext.zout()
       grptext.zout()
 
-  # GRADES
-  if mainconfig['grading']:
-    grade = None
-    if players == 2:
-      grade = GradingScreen([playerContents[0]['judge'], playerContents[1]['judge']]).make_gradescreen(screen)
-    else:
-      grade = GradingScreen([playerContents[0]['judge']]).make_gradescreen(screen)
+  try:
+    print "LPS for this song was %d tops, %d on average, %d at worst." % (fpstext.highest, fpstext.fpsavg(), fpstext.lowest)
+  except:
+    pass
+    
+  if players == 2:
+    return [playerContents[0]['judge'], playerContents[1]['judge']] , [playerContents[0]['lifebar'], playerContents[1]['lifebar']] , pygame.transform.scale(screen, (640,480))
+  else:
+    return [playerContents[0]['judge']] , [playerContents[0]['lifebar']] , pygame.transform.scale(screen, (640,480))
 
-    if not grade:
-      song.kill()
-      return
-
-    print "LPS for this song was %d tops, %d on average, %d at worst." % (
-      fpstext.highest, fpstext.fpsavg(), fpstext.lowest)
-
-    idir = -4
-    i = 192
-    font = pygame.font.Font(None, 32)
-    while 1:
-      if i < 32:
-        idir = 4
-      elif i > 224:
-        idir = -4
-
-      i += idir
-      event = eventManager.poll()
-      if (event == E_QUIT) or (event == E_START):
-        break
-      elif event == E_FULLSCREEN:  #f
-        print "fullscreen toggle"
-        pygame.display.toggle_fullscreen()
-      elif event == E_SCREENSHOT: #s
-        print "writing next frame to screenshot.bmp"
-        screenshot = 1
-          
-      gradetext = font.render("Press ESC/ENTER/START",1, (i,128,128) )
-      gradetextpos = gradetext.get_rect()
-      gradetextpos.centerx = screen.get_rect().centerx
-      gradetextpos.bottom = screen.get_rect().bottom - 16
-      r = screen.blit(gradetext,gradetextpos)
-      update_screen(r)
-      pygame.time.wait(1)     # don't peg the CPU on the grading screen
-
-      if screenshot:
-        pygame.image.save(pygame.transform.scale(screen, (640,480)),
-                          "screenshot.bmp")
-        screenshot = 0
   song.kill()
   print "proper exit"
 # "end"
