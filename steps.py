@@ -55,6 +55,7 @@ class Steps:
     coloring_mod = 0
     cur_time = float(self.offset)
     cur_bpm = self.bpm
+    self.lastbpmchangetime = []
     self.events = SongEvent(when = cur_time, bpm = cur_bpm,
                             extra = song.difficulty[playmode][difficulty])
 
@@ -129,9 +130,7 @@ class Steps:
 
       elif words[0] == "B":
         cur_bpm = words[1]
-        tail.next = SongEvent(when = cur_time, bpm = cur_bpm,
-                              extra = "CHBPM")
-        tail = tail.next
+        self.lastbpmchangetime.append([cur_time, cur_bpm])
 
       elif words[0] == "S":
         tail.next = SongEvent(when = cur_time, bpm = cur_bpm,

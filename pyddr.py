@@ -631,80 +631,73 @@ def find (path, pattern):
   return matches
 
 class ArrowSprite(CloneSprite):
-  def __init__ (self, spr, curtime, endtime, playernum, POS, zindex=ARROWZINDEX):
-    CloneSprite.__init__(self,spr,zindex=zindex)
-    self.timef = endtime
+
+  # Assist mode sound samples
+  samples = {}
+  for d in DIRECTIONS:
+    samples[d] = pygame.mixer.Sound(os.path.join(sound_path,
+                                                 "assist-" + d + ".ogg"))
+  
+  def __init__ (self, spr, curtime, endtime, playernum, POS):
+    CloneSprite.__init__(self, spr, ARROWZINDEX)
+    self.endtime = endtime
     self.life  = endtime - curtime
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
-    if mainconfig['assist']:
-      self.playedsound = None
-      self.sample = pygame.mixer.Sound(os.path.join(sound_path, "assist-" + self.dir + ".ogg"))
-    else:
-      self.playedsound = 1
-    self.r = 0
+    if mainconfig['assist']: self.sample = ArrowSprite.samples[self.dir]
+    else: self.sample = None
     self.pos = copy.copy(POS)
     if self.pos['mode'] == 'switchy':
       self.pos = POS
     if (self.pos['mode'] == 'centered') or (self.pos['mode'] == 'switchy'):
-      if random.choice([0,1]):
+      if random.choice([True, False]):
         self.pos['bot'] = int(236 + (mainconfig['scrollspeed']*512))
       else:
         self.pos['bot'] = int(236 - (mainconfig['scrollspeed']*512))
       self.pos['diff'] = float(self.pos['top']-self.pos['bot'])
     self.playernum = playernum
     self.bimage = self.image
-    self.arrowspin = float(mainconfig["arrowspin"])
-    self.arrowscale = float(mainconfig["arrowscale"])
+    self.arrowspin = mainconfig["arrowspin"]
+    self.arrowscale = mainconfig["arrowscale"]
     
     self.centerx = self.rect.centerx+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
-    # assist
-    if (self.playedsound is None) and (curtime >= self.timef -0.0125): #- (0.001*(60000.0/curbpm))):
+    if (self.sample) and (curtime >= self.endtime -0.0125):
       self.sample.play()
-      self.playedsound = 1
+      self.sample = None
 
-    if curtime > self.timef + (0.004*(60000.0/curbpm)):
+    if curtime > self.endtime + (240.0/curbpm): # == 0.004 * 60000 / curbpm
       self.kill()
       return
-      
+
     self.rect = self.image.get_rect()
     self.rect.centerx = self.centerx
 
     self.top = self.pos['top']
-    finaltime = 0
     
-    if len(lbct)<2:
+    if len(lbct) == 0:
       onebeat = float(60000.0/curbpm)/1000
-      doomtime = self.timef - curtime
+      doomtime = self.endtime - curtime
       beatsleft = float(doomtime / onebeat)
       self.top = self.top - int( (beatsleft/8.0)*self.pos['diff'] )
     else:
       oldbpmsub = [curtime,curbpm]
       bpmbeats = 0
-      for bpmcheck in range(len(lbct[-1])-1):
-        bpmsub = lbct[bpmcheck+1]
-#        print "bpmsub[0]",bpmsub[0],"curtime",curtime
-        if bpmsub[0] <= self.timef:
-#          print "adjusting for",bpmsub,
-#          onefbeat = float(60000.0/bpmsub[1])/1000
-          onefbeat = float(60000.0/curbpm)/1000
+      for bpmsub in lbct:
+        if bpmsub[0] <= self.endtime:
+          onefbeat = float(60000.0/oldbpmsub[1])/1000
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           bpmbeats = float(bpmdoom / onefbeat)
-#          print "bpmbeats",bpmbeats
           self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
           oldbpmsub = bpmsub
-      if not finaltime:
-#        print "adjusting for finaltime",
-        onefbeat = float(60000.0/oldbpmsub[1])/1000
-#        onefbeat = float(60000.0/curbpm)/1000
-        bpmdoom = self.timef - oldbpmsub[0] 
-        bpmbeats = float(bpmdoom / onefbeat)
-#        print "bpmbeats",bpmbeats
-        self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
-        finaltime = 1
-            
+        else: break
+
+      onefbeat = float(60000.0/oldbpmsub[1])/1000
+      bpmdoom = self.endtime - oldbpmsub[0]
+      bpmbeats = float(bpmdoom / onefbeat)
+      self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
+
     if self.top > 480:
       self.top = 480
     self.rect.top = self.top
@@ -816,33 +809,24 @@ class HoldArrowSprite(CloneSprite):
     else:
       oldbpmsub = [curtime,curbpm]
       bpmbeats = 0
-      for bpmcheck in range(len(lbct[-1])-1):
-        bpmsub = lbct[bpmcheck+1]
-#        print "bpmsub[0]",bpmsub[0],"curtime",curtime
+      for bpmsub in lbct:
         if bpmsub[0] <= self.timef1 or bpmsub <= self.timef2:
-#          print "adjusting for",bpmsub,
-#          onefbeat = float(60000.0/bpmsub[1])/1000
-          onefbeat = float(60000.0/curbpm)/1000
+          onefbeat = float(60000.0/oldbpmsub[1])/1000
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           bpmbeats = float(bpmdoom / onefbeat)
-#          print "bpmbeats",bpmbeats
 	  if bpmsub[0] <= self.timef1:
 	    self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
           if bpmsub[0] <= self.timef2:
             self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0)
           oldbpmsub = bpmsub
-      if not finaltime:
-#        print "adjusting for finaltime",
-        onefbeat = float(60000.0/oldbpmsub[1])/1000
-#        onefbeat = float(60000.0/curbpm)/1000
-        bpmdoom = self.timef1 - oldbpmsub[0]
-        bpmbeats = float(bpmdoom / onefbeat)
-#        print "bpmbeats1=",bpmbeats1," bpmbeats2=",bpmbeats2
-        self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
-        bpmdoom = self.timef2 - oldbpmsub[0]
-        bpmbeats = float(bpmdoom / onefbeat)
-        self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0)
-        finaltime = 1
+
+      onefbeat = float(60000.0/oldbpmsub[1])/1000
+      bpmdoom = self.timef1 - oldbpmsub[0]
+      bpmbeats = float(bpmdoom / onefbeat)
+      self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
+      bpmdoom = self.timef2 - oldbpmsub[0]
+      bpmbeats = float(bpmdoom / onefbeat)
+      self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0)
 
     if self.bottom > 480:
       self.bottom = 480
@@ -1358,12 +1342,6 @@ def dance(song, players, ARROWPOS, prevscr):
                 plr.judge.handle_arrow(dir, curtime, ev.when)
          
         for ev in nevents:
-          #print "future event: %r"%ev
-          if ev.extra == 'CHBPM':
-            plr.steps.lastbpmchangetime.append([ev.when,ev.bpm])
-            print [ev.when,ev.bpm], "was added to the bpm changelist"
-            print players.index(plr), plr.steps.lastbpmchangetime
-          
           if ev.feet:
             for (dir,num) in zip(DIRECTIONS, ev.feet):
               if num & 1:
@@ -1375,12 +1353,12 @@ def dance(song, players, ARROWPOS, prevscr):
                 HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, plr.steps.holdinfo[holdindex], plr.steps.lastbpmchangetime[0], plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
 
     for plr in players:
-      if len(plr.steps.lastbpmchangetime) > 1:
-        if (curtime >= plr.steps.lastbpmchangetime[1][0]):
-          nbpm = plr.steps.lastbpmchangetime[1][1]
+      if len(plr.steps.lastbpmchangetime) > 0:
+        if (curtime >= plr.steps.lastbpmchangetime[0][0]):
+          nbpm = plr.steps.lastbpmchangetime[0][1]
           for plr in players:
             plr.change_bpm(nbpm)
-            print "Last changed BPM at", plr.steps.lastbpmchangetime
+            print "Last changed BPM at", plr.steps.lastbpmchangetime[0]
             plr.steps.lastbpmchangetime.pop(0)
      
     for plr in players: plr.check_sprites(curtime)
