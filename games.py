@@ -11,6 +11,11 @@ class GameType(object):
     # The directions to be displayed for each player.
     self.dirs = "ldur"
 
+    # This maps certain directions to others, in case two directions (in
+    # the button sense) trigger the same direction (in the game sense).
+    # Think IIDX scratching.
+    self.dirmap = {}
+
     # The maximum number of players for this game mode.
     self.players = 2
 

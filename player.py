@@ -423,6 +423,7 @@ class Player(object):
             holding[dir_idx] = -1
 
   def handle_key(self, ev, time):
+    ev = ev[0], self.game.dirmap.get(ev[1], ev[1])
     if ev[1] not in self.game.dirs: return
 
     # Note that we can't pack up the listener arguments ahead of time
