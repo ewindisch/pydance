@@ -9,6 +9,7 @@ import grades
 import dance
 import random
 import options
+import error
 
 from constants import *
 from interface import *
@@ -203,8 +204,16 @@ class SongPreview(object):
 
 class SongSelect(InterfaceWindow):
   def __init__(self, songs, courses, screen, game):
+
     InterfaceWindow.__init__(self, screen, "newss-bg.png")
     songs = [s for s in songs if s.difficulty.has_key(game)]
+
+    if len(songs) == 0:
+      error.ErrorMessage(screen, ["You don't have any songs",
+                                  "for the game mode (%s)" % game,
+                                  "that you selected."])
+      return
+
     self._songs = [SongItemDisplay(s) for s in songs]
     self._index = 0
     self._game = game
