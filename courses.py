@@ -1,6 +1,5 @@
 # Like DWI and SM files, CRS files are a variant of the MSD format.
 
-from constants import *
 import pygame
 import random
 import util
