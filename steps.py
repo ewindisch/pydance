@@ -133,9 +133,7 @@ class Steps:
         self.lastbpmchangetime.append([cur_time, cur_bpm])
 
       elif words[0] == "S":
-        tail.next = SongEvent(when = cur_time, bpm = cur_bpm,
-                              extra = "TSTOP")
-        cur_time += words[1] / 1000
+        cur_time += words[1]
         tail = tail.next
 
       elif words[0] == "L" and lyrics:

@@ -14,6 +14,7 @@ legend:
 - 'transcolor' option removed in favor of new 'lyriccolor' syntax.
 * Bug fixes, optimizations, whippings, etc.
   + Most notably, hold arrows are working wonderfully now.
+  + Also, reconvert any songs with BPM changes with the new dwi2step.
 
 0.6.3 - Reasonable Starting Times!				[2003.05.17]
 + New song loading display and algorithm (at least 4-5 times faster).
