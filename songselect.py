@@ -150,6 +150,7 @@ class SongPreview:
       self.playing = False
       self.start_time = pygame.time.get_ticks() + 500
       self.end_time = int(self.start_time + length * 1000)
+    elif song.isfolder: audio.fadeout(500)
 
   def update(self, time):
     if self.filename is None: pass
@@ -497,7 +498,6 @@ class SongSelect:
           self.songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"]]])
           self.index = self.songs.index(s)
           self.oldindex = self.index # We're cheating!
-        self.scroll_in(self.index)
         changed = True
 
       elif ev[1] == E_FULLSCREEN:
