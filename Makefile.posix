@@ -12,7 +12,7 @@ install:
 	install -d $(DESTDIR)$(PREFIX)/share/man/man1 $(DESTDIR)$(PREFIX)/share/man/man6
 	install -m 644 $(PYMODS) $(DESTDIR)$(PREFIX)/share/games/pyddr
 	install -m 755 pyddr.py $(DESTDIR)$(PREFIX)/share/games/pyddr
-	ln -sf ../share/games/pyddr/pyddr.py $(DESTDIR)$(PREFIX)/games/pyddr.py
+	ln -sf ../share/games/pyddr/pyddr.py $(DESTDIR)$(PREFIX)/games/pyddr
 	cp pyddr.posix.cfg pyddr.cfg
 	install -D -m 644 pyddr.cfg $(DESTDIR)/etc/pyddr.cfg
 	for U in $(UTILS); do\
