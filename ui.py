@@ -57,19 +57,18 @@ class UI(object):
 
     nev = self.events.get(abs(ev), PASS)
 
-    if (nev == PASS and self.last_press[0][1] and
-        self.last_press[1] + 500 < pygame.time.get_ticks() and
-        self.last_repeat + 30 < pygame.time.get_ticks() and
-        self.states[self.last_press[0]] == True):
-      self.last_repeat = pygame.time.get_ticks()
-      return self.last_press[0]
-
     if ev < 0:
       self.states[(pid, nev)] = False
       nev = -nev
     elif ev != PASS:
       self.states[(pid, nev)] = True
       self.last_press = ((pid, nev), pygame.time.get_ticks())
+    elif (nev == PASS and self.last_press[0][1] and
+          self.last_press[1] + 500 < pygame.time.get_ticks() and
+          self.last_repeat + 30 < pygame.time.get_ticks() and
+          self.states[self.last_press[0]] == True):
+      self.last_repeat = pygame.time.get_ticks()
+      return self.last_press[0]
 
     return (pid, nev)
 

@@ -194,7 +194,8 @@ class Pad(object):
          ev.key == K_DOWN)):
       default = (0, {K_LEFT: LEFT, K_RIGHT: RIGHT,
                      K_UP: UP, K_DOWN: DOWN}[ev.key])
-    elif ev.type == KEYDOWN and passthrough: default = (-2, ev.key * 100)
+    elif (ev.type == KEYUP or ev.type == KEYDOWN) and passthrough:
+      default = (-2, ev.key * 100)
     else: default = (-1, PASS)
 
     ret = self.events.get((t, v), default)
