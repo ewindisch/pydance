@@ -70,6 +70,12 @@ A Comprehensive List of Features for pydance 1.2
    DESCRIPTION) about them. Bonus points if you can watch the step
    charts in the background or something.
 
+* No pad-based UI
+   (Pavel) piman: Here's a minor feature request, before I forget: a
+           menu option to disable the DDR mat for navigating through
+           songs, leaving only the keyboard for that, and activating
+           the mat only when actually "dancing".
+
 * BG Animation
    This is probably a Sprite like BGMovie is now, but with complicated
    timing information about when to change. For good support of
@@ -122,6 +128,10 @@ A Comprehensive List of Features for pydance 1.2
    song selector.
 
    This would require arbitrary nesting of subfolders, maybe.
+
+   (Pavel) piman: Makes sense... So an interesting possibility might be
+           to have folders nested to a depth of 3 or so, with top-level
+           folders being what "S" key does right now.
 
 * Song installer
    We should have a song package format that pydance should either be
