@@ -49,6 +49,10 @@ A2B10 = { 0: E_LEFT, 1: E_DOWN, 2: E_RIGHT, 3: E_UP,
 A2B8 = { E_UP: 4, E_DOWN: 6, E_LEFT: 5, E_RIGHT: 7,
          E_START: 2, E_MARK: 3, E_PGUP: 0, E_PGDN: 1 }
 
+MATS = { (6, 12): A6B12,
+         (2, 10): A2B10,
+         (2, 8): A2B8 }
+
 class EventManager:
   def __init__(self, handler = pygame.event):
     self.handler = handler
@@ -73,14 +77,8 @@ class EventManager:
         if mat == None: mat = i
         else: # A 4/16 should be P1 if available, overriding 6/12.
           mat2 = mat
-          mat = i # FIXME We can clean this up a lot
-      elif ddrmat.get_numbuttons() == 12 and ddrmat.get_numaxes() == 6:
-        if mat == None: mat = i
-        elif mat2 == None: mat2 = i
-      elif ddrmat.get_numbuttons() == 10 and ddrmat.get_numaxes() == 2:
-        if mat == None: mat = i
-        elif mat2 == None: mat2 = i
-      elif ddrmat.get_numbuttons() == 8 and ddrmat.get_numaxes() == 2:
+          mat = i
+      elif MATS.get((ddrmat.get_numaxes(), ddrmat.get_numbuttons())):
         if mat == None: mat = i
         elif mat2 == None: mat2 = i
       else:
@@ -105,12 +103,9 @@ class EventManager:
       data = {}
       if ddrmat.get_numbuttons() == 16:
         self.mergeEvents(A4B16, 0, "js" + str(mat))
-      elif ddrmat.get_numbuttons() == 12:
-        self.mergeEvents(A6B12, 0, "js" + str(mat))
-      elif ddrmat.get_numbuttons() == 10:
-        self.mergeEvents(A2B10, 0, "js" + str(mat))
-      elif ddrmat.get_numbuttons() == 8:
-        self.mergeEvents(A2B8, 0, "js" + str(mat))
+      elif MATS.get(ddrmat.get_numaxes(), ddrmat.get_numbuttons()):
+        self.mergeEvents(MATS[(ddrmat.get_numaxes(), ddrmat.get_numbuttons())],
+                         0, "js" + str(mat))
       print "DDR mat 1 initialized: js", mat
       self.handler.set_allowed((JOYBUTTONUP, JOYBUTTONDOWN))
       if mat2 != None:
@@ -118,12 +113,9 @@ class EventManager:
         ddrmat.init()
         if ddrmat.get_numbuttons() == 16:
           self.mergeEvents(A4B16, 1, "js" + str(mat2))
-        elif ddrmat.get_numbuttons() == 12:
-          self.mergeEvents(A6B12, 1, "js" + str(mat2))
-        elif ddrmat.get_numbuttons() == 10:
-          self.mergeEvents(A2B10, 1, "js" + str(mat2))
-        elif ddrmat.get_numbuttons() == 8:
-          self.mergeEvents(A2B8, 1, "js" + str(mat2))
+        elif MATS.get(ddrmat.get_numaxes(), ddrmat.get_numbuttons()):
+          self.mergeEvents(MATS[(ddrmat.get_numaxes(),
+                                 ddrmat.get_numbuttons())], 0, "js" + str(mat))
         print "DDR mat 2 initialized: js", mat2
     else:
       print "No DDR mats found. Not initializing joystick support."
