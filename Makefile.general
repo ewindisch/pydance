@@ -1,5 +1,5 @@
 MANPAGES += docs/man
-UTILS += utils/*.py
+UTILS += utils/dwi2step.py utils/findbpm.py utils/lyrictag.py utils/step2dwi.py utils/stepshrink.py utils/msd2step.py
 PYMODS += config.py announcer.py fontfx.py input.py constants.py
 DATA += themes images sound
 
