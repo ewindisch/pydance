@@ -205,6 +205,7 @@ class StepFile(GenericFile):
 
   def __init__(self, filename, need_steps):
     GenericFile.__init__(self, filename, need_steps)
+    raise RuntimeWarning, "The .step format is deprecated and support will be removed."
 
     f = open(filename)
 
