@@ -10,31 +10,34 @@ class OptionScreen:
   menu = [
     ("Speed", "speed", [(0.25, ".25x"), (0.5, ".5x"), (1, "1x"), (2, "2x"),
                         (3, "3x"), (4, "4x"), (8, "8x")]),
-    ("Spin", "spin", [(0, "Off"), (1, "On")]),
-    ("Size", "scale", [(1, "Normal"), (0, "Shrink"), (2, "Grow")]),
     ("Sudden", "sudden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
                           (3, "Hide 3")]),
     ("Hidden", "hidden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
                           (3, "Hide 3")]),
+    ("Size", "scale", [(1, "Normal"), (0, "Shrink"), (2, "Grow")]),
+    ("Little", "little", [(0, "Off"), (1, "No 16ths"), (3, "No 16ths/8ths")]),
+    ("Scroll", "scrollstyle", [(0, "Normal"), (1, "Reverse"), (2, "Center")]),
+    ("Spin", "spin", [(0, "Off"), (1, "On")]),
     ("Flat", "colortype", [(4, "Off"), (1, "On")]),
     ("Dark", "toparrows", [(1, "Off"), (0, "On")]),
     ("Jumps", "jumps", [(1, "On"), (0, "Off")]),
-    ("Little", "little", [(0, "Off"), (1, "No 16ths"), (3, "No 16ths/8ths")]),
-    ("Scroll", "scrollstyle", [(0, "Normal"), (1, "Reverse"), (2, "Center")])
     ]
 
   player_colors = [colors.color["cyan"], colors.color["yellow"]]
 
+  bg = pygame.image.load(os.path.join(pyddr_path, "images", "option-bg.png"))
+  bg.set_colorkey(bg.get_at((0, 0)))
+  bg.set_alpha(200)
+
   # Players is a list of hashes, not Player objects; it should have all
   # config information set to some value already (player_config in constants)
-  def __init__(self, screen, players, title = ""):
+  def __init__(self, players, title = "Players"):
     self.players = players
     self.current = [0] * len(players)
     self.title = title + ": Options"
+
+  def display(self, screen):
     baseimage = pygame.transform.scale(screen, (640,480))
-    bg = pygame.image.load(os.path.join(pyddr_path, "images", "option-bg.png"))
-    bg.set_colorkey(bg.get_at((0, 0)))
-    bg.set_alpha(200)
 
     # Animate the menu opening
     if mainconfig['gratuitous']:
@@ -43,7 +46,7 @@ class OptionScreen:
       while pygame.time.get_ticks() - t < 300:
         p = float(pygame.time.get_ticks() - t) / 300
         eyecandyimage.blit(baseimage, (0,0))
-        scaledbg = pygame.transform.scale(bg,(int(580 * p), 480))
+        scaledbg = pygame.transform.scale(OptionScreen.bg,(int(580 * p), 480))
         scaledbg.set_alpha(200)
         r = scaledbg.get_rect()
         r.center = (320, 240)
@@ -51,21 +54,20 @@ class OptionScreen:
         screen.blit(eyecandyimage, (0, 0))
         pygame.display.update(up)
     
-    baseimage.blit(bg, (30, 0))
+    baseimage.blit(OptionScreen.bg, (30, 0))
 
     self.baseimage = baseimage
+    
     screen.blit(baseimage, (0, 0))
     pygame.display.update()
     
     ev = E_PASS
     
-    while ev != E_QUIT:
+    while not (ev == E_START or ev == E_QUIT):
       self.render(screen)
       
       pid, ev = event.wait()
-      if pid >= len(players): pass
-      
-      elif ev == E_START: ev = E_QUIT
+      if pid >= len(self.players): pass
       
       elif ev == E_DOWN:
         self.current[pid] = (self.current[pid] + 1) % len(OptionScreen.menu)
@@ -97,6 +99,8 @@ class OptionScreen:
             self.players[pid][optname] = val[0]
             break
           elif self.players[pid][optname] == val[0]: next = True
+
+    return (ev == E_START)
 
   def render(self, screen):
     rect = ((45, 5), (570, 470))

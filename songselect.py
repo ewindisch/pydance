@@ -37,7 +37,6 @@ DIFF_LOCATION = (8, 120)
 
 # FIXME: DSU at some point in the future.
 SORTS = {
-  "filename": (lambda x, y: cmp(x.song.filename, y.song.filename)),
   "subtitle": (lambda x, y: cmp(str(x.song.info["subtitle"]).lower(),
                                 str(y.song.info["subtitle"]).lower())),
   "title": (lambda x, y: (cmp(x.song.info["title"].lower(),
@@ -53,10 +52,10 @@ SORTS = {
                         SORTS["title"](x, y)))
   }
 
-SORT_NAMES = ("filename", "title", "artist", "bpm", "mix")
+SORT_NAMES = ("mix", "title", "artist", "bpm")
 
 NUM_SORTS = len(SORT_NAMES)
-BY_FILENAME,BY_NAME,BY_GROUP,BY_BPM,BY_MIX = range(NUM_SORTS)
+BY_MIX,BY_NAME,BY_GROUP,BY_BPM = range(NUM_SORTS)
 
 # Make a box of a specific color - these are used for difficulty ratings
 def make_box(color):
@@ -295,28 +294,30 @@ class SongSelect:
           while ann.chan.get_busy(): pygame.time.wait(1)
         except: pass
 
-        self.optionscreen()
-        audio.fadeout(500)
+        if self.optionscreen():
+          audio.fadeout(500)
 
-        # playSequence can probably derive the number of players from
-        # the length of the other lists
-        playSequence(zip(self.song_list, self.diff_list), self.player_configs)
+          # playSequence can probably derive the number of players from
+          # the length of the other lists
+          playSequence(zip(self.song_list, self.diff_list),
+                       self.player_configs)
+
+          audio.fadeout(500) # This is the just-played song
+
+          if not previews:
+            audio.load(os.path.join(sound_path, "menu.ogg"))
+            audio.play(4, 0.0)
+
+          while ev[1] != E_PASS: ev = event.poll() # Empty the queue
+          self.screen.blit(self.bg, (0, 0))
+          pygame.display.flip()
+
+        changed = all_changed = True
 
         # Reset the playlist
         self.song_list = []
         self.diff_list = []
         self.title_list = []
-
-        audio.fadeout(500) # This is the just-played song
-
-        if not previews:
-          audio.load(os.path.join(sound_path, "menu.ogg"))
-          audio.play(4, 0.0)
-
-        while ev[1] != E_PASS: ev = event.poll() # Empty the queue
-        self.screen.blit(self.bg, (0, 0))
-        pygame.display.flip()
-        changed = True
 
       # Add the current song to the playlist
       elif ev[1] == E_MARK:
@@ -634,5 +635,6 @@ class SongSelect:
       ev = event.poll()
 
     if event.states[(0, E_START)]:
-      optionscreen.OptionScreen(self.screen, self.player_configs,
-                                "Song Select")
+      op = optionscreen.OptionScreen(self.player_configs, "Song Select")
+      return op.display(self.screen)
+    else: return True
