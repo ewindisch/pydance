@@ -167,7 +167,9 @@ class SongPreview(object):
       self.end_time = int(self.start_time + length * 1000)
     elif song.isfolder: audio.fadeout(500)
 
-  def update(self, time = pygame.time.get_ticks()):
+  # Python evaluates default parameters at instantiate-time or something,
+  # so we can't set a default value of time = pygame.time.get_ticks() here.
+  def update(self, time):
     if self.filename is None: pass
     elif time < self.start_time: pass
     elif not self.playing:
@@ -480,7 +482,7 @@ class SongSelect(object):
           if name in self.current_song.diff_list[self.gametype]:
             self.player_diffs[i] = self.current_song.diff_list[self.gametype].index(name)
 
-      preview.update()
+      preview.update(pygame.time.get_ticks())
 
       if self.index != self.oldindex:
         preview.preview(self.songs[self.index])
