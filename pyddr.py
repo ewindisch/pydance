@@ -510,16 +510,18 @@ class GradingScreen:
 
     if totalsteps == 0: return None
 
-    # flash screen, whee
-    for i in range(16):
-      bg = pygame.Surface(screen.get_size())
-      bg.fill(((15-i)*16,(15-i)*16,(15-i)*16))
-      screen.blit(bg, (0,0))
+    # dim screen
+    for n in range(31):
+      background.set_alpha(255-(n*4))
+      screen.fill(BLACK)
+      background.draw(screen)
       pygame.display.flip()
+      pygame.time.wait(1)
 
     font = pygame.font.Font(None, 28)
 
     grading = fontfx.sinkblur("GRADING",64,4,(224,72),(64,64,255))
+    grading.set_colorkey(grading.get_at((0,0)))
     screen.blit(grading, (320-grading.get_rect().centerx,-8) )
     pygame.display.update()
 
@@ -638,6 +640,7 @@ class GradingScreen:
 
       player += 1
 
+    background.set_alpha()
     return 1
 
 class zztext(pygame.sprite.Sprite):
@@ -665,18 +668,25 @@ class zztext(pygame.sprite.Sprite):
       self.baseimage.set_colorkey(self.baseimage.get_at((0,0)),RLEACCEL)
       self.image = self.baseimage
 
-    def plunk(self):
-      self.zoom = 8
+    def zin(self):
+      self.zoom = 1
+      self.zdir = 1
+      
+    def zout(self):
+      self.zoom = 31
+      self.zdir = -1
       
     def update(self):
-      if self.zoom > 0:
-        self.image = pygame.transform.rotozoom(self.baseimage, 0, self.zoom)
+      if 32 > self.zoom > 0:
+        self.image = pygame.transform.rotozoom(self.baseimage, 0, self.zoom/32.0)
 
         self.rect = self.image.get_rect()
         self.rect.centerx = self.x
         self.rect.centery = self.y
         
-        self.zoom -= 1
+        self.zoom += self.zdir
+      else:
+        self.zdir = 0
 
 class DancerAnim(pygame.sprite.Sprite):
   def __init__(self,x,y):
@@ -1323,6 +1333,7 @@ class Song:
     for key in MODELIST: modes[key]=DIFFICULTIES.copy()
     curTime = 0.0
     curBPM = 0.0
+    self.length = None
     self.offset = 0.0
     self.isValid = 0
     self.crapout = 0
@@ -1709,6 +1720,7 @@ class fastSong:
     for key in MODELIST: modes[key]=DIFFICULTIES.copy()
     curTime = 0.0
     curBPM = 0.0
+    self.length = None
     self.offset = 0.0
     self.isValid = 0
     self.startsec = 0.0
@@ -3281,15 +3293,13 @@ def blatantplug():
 
   pygame.time.delay(4500)
 
-  fadeout = pygame.surface.Surface((640,480))
-  fadeout.fill((0,0,0))
-  fadeout.set_alpha(12)
-
-  for i in range(26):
-    pygame.mixer.music.set_volume((26-i)/2.0)
-    screen.blit(fadeout,(0,0))
+  background = CloneSprite(pygame.transform.scale(screen, (640,480)))
+  for n in range(63):
+    background.set_alpha(255-(n*4))
+    screen.fill(BLACK)
+    background.draw(screen)
     pygame.display.flip()
-    pygame.time.delay(32)
+    pygame.time.wait(1)
 
   print "pyDDR exited properly."
   sys.exit()    
@@ -3386,6 +3396,18 @@ def songSelect(songs, players):
           pygame.mixer.music.load(currentSong.osfile)
           # Just an arbitrary start position, an attempt to pick up the chorus or
           # the most recognizable part of the song.
+
+          pygame.mixer.music.set_volume(0.2)
+          length = 1
+          lastgp = 1
+          while 1:
+            pygame.mixer.music.play(0, currentSong.startsec + length)
+            if (pygame.mixer.music.get_pos() == 0) and (lastgp == 0):
+              length -= 2
+              break
+            lastgp = pygame.mixer.music.get_pos()
+            length += 1
+          print "this song is",length,"secongs long"
           previewStart = 45
           pygame.mixer.music.set_volume(1.0)
           pygame.mixer.music.play(0, currentSong.startsec + previewStart)
@@ -3527,6 +3549,7 @@ def songSelect(songs, players):
 
       fooblah = currentSong.fooblah
       mrsong = Song(fooblah)
+      mrsong.length = length
       pygame.mixer.quit()
       oldfoo = 1
       screen.fill(BLACK)
@@ -3923,8 +3946,8 @@ def dance(song,players,difficulty):
   grptext = zztext(song.group,160,12)
   timewatch = TimeDisp()
 
-  songtext.plunk()
-  grptext.plunk()
+  songtext.zin()
+  grptext.zin()
 
   tgroup.add(timewatch)
   tgroup.add(songtext)
@@ -4263,6 +4286,10 @@ def dance(song,players,difficulty):
 
 #    time.sleep(0.0066667)
 #    time.sleep(0.0096066)
+
+    if (curtime > song.length - 1) and (songtext.zdir == 0) and (songtext.zoom > 0):
+      songtext.zout()
+      grptext.zout()
 
   # GRADES
   if mainconfig['grading']:
