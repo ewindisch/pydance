@@ -65,6 +65,28 @@ class AbstractArrow(pygame.sprite.Sprite):
       self.origcenterx = self.centerx = self.rect.centerx
     else: self.centerx = self.rect.centerx = self.goalcenterx
 
+  def calculate_beats(self, curtime, endtime, curbpm, lbct):
+    beatsleft = 0
+    if len(lbct) == 0:
+      onebeat = float(60.0/curbpm) # == float(60000.0/curbpm)/1000
+      doomtime = endtime - curtime
+      beatsleft = float(doomtime / onebeat)
+    else:
+      oldbpmsub = [curtime, curbpm]
+      for bpmsub in lbct:
+        if bpmsub[0] <= endtime:
+          onefbeat = float(60.0/oldbpmsub[1]) # == float(60000.0/curbpm)/1000
+          bpmdoom = bpmsub[0] - oldbpmsub[0]
+          beatsleft += float(bpmdoom / onefbeat)
+          oldbpmsub = bpmsub
+        else: break
+
+      onefbeat = float(60000.0/oldbpmsub[1])/1000
+      bpmdoom = endtime - oldbpmsub[0]
+      beatsleft += float(bpmdoom / onefbeat)
+
+    return beatsleft
+
   def kill(self):
     pygame.sprite.Sprite.kill(self)
     if self.sample: self.sample.play()
@@ -76,7 +98,7 @@ class ArrowSprite(AbstractArrow):
     self.endtime = endtime
     self.life  = endtime - curtime
 
-  def update (self, curtime, curbpm, lbct):
+  def update(self, curtime, curbpm, lbct):
     if (self.sample) and (curtime >= self.endtime -0.0125):
       self.sample.play()
       self.sample = None
@@ -92,25 +114,7 @@ class ArrowSprite(AbstractArrow):
 
     top = self.top
 
-    beatsleft = 0
-
-    if len(lbct) == 0:
-      onebeat = float(60.0/curbpm) # == float(60000.0/curbpm)/1000
-      doomtime = self.endtime - curtime
-      beatsleft = float(doomtime / onebeat)
-    else:
-      oldbpmsub = [curtime, curbpm]
-      for bpmsub in lbct:
-        if bpmsub[0] <= self.endtime:
-          onefbeat = float(60.0/oldbpmsub[1]) # == float(60000.0/curbpm)/1000
-          bpmdoom = bpmsub[0] - oldbpmsub[0]
-          beatsleft += float(bpmdoom / onefbeat)
-          oldbpmsub = bpmsub
-        else: break
-
-      onefbeat = float(60000.0/oldbpmsub[1])/1000
-      bpmdoom = self.endtime - oldbpmsub[0]
-      beatsleft += float(bpmdoom / onefbeat)
+    beatsleft = self.calculate_beats(curtime, self.endtime, curbpm, lbct)
 
     if self.accel == 1:
       p = min(1, max(0, -0.125 * (beatsleft * self.speed - 8)))
@@ -201,44 +205,8 @@ class HoldArrowSprite(AbstractArrow):
     top = self.top
     bottom = self.top
 
-    beatsleft_top = 0
-    beatsleft_bottom = 0
-
-    if len(lbct) == 0:
-      onebeat = float(60.0/curbpm)
-      doomtime = self.timef1 - curtime
-      if self.broken == 0 and doomtime < 0: doomtime = 0
-      beatsleft_top = float(doomtime / onebeat)
-
-      doomtime = self.timef2 - curtime
-      beatsleft_bottom = float(doomtime / onebeat)
-    else:
-      oldbpmsub = [curtime, curbpm]
-      bpmbeats = 0
-      for bpmsub in lbct:
-        if bpmsub[0] <= self.timef1:
-          onefbeat = float(60.0/oldbpmsub[1])
-          bpmdoom = bpmsub[0] - oldbpmsub[0]
-          beatsleft_top += float(bpmdoom / onefbeat)
-          oldbpmsub = bpmsub
-        else: break
-
-      onefbeat = float(60.0/oldbpmsub[1])
-      bpmdoom = self.timef1 - oldbpmsub[0]
-      beatsleft_top += float(bpmdoom / onefbeat)
-
-      oldbpmsub = [curtime, curbpm]
-      for bpmsub in lbct:
-        if bpmsub[0] <= self.timef2:
-          onefbeat = float(60.0/oldbpmsub[1])
-          bpmdoom = bpmsub[0] - oldbpmsub[0]
-          beatsleft_bottom += float(bpmdoom / onefbeat)
-          oldbpmsub = bpmsub
-        else: break
-
-      onefbeat = float(60.0/oldbpmsub[1])
-      bpmdoom = self.timef2 - oldbpmsub[0]
-      beatsleft_bottom += float(bpmdoom / onefbeat)
+    beatsleft_top = self.calculate_beats(curtime, self.timef1, curbpm, lbct)
+    beatsleft_bot = self.calculate_beats(curtime, self.timef2, curbpm, lbct)
 
     if self.accel == 1:
       p = min(1, max(0, -0.125 * (beatsleft_top * self.speed - 8)))
@@ -253,7 +221,7 @@ class HoldArrowSprite(AbstractArrow):
     else: speed_top = speed_bottom = self.speed
 
     top = top - int(beatsleft_top / 8.0 * self.diff * speed_top)
-    bottom = bottom - int(beatsleft_bottom / 8.0 * self.diff * speed_bottom)
+    bottom = bottom - int(beatsleft_bot / 8.0 * self.diff * speed_bottom)
 
     if bottom > 480: bottom = 480
 
