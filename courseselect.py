@@ -260,7 +260,8 @@ class CourseSelector(InterfaceWindow):
       elif ev == ui.SELECT:
         if self._course.isfolder:
           self._course = random.choice(self._all_courses)
-          root_idx = self._index
+          root_idx = [fol.name for fol in self._courses].index(self._course.folder[SORT_NAMES[mainconfig["sortmode"]]])
+            
           fol = self._course.folder[SORT_NAMES[mainconfig["sortmode"]]]
           self._create_course_list(fol)
           self._index = self._courses.index(self._course)

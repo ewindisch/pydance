@@ -263,8 +263,8 @@ class SongSelect(InterfaceWindow):
       elif ev == ui.SELECT:
         if self._song.isfolder:
           if len(self._all_valid_songs) > 0:
-            root_idx = self._index
             self._song = random.choice(self._all_valid_songs)
+            root_idx = [fol.name for fol in self._songs].index(self._song.folder[SORT_NAMES[mainconfig["sortmode"]]])
             fol = self._song.folder[SORT_NAMES[mainconfig["sortmode"]]]
             self._create_song_list(fol)
             self._index = self._songs.index(self._song)      
