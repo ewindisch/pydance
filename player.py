@@ -1,13 +1,12 @@
 from constants import *
 from util import toRealTime
 from gfxtheme import GFXTheme
-from judge import Judge
 from listener import Listener
 
 from pygame.sprite import RenderUpdates, RenderClear
 
 import fontfx, colors, steps, random
-import lifebars, scores, combos, grades
+import lifebars, scores, combos, grades, judge
 
 # This class keeps an ordered list of sprites in addition to the dict,
 # so we can draw in the order the sprites were added.
@@ -552,6 +551,8 @@ class Player(object):
     Lifebar = lifebars.bars[songconf["lifebar"]]
     self.lifebar = Lifebar(pid, self.theme, songconf, game)
     self.judging_disp = JudgingDisp(self.pid, game)
+
+    self.Judge = judge.judges[songconf["judge"]]
     
     self.game = game
 
@@ -605,8 +606,9 @@ class Player(object):
       for i in range(2):
         if self.steps[i].holdref: holds = len(self.steps[i].holdref)
         else: holds = 0
-        j = Judge(self.steps[i].bpm, holds, self.combos, self.score,
-                  self.judging_disp, self.grade, self.difficulty, self.lifebar)
+        j = self.Judge(self.steps[i].bpm, holds, self.combos, self.score,
+                       self.judging_disp, self.grade,
+                       self.difficulty, self.lifebar)
         if self.judge[i] != None: j.munch(self.judge[i])
         self.judge[i] = j
 
@@ -628,8 +630,9 @@ class Player(object):
       self.score.set_song(diff, self.steps.totalarrows, self.steps.feet)
       self.lifebar.set_song(diff, self.steps.totalarrows, self.steps.feet)
 
-      j = Judge(self.steps.bpm, holds, self.combos, self.score,
-                self.judging_disp, self.grade, self.difficulty, self.lifebar)
+      j = self.Judge(self.steps.bpm, holds, self.combos, self.score,
+                     self.judging_disp, self.grade,
+                     self.difficulty, self.lifebar)
       if self.judge != None: j.munch(self.judge)
       self.judge = j
 

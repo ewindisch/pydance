@@ -4,7 +4,7 @@ import copy
 from constants import *
 import pygame
 import colors
-import scores, lifebars, combos, grades
+import scores, lifebars, combos, grades, judge
 
 def player_opt_driver(screen, configs):
   ev = (0, E_QUIT)
@@ -47,6 +47,7 @@ def game_opt_driver(screen, config):
     ("Scoring", "scoring", scores.score_opt),
     ("Combos", "combo", combos.combo_opt),
     ("Grades", "grade", grades.grade_opt),
+    ("Judge", "judge", judge.judge_opt),
     ("Lifebar", "lifebar", lifebars.lifebar_opt),
     ("Oni Life", "onilives", [(1, "1"), (3, "3"), (5, "5"), (9, "9")]),
     ("Battle", "battle", [(0, "Off"), (1, "On")]),
