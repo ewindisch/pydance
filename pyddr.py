@@ -98,7 +98,6 @@ class Judge:
     self.steps = {}
     self.actualtimes = {}
     self.tick = toRealTime(bpm, 1)
-    self.oldtick = toRealTime(bpm, 1)
     self.marvelous = self.perfect = self.great = self.ok = self.boo = self.miss = 0
     self.combo = self.bestcombo = self.broke = 0
     self.steppedtime = -1000
@@ -107,7 +106,6 @@ class Judge:
     self.totalcombos = 1
     self.bpm = bpm
     self.failed_out = False
-    self.oldbpm = bpm
     self.lifebar = lifebar
     self.diff = diff
     # DDR Extreme scoring
@@ -145,13 +143,8 @@ class Judge:
     self.late += anotherjudge.late
     self.ontime += anotherjudge.ontime
         
-  def changingbpm(self, bpm):
-    self.oldtick = toRealTime(bpm, 1)
-    self.oldbpm = bpm
-
   def changebpm(self, bpm):
     self.tick = toRealTime(bpm, 1)
-    self.oldbpm = copy
     self.bpm = bpm
         
   def numholds(self):
@@ -355,30 +348,6 @@ class zztext(pygame.sprite.Sprite):
       else:
         self.zdir = 0
 
-class DancerAnim(pygame.sprite.Sprite):
-  def __init__(self,x,y):
-    pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-    self.x = x
-    self.y = y
-    self.baseimage = pygame.surface.Surface((self.x,self.y))
-    self.baseimage.fill((127,127,127))
-    
-  def update(self):
-    self.image = self.baseimage
-    x2 = self.x/2
-    x4 = self.x/4
-    x8 = self.x/8
-    y2 = self.y/2
-    y4 = self.y/4
-    y8 = self.y/8
-    pygame.draw.circle(self.image,(64,64,64),(x2,y4),x4)
-    pygame.draw.polygon(self.image,(64,64,64),[(x2-x8,y4),(x2+x8,y4),(x2+x8,y4+y8),(x2-x8,y4+y8)])
-    pygame.draw.polygon(self.image,(64,64,64),[(x2-x4,y4+y8),(x2+x4,y4+y8),(x2+x8,y2+y4),(x2-x8,y2+y4)])
-    self.image.set_colorkey(self.image.get_at((0,0)))
-    self.rect = self.image.get_rect()
-    self.rect.top = 240-(self.y/2)
-    self.rect.left = 480-(self.x/2)
-
 class ComboDisp(pygame.sprite.Sprite):
   def __init__(self,playernum):
     pygame.sprite.Sprite.__init__(self) #call Sprite initializer
@@ -449,7 +418,6 @@ class ComboDisp(pygame.sprite.Sprite):
     if self.dirty:
       screen.blit(bgd, self.dirty, self.dirty)
       self.dirty = 0
-
 
 class HoldJudgeDisp(pygame.sprite.Sprite):
     def __init__(self, POS, playernum):
@@ -663,12 +631,10 @@ def find (path, pattern):
   return matches
 
 class ArrowSprite(CloneSprite):
-  def __init__ (self, spr, curtime, endtime, bpm, playernum, POS, zindex=ARROWZINDEX):
+  def __init__ (self, spr, curtime, endtime, playernum, POS, zindex=ARROWZINDEX):
     CloneSprite.__init__(self,spr,zindex=zindex)
-    self.timeo = curtime
     self.timef = endtime
-    self.life  = endtime-curtime
-    self.bpm = bpm
+    self.life  = endtime - curtime
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
     if mainconfig['assist']:
@@ -780,14 +746,12 @@ class ArrowSprite(CloneSprite):
       self.image.set_alpha(alp)
 
 class HoldArrowSprite(CloneSprite):
-  def __init__ (self, spr, curtime, times, bpm, lastbpmtime, playernum, POS, zindex=ARROWZINDEX):
+  def __init__ (self, spr, curtime, times, lastbpmtime, playernum, POS, zindex=ARROWZINDEX):
     CloneSprite.__init__(self,spr,zindex=zindex)
-    self.timeo = curtime
     self.timef1 = times[1]
     self.timef2 = times[2]
     self.timef = times[2]
     self.life  = times[2]-curtime
-    self.bpm = bpm
     self.lastbpmtime = lastbpmtime
     self.pos = copy.copy(POS)
     if self.pos['mode'] == 'switchy':
@@ -1160,9 +1124,6 @@ def dance(song, players, ARROWPOS, prevscr):
   # background group
   bgroup = RenderLayered()
 
-  # dancer group
-  #dgroup = RenderLayered()
-
   if song.movie != None:
     backmovie = BGmovie(song.movie)
     backmovie.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
@@ -1213,9 +1174,6 @@ def dance(song, players, ARROWPOS, prevscr):
   fpstext = fpsDisp()
   timewatch = TimeDisp()
 
-#  dancer = DancerAnim(200,400)
-#  dancer.add(dgroup)
-  
   colortype = mainconfig['arrowcolors']
   if colortype == 0:
     colortype = 1
@@ -1394,12 +1352,6 @@ def dance(song, players, ARROWPOS, prevscr):
         events,nevents,curtime,bpm = plr.evt
         
         for ev in events:
-          #print "current event: %r"%ev
-          if ev.extra == 'CHBPM':
-            if (ev.bpm != plr.judge.bpm):
-              plr.judge.changingbpm(ev.bpm)
-          elif ev.extra == 'TSTOP':
-            pass # Just do a delay for now
           if ev.feet:
             for (dir,num) in zip(DIRECTIONS,ev.feet):
               if num & 1:
@@ -1416,11 +1368,11 @@ def dance(song, players, ARROWPOS, prevscr):
             for (dir,num) in zip(DIRECTIONS, ev.feet):
               if num & 1:
                 if not (num & 2):
-                  ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
+                  ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
 
               if num & 2:
                 holdindex = plr.steps.holdref.index((DIRECTIONS.index(dir),ev.when))
-                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, plr.steps.holdinfo[holdindex], ev.bpm, plr.steps.lastbpmchangetime[0], plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
+                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, plr.steps.holdinfo[holdindex], plr.steps.lastbpmchangetime[0], plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
 
     for plr in players:
       if len(plr.steps.lastbpmchangetime) > 1:
@@ -1440,7 +1392,6 @@ def dance(song, players, ARROWPOS, prevscr):
 
     for plr in players: plr.combo_update(curtime)
     
-#    dancer.update()
     backimage.update()
     
     if backmovie.filename:
