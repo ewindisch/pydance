@@ -13,6 +13,7 @@ NO_BANNER = pygame.image.load(os.path.join(image_path, "no-banner.png"))
 NO_BANNER.set_colorkey(NO_BANNER.get_at((0, 0)))
 BACKGROUND = os.path.join(image_path, "ss-bg.png")
 MOVE_SOUND = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
+OPEN_SOUND = pygame.mixer.Sound(os.path.join(sound_path, "back.ogg"))
 
 difficulty_colors = { "BEGINNER": colors.color["white"],
                       "LIGHT": colors.color["yellow"],
@@ -90,7 +91,7 @@ class SongItemDisplay:
       if info["banner"]:
         # A postcondition of file parsers is that this is a valid filename
         banner = pygame.image.load(info["banner"]).convert()
-        if banner.get_rect().size[0] > banner.get_rect().size[1] * 2:
+        if banner.get_rect().size[0] != banner.get_rect().size[1]:
           self.banner = pygame.transform.scale(banner, BANNER_SIZE)
         else:
           # One of the older banners that we need to rotate
@@ -130,17 +131,34 @@ class SongItemDisplay:
       self.menuimage.blit(grouptext, (15, 36))
 
 class FolderDisplay:
-  def __init__(self, name, numsongs):
+  def __init__(self, name, type, numsongs):
     self.name = name
+    self.type = type
     self.isfolder = True
     self.banner = None
     self.menuimage = None
     self.numsongs = numsongs
 
+  def find_banner(self):
+    for path in (rc_path, pyddr_path):
+      filename = os.path.join(path, "banners", self.type, self.name + ".png")
+      if os.path.exists(filename):
+        banner = pygame.image.load(filename).convert()
+        if banner.get_rect().size[0] != banner.get_rect().size[1]:
+          self.banner = pygame.transform.scale(banner, BANNER_SIZE)
+        else:
+          banner.set_colorkey(banner.get_at((0,0)), RLEACCEL)
+          self.banner = pygame.transform.rotate(banner, -45)
+          self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
+        break
+
+    else:
+      self.banner = NO_BANNER
+      self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
+
   def render(self):
     if self.banner == None:
-      self.banner = NO_BANNER
-      self.banner.set_colorkey(self.banner.get_at([0, 0]), RLEACCEL)
+      self.find_banner()
       self.banner_rect = self.banner.get_rect()
       self.banner_rect.center = BANNER_CENTER
       self.menuimage = pygame.surface.Surface(ITEM_SIZE)
@@ -209,7 +227,7 @@ class SongSelect:
     self.player_configs = [copy.copy(player_config)]
     self.player_diff_names = [self.songs[self.index].song.diff_list[self.gametype][self.player_diffs[0]]]
 
-    if self.numsongs > 100:
+    if self.numsongs > 100 and mainconfig["folders"]:
       self.set_up_folders()
       name = SORT_NAMES[mainconfig["sortmode"]]
       folder = self.folders[name].keys()[0]
@@ -329,6 +347,7 @@ class SongSelect:
       # Open up a new folder
       elif ev[1] == E_START and ev[0] == 0 and self.songs[self.index].isfolder:
         self.set_up_songlist(self.songs[self.index].name)
+        OPEN_SOUND.play()
         changed = True
         all_changed = True
 
@@ -447,8 +466,7 @@ class SongSelect:
       # Song preview support
       if previews:
         # Don't open the mixer until we "stop" (wait ~ 0.1-0.2 s) on an item.
-        if (new_preview == True and
-           current_time - not_changed_since > 500):
+        if (new_preview == True and current_time - not_changed_since > 500):
           new_preview = False
           is_playing = True
           try:
@@ -463,17 +481,18 @@ class SongSelect:
             preview_start = 0
 
         # Fade in, then fade out
-        if is_playing and not self.songs[self.index].isfolder:
-          length = self.songs[self.index].song.info["preview"][1]
-          timesince = (current_time - preview_start)/2000.0
-          if timesince <= 1.0:
-            audio.set_volume(timesince)
-          elif length - 1 <= timesince <= length:
-            audio.set_volume(length - timesince)
-          elif timesince > length:
-            audio.set_volume(0)
-            audio.stop()
+        if is_playing:
+          if self.songs[self.index].isfolder:
+            audio.fadeout(1000)
             is_playing = False
+          else:
+            length = self.songs[self.index].song.info["preview"][1]
+            timesince = (current_time - preview_start)/2000.0
+            if timesince <= 1.0:
+              audio.set_volume(timesince)
+            elif length - 1 <= timesince <= length:
+              audio.fadeout(1000)
+              is_playing = False
 
       if self.index != self.oldindex:
         not_changed_since = current_time
@@ -747,7 +766,8 @@ class SongSelect:
 
     new_songs = []
     for folder in folderlist:
-      new_songs.append(FolderDisplay(folder, len(self.folders[sort][folder])))
+      new_songs.append(FolderDisplay(folder, sort,
+                                     len(self.folders[sort][folder])))
       if folder == selected_folder: new_songs.extend(songlist)
 
     self.songs = new_songs

@@ -73,6 +73,7 @@ mainconfig = config.Config({ # Wow we have a lot of options
   "onboardaudio": 0, "masteroffset": 0,
   "explodestyle": 3, "vesacompat": 0, "fullscreen": 0,
   "sortmode": 0,
+  "folders": 1,
   "previewmusic": 1,
   "showbackground": 1, "bgbrightness": 127,
   "gratuitous": 1,

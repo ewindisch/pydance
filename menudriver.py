@@ -158,6 +158,7 @@ def do(screen, songdata):
         ),
        ("Interface Options",
         ["Song Previews", onoff_opt, ('previewmusic',)],
+        ["Folders", onoff_opt, ("folders",)],
         ["Timer Display", onoff_opt, ('fpsdisplay',)],
         ["Gratuitous Extras", onoff_opt, ('gratuitous',)],
         ["Display Help", onoff_opt, ("ingamehelp",)],
