@@ -146,6 +146,9 @@ class Endless:
         vtext.set_colorkey(vtext.get_at((0,0)), RLEACCEL)
         ctext.set_colorkey(ctext.get_at((0,0)), RLEACCEL)
 
+      ptext_r = ptext.get_rect()
+      ptext_r.center = (RESOLUTION[0] / 4 + 2 * i * (RESOLUTION[0] / 4),
+                        50)
       ctext_r = ctext.get_rect()
       ctext_r.center = (RESOLUTION[0] / 4 + 2 * i * (RESOLUTION[0] / 4),
                         RESOLUTION[1] / 3)
@@ -153,6 +156,7 @@ class Endless:
       vtext_r.center = (RESOLUTION[0] / 4 + 2 * i * (RESOLUTION[0] / 4),
                         RESOLUTION[1] / 2)
 
+      self.screen.blit(ptext, ptext_r)
       self.screen.blit(ctext, ctext_r)
       self.screen.blit(vtext, vtext_r)
     pygame.display.flip()
