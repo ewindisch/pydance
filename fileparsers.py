@@ -48,7 +48,7 @@ class GenericFile(object):
   # filename.
   def resolve_files_sanely(self):
     dir, name = os.path.split(self.filename)
-    for t in ("banner", "filename", "movie", "background"):
+    for t in ["banner", "filename", "movie", "background"]:
       if t in self.info:
         if not os.path.isfile(self.info[t]):
           self.info[t] = os.path.join(dir, self.info[t])
@@ -771,11 +771,11 @@ class SongItem(object):
     self.info = song.info
 
     # Sanity checks
-    for k in ("bpm", "filename"):
+    for k in ["bpm", "filename"]:
       if k not in self.info:
         raise RuntimeError(filename + " is missing: " + k)
 
-    for k in ("subtitle", "title", "artist", "author", "mix"):
+    for k in ["subtitle", "title", "artist", "author", "mix"]:
       try:
         if k in self.info: self.info[k] = self.info[k].decode("utf-8")
       except UnicodeError:
@@ -783,25 +783,25 @@ class SongItem(object):
         self.info[k] = self.info[k].decode("ascii", "ignore")
 
     # Default values
-    for k in ("background", "banner",
-              "revision", "md5sum", "movie", "cdtitle"):
+    for k in ["background", "banner", "revision", "md5sum",
+              "movie", "cdtitle"]:
       self.info.setdefault(k, None)
 
     for k in SongItem.defaults:
       self.info.setdefault(k, SongItem.defaults[k])
 
-    for k in ("artist", "author", "title"):
+    for k in ["artist", "author", "title"]:
       if self.info[k] == "": self.info[k] = "Unknown"
 
-    for k in ("filename",):
+    for k in ["filename"]:
       if self.info[k] and not os.path.isfile(self.info[k]):
         raise RuntimeError("Music not found for %s" % (filename, k))
 
-    for k in ("banner", "background", "cdtitle"):
+    for k in ["banner", "background", "cdtitle"]:
       if self.info[k] and not os.path.isfile(self.info[k]):
         self.info[k] = None
 
-    for k in ("startat", "endat", "gap", "bpm"):
+    for k in ["startat", "endat", "gap", "bpm"]:
       self.info[k] = float(self.info[k])
 
     self.info.setdefault("bpmdisplay", [self.info["bpm"]])

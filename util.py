@@ -20,7 +20,7 @@ def difficulty_sort(a, b):
 
 # Return the subtitle of a song...
 def find_subtitle(title):
-  for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
+  for pair in [("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")]:
     if pair[0] in title and title[-1] == pair[1]:
       l = title[0:-1].rindex(pair[0])
       if l != 0:
@@ -37,7 +37,7 @@ def toRealTime(bpm, steps):
 # Search the directory specified by path recursively for files that match
 # the shell wildcard pattern. A list of all matching file names is returned,
 # with absolute paths.
-def find (path, patterns):
+def find(path, patterns):
   matches = []
   path = os.path.abspath(os.path.expanduser(path))
 

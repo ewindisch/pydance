@@ -1,3 +1,5 @@
+# The main grading screen.
+
 import pygame
 import announcer
 import colors
@@ -7,6 +9,7 @@ import ui
 from interface import *
 from constants import *
 
+# Fade in a 246x80 (not a typo!) graphic in the center of the screen.
 class BannerFadeIn(pygame.sprite.Sprite):
   def __init__(self, image, center):
     pygame.sprite.Sprite.__init__(self)
@@ -28,26 +31,8 @@ class BannerFadeIn(pygame.sprite.Sprite):
       alp = int(256 * (1 - ((self._end - time) / 3000.0)))
       self.image.set_alpha(alp)
 
-class TextSprite(pygame.sprite.Sprite):
-  def __init__(self, center):
-    pygame.sprite.Sprite.__init__(self)
-    self._idir = 4
-    self._i = 128
-    self._center = center
-    self._last_update = pygame.time.get_ticks() - 200
 
-  def update(self, time):
-    if time - self._last_update > 100:
-      if self._i < 32: self._idir =  4
-      elif self._i > 224: self._idir = -4
-      self._i += self._idir
-
-      c = [self._i, 128, 128]
-      self.image = FONTS[24].render("Press Escape/Confirm/Start", True, c)
-      self.rect = self.image.get_rect()
-      self.rect.center = self._center
-      self._last_update = time
-
+# Display a rotating grade graphic.
 class GradeSprite(pygame.sprite.Sprite):
   def __init__(self, center, rating):
     pygame.sprite.Sprite.__init__(self)
@@ -78,6 +63,8 @@ class GradeSprite(pygame.sprite.Sprite):
     self.rect.center = self._center
 
 # And here is where I blatantly steal your idea, Matt. Sorry.
+# Display a graph of the player's lifebar over time, scaled to a
+# width/height.
 class GrooveGaugeSprite(pygame.sprite.Sprite):
   def __init__(self, pos, size, records):
     pygame.sprite.Sprite.__init__(self)
@@ -112,6 +99,7 @@ class GrooveGaugeSprite(pygame.sprite.Sprite):
     self.rect.topleft = self._pos
     self.image.set_alpha(192)
 
+# A number (with a label) that counts upwards.
 class StatSprite(pygame.sprite.Sprite):
   def __init__(self, pos, title, count, size, delay):
     pygame.sprite.Sprite.__init__(self)
@@ -146,6 +134,7 @@ class StatSprite(pygame.sprite.Sprite):
       self._curcount = self._count
       self._render()
 
+# Like StatSprite but with two numbers (separated by /).
 class HoldStatSprite(pygame.sprite.Sprite):
   def __init__(self, pos, title, goodcount, totalcount, size, delay):
     pygame.sprite.Sprite.__init__(self)
@@ -212,7 +201,6 @@ class GradingScreen(InterfaceWindow):
     banner = pygame.transform.rotozoom(banner, 0, (246.0 / banner.get_width()))
     self._sprites.add(BannerFadeIn(banner, [320, 241]))
 
-    #self._sprites.add(TextSprite([320, 242]))
     plr = self.players[0]
 
     s = [180, 34]
@@ -270,11 +258,13 @@ class GradingScreen(InterfaceWindow):
         mainconfig["fullscreen"] ^= 1
       elif ev == ui.SCREENSHOT:
         screenshot = True
+      # The first time we hit start, advance the time counter to stop
+      # all the animations.
       elif (ev == ui.CONFIRM or ev == ui.START or
             pygame.time.get_ticks() - start > 3333):
         exits.extend([ui.CONFIRM, ui.START])
         ev = ui.PASS
-        self._time_bonus += 3333
+        self._time_bonus = 3333
 
       screenshot = self.update(screenshot)
       if self._time_bonus:

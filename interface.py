@@ -1,3 +1,5 @@
+# GUI widgets and routines common to several screens.
+
 import os
 import math
 import pygame
@@ -49,6 +51,7 @@ def load_banner(filename, box = True):
     else: b2 = banner
     return b2, None
 
+# Just display a text string, within a specific width.
 class TextDisplay(pygame.sprite.Sprite):
   def __init__(self, font, size, midleft, str = " "):
     pygame.sprite.Sprite.__init__(self)
@@ -69,6 +72,7 @@ class TextDisplay(pygame.sprite.Sprite):
     self._text = text
     self._render()
 
+# Moving BPM display.
 class BPMDisplay(pygame.sprite.Sprite):
   def __init__(self, font, center, song = None):
     pygame.sprite.Sprite.__init__(self)
@@ -78,7 +82,7 @@ class BPMDisplay(pygame.sprite.Sprite):
     self.set_song(song)
     self._render()
     self._color = [255, 255, 255]
-    self._bpm_range = [0, 1]	# normally [min, range]
+    self._bpm_range = [0, 1 # normally [min, range]
 
   def _render(self):
     if self._bpm:
@@ -146,6 +150,7 @@ class BPMDisplay(pygame.sprite.Sprite):
         self._color = [255 * math.sqrt(p), 255 * math.sqrt(1 - p), 0]
       self._render()
 
+# Scroll an image looping vertically, from the course selection course list.
 class ScrollingImage(pygame.sprite.Sprite):
   def __init__(self, image, topleft, height):
     pygame.sprite.Sprite.__init__(self)
@@ -178,6 +183,7 @@ class ScrollingImage(pygame.sprite.Sprite):
       self.image.blit(self._image, [0, -y])
       self.image.blit(self._image, [0, self._image.get_height() - y])
 
+# Display an image.
 class ImageDisplay(pygame.sprite.Sprite):
   def __init__(self, image, topleft):
     pygame.sprite.Sprite.__init__(self)
@@ -189,6 +195,8 @@ class ImageDisplay(pygame.sprite.Sprite):
     self.rect = image.get_rect()
     self.rect.topleft = self._topleft
 
+# Flip an image around like it's being rotated when it changes, used on
+# the gameselect screen.
 class FlipImageDisplay(pygame.sprite.Sprite):
   def __init__(self, filename, center):
     pygame.sprite.Sprite.__init__(self)
@@ -353,6 +361,7 @@ class DifficultyBox(pygame.sprite.Sprite):
     self.rect.topleft = self._topleft
     self.image.set_alpha(140)
 
+# Scrolling list. Used all over the place.
 class ListBox(pygame.sprite.Sprite):
   def __init__(self, font, color, spacing, count, width, topleft):
     pygame.sprite.Sprite.__init__(self)
@@ -425,6 +434,8 @@ class ListBox(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.topleft = self._topleft
 
+# Display the whole banner + surrounding text, with the slowly
+# rotating color.
 class BannerDisplay(pygame.sprite.Sprite):
   def __init__(self, size, center):
     pygame.sprite.Sprite.__init__(self)
@@ -500,6 +511,7 @@ class BannerDisplay(pygame.sprite.Sprite):
       self._color[self._idx] += self._delta
     self._render()
 
+# Wrap some text in a sprite.
 class WrapTextDisplay(pygame.sprite.Sprite):
   def __init__(self, font, width, topleft, str = " ", centered = False):
     pygame.sprite.Sprite.__init__(self)
@@ -523,6 +535,7 @@ class WrapTextDisplay(pygame.sprite.Sprite):
   def update(self, time):
     if self._needs_update: self._render()
 
+# The base UI screen class. A sprite list, and a background image.
 class InterfaceWindow(object):
   def __init__(self, screen, bg_fn):
     self._screen = screen

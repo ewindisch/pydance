@@ -10,8 +10,6 @@ clean:
 distclean: clean
 	rm -f pydance.cfg Makefile
 
-cvsclean: distclean
-	rm -rf CVS */CVS */*/CVS */*/*/CVS */*/*/*/CVS
-
 zip:
 	zip pydance.zip $(PYMODS)
+	zip -d pydance.zip pydance.py
