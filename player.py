@@ -40,7 +40,9 @@ class Player:
     self.difficulty = diff
     self.score.set_text(diff)
     difflist = self.song.modediff[self.mode]
-    self.holds = len(self.song.holdref[self.song.modediff[self.mode].index(self.difficulty)])
+    holds = self.song.holdref[self.song.modediff[self.mode].index(self.difficulty)]
+    if holds: self.holds = len(holds)
+    else: self.holds = 0
     j = Judge(self.song.bpm, self.holds,
               self.song.modeinfo[self.mode][difflist.index(self.difficulty)][1],
               self.song.totarrows[self.difficulty],

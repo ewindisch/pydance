@@ -18,8 +18,6 @@ class Constraint:
     self.value = value
 
   def meets(self, diffs):
-    print diffs
-    print self.kind, self.value
     if self.kind == "name":
       if diffs.has_key(self.value): return True
       else: return False

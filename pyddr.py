@@ -18,8 +18,9 @@ from spritelib import *
 
 import fontfx, menudriver, fileparsers, colors
 
-import pygame
+import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
 import os, sys, glob, random, fnmatch, types, operator, copy, string
+import pygame.transform
 
 from stat import *
 
@@ -70,14 +71,12 @@ class SongEvent:
     self.next = next
     self.extra = extra
     self.color = color
-
   def __repr__(self):
-    rest = []
+    rest=[]
     if self.feet: rest.append('feet=%r'%self.feet)
     if self.extra: rest.append('extra=%r'%self.extra)
     if self.extra: rest.append('color=%r'%self.color)
-    return '<SongEvent when=%r bpm=%r %s>' % (self.when, self.bpm,
-                                              ' '.join(rest))
+    return '<SongEvent when=%r bpm=%r %s>' % (self.when,self.bpm,' '.join(rest))
 
 def emptyDictFromList(lst):
   d = {}
@@ -85,7 +84,7 @@ def emptyDictFromList(lst):
   return d
 
 DIFFICULTYLIST = ['BASIC','TRICK','MANIAC']
-DIFFICULTIES = emptyDictFromList(DIFFICULTYLIST)
+DIFFICULTIES   = emptyDictFromList(DIFFICULTYLIST)
 MODELIST = ['SINGLE','DOUBLE']
 MODES = emptyDictFromList(MODELIST)
 BEATS = {'sixty':0.25,'thrty':0.5,'twtfr':2.0/3.0,'steps':1.0,'tripl':4.0/3.0,'eight':2.0,'qurtr':4.0,'halfn':8.0,'whole':16.0} 
@@ -246,8 +245,8 @@ class Judge:
         else:
           self.great += 1
           self.score += 5 * self.score_coeff * self.arrow_count
-          self.lifebar.update_life("G")
           self.dance_score += 1
+          self.lifebar.update_life("G")
           text = "GREAT"
           anncrange = (70, 94)
 
@@ -263,8 +262,8 @@ class Judge:
           anncrange = (40, 69)
         else:
           self.boo += 1
-          self.lifebar.update_life("B")
           self.dance_score -= 4
+          self.lifebar.update_life("B")
           text = "BOO"
           anncrange = (20, 39)
 #      else:
@@ -943,8 +942,20 @@ class TimeDisp(pygame.sprite.Sprite):
 
 class Song:
   def __init__ (self, fn, path=None):
+    # note that I'm only copying DIFFICULTIES because it's the right size..
     self.haslyrics = ''
     self.fooblah = fn
+    try:
+      try:
+        print "trying full banner",fn[:-5]+'-full.png'
+        self.lilbanner = pygame.image.load(fn[:-5]+'-full.png').convert()
+      except:
+        print "nogo, trying rotated banner",fn[:-5]+'.png'
+        self.lilbanner = pygame.transform.rotate(pygame.image.load(fn[:-5]+'.png').convert(),-45)
+    except:
+      print "settling for blank banner for",fn
+      self.lilbanner = pygame.surface.Surface((1,1))
+    self.lilbanner.set_colorkey(self.lilbanner.get_at((0,0)))
     self.modes = modes = MODES.copy()
     self.modelist = []
     self.modediff = {}
@@ -967,6 +978,7 @@ class Song:
     self.bgfile = ' '
     self.file = None
     self.moviefile = ' '
+    self.mixname = 'unspecified mix'
     self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
     self.mixerclock = mainconfig['mixerclock']
     self.lyricdisplay = LyricDispKludge(400,
@@ -976,10 +988,9 @@ class Song:
     little = mainconfig["little"]
     coloringmod = 0
     self.totarrows = {}
-    self.holdinfo = [None] * 4
-    self.holdref = [None] * 4
+    self.holdinfo = []
+    self.holdref = []
     numholds = 1
-    difficulty = None
     holdlist = []
     releaselist = []
     holdtimes = []
@@ -1014,10 +1025,8 @@ class Song:
             coloringmod = 0
 
             # append the hold info for this mode
-            if difficulty != None:
-              i = DIFFICULTYLIST.index(difficulty)
-              self.holdinfo[i] = zip(holdlist,holdtimes,releasetimes)
-              self.holdref[i] = zip(holdlist,holdtimes)
+            self.holdinfo.append( zip(holdlist,holdtimes,releasetimes) )
+            self.holdref.append( zip(holdlist,holdtimes) )
 
             # reset all the hold arrow stuff and operate on next mode
             holdlist = []
@@ -1066,11 +1075,11 @@ class Song:
               for checkforholds in range(4):             # guess what this function does
                   didnothold = 1
                   if (feetstep[checkforholds] & 128) and (holding[checkforholds] == 0):
-                    holdtimes.insert(numholds,curTime)
-                    holdlist.insert(numholds,checkforholds)
-                    numholds += 1
-                    holding[checkforholds] = numholds-1  # set the holding status to what's being held
-                    didnothold = 0
+                      holdtimes.insert(numholds,curTime)
+                      holdlist.insert(numholds,checkforholds)
+                      numholds += 1
+                      holding[checkforholds] = numholds-1  # set the holding status to what's being held
+                      didnothold = 0
                   elif ((feetstep[checkforholds] & 128) or (feetstep[checkforholds] & 8)) and holding[checkforholds] and didnothold:
                       releasetimes.insert(holding[checkforholds],curTime)
                       releaselist.insert(holding[checkforholds],checkforholds)
@@ -1117,6 +1126,7 @@ class Song:
         self.lyrics = SongEvent(when=curTime,bpm=curBPM)
         chompNext = None,self.lyrics
       elif firstword == 'song':        self.song = " ".join(rest)
+      elif firstword == 'mix':         self.mixname = " ".join(rest)
       elif firstword == 'group':       self.group = " ".join(rest)
       elif firstword == 'bpm':
         self.bpm = float(nextword) 
@@ -1175,7 +1185,7 @@ class Song:
       for key,val in self.modeinfo[m]:
         self.modeinfodict[key]=val
 
-  def init (self):
+  def init(self):
     try:
       pygame.mixer.music.load(self.osfile)
     except pygame.error:
@@ -1183,10 +1193,8 @@ class Song:
       self.crapout = 1
     if self.startsec > 0.0:
       print "Skipping %f seconds" % self.startsec
-#      ss.skip(self.startsec)
 
   def play(self,mode,difficulty,actuallyplay):
-#    self.ss.play()
     try:
       if self.crapout == 0 and actuallyplay:
         pygame.mixer.music.play(0, self.startsec)
@@ -1219,6 +1227,7 @@ class Song:
     bpm = None
     events_append,nevents_append = events.append,nevents.append
     while (head and head.when <= (time + 2*toRealTime(head.bpm, 1))):
+#    while (head and head.when <= (time + 2*toRealTime(self.playingbpm, 1))):
       events_append(head)
       head=head.next
     self.head = head
@@ -1228,6 +1237,7 @@ class Song:
       return None
     elif not pygame.mixer.music.get_busy():
       self.kill()
+#      print "not busy"
       return None
     
     if head and fhead:
@@ -1747,9 +1757,9 @@ def playSequence(numplayers, playlist):
 def dance(song, players):
   global screen,background,playmode
 
-  pygame.mixer.init()
+  songFailed = True
 
-  songFailed = False
+  pygame.mixer.init()
 
   # render group, almost[?] every sprite that gets rendered
   rgroup = RenderLayered()
@@ -1844,9 +1854,8 @@ def dance(song, players):
   bgroup.draw(screen)
 
   screenshot=0
-  
-  if song.crapout == 0:
-    song.init()
+
+  song.init()
   
   if song.crapout != 0:
     font = None
@@ -2016,13 +2025,15 @@ def dance(song, players):
           
           if ev.feet:
             for (dir,num) in zip(DIRECTIONS, ev.feet):
-              if num & 8 and not (num & 128):
+              if num & 8:
+                if not (num & 128):
                   ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr.pid).add([plr.arrow_group, rgroup])
 
               if num & 128:
                 diffnum = song.modediff[playmode].index(plr.difficulty)
                 holdindex = song.holdref[diffnum].index((DIRECTIONS.index(dir),ev.when))
                 HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr.pid).add([plr.arrow_group, rgroup])
+          
     if len(song.lastbpmchangetime) > 1:
       if (curtime >= song.lastbpmchangetime[1][0]):
         nbpm = song.lastbpmchangetime[1][1]
@@ -2106,6 +2117,7 @@ def dance(song, players):
   except:
     pass
     
+  print "songFailed is", songFailed
   return songFailed
 
 if __name__ == '__main__': main()

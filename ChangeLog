@@ -14,6 +14,7 @@ legend:
 + Smaller download size by converting wavs to oggs.
   - Requires SDL_mixer 1.2.5.
 + The timer display is controllable via the 'fpsdisplay' option.
++ New theme ('blue') and a new lifebar display for all themes.
 + Endless mode.
 * DDR Extreme (8th Mix) grading and scoring algorithm.
 * Split off the ddrmat.o driver from the main package.
