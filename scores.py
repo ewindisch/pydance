@@ -3,6 +3,7 @@
 # Data on many algorithms taken from www.aaroninjapan.com/ddr2.html
 
 # N = Number of steps in the song.
+# H = Current song number (in a sequence of songs).
 # F = Feet rating of the song.
 # S(N) = N * (N + 1) / 2.
 # n = Current step number.
@@ -45,8 +46,7 @@ class AbstractScore(Listener, pygame.sprite.Sprite):
       self.oldscore = self.score
 
 # This is pydance's custom scoring algorithm. It's designed to make
-# scores "fair" between different difficulty modes, and is similar
-# to DDR 3rd Mix's in that respect.
+# scores "fair" between different difficulty modes and game types.
 
 # L(V) = 4, L(P) = 3.5, L(G) = 2.5, L(O) = 0.5
 # V(n) = L(r) * 10,000,000 / N + 10,000,000 / S(N) * C
@@ -88,6 +88,9 @@ class FirstScore(AbstractScore):
 
 # L(V) = L(P) = 10, L(G) = 5, L(O) = 1
 # V(n) = L(r) * 1,000,000 / S(N) * n
+
+# V(n) = L(r) * K / S(N) * n is common, and so many classes descend from
+# this one and override set_song.
 class ThirdScore(AbstractScore):
   def set_song(self, pid, bpm, text, count, hold, feet):
     AbstractScore.set_song(self, pid, bpm, text, count, hold, feet)
@@ -112,37 +115,55 @@ class FourthScore(AbstractScore):
 # V(n) = L(r) * 500,000 * (F + 1) / S(N) * n
 
 # The bonus for your combo or final grade is not implemented yet.
-class FifthScore(AbstractScore):
+# This would require a Listener event for the end of the song.
+class FifthScore(ThirdScore):
   def set_song(self, pid, bpm, text, count, hold, feet):
     AbstractScore.set_song(self, pid, bpm, text, count, hold, feet)
     self.arrow = 0
     s = 500000.0 * (feet + 1) / float((count * (count + 1)) / 2)
     self.inc = { "V": 10 * s, "P": 10 * s, "G": 5 * s }
 
-  def stepped(self, pid, dir, cur_time, rating, combo):
-    self.arrow += 1
-    self.score += self.inc.get(rating, 0) * self.arrow
+# Max's score algorithm relys on calculating the "groove radar" values,
+# which we don't do. So, it stays unimplemented.
 
-# L(V) = 10, L(P) = 9, L(G) = 5
+# L(V) = L(P) = 10, L(G) = 5
 # V(n) = L(r) * 1,000,000 * F / S(N) * n
-
-# The special scoring mode for Nonstop is not implemented.
 
 # In pydance's implementation, jumps are counted as two arrows; in
 # 8rd, they aren't.
-class ExtremeScore(AbstractScore):
+class ExtremeScore(ThirdScore):
   def set_song(self, pid, bpm, text, count, hold, feet):
     AbstractScore.set_song(self, pid, bpm, text, count, hold, feet)
     if count == 0: count = 1 # Don't crash on empty songs.
 
     self.arrow = 0
     score_coeff = (1000000.0 * feet) / ((count * (count + 1.0)) / 2.0)
-    self.inc = { "V": 10 * score_coeff, "P": 9 * score_coeff,
+    self.inc = { "V": 10 * score_coeff, "P": 10 * score_coeff,
                  "G": 5 * score_coeff }
 
+# This is closer to the grading algorithm than to a scoring algorithm.
+class ExtremeOniScore(AbstractScore):
   def stepped(self, pid, dir, cur_time, rating, combo):
-    self.arrow += 1
-    self.score += self.inc.get(rating, 0) * self.arrow
+    self.score += {"V": 3, "P": 2, "G": 1}.get(rating, 0)
+
+  def ok_hold(self, pid, time, dir, whichone): self.score += 3
+
+# L(V) = 10, L(P) = 9, L(G) = 5
+# V(n) = L(r) * 1,000,000 * H / S(N) * n
+class ExtremeNonstopScore(ThirdScore):
+  def __init__(self, pid, text, game):
+    AbstractScore.__init__(self, pid, text, game)
+    self.song = 0
+  
+  def set_song(self, pid, bpm, text, count, hold, feet):
+    AbstractScore.set_song(self, pid, bpm, text, count, hold, feet)
+    if count == 0: count = 1 # Don't crash on empty songs.
+    self.song += 1
+
+    self.arrow = 0
+    score_coeff = (1000000.0 * self.song) / ((count * (count + 1.0)) / 2.0)
+    self.inc = { "V": 10 * score_coeff, "P": 9 * score_coeff,
+                 "G": 5 * score_coeff }
 
 scores = [PydanceScore, FirstScore, ThirdScore, FourthScore,
           FifthScore, ExtremeScore]

@@ -7,10 +7,13 @@ legend:
 
 ----- - CURRENT
 0.8.1
++ Major internal simplifications for those who want to write new
+  lifebar/grade/score/judge/other algorithms, see listeners.py.
 + Choose between pydance, DDR 1st/2nd, 3rd, 4th, or 5th/Max2/Ex
   score calculation methods.
 + Choose between beat-based (old pydance) or time-based (Stepmania) judge.
  * Time-based is the new default judge.
+- This release may be slightly slower on some systems; Psyco is recommended.
 
 0.8.0 - That's the second largest ChangeLog I've ever seen!	[2003.08.22]
 + New options:
