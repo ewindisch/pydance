@@ -142,13 +142,19 @@ class DifficultyBox(pygame.sprite.Sprite):
 class ListBox(pygame.sprite.Sprite):
   def __init__(self, font, color, spacing, count, width, topleft):
     pygame.sprite.Sprite.__init__(self)
-    self._idx = self._oldidx = -count / 2
     self._h = spacing
     self._count = count
     self._w = width
     self._color = color
     self._font = font
     self._topleft = topleft
+
+    # animation
+    self._start = pygame.time.get_ticks()
+    self._animate = -1
+    self._animate_dir = 0
+    self._offset = 0
+            
     self.set_items([""])
     self._needs_update = True
     self._render()
@@ -161,15 +167,45 @@ class ListBox(pygame.sprite.Sprite):
       txt = fontfx.render_outer(i, self._w - 7, self._font)
       img = fontfx.shadow(txt, self._font, 1, self._color, c2)
       self._items.append(img)
+    self._idx = self._oldidx = 0 - self._count / 2 # Reset index to 0.
     self._needs_update = True
 
   def set_index(self, idx):
     self._oldidx = self._idx
-    self._idx = idx - self._count / 2
+    self._idx = (idx - self._count / 2)
     self._needs_update = True
 
   def update(self, time):
-    if self._idx != self._oldidx or self._needs_update:
+    time -= self._start
+
+    # animation disabled if there are only 2 items; there's no way to
+    # tell if we should animate up or down
+    if self._idx != self._oldidx and len(self._items) > 2:
+      self._animate = time + 100
+
+      if self._idx < 0 and self._oldidx > 0:
+        # we wrapped around from the bottom to the top; animate items up
+        self._animate_dir = 1
+      elif self._idx > 0 and self._oldidx < 0:
+        # we wrapped around from the bottom to the top; animate items down
+      	self._animate_dir = -1
+      elif self._idx < self._oldidx:
+        # new index < old index; animate items down
+        self._animate_dir = -1
+      else:
+        # old index < new index; animate items up
+        self._animate_dir = 1
+    
+    if self._animate > time:
+      self._offset = (self._animate - time) / 100.0 # 0.1 seconds
+      self._offset *= self._h	                    # percentage of height
+      self._offset *= self._animate_dir	            # 1 for up, -1 for down
+      self._needs_update = True
+    elif self._offset != 0:
+      self._offset = 0
+      self._needs_update = True
+    
+    if self._needs_update:
       self._oldidx = self._idx
       self._needs_update = False
       self._render()
@@ -178,12 +214,12 @@ class ListBox(pygame.sprite.Sprite):
     self.image = pygame.Surface([self._w, self._h * self._count],
                                 SRCALPHA, 32)
     self.image.fill([0, 0, 0, 0])
-    for i, y in zip(range(self._count),
-                    range(self._h / 2, self._h * self._count, self._h)):
-      idx = (self._idx + i) % len(self._items)
+    for i, y in zip(range(self._count + 2),
+                    range(-self._h / 2, self._h * (self._count + 1), self._h)):
+      idx = (self._idx + i - 1) % len(self._items)
       t = self._items[idx]
       r = t.get_rect()
-      r.centery = y
+      r.centery = y + self._offset
       r.left = 5
       self.image.blit(t, r)
     self.rect = self.image.get_rect()

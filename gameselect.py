@@ -111,13 +111,11 @@ class MainWindow(InterfaceWindow):
     self._sprites.add(HelpText(GS_HELP, [255, 255, 255], [0, 0, 0],
                                Font(None, 22), [206, 20]))
     self._sprites.add(self._lists)
+
     self._screen.blit(self._bg, [0, 0])
     self._sprites.update(pygame.time.get_ticks())
     self._sprites.draw(self._screen)
     pygame.display.update()
-    self._lists[0].set_index(0)
-    self._lists[1].set_index(0)
-    self._lists[2].set_index(0)
 
     self.loop()
 
@@ -164,6 +162,6 @@ class MainWindow(InterfaceWindow):
         self._selected.set_text(values[active][indices[active]])
         self._description.set_text(DESCRIPTIONS[values[active][indices[active]]])
 
-      clock.tick(60)
+      clock.tick(45)
       self.update()
       pid, ev = ui.ui.poll()
