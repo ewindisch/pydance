@@ -67,7 +67,7 @@ class ArrowSet:
 class TopArrow(pygame.sprite.Sprite):
 
   def __init__ (self, bpm, direction, ypos, playernum, path):
-    pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
+    pygame.sprite.Sprite.__init__(self)
     self.presstime = -1
     self.tick = toRealTime(bpm, 1);
     self.frame = 0
@@ -116,7 +116,7 @@ class TopArrow(pygame.sprite.Sprite):
 
 class ArrowFX(pygame.sprite.Sprite):
   def __init__ (self, bpm, direction, ypos, playernum, path):
-    pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
+    pygame.sprite.Sprite.__init__(self)
     self.presstime = -1000000
     self.tick = toRealTime(bpm, 1);
     self.centery = ypos + 32
@@ -155,7 +155,7 @@ class ArrowFX(pygame.sprite.Sprite):
     tinter.set_alpha(127)
     self.tintimg.blit(tinter,(0,0))
     self.tintimg.set_colorkey(self.tintimg.get_at((0,0)))
-    self.tintimg = self.tintimg.convert() #_alpha() #rotozoom wants _alpha 
+    self.tintimg = self.tintimg.convert()
     if self.direction == 1: self.direction = -1
     else: self.direction = 1
 

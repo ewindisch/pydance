@@ -132,7 +132,7 @@ class SimpleAnim:
 
 class BGimage(pygame.sprite.Sprite):
   def __init__ (self, filename):
-    pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
+    pygame.sprite.Sprite.__init__(self)
     self.image = pygame.transform.scale(pygame.image.load(filename),(640,480)).convert()
     self.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
     self.rect = self.image.get_rect()

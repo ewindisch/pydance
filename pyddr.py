@@ -18,56 +18,23 @@ from spritelib import *
 
 import fontfx, menudriver, fileparsers, colors, gradescreen, steps
 
-import os, sys, glob, random, fnmatch, types, operator, copy, string
+import os, sys, random, fnmatch, operator, string
 
 from stat import *
 
 os.chdir(pyddr_path)
 
-USE_GL = 0
-
-if USE_GL:
-
-  from spritegl import SpriteGL, GroupGL, gl_display_get_surface, gl_display_set_mode
-
-  pygame.sprite.Sprite = SpriteGL
-  pygame.sprite.Group = GroupGL
-  pygame.sprite.RenderPlain = GroupGL
-
-
-  pygame.display.old_get_surface = pygame.display.get_surface
-  pygame.display.get_surface = gl_display_get_surface
-
-  pygame.display.old_set_mode = pygame.display.set_mode
-  pygame.display.set_mode = gl_display_set_mode
-
-
-# extend the sprite class with layering support
 pygame.sprite.Sprite.zindex = DEFAULTZINDEX
-#def zcompare(self,other):
-#  return cmp(self.zindex,other.zindex)
-#pygame.sprite.Sprite.__cmp__ = zcompare
-
-#_pixels3d   = pygame.surfarray.pixels3d
-#_blit_array = pygame.surfarray.blit_array
-
-#def (surf,color):
-#  size = surf.rect.width*surf.rect.height
-#  surf=surf.image
-#  narray=_pixels3d(surf).astype(Float32)
-#  reshape(narray,[size,3])
-#  narray*=array(color).astype(Float32)
-#  _blit_array(surf,narray.astype(Int8))
 
 songdir = mainconfig['songdir']
 
 class BGmovie(pygame.sprite.Sprite):
   def __init__ (self, filename):
-    pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
+    pygame.sprite.Sprite.__init__(self)
     self.filename = filename
     self.image = pygame.surface.Surface((640,480))
     
-    if filename and not os.path.isfile(filename): #make sure the file's there
+    if filename and not os.path.isfile(filename):
       print "The movie file for this song is missing."
       self.filename = None
     
@@ -175,8 +142,6 @@ class Judge:
           done = 1
           etime = self.actualtimes[time+i]
           self.steps[time+i] = self.steps[time+i].replace(dir, "")
-#          print "Before: %s" % self.steps[time+i]
-#          print "Removing %s: %s" % (dir, self.steps[time+i])
           break
 
     text = ' '
@@ -260,8 +225,6 @@ class Judge:
   
   def handle_arrow(self, key, time, etime):
       multicheck = self.tick
-#      tick_6 = multicheck / 6
-#      curtick = round((time + 2*multicheck) / tick_6)
       curtick = round(6 * (time/multicheck + 2))
       self.times = self.steps.keys()
       self.actualtimes[curtick] = etime
@@ -300,7 +263,7 @@ class Judge:
 
 class zztext(pygame.sprite.Sprite):
     def __init__(self,text,x,y):
-      pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+      pygame.sprite.Sprite.__init__(self)
       self.x = x
       self.y = y
       self.zoom = 0
@@ -345,7 +308,7 @@ class zztext(pygame.sprite.Sprite):
 
 class ComboDisp(pygame.sprite.Sprite):
   def __init__(self,playernum):
-    pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+    pygame.sprite.Sprite.__init__(self)
     self.sticky = mainconfig['stickycombo']
     self.lowcombo = mainconfig['lowestcombo']
 
@@ -416,7 +379,7 @@ class ComboDisp(pygame.sprite.Sprite):
 
 class HoldJudgeDisp(pygame.sprite.Sprite):
     def __init__(self, playernum):
-        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+        pygame.sprite.Sprite.__init__(self)
         self.playernum = playernum
 
         self.space = pygame.surface.Surface((48,24))
@@ -460,7 +423,7 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
           
 class fpsDisp(pygame.sprite.Sprite):
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+        pygame.sprite.Sprite.__init__(self)
         self.oldtime = -10000000
         self.loops = 0
         self.image = pygame.surface.Surface((1,1))
@@ -588,7 +551,7 @@ class JudgingDisp(pygame.sprite.Sprite):
 
 class TimeDisp(pygame.sprite.Sprite):
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+        pygame.sprite.Sprite.__init__(self)
         self.oldtime = "-1000"
         self.image = pygame.surface.Surface((1,1))
         self.rect = self.image.get_rect()
@@ -852,7 +815,6 @@ class HoldArrowSprite(CloneSprite):
     if self.top < self.bottom: self.rect.top = top
     else: self.rect.top = bottom
     
-#    print "top",self.top,"bottom",self.bottom
     holdsize = abs(bottom - top)
     if holdsize < 0:
       holdsize = 0
@@ -896,8 +858,6 @@ class HoldArrowSprite(CloneSprite):
       alp /= 2
     if alp != self.curalpha:
       self.image.set_alpha(alp)
-  
-#    print "alpha ",alp
 
 def SetDisplayMode(mainconfig):
   global screen
@@ -1125,7 +1085,6 @@ def dance(song, players, prevscr):
         pygame.time.delay(1)
     else:
       background.fill(colors.BLACK)
-#      backmovie.add(bgroup)
   else:
     background.fill(colors.BLACK)
 
@@ -1152,7 +1111,6 @@ def dance(song, players, prevscr):
 
   if mainconfig['showlyrics']:
     lgroup.add(song.lyricdisplay.channels.values())
-#    song.lyricdisplay.add(lgroup)
 
   showcombo = mainconfig['showcombo']
   
@@ -1215,8 +1173,6 @@ def dance(song, players, prevscr):
   
   screenshot = 0
 
-#  print "playmode: %r difficulty %r modes %r" % (playmode,difficulty,song.modes)
-#  print "Total arrows are %d " % song.totarrows[difficulty]
   if mainconfig['assist']:
     pygame.mixer.music.set_volume(0.6)
   else:
@@ -1372,10 +1328,7 @@ def dance(song, players, prevscr):
       timewatch.update(curtime)
 
     # more than one display.update will cause flicker
-#    bgroup.draw(screen)
     sgroup.draw(screen)
-    #dgroup.draw(screen)
-#    rgroup.draw(screen)
 
     for plr in players:
       plr.arrow_group.draw(screen)
@@ -1401,10 +1354,8 @@ def dance(song, players, prevscr):
       lgroup.clear(screen,background.image)
       tgroup.clear(screen,background.image)
       fgroup.clear(screen,background.image)
-  #    rgroup.clear(screen,background.image)
       for plr in players:
         plr.arrow_group.clear(screen,background.image)
-      #dgroup.clear(screen,background.image)
       sgroup.clear(screen,background.image)
 
     if (curtime > players[0].steps.length - 1) and (songtext.zdir == 0) and (songtext.zoom > 0):
