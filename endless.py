@@ -87,6 +87,7 @@ class Endless:
     if len(diffs) == 0:
       util.ErrorMessage(screen, ("You need more songs to play Endless Mode.",
                                  "Otherwise, it's just really boring."))
+      return
 
     mainconfig["autofail"] = 1
 
