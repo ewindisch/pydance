@@ -109,7 +109,7 @@ mainconfig = Config({ # Wow we have a lot of options
   "reversescrolls": 0, "scrollspeed": 1,
   "explodestyle": 3, "arrowspin": 0, "arrowscale" : 1,
   "joy_left": 4, "joy_right": 5, "joy_up": 7, "joy_down": 6,
-  "joy_start": 9, "joy_select": 8, "joy_pgup": 1, "joy_pgdown": 3,
+  "joy_start": 9, "joy_select": 8, "joy_pgup": 1, "joy_pgdn": 3,
   "mat_buttons": 12, "mat_axes": 6,
   "vesacompat": 0, "fullscreen": 0,
   "sortmode": 0, "sortpersist": 1,
