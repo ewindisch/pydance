@@ -1,4 +1,4 @@
-.TH any2dance 1 "June 2nd, 2003"
+.TH any2dance 1 "June 26th, 2003"
 .SH NAME
 any2dance \- convert any pyDDR-supported format to the .dance format
 .SH SYNOPSIS
@@ -9,7 +9,7 @@ to pyDDR's native .dance format. The dance format provides a superset of
 most useful features in other file formats, and is the only format
 pyDDR will always load correctly.
 .PP
-\fBany2dance\fR can be given an explicitfilename to convert, or a directory
+\fBany2dance\fR can be given an explicit filename to convert, or a directory
 name. If it is given a directory, it will recurse down that directory
 looking for files to convert.
 .SH USAGE
@@ -18,12 +18,9 @@ If this option is given, the original file will be deleted after the
 conversion is done. Be particularly careful about using this with
 a directory argument.
 .SH BUGS
-Bad input files generally crash the program (which isn't all bad).
-.PP
 DWI banner/background detection is not 100% accurate (blame DWI).
-.SH AUTHOR
-Joe Wreschnig <piman@debian.org> is the author of any2dance and the
-pyDDR file parsers.
+.SH AUTHORS
+Brendan Becker <tgz@orotech.net> and Joe Wreschnig <piman@debian.org>.
 .SH SEE ALSO
 \fBpyddr\fR(6),
 dance\-spec.txt included with pyDDR.
