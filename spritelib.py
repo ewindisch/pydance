@@ -164,6 +164,14 @@ class RenderLayered(pygame.sprite.RenderClear):
       spritedict[s] = newrect
     return dirty
 
+  # Override the add method so we can add lists of items
+  def add(self, sprite):
+    if type(sprite) == type((0,0)) or type(sprite) == type([]):
+      for spr in sprite:
+        print spr
+        self.add(spr)
+    else: pygame.sprite.RenderClear.add(self, sprite)
+
   def ordersprites(self):
     " self.ordersprites() -> overlaplist, cleanlist"
     dirty=[]

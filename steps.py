@@ -1,4 +1,4 @@
-from lyrics import LyricDisp
+from lyrics import Lyrics
 from constants import *
 
 import colors
@@ -30,7 +30,7 @@ class SongEvent:
 #FIXME Why are we using a linked list? We should be using a python list
 class Steps:
   def __init__(self, song, difficulty, playmode="SINGLE",
-               lyrics = None, trans = None): # FIXME - New lyrics system
+               lyrics = None): # FIXME - New lyrics system
     self.playmode = playmode
     self.difficulty = difficulty
     self.feet = song.difficulty[playmode][difficulty]
@@ -74,12 +74,8 @@ class Steps:
       elif firstword == "atsec":
         cur_time = float(nextword)
         cur_time = float(nextword)
-        tail.next = SongEvent(when=cur_time,bpm=cur_bpm,extra='ATSEC')
-        tail = tail.next
       elif firstword == 'waits':
         cur_time += float(nextword)
-        tail.next = SongEvent(when=cur_time,bpm=cur_bpm,extra='WAITS')
-        tail = tail.next
       elif firstword == 'ready':
         tail.next = SongEvent(when=cur_time,bpm=cur_bpm,extra='READY')
         coloring_mod = 0
@@ -141,8 +137,6 @@ class Steps:
         cur_time += toRealTime(cur_bpm,
                                BEATS['qurtr'] * float(nextword))
         coloring_mod += 4 * float(nextword)
-        tail.next = SongEvent(when = cur_time, bpm = cur_bpm, extra = "DELAY")
-        tail = tail.next
 
       elif firstword == "chbpm":
         cur_bpm = float(nextword)
@@ -157,15 +151,10 @@ class Steps:
         tail = tail.next
 
       elif firstword == "lyric" and lyrics:
-        lyrics.addlyric(cur_time - 0.4, rest)
-        tail.next = SongEvent(when = cur_time, bpm = cur_bpm,
-                              extra = ("LYRIC", rest))
-        tail = tail.next
+        lyrics.addlyric(cur_time - 0.4, " ".join(rest), 1)
 
-      elif firstword == 'trans' and trans:
-        trans.addlyric(cur_time - 0.4, rest)
-        tail.next = SongEvent(when=cur_time,bpm=cur_bpm,extra=('TRANS',rest))
-        tail = tail.next
+      elif firstword == 'trans' and lyrics:
+        lyrics.addlyric(cur_time - 0.4, " ".join(rest), 0)
 
     self.holdinfo = zip(holdlist, holdtimes, releasetimes)
     self.holdref = zip(holdlist, holdtimes)
@@ -226,18 +215,16 @@ class SongData:
 
     self.crapout = 0
 
-    self.lyricdisplay = LyricDisp(400,
-                                  colors.color[mainconfig['lyriccolor']])
-    self.transdisplay = LyricDisp(428,
-                                  colors.color[mainconfig['transcolor']])
+    self.lyricdisplay = Lyrics([colors.color[mainconfig['transcolor']],
+                                colors.color[mainconfig['lyriccolor']]])
     atsec = 0
     for lyr in song.lyrics:
       lsplit = lyr.split()
       if lsplit[0] == "atsec": atsec = float(lsplit[1])
       elif lsplit[0] == "lyric":
-        self.lyricdisplay.addlyric(atsec - 0.4, lsplit[1:])
+        self.lyricdisplay.addlyric(atsec - 0.4, " ".join(lsplit[1:]), 1)
       elif lsplit[0] == "trans":
-        self.transdisplay.addlyric(atsec - 0.4, lsplit[1:])
+        self.lyricdisplay.addlyric(atsec - 0.4, " ".join(lsplit[1:]), 0)
 
   def init(self):
     try: pygame.mixer.music.load(self.song_file)

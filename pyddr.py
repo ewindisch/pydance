@@ -1142,8 +1142,8 @@ def playSequence(numplayers, playlist):
 
     for pid in range(len(players)): #FIXME new lyrics system
       players[pid].set_song(steps.Steps(current_song, diff[pid],
-                                        lyrics = songdata.lyricdisplay,
-                                        trans = songdata.transdisplay), Judge)
+                                        lyrics = songdata.lyricdisplay),
+                                        Judge)
 
     if dance(songdata, players, ARROWPOS, prevscr):
       break # Failed
@@ -1247,8 +1247,8 @@ def dance(song, players, ARROWPOS, prevscr):
     tgroup.add(timewatch)
 
   if mainconfig['showlyrics']:
-    song.lyricdisplay.add(lgroup)
-    song.transdisplay.add(lgroup)
+    lgroup.add(song.lyricdisplay.channels.values())
+#    song.lyricdisplay.add(lgroup)
 
   showcombo = mainconfig['showcombo']
   
@@ -1458,7 +1458,6 @@ def dance(song, players, ARROWPOS, prevscr):
       extbox.update(curtime+(players[0].steps.offset*1000.0))
     
     song.lyricdisplay.update(curtime)
-    song.transdisplay.update(curtime)
 
     for plr in players: plr.combo_update(curtime)
     
