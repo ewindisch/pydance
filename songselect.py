@@ -296,31 +296,22 @@ class SongSelect:
 
       ev = event.poll()
 
-      # We keep a constant and mod it by the length of the list, so
-      # unless up/down is pressed, you will always be the same difficulty
-      # on the same song - and between songs that have the same difficulty
-      # levels (e.g. the standard 3).
-
-      # Also we store the name of the last manually selected difficulty
-      # and go to it if the song has it.
+      if ev[1] in [E_LEFT, E_RIGHT, E_UP, E_DOWN, E_PGUP, E_PGDN, E_MARK]:
+        MOVE_SOUND.play()
 
       # Scroll up the menu list
       if ev[1] == E_LEFT:
         self.index = (self.index - 1) % self.numsongs
-        MOVE_SOUND.play()
 
       elif ev[1] == E_PGUP:
-        MOVE_SOUND.play()
         self.scroll_out(self.index)
         self.index = (self.index - 7) % self.numsongs
 
       # Down the menu list
       elif ev[1] == E_RIGHT:
         self.index = (self.index + 1) % self.numsongs
-        MOVE_SOUND.play()
   
       elif ev[1] == E_PGDN:
-        MOVE_SOUND.play()
         self.scroll_out(self.index)
         self.index = (self.index + 7) % self.numsongs
 
@@ -331,7 +322,6 @@ class SongSelect:
           self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
           self.player_diff_names[ev[0]] = self.current_song.diff_list[gametype][self.player_diffs[ev[0]]]
           changed = True
-          MOVE_SOUND.play()
 
       # Harder difficulty
       elif (ev[1] == E_DOWN and ev[0] < len(self.player_diffs)):
@@ -340,7 +330,6 @@ class SongSelect:
           self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
           self.player_diff_names[ev[0]] = self.current_song.diff_list[gametype][self.player_diffs[ev[0]]]
           changed = True
-          MOVE_SOUND.play()
 
       # Player n+1 hit start, so add a new player
       elif ev[1] == E_START and ev[0] == len(self.player_diffs):
@@ -372,8 +361,6 @@ class SongSelect:
         OPEN_SOUND.play()
         self.scroll_out(self.index)
         self.set_up_songlist(self.songs[self.index].name)
-        self.scroll_in(self.index)
-        self.oldindex = self.index
         event.empty()
         changed = True
 
@@ -400,7 +387,7 @@ class SongSelect:
 
           preview = SongPreview()
 
-          while ev[1] != E_PASS: ev = event.poll() # Empty the queue
+          event.empty()
           self.screen.blit(self.bg, (0, 0))
           pygame.display.flip()
 
@@ -414,9 +401,9 @@ class SongSelect:
 
       # Add the current song to the playlist
       elif ev[1] == E_MARK:
-        MOVE_SOUND.play()
-        self.add_current_song()
-        changed = True
+        if not self.songs[self.index].isfolder:
+          self.add_current_song()
+          changed = True
 
       # Remove the most recently added song
       elif ev[1] == E_UNMARK:

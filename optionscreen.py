@@ -136,6 +136,10 @@ class OptionScreen:
             break
           elif self.players[pid][optname] == val[0]: next = True
 
+      elif ev == E_FULLSCREEN:
+        pygame.display.toggle_fullscreen()
+        mainconfig["fullscreen"] ^= 1
+
     return (ev == E_START)
 
   def render(self, screen):
