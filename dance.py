@@ -8,7 +8,7 @@ from announcer import Announcer
 
 from pygame.sprite import RenderUpdates
 
-import fontfx, gradescreen, steps, audio, fileparsers, games
+import fontfx, gradescreen, steps, audio, fileparsers, games, error
 
 import random, sys, os
 
@@ -574,7 +574,12 @@ def play(screen, playlist, configs, songconf, playmode):
     players.append(plr)
 
   for songfn, diff in playlist:
-    current_song = fileparsers.SongItem(songfn)
+    try: current_song = fileparsers.SongItem(songfn)
+    except:
+      error.ErrorMessage(screen, ["There was an error loading",
+                                  os.path.split(songfn)[1]])
+      continue
+      
     pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
     songdata = steps.SongData(current_song, songconf)
