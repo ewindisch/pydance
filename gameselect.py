@@ -62,6 +62,7 @@ IMAGES = {
     "Versus": make_versus,
     "Double": make_double,
     "Couple": make_couple,
+    "Endless": "select-endless.png",
     }
 
 SELECTORS = {
@@ -140,9 +141,9 @@ DESCRIPTIONS = {
   "Couple": "Two people dance different steps to the same song.",
   "Double": "Try playing on both sides at once.",
 
-  "Normal": "One song at a time.",
+  "Normal": "Play one song at a time.",
   "Endless": "Keep dancing until you fail.",
-  "Nonstop": "Several songs in a row.",
+  "Nonstop": "Play several songs in a row.",
   }
 
 class MainWindow(InterfaceWindow):
