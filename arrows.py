@@ -32,21 +32,25 @@ class AbstractArrow(pygame.sprite.Sprite):
       self.top = 240 - player.game.width / 2
       self.bottom = random.choice([748, -276])
       if self.top < self.bottom:
-        self.suddenzone = 480 - int(64.0 * player.sudden)
-        self.hiddenzone = 240 - player.game.width / 2 + int(64.0 * player.hidden)
+        self.vector = 1
+        self.suddenzone = 480 - 64 * player.sudden
+        self.hiddenzone = 240 - player.game.width / 2 + 64 * player.hidden
       else:
-        self.suddenzone = int(64.0 * player.sudden) 
-        self.hiddenzone = 240 - player.game.width / 2 - int(64.0 * player.hidden)
+        self.vector = -1
+        self.suddenzone = 64 * (player.sudden - 1)
+        self.hiddenzone = 240 - player.game.width / 2 - 64 * player.hidden
     elif player.scrollstyle == 1:
+      self.vector = -1
       self.top = 352
       self.bottom = -64
-      self.suddenzone = int(64.0 * player.sudden)
-      self.hiddenzone = 352 - int(64.0 * player.hidden)
+      self.suddenzone =  64 * (player.sudden - 1)
+      self.hiddenzone = 352 - 64 * player.hidden
     else:
+      self.vector = 1
       self.top = 64
       self.bottom = 480
-      self.suddenzone = 480 - int(64.0 * player.sudden)
-      self.hiddenzone = 64 + int(64.0 * player.hidden)
+      self.suddenzone = 480 - 64 * player.sudden
+      self.hiddenzone = 64 * (player.hidden + 1)
 
     self.spin = player.spin
     self.scale = player.scale
@@ -118,7 +122,8 @@ class AbstractArrow(pygame.sprite.Sprite):
       else: rect.centerx = self.goalcenterx
     else: rect.centerx = self.centerx
 
-    # Although the image size can be 0x!0, it can't ever be !0x0, because X > Y always.
+    # Although the image size can be 0x!0, it can't ever be !0x0,
+    # because X >= Y always.
     if image.get_size()[0] != 0:
       image.set_colorkey(image.get_at([0, 0]))
 
@@ -146,20 +151,20 @@ class ArrowSprite(AbstractArrow):
     # 0 is out of lbct, and so we only use curbpm, which is 0, meaning
     # we always end up at the top.
 
-    top = self.top
-
     beatsleft = self.calculate_beats(curtime, self.endtime, curbpm, lbct)
 
     if self.accel == 1:
-      p = min(1, max(0, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats)))
+      p = max(0, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats))
       speed = 2 * p * self.speed + self.speed * (1 - p)
     elif self.accel == 2:
-      p = min(1, max(0, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats)))
+      p = min(1, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats))
       speed = p * self.speed / 2.0 + self.speed * (1 - p)
     else: speed = self.speed
 
-    top = top - int(beatsleft / self.totalbeats * speed * self.diff)
-
+    # The second term (self.vector * ...) is a simplication of
+    # int(beatsleft * speed * self.diff / self.beatsleft).
+    top = self.top + self.vector * int(beatsleft * speed * 64)
+    
     self.image = self.baseimage
   
     if top > 480: top = 480
@@ -170,15 +175,15 @@ class ArrowSprite(AbstractArrow):
 
     alp = 256
     if self.top < self.bottom: 
-      if self.rect.top > self.suddenzone:
-        alp = 256 - 4 * (self.rect.top - self.suddenzone) / self.speed
-      elif self.rect.top < self.hiddenzone:
-        alp = 256 - 4 * (self.hiddenzone - self.rect.top) / self.speed
+      if top > self.suddenzone:
+        alp = 256 - 4 * (top - self.suddenzone) / self.speed
+      elif top < self.hiddenzone:
+        alp = 256 - 4 * (self.hiddenzone - top) / self.speed
     else:
-      if self.rect.top < self.suddenzone:
-        alp = 256 - 4 * (self.suddenzone - self.rect.top) / self.speed
-      elif self.rect.top > self.hiddenzone:
-        alp = 256 - 4 * (self.rect.top - self.hiddenzone) / self.speed
+      if top < self.suddenzone:
+        alp = 256 - 4 * (self.suddenzone - top) / self.speed
+      elif top > self.hiddenzone:
+        alp = 256 - 4 * (top - self.hiddenzone) / self.speed
 
     if alp > 256: alp = 256
     elif alp < 0: alp = 0
@@ -219,30 +224,34 @@ class HoldArrowSprite(AbstractArrow):
     beatsleft_bot = self.calculate_beats(curtime, self.timef2, curbpm, lbct)
 
     if self.accel == 1:
-      p = min(1, max(0, -1 / self.totalbeats * (beatsleft_top * self.speed - self.totalbeats)))
+      p = max(0, -1 / self.totalbeats * (beatsleft_top * self.speed - self.totalbeats))
       speed_top = 2 * p * self.speed + self.speed * (1 - p)
-      p = min(1, max(0, -1 / self.totalbeats * (beatsleft_bot * self.speed - self.totalbeats)))
+      p = max(0, -1 / self.totalbeats * (beatsleft_bot * self.speed - self.totalbeats))
       speed_bottom = 2 * p * self.speed + self.speed * (1 - p)
     elif self.accel == 2:
-      p = min(1, max(0, -1 / self.totalbeats * (beatsleft_top * self.speed - self.totalbeats)))
+      p = min(1, -1 / self.totalbeats * (beatsleft_top * self.speed - self.totalbeats))
       speed_top = p * self.speed / 2.0 + self.speed * (1 - p)
-      p = min(1, max(0, -1 / self.totalbeats* (beatsleft_bot * self.speed - self.totalbeats)))
+      p = min(1, -1 / self.totalbeats* (beatsleft_bot * self.speed - self.totalbeats))
       speed_bottom = p * self.speed / 2.0 + self.speed * (1 - p)
     else: speed_top = speed_bottom = self.speed
 
+    # See the notes in ArrowSprite about the derivation of this.
     if self.bottom > self.top:
-      top = self.top - int(beatsleft_top / self.totalbeats * self.diff * speed_top)
-      bottom = self.top - int(beatsleft_bot / self.totalbeats * self.diff * speed_bottom)
+      top = self.top + self.vector * int(beatsleft_top * speed_top * 64)
+      bottom = self.top + self.vector * int(beatsleft_bot * speed_bottom * 64)
     else:
-      top = self.top - int(beatsleft_bot / self.totalbeats * self.diff * speed_top)
-      bottom = self.top - int(beatsleft_top / self.totalbeats * self.diff * speed_bottom)
+      top = self.top + self.vector * int(beatsleft_bot * speed_top * 64)
+      bottom = self.top + self.vector * int(beatsleft_top * speed_bottom * 64)
 
     if bottom > 480: bottom = 480
     if top > 480: top = 480
 
     if self.top < self.bottom:
-      bottom = max(64, bottom)
-      top = max(64, top)
+      bottom = max(self.top, bottom)
+      top = max(self.top, top)
+    else:
+      bottom = min(self.top, bottom)
+      top = min(self.top, top)
 
     pct = abs(float(top - self.top) / self.diff)
     
@@ -258,15 +267,15 @@ class HoldArrowSprite(AbstractArrow):
 
     alp = 256
     if self.top < self.bottom: 
-      if self.rect.top > self.suddenzone:
-        alp = 256 - 4 * (self.rect.top - self.suddenzone) / self.speed
+      if top > self.suddenzone:
+        alp = 256 - 4 * (top - self.suddenzone) / self.speed
       elif self.rect.top < self.hiddenzone:
-        alp = 256 - 4 * (self.hiddenzone - self.rect.top) / self.speed
+        alp = 256 - 4 * (self.hiddenzone - top) / self.speed
     else:
-      if self.rect.bottom < self.suddenzone:
-        alp = 256 - 4 * (self.suddenzone - self.rect.bottom) / self.speed
-      elif self.rect.bottom > self.hiddenzone:
-        alp = 256 - 4 * (self.rect.bottom - self.hiddenzone) / self.speed
+      if top < self.suddenzone:
+        alp = 256 - 4 * (self.suddenzone - top) / self.speed
+      elif top > self.hiddenzone:
+        alp = 256 - 4 * (top - self.hiddenzone) / self.speed
 
     if alp > 256: alp = 256
     elif alp < 0: alp = 0

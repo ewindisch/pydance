@@ -59,9 +59,10 @@ class Steps(object):
     cur_bpm = self.bpm
     self.speed = player.speed
 
-    # If too small, arrows don't appear fast enough
-    if player.accel: self.nbeat_offset = 104 / player.speed
-    else:  self.nbeat_offset = 64 / player.speed
+    # If this is too small, arrows don't appear fast enough. If it's
+    # too large, many arrows queue up and pydance slows down.
+    # 104 == (480 (screen height) - 64 (space on top)) / 4 (pixels per beat)
+    self.nbeat_offset = 104.0 / player.speed
     self.lastbpmchangetime = []
     self.events = [SongEvent(when = cur_time, bpm = cur_bpm, beat = cur_beat,
                              extra = song.difficulty[playmode][difficulty])]
