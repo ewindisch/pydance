@@ -62,7 +62,12 @@ class FakePlaylist(object):
 
 class Endless(object):
   def __init__(self, songitems, screen, gametype):
+
     self.player_configs = [copy.copy(player_config)]
+
+    if games.GAMES[gametype].players == 2:
+      self.player_configs.append(copy.copy(player_config))
+
     self.game_config = copy.copy(game_config)
     songitems = [s for s in songitems if s.difficulty.has_key(gametype)]
     oldaf = mainconfig["autofail"]
@@ -84,6 +89,15 @@ class Endless(object):
     mainconfig["autofail"] = 1
 
     self.constraints = [Constraint("name", songitems[0].difficulty[gametype].keys()[0])]
+
+    if games.GAMES[gametype].players == 2:
+      if games.GAMES[gametype].couple == True:
+        # Lock both players to the same constraints in couple modes.
+        self.constraints.append(self.constraints[0])
+      else:
+        c = Constraint("name", songitems[0].difficulty[gametype].keys()[0])
+        self.constraints.append(c)
+
     self.bg = pygame.image.load(BACKGROUND)
     self.screen = screen
     self.firsttime = True
@@ -99,7 +113,7 @@ class Endless(object):
       ev = event.wait()
 
       # Start game
-      if ev[0] == 0 and ev[1] == E_START:
+      if ev[1] == E_START:
 
         if optionscreen.player_opt_driver(screen, self.player_configs):
           dance.play(screen, FakePlaylist(songitems, self.constraints,
@@ -111,21 +125,8 @@ class Endless(object):
 
         while ev[1] != E_PASS: ev = event.poll()
 
-      if ev[0] == 0 and ev[1] == E_SELECT:
+      if ev[1] == E_SELECT:
         optionscreen.game_opt_driver(screen, self.game_config)
-
-      # Player 2 on
-      elif (ev[0] == len(self.constraints) and ev[1] == E_START and
-            ev[0] < games.GAMES[gametype].players):
-        self.constraints.append(Constraint(self.constraints[0].kind,
-                                           self.constraints[0].value))
-        self.player_configs.append(copy.copy(player_config))
-
-      # Player 2 off
-      elif ev[0] < len(self.constraints) and ev[1] == E_START:
-        while len(self.constraints) > ev[0]:
-          self.constraints.pop()
-          self.player_configs.pop()
 
       # Ignore unknown events
       elif ev[0] >= len(self.constraints): pass
@@ -156,6 +157,7 @@ class Endless(object):
       self.render()
 
     mainconfig["autofail"] = oldaf
+    player_config.update(self.player_configs[0])
 
   # FIXME - Calculate rects instead?
   def render(self):

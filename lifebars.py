@@ -98,7 +98,7 @@ class TugLifeBarDisp(LifeBarDisp):
 
     self.wontext = fontfx.embfade("WON",28,3,(80,32),(224,32,32))
     self.wontext.set_colorkey(self.failtext.get_at((0,0)), RLEACCEL)
-    self.deltas = {"V": 3.0, "P": 1.5, "G": 0.75 }
+    self.deltas = {"V": 3.0, "P": 1.5, "G": 0.75, "M": -0.5 }
 
     # If we're player 1, it's a new game, so delete the old lifebars.
     if playernum == 0: TugLifeBarDisp.active_bars = [self]
