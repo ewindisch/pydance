@@ -63,7 +63,13 @@ def main():
   r.center = (320, 240)
   for f in fileList:
     try: songs.append(fileparsers.SongItem(f, False))
-    except None: print "Error loading " + f
+    except RuntimeWarning, message:
+      print "W:", message
+    except RuntimeError, message:
+      print "E:", message
+    except None:
+      print "E: Unknown error loading " + f
+      print "E: Please contact the developers (pydance-devel@icculus.org)."
     img = pbar.render(parsedsongs / totalsongs)
     pygame.display.update(screen.blit(img, r))
     parsedsongs += 100.0

@@ -2,6 +2,7 @@ import os, stat, util, string
 
 import games
 
+# The basic skeleton parser/song class.
 class GenericFile(object):
   def __init__(self, filename, need_steps):
     self.filename = filename
@@ -12,10 +13,26 @@ class GenericFile(object):
     self.description = None
     self.need_steps = need_steps
 
-  def strip_line(self, line):
-    if line.count(self.comment) > 0: line = line[:line.index(self.comment)]
-    return line.strip()
+  # Find a list of files with a given extension in the directory.
+  # We call this a lot (4x / DWI/SM), so it should be as fast as possible.
+  def find_files(self, formats):
+    files = []
 
+    dir = os.path.split(self.filename)[0]
+    if dir == "": dir = "."
+
+    # FIXME: Make this a list comprehension, for speed...
+    for f in os.listdir(dir):
+      fullname = os.path.join(dir, f)
+      for ext in formats:
+        if fullname.lower()[-len(ext):] == ext:
+          files.append(fullname)
+
+    files.sort(lambda a, b: cmp(os.stat(a).st_size, os.stat(b).st_size))
+    return files
+
+  # Try to extract a subtitle from formats that don't support it (DWI, step)
+  # Recognize ()s, []s, --s, or ~~s.
   def find_subtitle(self):
     if not self.info.has_key("subtitle"):
       for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
@@ -26,93 +43,8 @@ class GenericFile(object):
             self.info["title"] = self.info["title"][:l]
             break
 
-  def find_mixname(self):
-    dir, name = os.path.split(self.filename)
-    mixname = os.path.split(os.path.split(dir)[0])[1]
-    if mixname != "songs": self.info["mix"] = mixname
-
-  def find_files_insanely(self):
-    dir, name = os.path.split(self.filename)
-    largefile = 10240 # Oh crap, I hate DWI. Shoot me now.
-    found_bg = False
-    found_ban = False
-    if dir == "": dir = os.path.realpath(".")
-    for file in os.listdir(dir):
-      lfile = file.lower()
-      # SimWolf should be indicted for some sort of programming crime
-      # for making me write all the code below this.
-      fullfile = os.path.join(dir, file)
-      if lfile[-3:] == "mp3" and not self.info.has_key("filename"):
-        if lfile[0:5] != "intro": self.info["filename"] = fullfile
-      elif lfile[-3:] == "wav" and not self.info.has_key("filename"):
-        if lfile[0:5] != "intro": self.info["filename"] = fullfile
-      elif lfile[-3:] == "ogg":
-        if lfile[0:5] != "intro": self.info["filename"] = fullfile
-      elif lfile[-3:] == "lrc":
-        self.parse_lyrics(fullfile)
-      elif lfile[-3:] == "jpg" or lfile[-3:] == "png":
-        size = os.stat(fullfile).st_size
-        try:
-          lfile.index("bg")
-          found_bg = True
-          largefile = max(largefile, size)
-          if self.info.has_key("background") and not found_ban:
-            self.info["banner"] = self.info["background"]
-          self.info["background"] = fullfile
-        except ValueError:
-          try:
-            lfile.index("ban")
-            found_ban = True
-            largefile = max(largefile, size)
-            self.info["banner"] = fullfile
-          except ValueError:
-            try:
-              lfile.index("bn")
-              found_ban = True
-              largefile = max(largefile, size)
-              self.info["banner"] = fullfile
-            except ValueError:
-              if size > largefile and not found_bg:
-                largefile = size
-                if self.info.has_key("background"):
-                  self.info["banner"] = self.info["background"]
-                self.info["background"] = fullfile
-              elif not found_ban:
-                self.info["banner"] = fullfile
-    if (self.info.get("banner") == self.info.get("background") and
-        self.info.has_key("banner")):
-      del(self.info["banner"])
-
-  # Fucking braindead file format
-  # Fucking braindead DWI writers
-  def parse_time(self, string):
-    offset = 0
-    time = 0
-    if string[0] == "+":
-      string = string[1:]
-      offset = self.info["gap"]
-    if ":" in string:
-      parts = string.split(":")
-      if len(parts) == 2: time = 60 * int(parts[0]) + float(parts[1])
-      elif len(parts) == 3:
-        time = int(parts[0]) + float(parts[1]) + float(parts[2]) / 100
-    elif "." in string: time = float(string)
-    else: time = int(string) / 1000.0
-    return offset + time
-
-  def parse_lyrics(self, filename):
-    f = open(filename)
-    offset = 0
-    for line in f:
-      line = line.strip()
-      if line[1:7] == "offset": offset = float(line[8:-1]) / 1000.0
-      if len(line) > 2 and line[1] in "0123456789":
-        time = self.parse_time(line[1:line.index("]")])
-        lyr = line[line.index("]") + 1:].split("|")
-        lyr.reverse()
-        for i in range(len(lyr)):
-          if lyr[i] is not "": self.lyrics.append((time, i, lyr[i]))
-
+  # If a filename isn't found, try joining it with the path of the song's
+  # filename.
   def resolve_files_sanely(self):
     dir, name = os.path.split(self.filename)
     for t in ("banner", "filename", "movie", "background"):
@@ -120,6 +52,23 @@ class GenericFile(object):
         if not os.path.isfile(self.info[t]):
           self.info[t] = os.path.join(dir, self.info[t])
           if not os.path.isfile(self.info[t]): del(self.info[t])
+
+  # DWI has an insane number of time formats.
+  def parse_time(self, string):
+    offset = 0
+    time = 0
+    if string[0] == "+": # Any prepended + means add the offset of the file.
+      string = string[1:]
+      offset = self.info["gap"]
+    if ":" in string:
+      parts = string.split(":")
+      # M:SS format; also M:SS.SS (only seen once)
+      if len(parts) == 2: time = 60 * int(parts[0]) + float(parts[1])
+      elif len(parts) == 3: ## M:SS:CS
+        time = int(parts[0]) + float(parts[1]) + float(parts[2]) / 100
+    elif "." in string: time = float(string) # seconds in a float value
+    else: time = int(string) / 1000.0 # no punctuation means in milliseconds
+    return offset + time
 
 class DanceFile(GenericFile):
   WAITING,METADATA,DESCRIPTION,LYRICS,BACKGROUND,GAMETYPE,STEPS = range(7)
@@ -148,11 +97,11 @@ class DanceFile(GenericFile):
       elif state == DanceFile.STEPS and not need_steps: pass
       else: state = parsers[state](line, state_data)
 
-    self.resolve_files_sanely()
-
     if self.info.has_key("preview"):
       start, length = self.info["preview"].split()
       self.info["preview"] = (float(start), float(length))
+
+    self.resolve_files_sanely()
 
   def parse_metadata(self, line, data):
     parts = line.split()
@@ -247,8 +196,9 @@ class StepFile(GenericFile):
     if not need_steps: parsers[StepFile.STEPS] = self.parse_dummy_steps
 
     for line in f:
-      line = self.strip_line(line)
-      if line != "": state, state_data = parsers[state](line, state_data)
+      line = line.strip()
+      if line != "" and line[0] != "#":
+        state, state_data = parsers[state](line, state_data)
 
     for old, new in (("song", "title"), ("group", "artist"),
                      ("offset", "gap"), ("bg", "background"),
@@ -262,8 +212,6 @@ class StepFile(GenericFile):
 
     if self.info.has_key("version"): del(self.info["version"])
 
-    self.resolve_files_sanely()
-
     dir, name = os.path.split(self.filename)
     for t in (("banner", ".png"), ("banner", "-full.png"),
               ("background", "-bg.png"), ("filename", ".ogg"),
@@ -274,7 +222,7 @@ class StepFile(GenericFile):
         if os.path.isfile(possible): self.info[t[0]] = possible
 
     self.find_subtitle()
-    self.description = None
+    self.resolve_files_sanely()
 
   def parse_metadata(self, line, data):
     if line == "LYRICS": return StepFile.LYRICS, [None, None]
@@ -367,11 +315,27 @@ class MSDFile(GenericFile):
     # Return a list of lists, [tag, field1, field2, ...]
     return lines
 
+  def find_mixname(self):
+    dir, name = os.path.split(self.filename)
+    mixname = os.path.split(os.path.split(dir)[0])[1]
+    if mixname != "songs": self.info["mix"] = mixname
+
+  def parse_lyrics(self, filename):
+    f = open(filename)
+    offset = 0
+    for line in f:
+      line = line.strip()
+      if line[1:7] == "offset": offset = float(line[8:-1]) / 1000.0
+      if len(line) > 2 and line[1] in "0123456789":
+        time = self.parse_time(line[1:line.index("]")])
+        lyr = line[line.index("]") + 1:].split("|")
+        lyr.reverse()
+        for i in range(len(lyr)):
+          if lyr[i] is not "": self.lyrics.append((time, i, lyr[i]))
+
   # Return a list of all the images in the directory, sorted by file size
   def find_images(self):
-    files = self.find_files([".png", ".jpg", ".jpeg", ".bmp"])
-    files.sort(lambda a, b: cmp(os.stat(a).st_size, os.stat(b).st_size))
-    return files
+    return self.find_files([".png", ".jpg", ".jpeg", ".bmp"])
 
   # Find all audio files
   def find_audio(self):
@@ -379,20 +343,29 @@ class MSDFile(GenericFile):
 
   # Find all step files
   def find_othersteps(self):
-    return self.find_files([f[0] for f in SongItem.formats])
+    return self.find_files([".sm", ".dwi", ".ksf", ".dance", ".step"])
 
-  def find_files(self, formats):
-    files = []
+  def find_files_sanely(self):
+    images = self.find_images()
+    for image in images:
+      image_lower = image.lower()
+      if image_lower.find("bg") != -1 or image_lower.find("back") != -1:
+        self.info["background"] = image
+      elif image_lower.find("ban") != -1 or image_lower.find("bn") != -1:
+        self.info["banner"] = image
 
-    dir = os.path.split(self.filename)[0]
-    if dir == "": dir = "."
+    if len(images) > 0:
+      self.info["background"] = self.info.get("background", images[-1])
+      if self.info["background"] in images:
+        images.remove(self.info["background"])
+    if len(images) > 0:
+      self.info["banner"] = self.info.get("banner", images[-1])
 
-    # FIXME: Make this a list comprehension, for speed...
-    for f in os.listdir(dir):
-      fullname = os.path.join(dir, f)
-      for ext in formats:
-        if fullname.lower()[-len(ext):] == ext:
-          files.append(fullname)
+    audio = self.find_audio()
+    if len(audio) > 0: self.info["filename"] = audio[-1]
+
+    lyrics = self.find_files([".lrc"])
+    if len(lyrics) > 0: self.parse_lyrics(lyrics[0])
 
 # The DWI format, from Dance With Intensity.
 class DWIFile(MSDFile):
@@ -430,6 +403,14 @@ class DWIFile(MSDFile):
 
     self.bpms = []
     self.freezes = []
+
+    # SM and dance files will always be larger than an equivalent DWI,
+    # so using the file size to determine which to load works.
+    othersteps = self.find_othersteps()
+    if othersteps[-1] != self.filename:
+      error = "Ignoring %s in favor of %s." % (os.path.split(filename)[1],
+                                               os.path.split(othersteps[-1])[1])
+      raise RuntimeWarning(error)
 
     for parts in lines:
       if len(parts) > 3:
@@ -483,8 +464,9 @@ class DWIFile(MSDFile):
           self.parse_steps(parts[0], parts[1], parts[4])
 
     self.find_mixname()
-    self.find_files_insanely()
     self.find_subtitle()
+    self.find_files_sanely()
+    self.resolve_files_sanely()
 
   def parse_steps(self, mode, diff, steps):
     if mode not in DWIFile.steps: return
@@ -606,17 +588,14 @@ class SMFile(MSDFile):
             self.difficulty[game] = {}
             self.steps[game] = {}
           if parts[2] == "": parts[2] = parts[3]
+          if parts[2][-2] == "_": # This is a KSF-style difficulty
+            parts[2] = parts[2][:-2]
           self.difficulty[game][parts[2].upper()] = int(parts[4])
           if need_steps:
             self.steps[game][parts[2].upper()] = self.parse_steps(parts[6], game)
 
     self.find_mixname()
-    for k in ("banner", "background", "filename"):
-      if k in self.info and not os.path.isfile(self.info[k]):
-        del(self.info[k])
-    
-    if not (self.info.has_key("background") or self.info.has_key("banner")):
-      self.find_files_insanely()
+    self.find_files_sanely()
     self.resolve_files_sanely()
 
   def parse_steps(self, steps, gametype):
@@ -691,6 +670,10 @@ class KSFFile(MSDFile):
       elif fn_lower[:5] == "intro": self.info["preview"] = fullname
       elif fn_lower[:4] == "back" or fn_lower[:5] == "title":
         self.info["background"] = fullname
+      elif fn_lower[-2:] == "sm":
+        raise RuntimeWarning("Ignoring %s in favor of %s" % (filename, fn))
+
+    self.find_mixname()
 
   def parse_ksf(self, filename):
     steps = []
@@ -792,8 +775,7 @@ class SongItem(object):
         song = pair[1](filename, need_steps)
         break
     if song == None:
-      print filename, "is in an unsupported format."
-      raise NotImplementedError()
+      raise RuntimeError(filename + " is an unsupported format.")
     self.info = song.info
 
     # Sanity checks
@@ -811,7 +793,7 @@ class SongItem(object):
 
     for k in ("filename",):
       if self.info[k] and not os.path.isfile(self.info[k]):
-        raise RuntimeError("Missing %s" % k)
+        raise RuntimeError("%s is missing %s" % (filename, k))
 
     for k in ("banner", "background"):
       if self.info[k] and not os.path.isfile(self.info[k]):
