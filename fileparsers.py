@@ -1,4 +1,7 @@
-import os, stat, util, string
+# Read in various file formats and translate them to the internal structure
+# that Steps and SongData want.
+
+import os, stat, util, string, dircache
 
 import games
 
@@ -21,12 +24,13 @@ class GenericFile(object):
     dir = os.path.split(self.filename)[0]
     if dir == "": dir = "."
 
-    # FIXME: Make this a list comprehension, for speed...
-    for f in os.listdir(dir):
-      fullname = os.path.join(dir, f)
+    # FIXME: Make this a list comprehension, for speed... (Can we?)
+    for f in dircache.listdir(dir):
       for ext in formats:
-        if fullname.lower()[-len(ext):] == ext:
+        if f.lower()[-len(ext):] == ext:
+          fullname = os.path.join(dir, f)
           files.append(fullname)
+          break
 
     files.sort(lambda a, b: cmp(os.stat(a).st_size, os.stat(b).st_size))
     return files
@@ -70,6 +74,10 @@ class GenericFile(object):
     else: time = int(string) / 1000.0 # no punctuation means in milliseconds
     return offset + time
 
+# The .dance file format, pydance's native format. It has a very close
+# mapping to the internal structure. Unfortunately, Python's function
+# call overhead makes parsing it remarkably slow. See docs/dance-spec.txt
+# for more information.
 class DanceFile(GenericFile):
   WAITING,METADATA,DESCRIPTION,LYRICS,BACKGROUND,GAMETYPE,STEPS = range(7)
 
@@ -79,7 +87,6 @@ class DanceFile(GenericFile):
 
   def __init__(self, filename, need_steps):
     GenericFile.__init__(self, filename, need_steps)
-    self.comment = "#"
 
     parsers = [self.parse_waiting, self.parse_metadata, self.parse_description,
                self.parse_lyrics, self.parse_bg, self.parse_gametype,
@@ -105,13 +112,14 @@ class DanceFile(GenericFile):
 
   def parse_metadata(self, line, data):
     parts = line.split()
-    line2 = line[len(parts[0]):].strip()
+    line2 = line[len(parts[0]):].strip() # Keep multiple spaces in the value.
     self.info[parts[0]] = line2
     return DanceFile.METADATA
 
   def parse_waiting(self, line, data):
     if line == "DESCRIPTION": return DanceFile.DESCRIPTION
     elif line == "LYRICS": return DanceFile.LYRICS
+    elif line == "BACKGROUND": return DanceFile.LYRICS
     else:
       data[0] = line
       if not self.difficulty.has_key(line):
@@ -119,6 +127,7 @@ class DanceFile(GenericFile):
         self.steps[line] = {}
       return DanceFile.GAMETYPE
 
+  # FIXME: We don't actually parse the background change data yet.
   def parse_bg(self, line, data):
     return DanceFile.BACKGROUND
 
@@ -173,6 +182,8 @@ class DanceFile(GenericFile):
 
     return DanceFile.DESCRIPTION
 
+# The old pyDDR .step format. On the surface it looks like .dance, but
+# a lot of bad/inconsistent design problems make it trickier to parse.
 class StepFile(GenericFile):
   METADATA, GAMETYPE, LYRICS, STEPS, WAITING = range(5)
   word_trans = { "whole": 16.0, "halfn": 8.0, "qurtr": 4.0, "eight": 2.0,
@@ -184,12 +195,11 @@ class StepFile(GenericFile):
 
   def __init__(self, filename, need_steps):
     GenericFile.__init__(self, filename, need_steps)
-    self.comment = "#"
 
     f = open(filename)
-    # parser states
+
     state = StepFile.METADATA
-    state_data = [None, None] # sec, diff, or time in lyric mode
+    state_data = [None, None]
     parsers = [self.parse_metadata, self.parse_gametype,
                self.parse_lyrics, self.parse_steps, self.parse_waiting]
 
@@ -230,8 +240,9 @@ class StepFile(GenericFile):
       parts = line.split()
       if len(parts) == 1:
         data[0] = line
-        if self.steps.get(line) == None: self.steps[line] = {}
-        if self.difficulty.get(line) == None: self.difficulty[line] = {}
+        if not self.difficulty.has_key(line):
+          self.difficulty[line] = {}
+          self.steps[line] = {}
         return StepFile.GAMETYPE, data
       else:
         line2 = line[len(parts[0]):].strip()
@@ -268,6 +279,8 @@ class StepFile(GenericFile):
     self.steps[data[0]][data[1]].append(parts)
     return StepFile.STEPS, data
 
+  # .step's lyrics come in alternate lines (usually), the first giving the
+  # second the lyric is at, and the second actually giving the lyric.
   def parse_lyrics(self, line, data):
     if line == "end": return StepFile.WAITING, data
     else:
@@ -320,6 +333,7 @@ class MSDFile(GenericFile):
     mixname = os.path.split(os.path.split(dir)[0])[1]
     if mixname != "songs": self.info["mix"] = mixname
 
+  # MSD-style files use DWI's .lrc lyric format
   def parse_lyrics(self, filename):
     f = open(filename)
     offset = 0
@@ -330,8 +344,8 @@ class MSDFile(GenericFile):
         time = self.parse_time(line[1:line.index("]")])
         lyr = line[line.index("]") + 1:].split("|")
         lyr.reverse()
-        for i in range(len(lyr)):
-          if lyr[i] is not "": self.lyrics.append((time, i, lyr[i]))
+        self.lyrics = [(time, i, lyr[i]) for i in range(len(lyr)) if
+                       lyr[i] != ""]
 
   # Return a list of all the images in the directory, sorted by file size
   def find_images(self):
@@ -342,27 +356,39 @@ class MSDFile(GenericFile):
     return self.find_files([".ogg", ".mp3", ".wav", ".xm"])
 
   # Find all step files
+  # Don't look for KSFs here - KSFFile uses this function to see if it should
+  # be ignored, in favor of a .SM. Since KSFs are inherently multiple files,
+  # it can't find itself.
   def find_othersteps(self):
-    return self.find_files([".sm", ".dwi", ".ksf", ".dance", ".step"])
+    return self.find_files([".sm", ".dwi", ".dance", ".step"])
 
+  # DWI finds files based on their image size, not on any naming conventions.
+  # However, naming conventions combined with file size appears to be a
+  # useful and accurate heuristic.
+
+  # Many SMs actually contain accurate information about their filenames,
+  # so do some checks to avoid unnecessary searching.
   def find_files_sanely(self):
-    images = self.find_images()
-    for image in images:
-      image_lower = image.lower()
-      if image_lower.find("bg") != -1 or image_lower.find("back") != -1:
-        self.info["background"] = image
-      elif image_lower.find("ban") != -1 or image_lower.find("bn") != -1:
-        self.info["banner"] = image
+    if not (os.path.exists(self.info.get("banner", "")) and
+            os.path.exists(self.info.get("background", ""))):
+      images = self.find_images()
+      for image in list(images):
+        image_lower = os.path.split(image)[1].lower()
+        if image_lower.find("bg") != -1 or image_lower.find("back") != -1:
+          self.info["background"] = image
+        elif image_lower.find("ban") != -1 or image_lower.find("bn") != -1:
+          self.info["banner"] = image
 
-    if len(images) > 0:
-      self.info["background"] = self.info.get("background", images[-1])
-      if self.info["background"] in images:
-        images.remove(self.info["background"])
-    if len(images) > 0:
-      self.info["banner"] = self.info.get("banner", images[-1])
+      if len(images) > 0:
+        self.info["background"] = self.info.get("background", images[-1])
+        if self.info["background"] in images:
+          images.remove(self.info["background"])
+      if len(images) > 0:
+        self.info["banner"] = self.info.get("banner", images[-1])
 
-    audio = self.find_audio()
-    if len(audio) > 0: self.info["filename"] = audio[-1]
+    if not (os.path.exists(self.info.get("filename", ""))):
+      audio = self.find_audio()
+      if len(audio) > 0: self.info["filename"] = audio[-1]
 
     lyrics = self.find_files([".lrc"])
     if len(lyrics) > 0: self.parse_lyrics(lyrics[0])
@@ -408,9 +434,9 @@ class DWIFile(MSDFile):
     # so using the file size to determine which to load works.
     othersteps = self.find_othersteps()
     if othersteps[-1] != self.filename:
-      error = "Ignoring %s in favor of %s." % (os.path.split(filename)[1],
-                                               os.path.split(othersteps[-1])[1])
-      raise RuntimeWarning(error)
+      err = "Ignoring %s in favor of %s." % (os.path.split(filename)[1],
+                                             os.path.split(othersteps[-1])[1])
+      raise RuntimeWarning(err)
 
     for parts in lines:
       if len(parts) > 3:
@@ -595,8 +621,8 @@ class SMFile(MSDFile):
             self.steps[game][parts[2].upper()] = self.parse_steps(parts[6], game)
 
     self.find_mixname()
-    self.find_files_sanely()
     self.resolve_files_sanely()
+    self.find_files_sanely()
 
   def parse_steps(self, steps, gametype):
     stepdata = []
@@ -652,8 +678,12 @@ class SMFile(MSDFile):
 # We have to detect KSFs via 'Song.ext' rather than the actual KSF
 # files, since they're split up.
 class KSFFile(MSDFile):
+
   def __init__(self, filename, need_steps):
     GenericFile.__init__(self, filename, need_steps)
+
+    if len(self.find_othersteps()) != 0:
+      raise RuntimeWarning("Ignoring %s in favor of other files." % filename)
 
     self.info = {"artist": "Unknown", "title": "Unknown"}
     self.difficulty = {}
@@ -662,7 +692,7 @@ class KSFFile(MSDFile):
     self.info["filename"] = filename
 
     path = os.path.split(filename)[0]
-    for fn in os.listdir(path):
+    for fn in dircache.listdir(path):
       fullname = os.path.join(path, fn)
       fn_lower = fn.lower()
       if fn_lower[-3:] == "ksf": self.parse_ksf(fullname)
@@ -670,8 +700,6 @@ class KSFFile(MSDFile):
       elif fn_lower[:5] == "intro": self.info["preview"] = fullname
       elif fn_lower[:4] == "back" or fn_lower[:5] == "title":
         self.info["background"] = fullname
-      elif fn_lower[-2:] == "sm":
-        raise RuntimeWarning("Ignoring %s in favor of %s" % (filename, fn))
 
     self.find_mixname()
 
@@ -694,7 +722,6 @@ class KSFFile(MSDFile):
       if couple:
         steps = [[], []]
         mode = "5COUPLE"
-
 
     for line in file(filename):
       line = line.strip()
