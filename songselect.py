@@ -531,8 +531,10 @@ class SongSelect:
       self.screen.blit(self.songs[idx].menuimage, (x,y))
         
     # The banner
+    self.screen.set_clip([[5, 5], [256, 80]])
     self.screen.blit(self.songs[self.index].banner,
                        self.songs[self.index].banner_rect)
+    self.screen.set_clip()
 
     # Render this in "reverse" order, from bottom to top
     temp_list = copy.copy(self.title_list)
@@ -593,6 +595,7 @@ class SongSelect:
       self.update_help()
       r = [self.screen.blit(self.helpimage,
                             (5, DIFF_LOCATION[1] + len(diff_list) * 26))]
+    else: r = []
 
     if changed: pygame.display.update()
     else: pygame.display.update(r)
@@ -615,12 +618,14 @@ class SongSelect:
         img = self.songs[idx].menuimage
         img.set_alpha(226 - int(40 * (abs(k) * q + abs(k + 1) * p)))
         self.screen.blit(self.songs[idx].menuimage, (x,y))
+      self.screen.set_clip([[5, 5], [256, 80]])
       self.songs[self.oldindex].banner.set_alpha(256 * q)
       self.screen.blit(self.songs[self.oldindex].banner,
                        self.songs[self.oldindex].banner_rect)
       self.songs[self.index].banner.set_alpha(256 * p)
       self.screen.blit(self.songs[self.index].banner,
                        self.songs[self.index].banner_rect)
+      self.screen.set_clip()
       pygame.display.update(r)
     self.songs[self.oldindex].banner.set_alpha(256)
     self.songs[self.index].banner.set_alpha(256)
@@ -643,15 +648,17 @@ class SongSelect:
         img = self.songs[idx].menuimage
         img.set_alpha(226 - int(40 * (abs(k) * q + abs(k - 1) * p)))
         self.screen.blit(self.songs[idx].menuimage, (x,y))
-      self.songs[self.oldindex].banner.set_alpha(255 * q)
+      self.screen.set_clip([[5, 5], [256, 80]])
+      self.songs[self.oldindex].banner.set_alpha(256 * q)
       self.screen.blit(self.songs[self.oldindex].banner,
                        self.songs[self.oldindex].banner_rect)
-      self.songs[self.index].banner.set_alpha(255 * p)
+      self.songs[self.index].banner.set_alpha(256 * p)
       self.screen.blit(self.songs[self.index].banner,
                        self.songs[self.index].banner_rect)
+      self.screen.set_clip()
       pygame.display.update(r)
-    self.songs[self.oldindex].banner.set_alpha(255)
-    self.songs[self.index].banner.set_alpha(255)
+    self.songs[self.oldindex].banner.set_alpha(256)
+    self.songs[self.index].banner.set_alpha(256)
 
   def scroll_out(self, index):
     if not mainconfig["gratuitous"]: return
