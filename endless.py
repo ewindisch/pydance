@@ -6,8 +6,10 @@ from constants import *
 RESOLUTION = (640, 480)
 BACKGROUND = os.path.join(image_path, "endless-bg.png")
 
-DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "ANOTHER", "STANDARD", "TRICK",
-                "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI"]
+# FIXME: Merge this with the other such lists in the source
+DIFFICULTIES = ["BEGINNER", "EASY", "LIGHT", "BASIC", "ANOTHER", "NORMAL",
+                "STANDARD", "TRICK", "HARD", "MANIAC", "HEAVY", "HARDCORE",
+                "CHALLENGE", "ONI", "CRAZY"]
 
 def python_sucks_sort(a, b):
   if a in DIFFICULTIES and b in DIFFICULTIES:
