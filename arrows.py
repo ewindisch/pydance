@@ -210,16 +210,16 @@ class HoldArrowSprite(AbstractArrow):
 
     c = self.image.get_colorkey()
     self.top_image = pygame.surface.Surface([self.width, self.width / 2])
+    self.top_image.fill(c)
     self.top_image.blit(self.image, [0, 0])
-    self.top_image.set_colorkey(c)
 
     self.bottom_image = pygame.surface.Surface([self.width, self.width / 2])
+    self.bottom_image.fill(c)
     self.bottom_image.blit(self.image, [0, -self.width / 2])
-    self.bottom_image.set_colorkey(c)
 
     self.center_image = pygame.surface.Surface([self.width, 1]) 
+    self.center_image.fill(c)
     self.center_image.blit(self.image, [0, -self.width / 2 + 1])
-    self.center_image.set_colorkey(c)
 
     beatsleft_top = self.endbeat1 - beat
     beatsleft_bot = self.endbeat2 - beat
@@ -263,6 +263,7 @@ class HoldArrowSprite(AbstractArrow):
     image.blit(h_img, [0, self.width / 2])
     image.blit(self.top_image, [0, 0])
     image.blit(self.bottom_image, [0, holdsize + self.width / 2])
+    image.set_colorkey(c)
 
     self.rect, self.image = self.scale_spin_battle(image, top, pct)
     self.set_alpha(curtime, beatsleft_bot, top)
