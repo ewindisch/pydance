@@ -48,6 +48,8 @@ class Steps(object):
     self.totalarrows = 0
     self.ready = None
 
+    offbeat_color_mod = 3
+
     holdlist = []
     holdtimes = []
     holdbeats = []
@@ -135,8 +137,13 @@ class Steps(object):
               feetstep[hold] = 0
               holding[hold] = 0
 
-          if coloring_mod == int(coloring_mod): color = coloring_mod % 4
-          else: color = 1
+          if coloring_mod == int(coloring_mod):
+            color = coloring_mod % 4
+            if color == 3: color = 1
+            offbeat_color_mod = 3
+          else:
+            color = offbeat_color_mod
+            offbeat_color_mod ^= 2
           self.events.append(SongEvent(when = time_to_add, bpm = cur_bpm,
                                        feet = feetstep, extra = words[0],
                                        beat = cur_beat,
