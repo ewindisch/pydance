@@ -27,6 +27,7 @@ key_defaults = {
   100 * K_f: FULLSCREEN,
   100 * K_BACKSPACE: SORT,
   100 * K_TAB: SELECT,
+  100 * K_s: SORT,
   }
 
 # This class wraps pad and maps pad events to UI events.
