@@ -274,6 +274,7 @@ class MainWindow(InterfaceWindow):
 
   def loop(self):
     pid, ev = ui.ui.poll()
+    root_idx = 0
     self._list.set_index(self._index)
     self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
                                                          len(self._songs)))
@@ -317,6 +318,7 @@ class MainWindow(InterfaceWindow):
       elif ev == ui.CONFIRM:
         if self._song.isfolder:
           self._create_song_list(self._song.name)
+          root_idx = self._index
           self._index = 0
         else:
           music.fadeout(500)
@@ -332,6 +334,7 @@ class MainWindow(InterfaceWindow):
 
       elif ev == ui.CANCEL:
         self._create_folder_list()
+        self._index = root_idx
 
       elif ev == ui.FULLSCREEN:
         pygame.display.toggle_fullscreen()
@@ -352,7 +355,7 @@ class MainWindow(InterfaceWindow):
       if ev in [ui.CANCEL, ui.UP, ui.DOWN, ui.SELECT, ui.CONFIRM, ui.SORT]:
         if ev == ui.UP: self._list.set_index(self._index, -1)
         elif ev == ui.DOWN: self._list.set_index(self._index, 1)
-        else: self._list.set_index(self._index)
+        else: self._list.set_index(self._index, 0) # don't animate
         self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
                                                              len(self._songs)))
 
