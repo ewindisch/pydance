@@ -107,7 +107,7 @@ class AbstractArrow(pygame.sprite.Sprite):
   def get_alpha(self, curtime, beatsleft, top):
     alp = 256
 
-    if self.fade == 4: alp = int(alp * abs(sin(beatsleft * 1.5708)))
+    if self.fade == 4: alp = int(alp * sin(beatsleft * 1.5708) ** 2)
 
     if self.top < self.bottom: 
       if top > self.suddenzone:
