@@ -163,17 +163,17 @@ class CRSFile(object):
     else:
       for path in mainconfig["songdir"].split(os.pathsep):
         fn = os.path.join(path, name)
+        fn = os.path.expanduser(fn)
         if os.path.isfile(fn): fullname = fn
         elif os.path.isdir(fn):
           file_list = util.find(fn, ["*.sm", "*.dwi"])
           if len(file_list) != 0: fullname = file_list[0]
-
-        if not fullname: # Still haven't found it...
-          folder, song = name.split("/")
-          song = self.all_songs.get(folder.lower(), {}).get(song.lower())
-          fullname = song.filename
-
         if fullname: break
+
+    if not fullname: # Still haven't found it...
+      folder, song = name.split("/")
+      song = self.all_songs.get(folder.lower(), {}).get(song.lower())
+      if song: fullname = song.filename
 
     if not fullname:
       error.ErrorMessage(self.screen, [name, "was not found."])
