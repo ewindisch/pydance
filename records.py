@@ -24,7 +24,7 @@ def add(filename, diff, game, rank, name):
   newfn = os.path.join(*filename.split(os.sep)[-3:])
   if (newfn, diff, game) in records:
     if rank > records[(newfn, diff, game)][0]:
-      records[(newfn, diff, game)][0] = (rank, name)
+      records[(newfn, diff, game)] = (rank, name)
       return True
     return False
   else:
