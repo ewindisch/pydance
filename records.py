@@ -13,6 +13,7 @@ except: records = {}
 def verify(recordkeys):
   for k in records.keys():
     if k[0] not in recordkeys: del(records[k])
+    if len(records[k]) < 3: records[k] += (1,)
   
 # records maps the title, mix, difficulty, and game onto a tuple
 # (rank, name) where rank is a floating point number from 0 to 1; and
@@ -26,13 +27,16 @@ def verify(recordkeys):
 
 def add(recordkey, diff, game, rank, name):
   game = games.VERSUS2SINGLE.get(game, game)
-  if (recordkey, diff, game) in records:
-    if rank > records[(recordkey, diff, game)][0]:
-      records[(recordkey, diff, game)] = (rank, name)
+  t = (recordkey, diff, game)
+  if t in records:
+    if rank > records[t][0]:
+      records[t] = (rank, name, records[t][2] + 1)
       return True
-    return False
+    else:
+      records[t] = records[t][:2] + (records[t][2] + 1,)
+      return False
   else:
-    records[(recordkey, diff, game)] = (rank, name)
+    records[t] = (rank, name, 1)
     return True
 
 def get(recordkey, diff, game):
