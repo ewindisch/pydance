@@ -18,6 +18,7 @@ legend:
 + A document on the KSF file format has been added in docs/.
 + The .dance specification has been updated with new modes and corrections.
 + A new centered display for single player modes.
++ "Tug" lifebar mode where your good steps make your opponents' life go down.
 + New theming code.
  + Load themes from .zip files if possible.
  + Brings back oldschool and bryan themes.

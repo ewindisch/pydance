@@ -42,7 +42,7 @@ def game_opt_driver(screen, config):
   start = pygame.time.get_ticks()
   menu =  [
     ("Lifebar", "lifebar", [(0, "Normal"), (1, "Oni"), (2, "Drop"),
-                            (3, "Suck")]),
+                            (3, "Suck"), (4, "Tug")]),
     ("Oni Life", "onilives", [(1, "1"), (3, "3"), (5, "5"), (9, "9")]),
     ("Difficulty", "diff", [(1, "Normal"), (1.5, "Easy"), (0.75, "Hard")]),
     ("Battle", "battle", [(0, "Off"), (1, "On")]),

@@ -1,4 +1,5 @@
 from constants import *
+from lifebars import *
 from util import toRealTime
 from gfxtheme import GFXTheme
 from judge import Judge
@@ -93,172 +94,6 @@ class ScoringDisp(pygame.sprite.Sprite):
                                     13))
       self.image.set_colorkey(self.image.get_at((0, 0)), RLEACCEL)
       self.oldscore = self.score
-
-class AbstractLifeBar(pygame.sprite.Sprite):
-  def __init__(self, playernum, maxlife, songconf, game):
-    pygame.sprite.Sprite.__init__(self)
-    self.oldlife = 0
-    self.failed = False
-    self.really_failed = False # The graphics have been updated with "FAILED".
-    self.maxlife = int(maxlife * songconf["diff"])
-    self.image = pygame.Surface((204, 28))
-    self.deltas = {}
-
-    self.failtext = fontfx.embfade("FAILED",28,3,(80,32),(224,32,32))
-    self.failtext.set_colorkey(self.failtext.get_at((0,0)), RLEACCEL)
-        
-    self.rect = self.image.get_rect()
-    self.rect.top = 30
-    self.rect.centerx = game.sprite_center + playernum * game.player_offset
-
-  def failed(self):
-    return self.failed
-
-  def update_life(self, rating):
-    if self.life >= 0 and self.deltas.has_key(rating):
-      self.oldlife = self.life
-      self.life += self.deltas[rating]
-      self.life = min(self.life, self.maxlife)
-
-  def broke_hold(self):
-    pass
-
-  def next_song(self):
-    pass
-      
-  def update(self, judges):
-    if self.life < 0:
-      self.failed = 1
-      judges.failed_out = True
-      self.life = -1
-    elif self.life > self.maxlife:
-      self.life = self.maxlife
-        
-    if self.failed: return False
-    
-    if self.life == self.oldlife: return False
-
-    self.oldlife = self.life
-
-    return True
-
-# Regular lifebar
-class LifeBarDisp(AbstractLifeBar):
-  def __init__(self, playernum, theme, songconf, game):
-    AbstractLifeBar.__init__(self, playernum, 100, songconf, game)
-    self.life = self.maxlife / 2
-    self.displayed_life = self.life
-
-    self.deltas = {"V": 0.8, "P": 0.5, "G": 0.0,
-                   "O": -1.0, "B": -4.0, "M": -8.0}
-    self.empty = theme.theme_data.get_image('lifebar-empty.png')
-    self.full = theme.theme_data.get_image('lifebar-full.png')
-
-  def update(self, judges):
-    if self.really_failed and self.displayed_life <= 0: return
-
-    if self.displayed_life < self.life:  self.displayed_life += 1
-    elif self.displayed_life > self.life:  self.displayed_life -= 1
-
-    if abs(self.displayed_life - self.life) < 1:
-      self.displayed_life = self.life
-
-    AbstractLifeBar.update(self, judges)
-
-    if self.displayed_life < 0: self.displayed_life = 0
-    self.image.blit(self.empty, (0, 0))
-    self.image.set_clip((0, 0, int(202 * self.displayed_life / 100.0), 28))
-    self.image.blit(self.full, (0, 0))
-    self.image.set_clip()
-
-    if self.failed:
-      self.really_failed = True
-      self.image.blit(self.failtext, (70, 2))
-
-# A lifebar that only goes down.
-class DropLifeBarDisp(LifeBarDisp):
-  def __init__(self, playernum, theme, songconf, game):
-    LifeBarDisp.__init__(self, playernum, theme, songconf, game)
-    self.life = self.maxlife
-    for k in self.deltas:
-      if self.deltas[k] > 0: self.deltas[k] = 0
-
-# Lifebar where doing too good also fails you
-class MiddleLifeBarDisp(AbstractLifeBar):
-  def __init__(self, playernum, theme, songconf, game):
-    AbstractLifeBar.__init__(self, playernum, 20, songconf, game)
-    self.life = 10.0
-    self.displayed_life = 10
-
-    self.deltas = {"V": 0.8, "P": 0.5, "G": 0.0,
-                       "O": -1.0, "B": -4.0, "M": -8.0}
-    self.image = pygame.surface.Surface([202, 28])
-    self.image.fill([255, 255, 255])
-
-  def update(self, judges):
-    if self.really_failed: return
-
-    if self.displayed_life < self.life:  self.displayed_life += 1
-    elif self.displayed_life > self.life:  self.displayed_life -= 1
-
-    if abs(self.displayed_life - self.life) < 1:
-      self.displayed_life = self.life
-
-    AbstractLifeBar.update(self, judges)
-
-    if self.life == self.maxlife:
-      self.failed = True
-      judges.failed_out = True
-
-    if self.displayed_life < 0: self.displayed_life = 0
-    pct = 1 - abs(self.life - 10) / 10.0
-    self.image.fill([int(255 * pct)] * 3)
-
-    if self.failed:
-      self.really_failed = True
-      self.image.blit(self.failtext, (70, 2))
-
-# Oni mode lifebar
-class OniLifeBarDisp(AbstractLifeBar):
-
-  lose_sound = pygame.mixer.Sound(os.path.join(sound_path, "loselife.ogg"))
-
-  def __init__(self, playernum, theme, songconf, game):
-    AbstractLifeBar.__init__(self, playernum, songconf["onilives"], songconf, game)
-
-    self.life = songconf["onilives"]
-
-    self.deltas = { "O": -1, "B": -1, "M": -1}
-    self.empty = theme.theme_data.get_image('oni-empty.png')
-    self.bar = theme.theme_data.get_image('oni-bar.png')
-
-    self.width = 192 / self.maxlife
-    self.bar = pygame.transform.scale(self.bar, (self.width, 20))
-        
-  def next_song(self):
-    self.life = min(self.maxlife, self.life + 1)
-
-  def broke_hold(self):
-    OniLifeBarDisp.lose_sound.play()
-    self.life -= 1
-       
-  def update_life(self, rating):
-    AbstractLifeBar.update_life(self, rating)
-    if self.deltas.get(rating, 0) < 0: OniLifeBarDisp.lose_sound.play()
-
-  def update(self, judges):
-    if self.really_failed: return
-
-    AbstractLifeBar.update(self, judges)
-    
-    self.image.blit(self.empty, (0, 0))
-    if self.life > 0:
-      for i in range(self.life):
-        self.image.blit(self.bar, (6 + self.width * i, 4))
-
-    if self.failed:
-      self.really_failed = True
-      self.image.blit(self.failtext, (70, 2) )
 
 class HoldJudgeDisp(pygame.sprite.Sprite):
   def __init__(self, pid, player, game):
@@ -816,7 +651,8 @@ class HoldArrowSprite(pygame.sprite.Sprite):
 
 class Player(object):
 
-  lifebars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp]
+  lifebars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp,
+              TugLifeBarDisp]
 
   def __init__(self, pid, config, songconf, game):
     self.theme = GFXTheme(mainconfig.get("%s-theme" % game.theme, "default"),
