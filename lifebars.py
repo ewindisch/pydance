@@ -82,7 +82,6 @@ class DropLifeBarDisp(LifeBarDisp):
       if self.deltas[k] > 0: self.deltas[k] = 0
 
 # Tug of war lifebar, increases your lifebar and decreases your opponents'.
-# The only way to lose life is to have it subtracted by your opponent.
 class TugLifeBarDisp(LifeBarDisp):
 
   active_bars = []
@@ -109,10 +108,10 @@ class TugLifeBarDisp(LifeBarDisp):
   def update(self, time):
     if self.gameover and self.displayed_life <= 0: return
 
-    if self.displayed_life < self.life:  self.displayed_life += 1
-    elif self.displayed_life > self.life:  self.displayed_life -= 1
+    if self.displayed_life < self.life:  self.displayed_life += 0.01
+    elif self.displayed_life > self.life:  self.displayed_life -= 0.01
 
-    if abs(self.displayed_life - self.life) < 1:
+    if abs(self.displayed_life - self.life) < 0.01:
       self.displayed_life = self.life
 
     AbstractLifeBar.update(self, time)
@@ -121,7 +120,8 @@ class TugLifeBarDisp(LifeBarDisp):
 
     if self.displayed_life < 0: self.displayed_life = 0
     self.image.blit(self.empty, (0, 0))
-    self.image.set_clip((0, 0, int(202 * self.displayed_life / 100.0), 28))
+    self.image.set_clip([0, 0,
+                         int(202 * self.displayed_life / self.maxlife), 28])
     self.image.blit(self.full, (0, 0))
     self.image.set_clip()
 
