@@ -420,7 +420,6 @@ class ArrowSprite(pygame.sprite.Sprite):
     self.battle = song.battle
     self.rect = arrow.image.get_rect()
     self.rect.left = arrow.left
-
     if mainconfig['assist'] and self.dir in ArrowSprite.samples:
       self.sample = ArrowSprite.samples[self.dir]
     else: self.sample = None
@@ -453,9 +452,11 @@ class ArrowSprite(pygame.sprite.Sprite):
     self.speed = player.speed
     self.accel = player.accel
 
-    self.goalcenterx = self.rect.centerx + 320 * player.pid
+    self.goalcenterx = self.rect.centerx
     if self.battle:
-      self.rect.centerx += 146
+      self.rect.left = 320 - int(player.game.width *
+                                 (len(player.game.dirs) / 2.0 -
+                                  player.game.dirs.index(self.dir)))
       self.origcenterx = self.centerx = self.rect.centerx
     else: self.centerx = self.rect.centerx = self.goalcenterx
 
@@ -509,8 +510,8 @@ class ArrowSprite(pygame.sprite.Sprite):
     if self.battle:
       pct = abs(float(self.rect.top - self.top) / self.diff)
       if pct > 4.5 / 6: self.rect.centerx = self.origcenterx
-      elif pct > 2.5 / 6:
-        p = (pct - 2.5/6) / (2.0 / 6)
+      elif pct > 2.0 / 6:
+        p = (pct - 2.0/6) / (2.5 / 6)
         self.rect.centerx = (1 - p) * self.goalcenterx + p * self.origcenterx
       else: self.rect.centerx = self.goalcenterx
     else: self.rect.centerx = self.centerx
@@ -542,7 +543,7 @@ class ArrowSprite(pygame.sprite.Sprite):
     if alp > 256: alp = 256
     elif alp < 0: alp = 0
 
-    if alp != self.image.get_alpha():  self.image.set_alpha(alp)
+    if alp != self.image.get_alpha(): self.image.set_alpha(alp)
 
 class HoldArrowSprite(pygame.sprite.Sprite):
   def __init__ (self, arrow, curtime, times, player, song):
@@ -599,9 +600,11 @@ class HoldArrowSprite(pygame.sprite.Sprite):
     self.speed = player.speed
     self.accel = player.accel
     
-    self.goalcenterx = self.rect.centerx + 320 * player.pid
+    self.goalcenterx = self.rect.centerx
     if self.battle:
-      self.rect.centerx += 146
+      self.rect.left = 320 - int(player.game.width *
+                                 (len(player.game.dirs) / 2.0 -
+                                  player.game.dirs.index(self.dir)))
       self.origcenterx = self.centerx = self.rect.centerx
     else: self.centerx = self.rect.centerx = self.goalcenterx
 
@@ -698,8 +701,8 @@ class HoldArrowSprite(pygame.sprite.Sprite):
     if self.battle:
       pct = abs(float(self.rect.top - self.top) / self.diff)
       if pct > 4.5 / 6: self.rect.centerx = self.origcenterx
-      elif pct > 2.5 / 6:
-        p = (pct - 2.5/6) / (2.0 / 6)
+      elif pct > 2.0 / 6:
+        p = (pct - 2.0/6) / (2.5 / 6)
         self.rect.centerx = (1 - p) * self.goalcenterx + p * self.origcenterx
       else: self.rect.centerx = self.goalcenterx
     else: self.rect.centerx = self.centerx
@@ -763,7 +766,6 @@ class Player:
     else: self.judge = None
 
   def set_song(self, song, diff, lyrics):
-    print "pid is", self.pid
     self.difficulty = diff
     self.score.set_text(diff)
 
@@ -892,6 +894,8 @@ class Player:
                                    steps.holdinfo[holdindex], self, song)
               newsprites.append(ns)
       arrows.add(newsprites)
+
+
 
   def csl_update(self, curtime, judge, holdtext):
     self.combos.update(curtime)

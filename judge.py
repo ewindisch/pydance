@@ -12,7 +12,6 @@ class Judge:
     self.actualtimes = {}
     self.tick = toRealTime(bpm, 0.16666666666666666)
     self.marvelous = self.perfect = self.great = self.ok = self.boo = self.miss = 0
-    self.recentsteps = [' ',' ',' ']
     self.early = self.late = self.ontime = 0
     self.bpm = bpm
     self.failed_out = False
@@ -142,11 +141,10 @@ class Judge:
         for i in range(n):
           self.miss += 1
           self.combos.broke(time)
-          self.recentsteps.insert(0, "MISS")
           self.lifebar.update_life("M")
+          self.display.judge(time, "MISS")
           self.dance_score -= 8
           self.arrow_count += 1
-          self.recentsteps.pop()
   
   def handle_arrow(self, key, etime):
     self.times = self.steps.keys()
@@ -155,7 +153,6 @@ class Judge:
     else:
       self.steps[etime] = key
       self.times = self.steps.keys()
-
 
   def grade(self):
     totalsteps = (self.marvelous + self.perfect + self.great + self.ok +
