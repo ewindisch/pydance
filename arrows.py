@@ -68,14 +68,14 @@ class AbstractArrow(pygame.sprite.Sprite):
   def calculate_beats(self, curtime, endtime, curbpm, lbct):
     beatsleft = 0
     if len(lbct) == 0:
-      onebeat = float(60.0/curbpm) # == float(60000.0/curbpm)/1000
+      onebeat = float(60.0/curbpm)
       doomtime = endtime - curtime
       beatsleft = float(doomtime / onebeat)
     else:
       oldbpmsub = [curtime, curbpm]
       for bpmsub in lbct:
         if bpmsub[0] <= endtime:
-          onefbeat = float(60.0/oldbpmsub[1]) # == float(60000.0/curbpm)/1000
+          onefbeat = float(60.0/oldbpmsub[1])
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           beatsleft += float(bpmdoom / onefbeat)
           oldbpmsub = bpmsub
@@ -87,6 +87,38 @@ class AbstractArrow(pygame.sprite.Sprite):
 
     return beatsleft
 
+  def update(self, curtime, curbpm, lbct):
+    if self.sample and curtime >= self.timef1:
+      self.sample.play()
+      self.sample = None
+
+  def scale_spin_battle(self, image, top, pct):
+    if self.scale != 1:
+      if self.scale < 1: # Shrink
+        new_size = [pct * i for i in self.get_size()]
+      else: # Grow
+        new_size = [i - pct * i for i in image.get_size()]
+      new_size = [max(0, i) for i in new_size]
+      image = pygame.transform.scale(image, new_size)
+    
+    if self.spin:
+      image = pygame.transform.rotate(image, top - 64)
+
+    rect = image.get_rect()
+    rect.top = top
+
+    if self.battle:
+      if pct > 4.5 / 6: rect.centerx = self.origcenterx
+      elif pct > 2.0 / 6:
+        p = (pct - 2.0/6) / (2.5 / 6)
+        rect.centerx = (1 - p) * self.goalcenterx + p * self.origcenterx
+      else: rect.centerx = self.goalcenterx
+    else: rect.centerx = self.centerx
+
+    image.set_colorkey(image.get_at([0, 0]))
+
+    return rect, image
+
   def kill(self):
     pygame.sprite.Sprite.kill(self)
     if self.sample: self.sample.play()
@@ -96,12 +128,9 @@ class ArrowSprite(AbstractArrow):
     AbstractArrow.__init__(self, arrow, curtime, player, song)
     self.hold = False
     self.endtime = endtime
-    self.life  = endtime - curtime
 
   def update(self, curtime, curbpm, lbct):
-    if self.sample and curtime >= self.endtime:
-      self.sample.play()
-      self.sample = None
+    AbstractArrow.update(self, curtime, curbpm, lbct)
 
     if curtime > self.endtime + (240.0/curbpm):
       self.kill()
@@ -126,33 +155,13 @@ class ArrowSprite(AbstractArrow):
 
     top = top - int(beatsleft / 8.0 * speed * self.diff)
 
-    self.cimage = self.baseimage
-    
-    self.rect = self.image.get_rect()
+    self.image = self.baseimage
+  
     if top > 480: top = 480
-    self.rect.top = top
 
-    pct = abs(float(self.rect.top - self.top) / self.diff)
+    pct = abs(float(top - self.top) / self.diff)
     
-    if self.battle:
-      if pct > 4.5 / 6: self.rect.centerx = self.origcenterx
-      elif pct > 2.0 / 6:
-        p = (pct - 2.0/6) / (2.5 / 6)
-        self.rect.centerx = (1 - p) * self.goalcenterx + p * self.origcenterx
-      else: self.rect.centerx = self.goalcenterx
-    else: self.rect.centerx = self.centerx
-
-    if self.scale != 1:
-      arrscale = int(pct * self.width)
-      arrscale = min(self.width, max(0, arrscale))
-      if self.scale > 1: # grow
-      	arrscale = self.width - arrscale
-      self.cimage = pygame.transform.scale(self.baseimage, (arrscale, arrscale))
-    
-    if self.spin:
-      self.image = pygame.transform.rotate(self.cimage,(self.rect.top-64)/self.spin)
-    else:
-      self.image = self.cimage
+    self.rect, self.image = self.scale_spin_battle(self.baseimage, top, pct)
 
     alp = 256
     if self.top < self.bottom: 
@@ -178,9 +187,7 @@ class HoldArrowSprite(AbstractArrow):
     self.hold = True
     self.timef2 = times[2]
     if self.timef2 is None: self.timef2 = self.timef1
-    self.life  = self.timef2 - curtime
 
-    self.r = 0
     self.broken = 1
     self.oimage = pygame.surface.Surface((self.width, self.width / 2))
     self.oimage.blit(self.image, (0, -self.width / 2))
@@ -191,19 +198,14 @@ class HoldArrowSprite(AbstractArrow):
     self.baseimage = pygame.surface.Surface((self.width, 1))
     self.baseimage.blit(self.image,(0,-self.width / 2 + 1))
 
-  def update(self,curtime,curbpm,lbct):
-    if self.sample and curtime >= self.timef1:
-      self.sample.play()
-      self.sample = None
+  def update(self, curtime, curbpm, lbct):
+    AbstractArrow.update(self, curtime, curbpm, lbct)
 
     if curtime > self.timef2:
       self.kill()
       return
 
     if curbpm < 0.0001: return # We're stopped
-
-    top = self.top
-    bottom = self.top
 
     beatsleft_top = self.calculate_beats(curtime, self.timef1, curbpm, lbct)
     beatsleft_bot = self.calculate_beats(curtime, self.timef2, curbpm, lbct)
@@ -220,56 +222,29 @@ class HoldArrowSprite(AbstractArrow):
       speed_bottom = p * self.speed / 2.0 + self.speed * (1 - p)
     else: speed_top = speed_bottom = self.speed
 
-    top = top - int(beatsleft_top / 8.0 * self.diff * speed_top)
-    bottom = bottom - int(beatsleft_bot / 8.0 * self.diff * speed_bottom)
+    top = self.top - int(beatsleft_top / 8.0 * self.diff * speed_top)
+    bottom = self.top - int(beatsleft_bot / 8.0 * self.diff * speed_bottom)
 
     if bottom > 480: bottom = 480
-
-    if self.top < self.bottom and bottom < 64:  bottom = 64
-    self.rect.bottom = bottom
- 
     if top > 480: top = 480
-    if self.top < self.bottom and top < 64: top = 64
 
-    if self.top < self.bottom: self.rect.top = top
-    else: self.rect.top = bottom
+    if self.top < self.bottom:
+      bottom = max(64, bottom)
+      top = max(64, top)
+
+    pct = abs(float(top - self.top) / self.diff)
     
     holdsize = abs(bottom - top)
-    if holdsize < 0:
-      holdsize = 0
-    self.cimage = pygame.surface.Surface((self.width, holdsize + self.width))
-    self.cimage.set_colorkey(self.cimage.get_at((0, 0)), RLEACCEL)
-    self.cimage.blit(pygame.transform.scale(self.baseimage,
-                                            (self.width, holdsize)),
+    if holdsize < 0: holdsize = 0
+    image = pygame.Surface((self.width, holdsize + 64))
+    image.blit(pygame.transform.scale(self.baseimage,
+                                      (self.width, holdsize)),
                      (0, self.width / 2))
-    self.cimage.blit(self.oimage2,(0,0))
-    self.cimage.blit(self.oimage,(0,holdsize + self.width / 2))
+    image.blit(self.oimage2,(0,0))
+    image.blit(self.oimage,(0, holdsize + self.width / 2))
 
-    self.rect = self.image.get_rect()
-    if top > 480: top = 480
-    self.rect.top = top
+    self.rect, self.image = self.scale_spin_battle(image, top, pct)
 
-    pct = abs(float(self.rect.top - self.top) / self.diff)
-    
-    if self.battle:
-      if pct > 4.5 / 6: self.rect.centerx = self.origcenterx
-      elif pct > 2.0 / 6:
-        p = (pct - 2.0/6) / (2.5 / 6)
-        self.rect.centerx = (1 - p) * self.goalcenterx + p * self.origcenterx
-      else: self.rect.centerx = self.goalcenterx
-    else: self.rect.centerx = self.centerx
-
-    if self.scale != 1:
-      arrscale = int(pct * self.width)
-      if self.scale > 1: # grow
-      	arrscale = self.width - arrscale
-      arrscale = min(self.width, max(0, arrscale))
-      self.cimage = pygame.transform.scale(self.baseimage, (arrscale, arrscale))
-    
-    if self.spin:
-      self.image = pygame.transform.rotate(self.cimage,(self.rect.top - 64)/self.spin)
-    else:
-      self.image = self.cimage
 
     alp = 256
     if self.top < self.bottom: 
