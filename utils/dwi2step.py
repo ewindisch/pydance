@@ -243,7 +243,7 @@ def convert(msdfile):
         delayidx = 0
         dc = ''
         stepmode = Beat('')
-        for i in ('BASIC','TRICK','MANIAC','ANOTHER'):
+        for i in ('BASIC','TRICK','MANIAC','ANOTHER','SMANIAC'):
           if fileline[8:8+len(i)] == i:
             try:
               difficulty = int(fileline[9+len(i):11+len(i)])
@@ -251,8 +251,10 @@ def convert(msdfile):
               difficulty = int(fileline[9+len(i)])
             fileline = fileline[10+len(i):] + "\n"
 
-            if i == 'ANOTHER': # this is a trick.
+            if i == 'ANOTHER': # this is trick.
               i = 'TRICK'
+            if i == 'SMANIAC': # this is oni.
+              i = 'ONI'
 
             print "\ndifficulty SINGLE %s, %s feet. reading steps.." % (i, difficulty)
             dance = Dance(i, difficulty)
