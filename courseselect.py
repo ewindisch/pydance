@@ -9,6 +9,7 @@ import grades
 import dance
 import random
 import util
+import options
 
 from constants import *
 from interface import *
@@ -53,14 +54,13 @@ SORT_NAMES = ["mix", "title"]
 NUM_SORTS = len(SORT_NAMES)
 
 CS_HELP = [
-  "Up / Down changes song selection",
-  "Left / Right changes difficulty setting",
-  "Confirm / Up Right opens a folder or starts a course",
-  "Escape / Up Left closes a folder or backs up",
-  "Select / Tab takes you to a random song",
-  "Start / Enter switches between screens",
-  "F11 toggles fullscreen - S changes the sort mode.",
-  "Enjoy pydance 0.9.0!",
+  "Up / Down: Change song selection",
+  "Left / Right: Change difficulty setting",
+  "Enter / Up Right: Open a folder or start a course",
+  "Escape / Up Left: Close a folder or exit",
+  "Tab / Select: Go to a random course",
+  "Start: Switch to Options screen",
+  "F11: Toggle fullscreen - S: Change the sort mode",
   ]
 
 def folder_name(name, type):
@@ -269,6 +269,12 @@ class CourseSelector(InterfaceWindow):
           self._courses.sort(SORTS[SORT_NAMES[mainconfig["sortmode"]]])
           self._index = self._courses.index(s)
           self._list.set_items([s.name for s in self._courses])
+
+      elif ev == ui.START:
+        options.OptionScreen(self._configs, self._config, self._screen)
+        self._screen.blit(self._bg, [0, 0])
+        self.update()
+        pygame.display.update()
 
       elif ev == ui.CONFIRM:
         if self._course.isfolder:

@@ -8,10 +8,10 @@ import ui
 import endless, courseselect, songselect
 
 GS_HELP = [
-  "Up / Down moves through list",
-  "Confirm / O / Up Right advances your choice",
-  "Escape / X / Up Left backs up or exits",
-  "F11 toggles fullscreen",
+  "Up / Down: Change game, mode, or interface",
+  "Enter / Up Right: Advance your choice",
+  "Escape / Up Left: Back up or exit",
+  "F11: Toggles fullscreen",
   "Enjoy pydance 0.9.0!",
   ]
 
