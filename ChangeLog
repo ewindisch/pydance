@@ -18,6 +18,7 @@ legend:
 * Some more speed optimizations for slower processors.
 * Some DWI parser fixes for bad files.
 * 'usepsyco' option (on by default) to try and load the Psyco JIT compiler.
+- 'oldschool' and 'bryan' were removed (temporarily, maybe).
 
 0.7.3
 * Skipped, because the Linux Game Tome called 0.7.2 0.7.3 by mistake.

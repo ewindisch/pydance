@@ -164,9 +164,6 @@ pydance.cfg
           This is like stickycombo, but for judgings (good, marvelous,
           and so on), rather than your combo.
 
-   totaljudgings [num] (default 1)
-          This many judgings will be displayed on the screen at a time.
-
   Sound Options
 
    djtheme [themename]
@@ -234,18 +231,33 @@ pydance.cfg
           equipment, this can be used to make pydance communicate with a
           strobe lighting system.
 
+   usemad 1|0
+          Try to use the MAD MP3 decoding library, which is able to
+          decode MP3 audio (SDL's MP3 decoding library, SMPEG, is unable
+          to do this). This only works on a small subset of UNIX systems
+          (this does not include Mac OS X), and requires the pyao and
+          pymad modules to be installed.
+
+   usepsyco 1|0
+          Try to use the Psyco optimizing compiler for Python
+          ([1]http://psyco.sf.net). This is on by default, and can give
+          30-50% speed gains on slower systems. However, it also uses
+          substantially more memory (which is usually not a problem,
+          since pydance's code memory footprint is small relative to its
+          song data). Psyco is currently only available for IA32 systems.
+
                                   Using a Mat
 
-   The recommended adapter for pydance is the [1]EMSUSB2 from Level Six.
+   The recommended adapter for pydance is the [2]EMSUSB2 from Level Six.
    pydance easily supports two player with it, and it works on all
    operating systems. Also known to work is the parallel port adapter
-   that comes with [2]BNS pads. Any other 6 axis, 12 button or 4 axis, 16
+   that comes with [3]BNS pads. Any other 6 axis, 12 button or 4 axis, 16
    button joysticks that behave like those two adapters will also work.
 
 GNU/Linux
 
    For parallel adapters, you can use the ddrmat.o driver available at
-   [3]http://icculus.org/pyddr/get.php (which is a modified gamecon.o
+   [4]http://icculus.org/pyddr/get.php (which is a modified gamecon.o
    from the 2.4 kernel). Once compiled, just run insmod ddrmat gc=0,7
    (where 7 is the IRQ of your parallel port, which is probably 7). Note
    that your lp (parallel printer) module cannot be loaded at the same
@@ -270,7 +282,7 @@ Windows
 
 Other
 
-   As long as [4]Pygame supports your OS's joysticks, pydance will too.
+   As long as [5]Pygame supports your OS's joysticks, pydance will too.
    pydance specifically is looking for 4 axis 16 button, or 6 axis 12
    button joysticks (and also the 32 button EMSUSB2).
 
@@ -294,7 +306,7 @@ findbpm
                                       FAQ
 
    The FAQ is available online at
-   [5]http://www.icculus.org/pyddr/faq.php. Please read it before
+   [6]http://www.icculus.org/pyddr/faq.php. Please read it before
    contacting the developers.
 
                                    Contacts
@@ -306,26 +318,27 @@ Email
 
    The primary email address is the pyddr-discuss mailing list on
    icculus.org. To subscribe, email
-   [6]pyddr-discuss-subscribe@icculus.org. You can then send email to
-   [7]pyddr-discuss@icculus.org to talk about pydance. If you want to see
-   about having pydance at a convention or show, contact [8]Brendan
+   [7]pyddr-discuss-subscribe@icculus.org. You can then send email to
+   [8]pyddr-discuss@icculus.org to talk about pydance. If you want to see
+   about having pydance at a convention or show, contact [9]Brendan
    Becker <tgz@orotech.net>, or show up on the IRC channel.
 
 IRC
 
    If you need a bit more real-time help than email offers, pydance has
-   an IRC channel on the [9]Freenode IRC network. Surprisingly, the
+   an IRC channel on the [10]Freenode IRC network. Surprisingly, the
    channel is named #pyddr. The main developers are often in the channel
    as P2E (Brendan), piman (Joe), and DShadow (John).
 
 References
 
-   1. http://levelsix.com/products/pc/EMSUSB2.shtml
-   2. http://www.buynshop.com/
-   3. http://icculus.org/pyddr/get.php
-   4. http://www.pygame.org/
-   5. http://www.icculus.org/pyddr/faq.php
-   6. mailto:pyddr-discuss-subscribe@icculus.org
-   7. mailto:pyddr-discuss@icculus.org
-   8. mailto:tgz@orotech.net
-   9. http://www.freenode.net/
+   1. http://psyco.sf.net/
+   2. http://levelsix.com/products/pc/EMSUSB2.shtml
+   3. http://www.buynshop.com/
+   4. http://icculus.org/pyddr/get.php
+   5. http://www.pygame.org/
+   6. http://www.icculus.org/pyddr/faq.php
+   7. mailto:pyddr-discuss-subscribe@icculus.org
+   8. mailto:pyddr-discuss@icculus.org
+   9. mailto:tgz@orotech.net
+  10. http://www.freenode.net/
