@@ -3140,14 +3140,13 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
   #dgroup = RenderLayered()
 
   if song.moviefile != ' ':
-    backmovie = BGmovie(os.path.join(songdir,song.moviefile))
+    backmovie = BGmovie(song.moviefile)
     backmovie.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
   else:
     backmovie = BGmovie(None)
     
   if song.bgfile != ' ':
-    backimage = BGimage(os.path.join(songdir,song.bgfile))
-    bifn = os.path.join(songdir,song.bgfile)
+    backimage = BGimage(song.bgfile)
   else:
     try:
       bifn = song.fooblah[:-5] + '-bg.png'
