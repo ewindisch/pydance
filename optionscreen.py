@@ -118,7 +118,7 @@ class OptionScreen:
       item = OptionScreen.menu[i]
       name, opt, values = item
       text = FONTS[32].render(name, 1, color)
-      blankimage.blit(text, (10, 70 + 40 * i))
+      blankimage.blit(text, (10, 70 + 35 * i))
       width = 480 / (len(values) + 1)
       for k in range(len(values)):
         color = None
@@ -130,7 +130,27 @@ class OptionScreen:
         if not color: color = colors.WHITE
 
         text = FONTS[32].render(values[k][1], 1, color)
-        blankimage.blit(text, (100 + width * k, 70 + 40 * i))
+        blankimage.blit(text, (100 + width * k, 70 + 35 * i))
+
+    faketext = " / ".join([str(i+1) for i in range(len(self.current))])
+    faketext = "Players: " + faketext
+    textimage = pygame.surface.Surface(FONTS[16].size(faketext))
+    textimage.set_colorkey(textimage.get_at((0, 0)))
+    text = FONTS[16].render("Players: ", 1, colors.WHITE)
+    textimage.blit(text, (0, 0))
+    xpos = text.get_width()
+    for i in range(len(self.current)):
+      text = FONTS[16].render(str(i+1), 1, OptionScreen.player_colors[i])
+      textimage.blit(text, (xpos, 0))
+      xpos += text.get_width()
+      if i != len(self.current) - 1:
+        text = FONTS[16].render(" / ", 1, colors.WHITE)
+        textimage.blit(text, (xpos, 0))
+        xpos += text.get_width()
+
+    r = textimage.get_rect()
+    r.center = (blankimage.get_rect().centerx, 450)
+    blankimage.blit(textimage, r)
 
     screen.blit(self.baseimage, (0, 0))
     screen.blit(blankimage, rect)
