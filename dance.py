@@ -315,7 +315,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
     if mainconfig['autofail']:
       songFailed = True
       for plr in players:
-        if plr.lifebar.failed == 0:
+        if not plr.lifebar.gameover:
           songFailed = False
           break
       if songFailed:
