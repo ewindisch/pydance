@@ -293,6 +293,7 @@ class ComboDisp(pygame.sprite.Sprite):
     if steptimediff < 0.36 or self.sticky:
       self.drawcount = xcombo
       self.drawsize = min(int(steptimediff*50), len(self.words)-1)
+      if self.drawsize < 0: self.drawsize = 0
     else:
       self.drawcount = 0
     if self.drawcount >= self.lowcombo:
@@ -1015,7 +1016,8 @@ def dance(song, players, prevscr):
 
   if song.movie != None:
     backmovie = BGmovie(song.movie)
-    backmovie.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
+    background.fill(colors.BLACK)
+#    backmovie.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
   else:
     backmovie = BGmovie(None)
     
@@ -1089,8 +1091,6 @@ def dance(song, players, prevscr):
   grptext.zin()
 
   tgroup.add((songtext, grptext))
-
-  screenshot=0
 
   song.init()
 
@@ -1234,15 +1234,12 @@ def dance(song, players, prevscr):
     song.lyricdisplay.update(curtime)
 
     for plr in players: plr.combo_update(curtime)
-    
-    backimage.update()
-    
+        
     if backmovie.filename:
       backmovie.update(curtime)
       if backmovie.changed or (fpstext.fpsavg > 30):
         backmovie.resetchange()
-        background.fill(colors.BLACK)
-        screen.blit(background.image,(0,0))
+#        screen.blit(background.image,(0,0))
         screen.blit(backmovie.image,(0,0))
 
     songtext.update()
@@ -1262,7 +1259,6 @@ def dance(song, players, prevscr):
     rectlist.extend( tgroup.draw(screen))
     rectlist.extend( lgroup.draw(screen))
 
-    
     if not backmovie.filename: pygame.display.update(rectlist)
     else: pygame.display.update()
 

@@ -134,10 +134,3 @@ class BGimage(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.top = 0
     self.rect.left = 0
-    self.needsupdate = 0
-
-  def update(self):
-    if self.needsupdate:
-      self.rect = self.image.get_rect()
-      self.rect.top = 0
-      self.rect.left = 0
