@@ -872,6 +872,7 @@ class SongItem(object):
   defaults = { "valid": 1,
                "mix": "No Mix",
                "title": "Untitled",
+               "subtitle": "",
                "artist": "Unknown",
                "endat": 0.0,
                "preview": (45.0, 10.0),
@@ -902,13 +903,12 @@ class SongItem(object):
         self.info[k] = self.info[k].decode("ascii", "ignore")
 
     # Default values
-    for k in ("subtitle", "background", "banner",
+    for k in ("background", "banner",
               "revision", "md5sum", "movie", "cdtitle"):
       self.info.setdefault(k, None)
 
     for k in SongItem.defaults:
       self.info.setdefault(k, SongItem.defaults[k])
-      if self.info[k] == "": self.info[k] = "Unknown"
 
     for k in ("filename",):
       if self.info[k] and not os.path.isfile(self.info[k]):
