@@ -171,7 +171,7 @@ class ListBox(pygame.sprite.Sprite):
                     range(self._h / 2, self._h * self._count, self._h)):
       idx = (self._idx + i) % len(self._items)
       t = fontfx.shadow(self._items[idx], self._font, 1, self._color,
-                        [c / 4 for c in self._color])
+                        [c / 8 for c in self._color])
       r = t.get_rect()
       r.centery = y
       r.left = 5
