@@ -82,7 +82,7 @@ class Menu:
 
   bgimage = None
   click_sound = pygame.mixer.Sound(os.path.join(sound_path, "clicked.ogg"))
-  click_sound.set_volume(0.35)
+  click_sound.set_volume(0.45)
   move_sound = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
   back_sound = pygame.mixer.Sound(os.path.join(sound_path, "back.ogg"))
 
