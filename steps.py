@@ -50,7 +50,7 @@ class SongEvent:
 # Step objects, made from SongItem objects
 
 class Steps:
-  def __init__(self, song, difficulty, player, lyrics, playmode):
+  def __init__(self, song, difficulty, player, pid, lyrics, playmode):
     self.playmode = playmode
     self.difficulty = difficulty
     self.feet = song.difficulty[playmode][difficulty]
@@ -97,7 +97,7 @@ class Steps:
     self.nevent_idx = 0
 
     song_steps = song.steps[playmode][difficulty]
-    if playmode in games.COUPLE: song_steps = song_steps[player.pid]
+    if playmode in games.COUPLE: song_steps = song_steps[pid]
 
     for words in song_steps:
 

@@ -31,10 +31,8 @@ class GFXTheme:
       print "Error: Cannot load graphics theme '%s'." % name
       sys.exit(1)
 
-    self.load()
-
-  def load(self):
-    self.arrows = ArrowSet(self.path, self.game, self.pid)
+  def arrows(self, pid):
+    return ArrowSet(self.path, self.game, pid)
 
   def toparrows(self, bpm, ypos, pid):
     arrs = {}
@@ -51,7 +49,7 @@ class ArrowSet:
   def __init__ (self, path, game, pid):
     arrows = {}
     for dir in game.dirs:
-      left = game.left_off(pid) + game.width * game.dirs.index(dir)
+      left = game.left_off(pid) + game.width * game.dirs.index(dir) + pid * game.player_offset
       for cnum in range(4):
         if cnum == 3: color = 1
         else: color = cnum
@@ -91,7 +89,7 @@ class TopArrow(pygame.sprite.Sprite):
       self.rect.top = self.ypos
       self.rect.left = game.left_off(pid) + (game.dirs.index(direction) *
                                              game.width)
-      self.rect.left += 320 * pid
+      self.rect.left += game.player_offset * pid
 
   def stepped(self, modifier, time):
     if modifier:    self.adder = 4

@@ -193,8 +193,7 @@ def play(screen, playlist, configs, songconf, playmode):
     songdata = steps.SongData(current_song, songconf)
 
     for pid in range(len(players)):
-      players[pid].set_song(current_song, diff[pid], songdata.lyricdisplay,
-                            playmode)
+      players[pid].set_song(current_song, diff[pid], songdata.lyricdisplay)
 
     print "Playing", songfn
     print songdata.title, "by", songdata.artist
@@ -234,8 +233,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
   background.fill(colors.BLACK)
 
   ready_go_time = 100
-  for player in players:
-    ready_go_time = min(player.steps.ready, ready_go_time)
+  for player in players: ready_go_time = min(player.ready, ready_go_time)
   rgs = ReadyGoSprite(ready_go_time)
   if ready_go: tgroup.add(rgs)
 
@@ -355,7 +353,9 @@ def dance(screen, song, players, prevscr, ready_go, game):
     if ev[1] == E_QUIT: return False
   
     for ev in key:
-      pid = ev[0]
+      if game.double: pid = ev[0] / 2
+      else: pid = ev[0]
+      
       if pid < len(players): players[pid].handle_key(ev, curtime)
 
     rectlist = []
@@ -396,7 +396,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
       tgroup.clear(screen,background)
       for plr in players: plr.clear_sprites(screen, background)
 
-    if ((curtime > players[0].steps.length - 1) and
+    if ((curtime > players[0].length - 1) and
         (songtext.zdir == 0) and (songtext.zoom > 0)):
       songtext.zout()
       grptext.zout()

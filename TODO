@@ -7,6 +7,7 @@ UI Fixes & Improvements
  - Menu and song select theming (including new songselect.pys)
  - Make quitting from the menus more difficult (make esc not exit last menu)
  - Less ugly grading screen (bar chart, etc)
+ - Commas in score display
 
 Code Refactors & Cleanups
  - Judge refactor (for pluggable grading algorithms)

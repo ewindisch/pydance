@@ -26,11 +26,16 @@ class GameType:
 
     # The spacing between each field's edge; therefore, the width of
     # each player's field as well.
-    self.player_offset = 640 / self.players
+    if self.double: self.player_offset = 640 / (2 * self.players)
+    else: self.player_offset = 640 / self.players
 
     # The offset to start drawing the arrows at, centered within the field
     # (Unless the mode isdoubled - see left_offset(self,pid) below.
-    self.left_offset = (640 / self.players - self.width * len(self.dirs)) / 2
+    if self.double:
+      self.left_offset = (640 / (2 * self.players) -
+                          self.width * len(self.dirs)) / 2
+    else:
+      self.left_offset = (640 / self.players - self.width * len(self.dirs)) / 2
 
     # The center of the playfield, for non-arrow sprites (score, lifebar, etc)
     self.sprite_center = 320 / self.players
@@ -53,3 +58,5 @@ GAMES = {
 
 COUPLE = [mode for mode in GAMES if GAMES[mode].couple]
 DOUBLE = [mode for mode in GAMES if GAMES[mode].double]
+
+for game in GAMES: GAMES[game].name = game

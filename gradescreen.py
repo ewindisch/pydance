@@ -149,8 +149,8 @@ class GradingScreen:
 
       # Score
       for j in range(4):
-        gradetext = fontfx.shadefade(str(judge.score), 28, j,
-                                     (FONTS[28].size(str(judge.score))[0]+8,32), (fc,fc,fc))
+        gradetext = fontfx.shadefade(str(judge.score.score), 28, j,
+                                     (FONTS[28].size(str(judge.score.score))[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()
         graderect.top = 412-j
