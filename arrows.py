@@ -1,4 +1,4 @@
-import os, pygame
+import os, random, pygame
 
 from constants import *
 
@@ -12,7 +12,7 @@ class AbstractArrow(pygame.sprite.Sprite):
 
   def __init__(self, arrow, curtime, player, song):
     pygame.sprite.Sprite.__init__(self)
-    
+
     self.dir = arrow.dir
 
     # NB - Making a new surface, then blitting the image in place, is 20%
@@ -29,8 +29,8 @@ class AbstractArrow(pygame.sprite.Sprite):
     else: self.sample = None
 
     if player.scrollstyle == 2:
-      self.top = 236
-      self.bottom = random.choice((748, -276))
+      self.top = 240 - player.game.width / 2
+      self.bottom = random.choice([748, -276])
       if self.top < self.bottom:
         self.suddenzone = 480 - int(64.0 * player.sudden)
         self.hiddenzone = 236 + int(64.0 * player.hidden)
@@ -38,10 +38,10 @@ class AbstractArrow(pygame.sprite.Sprite):
         self.suddenzone = int(64.0 * player.sudden) 
         self.hiddenzone = 236 - int(64.0 * player.hidden)
     elif player.scrollstyle == 1:
-      self.top = 384
+      self.top = 352
       self.bottom = -128
       self.suddenzone = int(64.0 * player.sudden)
-      self.hiddenzone = 384 - int(64.0 * player.hidden)
+      self.hiddenzone = 352 - int(64.0 * player.hidden)
     else:
       self.top = 64
       self.bottom = 576
@@ -68,22 +68,22 @@ class AbstractArrow(pygame.sprite.Sprite):
   def calculate_beats(self, curtime, endtime, curbpm, lbct):
     beatsleft = 0
     if len(lbct) == 0:
-      onebeat = float(60.0/curbpm)
+      onebeat = 60.0 / curbpm
       doomtime = endtime - curtime
-      beatsleft = float(doomtime / onebeat)
+      beatsleft = doomtime / onebeat
     else:
       oldbpmsub = [curtime, curbpm]
       for bpmsub in lbct:
         if bpmsub[0] <= endtime:
-          onefbeat = float(60.0/oldbpmsub[1])
+          onefbeat = 60.0 / oldbpmsub[1]
           bpmdoom = bpmsub[0] - oldbpmsub[0]
-          beatsleft += float(bpmdoom / onefbeat)
+          beatsleft += bpmdoom / onefbeat
           oldbpmsub = bpmsub
         else: break
 
-      onefbeat = float(60000.0/oldbpmsub[1])/1000
+      onefbeat = 60.0 / oldbpmsub[1]
       bpmdoom = endtime - oldbpmsub[0]
-      beatsleft += float(bpmdoom / onefbeat)
+      beatsleft += bpmdoom / onefbeat
 
     return beatsleft
 
@@ -95,7 +95,7 @@ class AbstractArrow(pygame.sprite.Sprite):
   def scale_spin_battle(self, image, top, pct):
     if self.scale != 1:
       if self.scale < 1: # Shrink
-        new_size = [pct * i for i in self.get_size()]
+        new_size = [pct * i for i in self.image.get_size()]
       else: # Grow
         new_size = [i - pct * i for i in image.get_size()]
       new_size = [max(0, i) for i in new_size]
@@ -115,7 +115,8 @@ class AbstractArrow(pygame.sprite.Sprite):
       else: rect.centerx = self.goalcenterx
     else: rect.centerx = self.centerx
 
-    image.set_colorkey(image.get_at([0, 0]))
+    if image.get_size() != (0, 0):
+      image.set_colorkey(image.get_at([0, 0]))
 
     return rect, image
 
@@ -160,7 +161,7 @@ class ArrowSprite(AbstractArrow):
     if top > 480: top = 480
 
     pct = abs(float(top - self.top) / self.diff)
-    
+
     self.rect, self.image = self.scale_spin_battle(self.baseimage, top, pct)
 
     alp = 256
@@ -225,8 +226,12 @@ class HoldArrowSprite(AbstractArrow):
       speed_bottom = p * self.speed / 2.0 + self.speed * (1 - p)
     else: speed_top = speed_bottom = self.speed
 
-    top = self.top - int(beatsleft_top / 8.0 * self.diff * speed_top)
-    bottom = self.top - int(beatsleft_bot / 8.0 * self.diff * speed_bottom)
+    if self.bottom > self.top:
+      top = self.top - int(beatsleft_top / 8.0 * self.diff * speed_top)
+      bottom = self.top - int(beatsleft_bot / 8.0 * self.diff * speed_bottom)
+    else:
+      top = self.top - int(beatsleft_bot / 8.0 * self.diff * speed_top)
+      bottom = self.top - int(beatsleft_top / 8.0 * self.diff * speed_bottom)
 
     if bottom > 480: bottom = 480
     if top > 480: top = 480

@@ -196,8 +196,10 @@ class Player(object):
 
     self.__dict__.update(config)
 
-    if self.scrollstyle == 2: self.top = 236
-    elif self.scrollstyle == 1: self.top = 384
+    self.game = game
+
+    if self.scrollstyle == 2: self.top = 240 - game.width / 2
+    elif self.scrollstyle == 1: self.top = 352
     else: self.top = 64
     
     self.score = scores.scores[songconf["scoring"]](pid, "NONE", game)
@@ -208,8 +210,6 @@ class Player(object):
     self.judging_disp = JudgingDisp(self.pid, game)
     self.stats = stats.Stats()
     self.announcer = Announcer(mainconfig["djtheme"])
-
-    self.game = game
 
     self.listeners = [self.combos, self.score, self.grade, self.lifebar,
                       self.judging_disp, self.stats, self.announcer]
