@@ -30,7 +30,9 @@ class Judge(object):
   def munch(self, anotherjudge):
     self.grade.munch(anotherjudge.grade)
 
-    self.stats = anotherjudge.stats
+    if anotherjudge.failed: self.failed = True
+
+    for k, v in anotherjudge.stats.items(): self.stats[k] += v
 
     self.badholds += anotherjudge.badholds
     self.holdsub += anotherjudge.holdsub
