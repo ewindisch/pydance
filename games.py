@@ -72,8 +72,8 @@ GAMES = {
 
   "3PANEL": GameType(players = 1, dirs = "kdz", theme = "3p"),
   "3VERSUS": GameType(players = 2, dirs = "kdz", theme = "3p"),
-  "3COUPLE": GameType(players = 2, couple = True, dirs = "kuz", theme = "3p"),
-  "3DOUBLE": GameType(players = 1, double = True, dirs = "kuz", theme = "3p"),
+  "3COUPLE": GameType(players = 2, couple = True, dirs = "kdz", theme = "3p"),
+  "3DOUBLE": GameType(players = 1, double = True, dirs = "kdz", theme = "3p"),
 
   "5PANEL": GameType(players = 1, dirs = "wkczg", width = 56, theme = "5p"),
   "5VERSUS": GameType(players = 2, dirs = "wkczg", width = 56, theme = "5p"),
