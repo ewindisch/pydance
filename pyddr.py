@@ -2719,7 +2719,7 @@ def main():
   difWrap = 2*len(DIFFICULTIES)
 
   if totalsongs < 1:
-    print "You don't have any songs, and you need one. Go here: http://clickass.org/~tgz/pyddr/"
+    print "You don't have any songs, and you need one. Go here: http://icculus.org/pyddr/"
     sys.exit()
 
 
@@ -3839,8 +3839,8 @@ def dance(song,players,difficulty):
       bifn = song.fooblah[:-5] + '-bg.png'
       backimage = BGimage(bifn)
     except pygame.error:
-      bifn = 'bg.png'
-      backimage = BGimage('bg.png')
+      bifn = os.path.join('images', 'bg.png')
+      backimage = BGimage(os.path.join('images', 'bg.png'))
 
   if mainconfig['showbackground'] > 0:
     if song.moviefile == ' ':
