@@ -2353,7 +2353,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
         for ev in nevents:
           #print "future event: %r"%ev
           if ev.extra == 'CHBPM' and plr.pid == 0:
-            plr.song.lastbpmchangetimeappend([ev.when,ev.bpm])
+            plr.song.lastbpmchangetime.append([ev.when,ev.bpm])
             print [ev.when,ev.bpm], "was added to the bpm changelist"
           
           if ev.feet:
