@@ -278,6 +278,6 @@ class HoldArrowSprite(AbstractArrow):
     if self.broken: f = 0.5
     elif self._broken_at != -1:
       p = (curtime - self._broken_at) / judge.ok_time
-      f = 1.0 * (1 - p) + 0.5 * p
+      f = 1.0 * (1 - p) + 0.33 * p
     else: f = 1
     self.set_alpha(curtime, beatsleft_bot, top, f)

@@ -163,6 +163,20 @@ def max_size(string, max_width, max_size):
     if f.size(string)[0] < max_width: return f
   return pygame.font.Font(None, 6)
 
+# Replace as much of the middle of the string with "..." as is necessary
+# to fit it into width.
+def render_outer(string, width, font):
+  s = string
+  if font.size(string)[0] <= width: return string
+  center = len(string) / 2
+  remove = 0
+  while font.size(s)[0] > width:
+    remove += 1
+    left = center + (-remove)/2
+    right = center + remove/2
+    s = string[:left] + "..." + string[right:]
+  return s
+  
 class zztext(pygame.sprite.Sprite):
     def __init__(self, text, x, y):
       pygame.sprite.Sprite.__init__(self)

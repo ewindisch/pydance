@@ -288,6 +288,7 @@ class ListBox(pygame.sprite.Sprite):
     self._count = count
     self._w = width
     self._color = color
+    self._font = font
     self._topleft = topleft
     self.set_items([""])
     self._needs_update = True
@@ -298,8 +299,8 @@ class ListBox(pygame.sprite.Sprite):
     self._items = []
 
     for i in items:
-      f = fontfx.max_size(i, self._w - 5, 28)
-      img = fontfx.shadow(i, f, 1, self._color, c2)
+      txt = fontfx.render_outer(i, self._w - 7, self._font)
+      img = fontfx.shadow(txt, self._font, 1, self._color, c2)
       self._items.append(img)
     self._needs_update = True
 
@@ -458,8 +459,8 @@ class MainWindow(object):
 
     self._random_songs = [s for s in self._songs if s.info["valid"]]
 
-    self._list = ListBox(pygame.font.Font(None, 28),
-                         [255, 255, 255], 26, 16, 220, [410, 56])
+    self._list = ListBox(pygame.font.Font(None, 26),
+                         [255, 255, 255], 26, 16, 220, [408, 56])
     if len(self._songs) > 60 and mainconfig["folders"]:
       self._create_folders()
       name = SORT_NAMES[mainconfig["sortmode"]]
@@ -508,7 +509,7 @@ class MainWindow(object):
     self._sprites.add(HelpText(SS_HELP, [255, 255, 255], [0, 0, 0],
                                pygame.font.Font(None, 22), [206, 20]))
 
-    self._title = TextDisplay(30, [218, 28], [415, 27])
+    self._title = TextDisplay(30, [210, 28], [414, 27])
     self._sprites.add(self._title)
     self._screen.blit(self._bg, [0, 0])
     pygame.display.update()
