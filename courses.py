@@ -19,6 +19,29 @@ import ui
 
 NO_BANNER = pygame.image.load(os.path.join(image_path, "no-banner.png"))
 
+difficulty_colors = { "BEGINNER": colors.color["white"],
+                      "LIGHT": colors.color["orange"],
+                      "EASY": colors.color["orange"],
+                      "BASIC": colors.color["orange"],
+                      "STANDARD": colors.color["red"],
+                      "STANDER": colors.color["red"], # Shit you not, 3 people.
+                      "TRICK": colors.color["red"],
+                      "MEDIUM": colors.color["red"],
+                      "DOUBLE": colors.color["red"],
+                      "ANOTHER": colors.color["red"],
+                      "PARA": colors.color["red"], # This seems to be random
+                      "NORMAL": colors.color["red"],
+                      "MANIAC": colors.color["green"],
+                      "HARD": colors.color["green"],
+                      "HEAVY": colors.color["green"],
+                      "HARDCORE": colors.color["purple"],
+                      "SMANIAC": colors.color["purple"],
+                      "S-MANIAC": colors.color["purple"], # Very common typo
+                      "CHALLENGE": colors.color["purple"],
+                      "CRAZY": colors.color["purple"],
+                      "EXPERT": colors.color["purple"]
+                      }
+
 class CRSFile(object):
   # Map modifier names to internal pydance names.
   modifier_map = { "0.5x" : ("speed", 0.5),
@@ -183,7 +206,6 @@ class CRSFile(object):
 
     return (fullname, [diff] * len(self.player_configs))
 
-
 class CourseSelector(object):
   def __init__(self, songitems, courses, screen, gametype):
 
@@ -225,6 +247,9 @@ class CourseSelector(object):
         self.course_idx = (self.course_idx - 1) % len(self.courses)
       elif ev[1] == ui.RIGHT:
         self.course_idx = (self.course_idx + 1) % len(self.courses)
+      elif ev[1] == ui.FULLSCREEN:
+        mainconfig["fullscreen"] ^= 1
+        pygame.display.toggle_fullscreen()
 
       self.render(screen)
       clock.tick(30)
@@ -244,7 +269,7 @@ class CourseSelector(object):
     course = self.courses[self.course_idx]
     img = course.image
     r = img.get_rect()
-    r.center = [320, 240]
+    r.center = [320, 160]
     screen.blit(img, r)
     txt = FONTS[48].render(course.name, True, colors.WHITE)
     r = txt.get_rect()
@@ -254,4 +279,30 @@ class CourseSelector(object):
     r = txt.get_rect()
     r.center = [320, 50]
     screen.blit(txt, r)
+
+    s = min(280 / len(course.songs), 24)
+    font = pygame.font.Font(None, s)
+
+    for i in range(len(course.songs)):
+      if "*" in course.songs[i][0]:
+        t1 = font.render("???????? - ", True, colors.WHITE)
+      else:
+        parts = course.songs[i][0].split("/")
+        t1 = font.render(parts[-1] + " - ", True, colors.WHITE)
+
+      if "." in course.songs[i][1]:
+        t2 = font.render("????", True, colors.WHITE)
+      else:
+        t2 = font.render(course.songs[i][1], True,
+                          difficulty_colors.get(course.songs[i][1],
+                                                colors.WHITE))
+
+      r1 = t1.get_rect()
+      r2 = t2.get_rect()
+      r1.top = r2.top = 200 + font.get_linesize() * i
+      r1.left = 320 - (t1.get_width() + t2.get_width()) / 2
+      r2.right = 320 + (t1.get_width() + t2.get_width()) / 2
+      screen.blit(t1, r1)
+      screen.blit(t2, r2)
+
     pygame.display.update()
