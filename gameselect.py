@@ -16,7 +16,7 @@ GS_HELP = [
   ]
 
 GAMES = ["4 panel", "5 panel", "6 panel", "8 panel", "9 panel",
-         "Parapara", "DMX", "3 panel"]
+         "Parapara", "DMX", "EZ2", "EZ2 Real", "3 panel"]
 TYPES = ["Single", "Versus", "Double", "Couple"]
 SS = ["Normal", "Nonstop", "Endless"]
 
@@ -55,6 +55,8 @@ IMAGES = {
     "8 panel": "select-8p.png",
     "9 panel": "select-9p.png",
     "Parapara": "select-para.png",
+    "EZ2 Real": "select-ez2real.png",
+    "EZ2": "select-ez2.png",
     "DMX": "select-dmx.png",
     "Single": (lambda x: x),
     "Versus": make_versus,
@@ -108,7 +110,17 @@ MODES = {
   ("DMX", "Versus"): "DMXVERSUS",
   ("DMX", "Couple"): "DMXCOUPLE",
   ("DMX", "Double"): "DMXDOUBLE",
-  }
+
+  ("EZ2", "Single"): "EZ2SINGLE",
+  ("EZ2", "Versus"): "EZ2VERSUS",
+  ("EZ2", "Couple"): "EZ2COUPLE",
+  ("EZ2", "Double"): "EZ2DOUBLE",
+
+  ("EZ2 Real", "Single"): "EZ2REAL",
+  ("EZ2 Real", "Versus"): "REALVERSUS",
+  ("EZ2 Real", "Couple"): "REALCOUPLE",
+  ("EZ2 Real", "Double"): "REALDOUBLE",
+}
 
 DESCRIPTIONS = {
   "4 panel": "The standard up, down, left and right arrows (like Dance Dance Revolution)",
@@ -119,6 +131,9 @@ DESCRIPTIONS = {
   "9 panel": "Everything! (like Pop'n'Stage)",
   "Parapara": "Wave your arms (or feet) around",
   "DMX": "Crazy kung-fu action (like Dance ManiaX / Freaks). Use left, up left, up right, and right.",
+
+  "EZ2": "Three panels, two sensors, using left and right.",
+  "EZ2 Real": "Three panels and four sensors.",
 
   "Single": "Play by yourself.",
   "Versus": "Challenge an opponent to the same steps.",

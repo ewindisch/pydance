@@ -105,6 +105,28 @@ GAMES = {
   "9DOUBLE": GameType(players = 1, dirs = "wlkdcuzrg", width = 32,
                       double = True, theme = "9ps"),
 
+  "EZ2SINGLE": GameType(players = 1, dirs = "kldrz", width = 56,
+                        theme = "ez2", theme_default = "ez2",
+                        dirmap = {"w":"l", "g":"r"}),
+  "EZ2VERSUS": GameType(players = 2, dirs = "kldrz", width = 56,
+                        theme = "ez2",  theme_default = "ez2",
+                        dirmap = {"w":"l", "g":"r"}),
+  "EZ2COUPLE": GameType(players = 2, dirs = "kldrz", width = 56,
+                        theme = "ez2", theme_default = "ez2", couple = True,
+                        dirmap = {"w":"l", "g":"r"}),
+  "EZ2DOUBLE": GameType(players = 1, dirs = "kldrz", width = 56,
+                        theme = "ez2", theme_default = "ez2", double = True,
+                        dirmap = {"w":"l", "g":"r"}),
+
+  "EZ2REAL": GameType(players = 1, dirs = "klwdgrz", width = 56,
+                        theme = "ez2", theme_default = "ez2"),
+  "REALVERSUS": GameType(players = 2, dirs = "klwdgrz", width = 56,
+                        theme = "ez2", theme_default = "ez2"),
+  "REALCOUPLE": GameType(players = 2, dirs = "klwdgrz", width = 56,
+                        theme = "ez2", theme_default = "ez2", couple = True),
+  "REALDOUBLE": GameType(players = 1, dirs = "klwdgrz", width = 56,
+                        theme = "ez2", theme_default = "ez2", double = True),
+
   "PARAPARA": GameType(players = 1, dirs = "lkuzr", width = 48,
                        theme = "para"),
   "PARAVERSUS": GameType(players = 2, dirs = "lkuzr", width = 48,
@@ -145,6 +167,8 @@ VERSUS2SINGLE = {
   "9VERSUS": "9PANEL",
   "PARAVERSUS": "PARAPARA",
   "DMXVERSUS": "DMX",
+  "EZ2VERSUS": "EZ2SINGLE",
+  "REALVERSUS": "EZ2REAL",
 }
 
 for game in GAMES: GAMES[game].name = game

@@ -593,9 +593,14 @@ class SMFile(MSDFile):
   gametypes = { "dance-single": "SINGLE", "dance-double": "DOUBLE",
                 "dance-couple": "COUPLE", "dance-solo": "6PANEL",
                 "pump-single": "5PANEL", "pump-couple": "5COUPLE",
-                "pump-double": "5DOUBLE", "para-single": "PARAPARA" }
+                "pump-double": "5DOUBLE", "para-single": "PARAPARA",
+                "ez2-single-hard": "EZ2SINGLE", "ez2-real": "EZ2REAL",
+                "ez2-single": "EZ2SINGLE", "ez2-double": "EZ2DOUBLE",
+                }
   notecount = { "SINGLE": 4, "DOUBLE": 8, "COUPLE": 8, "PARAPARA": 5,
-                "5PANEL": 5, "6PANEL": 6, "5COUPLE": 10, "5DOUBLE": 10 }
+                "5PANEL": 5, "6PANEL": 6, "5COUPLE": 10, "5DOUBLE": 10,
+                "EZ2SINGLE": 5, "EZ2REAL": 7, "EZ2DOUBLE": 10,
+                }
 
   step = [0, 1, 3, 1]
 
@@ -654,6 +659,7 @@ class SMFile(MSDFile):
             self.difficulty[game] = {}
             self.steps[game] = {}
           if parts[2] == "": parts[2] = parts[3]
+          if parts[1] == "ez2-single-hard": parts[2] = "HARD: " + parts[2]
           if parts[2][-2] == "_": # This is a KSF-style difficulty
             parts[2] = parts[2][:-2]
           self.difficulty[game][parts[2].upper()] = int(parts[4])
@@ -872,17 +878,6 @@ class SongItem(object):
                "revision": "1970.01.01",
                "gap": 0 }
 
-  # A table of equivalencies between step sets; if the value doesn't
-  # exist, it should be made the same as the key.
-  equivs = { "SINGLE": "VERSUS",
-             "3PANEL": "3VERSUS",
-             "5PANEL": "5VERSUS",
-             "6PANEL": "6VERSUS",
-             "8PANEL": "8VERSUS",
-             "9PANEL": "9VERSUS",
-             "PARAPARA": "PARAVERSUS",
-             }
-  
   def __init__(self, filename, need_steps = True):
     song = None
     for pair in SongItem.formats:
@@ -938,10 +933,10 @@ class SongItem(object):
 
     if self.info["mix"] == "Unknown": self.info["mix"] = "No Mix"
 
-    for k, v in SongItem.equivs.items():
-      if k in self.difficulty and v not in self.difficulty:
-        self.difficulty[v] = self.difficulty[k]
-        self.steps[v] = self.steps[k]
+    for k, v in games.VERSUS2SINGLE.items():
+      if v in self.difficulty and k not in self.difficulty:
+        self.difficulty[k] = self.difficulty[v]
+        self.steps[k] = self.steps[v]
 
     if mainconfig["autogen"]:
       # Fill in non-defined game modes, if possible.
