@@ -153,8 +153,25 @@ class FolderDisplay:
         break
 
     else:
-      self.banner = NO_BANNER
-      self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
+      if self.type == "mix":
+        for dir in mainconfig["songdir"].split(":"):
+          dir = os.path.expanduser(dir)
+          filename = os.path.join(dir, self.name, "banner.png")
+          if os.path.exists(filename):
+            banner = pygame.image.load(filename).convert()
+            if banner.get_rect().size[0] != banner.get_rect().size[1]:
+              self.banner = pygame.transform.scale(banner, BANNER_SIZE)
+            else:
+              banner.set_colorkey(banner.get_at((0,0)), RLEACCEL)
+              self.banner = pygame.transform.rotate(banner, -45)
+              self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
+            break
+        else:
+          self.banner = NO_BANNER
+          self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
+      else:
+        self.banner = NO_BANNER
+        self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
 
   def render(self):
     if self.banner == None:

@@ -19,7 +19,7 @@ def find (path, patterns):
         matches.extend(find(filepath, patterns))
       else:
         for pattern in patterns:
-          if fnmatch.fnmatch(filepath, pattern):
+          if fnmatch.fnmatch(filepath.lower(), pattern):
             matches.append(filepath)
             break
   return matches
