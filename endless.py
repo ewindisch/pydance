@@ -1,6 +1,6 @@
 # Support for endless song playing!
 
-import random, copy, colors, error, optionscreen, dance, util
+import random, copy, colors, error, dance, util
 from pygame.mixer import music
 from constants import *
 
@@ -117,9 +117,7 @@ class Endless(object):
 
       # Start game
       if ev[1] == ui.START:
-
-        if optionscreen.player_opt_driver(screen, self.player_configs):
-          dance.play(screen, FakePlaylist(songitems, self.constraints,
+        dance.play(screen, FakePlaylist(songitems, self.constraints,
                                   screen, gametype),
                      self.player_configs, self.game_config, gametype)
 
@@ -127,9 +125,6 @@ class Endless(object):
         music.play(4, 0.0)
 
         ui.ui.clear()
-
-      elif ev[1] == ui.SELECT:
-        optionscreen.game_opt_driver(screen, self.game_config)
 
       # Ignore unknown events
       elif ev[0] >= len(self.constraints): pass

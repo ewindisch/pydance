@@ -5,7 +5,7 @@ from interface import *
 from pygame.font import Font
 
 import ui
-import newss, endless, courseselect
+import endless, courseselect, songselect
 
 GS_HELP = [
   "Up / Down moves through list",
@@ -36,7 +36,7 @@ IMAGES = {
 SELECTORS = {
   "Endless": endless.Endless,
   "Nonstop": courseselect.CourseSelector,
-  "Normal": newss.SongSelect,
+  "Normal": songselect.SongSelect,
   }
 
 MODES = {
