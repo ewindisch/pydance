@@ -18,7 +18,7 @@ elif os.name == "posix":
   elif os.environ.has_key("HOME"):
     osname = "posix"
 else:
-  print "Your platform (%s) is not supported by pyDDR. We're going to call it"#'
+  print "Your platform is not supported by pyDDR. We're going to call it"#'
   print "POSIX, and then just let it crash."
 
 # Find out our real directory - resolve symlinks, etc
@@ -28,7 +28,12 @@ if osname == "posix":
 else: pyddr_path = os.path.split(os.path.abspath(pyddr_path))[0]
 sys.path.append(pyddr_path)
 
-# Configure the base local resource directory
+# Set up some bindings for common directories
+image_path = os.path.join(pyddr_path, "images")
+sound_path = os.path.join(pyddr_path, "sound")
+theme_path = os.path.join(pyddr_path, "themes")
+
+# Set a binding for our savable resource directory
 rc_path = None
 if osname == "posix":
   rc_path = os.path.join(os.environ["HOME"], ".pyddr")
@@ -43,6 +48,7 @@ lyric_colors = (('cyan', (0, 244, 244)),
                 ('aqua', (0, 244, 122)),
                 ('yellow', (244, 244, 122)),
                 ('white', (244, 244, 244)),
+                ('black', (0, 0, 0)),
                 ('red', (244, 122, 122)),
                 ('purple', (244, 122, 244)),
                 ('orange', (244, 170, 0)))
