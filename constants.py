@@ -76,7 +76,7 @@ mainconfig = config.Config({ # Wow we have a lot of options
   "sortmode": 0, "sortpersist": 1,
   "previewmusic": 1,
   "showbackground": 1, "bgbrightness": 127,
-  "sudden": 0, "hidden": 0, "little": 0, "assist": 0,
+  "sudden": 0, "hidden": 0, "little": 0, "assist": 0, "badknees": 0,
   "arrowcolors": 4, "fpsdisplay": 1, "showlyrics": 1,
   "showcombo": 1, "showtoparrows": 1,
   "killsongonfail": 0,
