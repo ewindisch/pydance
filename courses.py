@@ -1,9 +1,7 @@
 # Like DWI and SM files, CRS files are a variant of the MSD format.
 
 # NB - If you are reading this code and are a better programmer than me,
-# I apologize for this file. However, if you are reading this code and
-# only *think* you are a better programmer than me, I suggest you try
-# parsing CRS files quickly on your own, and then come back to this.
+# I apologize for this file.
 
 from constants import *
 from pygame.mixer import music
@@ -230,7 +228,7 @@ class CourseSelector(object):
     while ev[1] != ui.QUIT:
       ev = ui.ui.poll()
 
-      if ev[1] == ui.START:
+      if ev[1] in [ui.START, ui.CONFIRM]:
 
         if optionscreen.player_opt_driver(screen, self.player_configs):
           self.play(screen)

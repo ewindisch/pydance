@@ -181,7 +181,7 @@ class GradingScreen(object):
 
       i += idir
       ev = ui.ui.poll()
-      if (ev[1] == ui.QUIT) or (ev[1] == ui.START):
+      if ev[1] in [ui.CONFIRM, ui.START, ui.QUIT]:
         break
       elif ev[1] == ui.FULLSCREEN:
         pygame.display.toggle_fullscreen()

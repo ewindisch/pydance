@@ -50,7 +50,7 @@ class MenuItem(object):
       self.alpha = TRANSPARENT
       self.render()
     elif self.callbacks == None:
-      if ev == ui.START or ev == ui.RIGHT or ev == ui.LEFT:
+      if ev  in [ui.START, ui.RIGHT, ui.LEFT, ui.CONFIRM]:
         return ui.QUIT # This is a back button
       else: return ev # Shouldn't happen
     elif callable(self.callbacks.get(ev)):
@@ -115,7 +115,7 @@ class Menu(object):
     self.image.set_alpha(self.alpha)
 
   def activate(self, ev):
-    if ev == ui.START or ev == ui.RIGHT:
+    if ev  in [ui.START, ui.CONFIRM, ui.RIGHT]:
       self.display()
     elif ev == SELECT:
       self.rgb = colors.WHITE
@@ -177,7 +177,7 @@ class Menu(object):
 
       # Otherwise, if the event actually happened, pass it on to the button.
       elif ev != ui.PASS and ev != ui.QUIT:
-        if ev == ui.START: Menu.click_sound.play()
+        if ev in [ui.START, ui.CONFIRM]: Menu.click_sound.play()
         ev = self.items[curitem].activate(ev)
         ui.ui.clear()
         changed = True

@@ -107,25 +107,28 @@ def wrap_ctr(Obj, args):
 
 def do(screen, songdata):
 
-  onoff_opt = { ui.START: switch_onoff, menus.CREATE: get_onoff,
-                 ui.LEFT: off_onoff, ui.RIGHT: on_onoff }
-  offon_opt = { ui.START: switch_offon, menus.CREATE: get_offon,
-                 ui.LEFT: off_offon, ui.RIGHT: on_offon }
-  rotate_opt = { ui.START: switch_rotate,
+  onoff_opt = { ui.START: switch_onoff, ui.CONFIRM: switch_onoff,
+                menus.CREATE: get_onoff, ui.LEFT: off_onoff,
+                ui.RIGHT: on_onoff }
+  offon_opt = { ui.START: switch_offon, ui.START: switch_offon,
+	menus.CREATE: get_offon, ui.LEFT: off_offon, ui.RIGHT: on_offon }
+  rotate_opt = { ui.START: switch_rotate, ui.CONFIRM: switch_rotate,
                  ui.LEFT: switch_rotate_back,
                  ui.RIGHT: switch_rotate,
                  menus.CREATE: get_rotate }
   rotate_index_opt = { ui.START: switch_rotate_index,
+                       ui.CONFIRM: switch_rotate_index,
                        ui.LEFT: switch_rotate_index_back,
                        ui.RIGHT: switch_rotate_index,
                        menus.CREATE: get_rotate_index }
-  tuple_opt = { ui.START: switch_tuple,
+  tuple_opt = { ui.START: switch_tuple, ui.CONFIRM: switch_tuple,
                 ui.LEFT: switch_tuple_back,
                 ui.RIGHT: switch_tuple,
                 menus.CREATE: get_tuple }
 
 
-  m = (["Play Game", {ui.START: wrap_ctr}, (GameSelect, songdata)],
+  m = (["Play Game", {ui.START: wrap_ctr, ui.CONFIRM: wrap_ctr},
+	(GameSelect, songdata)],
        ("Game Options",
         ["Autofail", onoff_opt, ("autofail",)],
         ["Assist Mode", onoff_opt, ("assist",)],
@@ -174,7 +177,8 @@ def do(screen, songdata):
         ["Back", None, None]
         ),
        ("Interface Options",
-        ["Map Keys", {ui.START: wrap_ctr}, (pad.PadConfig, (screen,))],
+        ["Map Keys", {ui.START: wrap_ctr, ui.CONFIRM: wrap_ctr},
+         (pad.PadConfig, (screen,))],
         ["Save Input", onoff_opt, ('saveinput',)],
         ["Song Previews", onoff_opt, ('previewmusic',)],
         ["Folders", onoff_opt, ("folders",)],
