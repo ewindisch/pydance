@@ -135,7 +135,7 @@ def do(screen, songdata):
   themes = tuple(themes) # Python sucks Python sucks Python sucks
 
   m = (("Play Game",
-        ["Singles", {E_START: wrap_ctr}, (SongSelect, songdata + ("SINGLE",))],
+        ["Single", {E_START: wrap_ctr}, (SongSelect, songdata + ("SINGLE",))],
         ["Versus", {E_START: wrap_ctr}, (SongSelect, songdata + ("VERSUS",))],
         ["Couple", {E_START: wrap_ctr}, (SongSelect, songdata + ("COUPLE",))],
         ["Double", {E_START: wrap_ctr}, (SongSelect, songdata + ("DOUBLE",))],

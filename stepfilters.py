@@ -5,11 +5,7 @@
 
 import random, math
 
-BEATS = "xtufswqehon"
-
-BEAT_TIMES = { 'x': 0.25, 't': 0.5, 'u': 1.0/3.0, 'f': 2.0/3.0,
-               's': 1.0, 'w': 4.0/3.0, 'e': 2.0,
-               'q': 4.0, 'h': 8.0, 'o': 16.0, 'n': 1/12.0 }
+NOT_STEPS = ["D", "S", "L", "W", "B", "R"]
 
 # 0 - Normal
 # 1 - Mirror
@@ -37,14 +33,14 @@ def rotate(steps, opt, mode):
   else: mapping = None
 
   for s in steps:
-    if s[0] in BEATS:
+    if s[0] not in NOT_STEPS:
       if mapping != None:
         step = list(s[1:])
-        for j in range(len(step)): s[i][mapping[j] + 1] = step[j]
+        for j in range(len(step)): s[mapping[j] + 1] = step[j]
       else:
-        random_map = list(s[1:])
-        random.shuffle(random_map)
-        s[i][1:] = random_map
+        random_steps = list(s[1:])
+        random.shuffle(random_steps)
+        s[1:] = random_steps
 
 # Apply myriad additions/deletions to the step pattern
 def size(steps, opt):
@@ -55,14 +51,14 @@ def size(steps, opt):
 def little(steps, mod):
   beat = 0.0
   for s in steps:
-    if s[0] in BEATS:
+    if s[0] not in NOT_STEPS:
       if beat % mod != 0: s[1:] = [0] * (len(s) - 1)
-      beat += BEAT_TIMES[s[0]]
+      beat += s[0]
     elif s[0] == "D": beat += s[1]
 
 def remove_holds(steps, jump):
   for s in steps:
-    if s[0] in BEATS: s[1:] = [i & 1 for i in s[1:]]
+    if s[0] not in NOT_STEPS: s[1:] = [i & 1 for i in s[1:]]
 
 # Remove or add jumps:
 def jumps(steps, jump):
@@ -72,7 +68,7 @@ def jumps(steps, jump):
 def remove_jumps(steps):
   side = 0 # Alternate sides so e.g. LR alternates between L and R.
   for s in steps:
-    if s[0] in BEATS:
+    if s[0] not in NOT_STEPS:
       step = list(s[1:])
       if step.count(0) < len(step) - 1:
         if side == 1: step.reverse()
@@ -90,7 +86,7 @@ def wide(steps):
   beat = 0.0
   holds = []
   for s in steps:
-    if s[0] in BEATS:
+    if s[0] not in NOT_STEPS:
       step = list(s[1:])
 
       for i in range(len(step)):
@@ -115,5 +111,5 @@ def wide(steps):
       for i in range(len(step)):
         if step[i] & 2: holds.append(i)
 
-      beat += BEAT_TIMES[s[0]]
+      beat += s[0]
     elif s[0] == "D": beat += s[1]
