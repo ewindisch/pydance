@@ -369,14 +369,20 @@ class DWIFile(GenericFile):
     self.bpms = []
     self.freezes = []
 
+    lines = []
     f = open(filename)
-    tokens = "".join([self.strip_line(line) for line in f])
-    tokens = tokens.replace(";", "")
-    tokens = tokens.split("#")
+    for line in f:
+      if line.find("//") != -1:
+        line = line[:line.find("//")]
+      
+      line = line.strip()
+      if len(line) == 0: continue
+      elif line[0] == "#": lines.append(line[1:])
+      else: lines[-1] += line
 
-    for token in tokens:
-      if len(token) == 0: continue
-      parts = token.split(":")
+    for line in lines:
+      while line[-1] == ";": line = line[:-1] # Some lines have two ;s.
+      parts = line.split(":")
       if len(parts) > 3:
         parts[0] = DWIFile.game_map.get(parts[0], parts[0])
         parts[1] = DWIFile.diff_map.get(parts[1], parts[1])
@@ -427,11 +433,6 @@ class DWIFile(GenericFile):
     self.find_mixname()
     self.find_files_insanely()
     self.find_subtitle()
-
-# For this to be really useful we need better heuristics
-#    for key in ("title", "subtitle", "artist", "mix"):
-#      if self.info.has_key(key):
-#        self.info[key] = util.titlecase(self.info[key])
 
   def parse_steps(self, mode, diff, steps):
     if mode not in DWIFile.steps: return

@@ -6,7 +6,7 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
-0.7.3 - In My Pants
+0.7.4 - In My Pants
 + 6 panel ("solo") and 8 panel support.
 + Double (1 player, both sides) support.
  - 'totaljudgings' option no longer works (no one was using it anyway...)
@@ -16,6 +16,9 @@ legend:
  - azerty 2nd player start key changed to '+' on the numeric pad.
 * Some more speed optimizations for slower processors.
 * 'usepsyco' option (on by default) to try and load the Psyco JIT compiler.
+
+0.7.3
+* Skipped, because the Linux Game Tome called 0.7.2 0.7.3 by mistake.
 
 0.7.2 -	Dilaudid, how I love thee                               [2003.07.14]
 + Boost, brake, left, right, mirror, shuffle, and random ("supershuffle").
