@@ -4,8 +4,7 @@
 
 # 2003-03-30 Refactoring done by Stephen Thorne <stephen@thorne.id.au>
 
-import os, pygame, pygame.font, pygame.image, pygame.mixer, pygame.movie, time, sys
-from pygame.locals import *
+import os, time, sys
 
 VERSION = "0.52"
 

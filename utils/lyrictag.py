@@ -2,10 +2,7 @@
 # Rewritten version of a much hacked version of findbpm
 # This program adds lyrics to stepfiles or other files
 
-import sys
-import time
-import getopt
-import os
+import sys, time, getopt, os
 import pygame, pygame.font, pygame.image, pygame.mixer
 from pygame.locals import *
 

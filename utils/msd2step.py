@@ -3,8 +3,7 @@
 # msd2step - converts MSD files from other clones to STEP files.
 # this could peobably be done way better than I'm doing it, but..
 
-import os, pygame, pygame.font, pygame.image, pygame.mixer, pygame.movie, time, sys
-from pygame.locals import *
+import os, time, sys
 
 # so it's currently in one routine. shut up, I'm learning python =]
 def main():

@@ -2,9 +2,7 @@
 # Shrink the size of PyDDR step files
 # By Joe Wreschnig <piman@debian.org>
 
-import sys
-import re
-import getopt
+import sys, re, getopt
 
 VERSION = "0.9"
 
