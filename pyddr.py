@@ -3617,10 +3617,7 @@ def songSelect(songs,fooblah):
           pass
       except:
         pass
-#      pygame.display.flip()
-# free some RAM
 
-#      for n in songs: n.discardListText()
       biggerdifflist = []
       biggerdifflist.append(diffList[difficulty])
       if players == 2:
@@ -3649,17 +3646,16 @@ def songSelect(songs,fooblah):
        difficulty2=0 # And set to whatever the first one it has is.
     if dozoom:
       fontdisp=1
-    dz=dozoom*12
-    
-    #pygame.display.flip()    
+      dz = 0
+      
+    dz+=dozoom*16
+
     if fontdisp==1:
-      if dz>255: dz=255
+      if dz>255: 
+        dozoom = 0
+        dz=255
       for m in fEraseRects: dirtyRects.append(background.draw(screen,m,m))
       fEraseRects=[]
-      if (scrolloff<=2) and (scrolloff>=-2):
-        scrolloff = 0
-        fontdisp = 0
-        sod = -1
       screen.set_clip((0,0,640,388))
       clip=screen.get_clip()
       if lastidx!=songidx:
@@ -3675,7 +3671,8 @@ def songSelect(songs,fooblah):
             mra = 255
           spr.set_alpha(mra)
           spr.orig = 32+60*j
-          sprList.append(spr)
+          if j != 3:
+            sprList.append(spr)
       for spr in sprList:
         spr.rect.top = spr.orig+scrolloff+4
         spr.rect.left = 40
@@ -3684,16 +3681,33 @@ def songSelect(songs,fooblah):
           dirtyRects.append(ro)
           fEraseRects.append(ro)
       screen.set_clip((0,0,640,480))
+
+      currentSong.titleimage.set_alpha()
+      dirtyRects.append(currentSong.titleimage.draw(screen))
+
+    # currently selected song flasher thingy
+    spr = CloneSprite(songs[songidx].listimage)
+    mra = 192+(i/4)
+    if mra > 255:
+      mra = 255
+    spr.set_alpha(mra)
+    spr.rect = (40,212+scrolloff+4)
+    ro=spr.draw(screen)
+    if ro:
+      dirtyRects.append(ro)
+      fEraseRects.append(ro)
+    
+    if fontdisp==1:
+      if (scrolloff<=2) and (scrolloff>=-2):
+        scrolloff = 0
+        fontdisp = 0
+        sod = -1
       if sod > -1:
         sod += 1
       if scrolloff:
         scrolloff = scrolloff/sod 
       if sod == 2:
         sod = 0
-
-      currentSong.titleimage.set_alpha()
-
-      dirtyRects.append(currentSong.titleimage.draw(screen))
 
     i += idir
     if i < 64:
@@ -3720,7 +3734,7 @@ def songSelect(songs,fooblah):
     try:
       sortimg = TextSprite(size=20, bkgcolor=BLACK, text=string.upper(sortbytext))
       sortimg.rect.centerx = 320
-      sortimg.rect.top = 384
+      sortimg.rect.top = 388
       sortimg.set_alpha(192)
       eraseRects.append(sortimg.rect)
       dirtyRects.append(sortimg.draw(screen))
