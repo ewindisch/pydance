@@ -442,10 +442,10 @@ class SongSelect(object):
           self.scroll_out(self.index)
           OPEN_SOUND.play()
           if len(self.random_songs) != 0:
-            s = random.choose(self.random_songs)
+            s = random.choice(self.random_songs)
             if self.folders:
               self.set_up_songlist(s.folder[SORT_NAMES[mainconfig["sortmode"]]])
-              self.index = self.songs.index(s)
+            self.index = self.songs.index(s)
           else:
             error.ErrorMessage(screen, ["Although you have songs, they're all",
                                         "marked as invalid, which means a",
