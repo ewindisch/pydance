@@ -19,7 +19,7 @@ def sinkblur(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
   displayrect = displaysurface.get_rect()
   if amount*2 > textsize:
     amount = textsize / 2
-  for i in xrange(amount):
+  for i in range(amount):
     font = pygame.font.Font(None, textsize-(i*2))
     camt = amount-i
     r = trgb[0]/camt
@@ -37,7 +37,7 @@ def sinkblur(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
 def embfade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
   displaysurface = pygame.Surface(displaysize)
   font = pygame.font.Font(None, textsize)
-  for i in xrange(amount):
+  for i in range(amount):
     camt = i + 1
     r = trgb[0]/camt
     g = trgb[1]/camt
@@ -53,7 +53,7 @@ def embfade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
 def shadefade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
   displaysurface = pygame.Surface(displaysize)
   font = pygame.font.Font(None, textsize)
-  for i in xrange(amount):
+  for i in range(amount):
     camt = amount-i
     r = trgb[0]/camt
     g = trgb[1]/camt
