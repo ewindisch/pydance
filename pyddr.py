@@ -2616,6 +2616,24 @@ def update_screen_software(dirty=None):
     pygame.display.update(dirty)
 update_screen = update_screen_software
 
+def SetDisplayMode(mainconfig):
+  global screen
+  
+  try:
+    if int(mainconfig["vesacompat"]):
+      screen = pygame.display.set_mode((640, 480), 16)
+    
+    elif int(mainconfig["fullscreen"]):
+      if os.path.islink("/System/Library/CoreServices/WindowServer") : # Mac OS X hack
+        screen = pygame.display.set_mode((640, 480), FULLSCREEN, 16)
+      else:
+        screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF|FULLSCREEN, 16)
+    
+    else:
+      screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF, 16)
+  except:
+    print "Can't get a 16 bit display!" 
+    sys.exit()
 
 # so it's currently in one routine. shut up, I'm learning python =]
 def main():
@@ -2649,16 +2667,8 @@ def main():
     else:
       difficulty = ['BASIC']
 
-  try:
-    if int(mainconfig["vesacompat"]):
-      screen = pygame.display.set_mode((640, 480), 16)
-    elif int(mainconfig["fullscreen"]):
-      screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF|FULLSCREEN, 16)
-    else:
-      screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF, 16)
-  except:
-    print "Can't get a 16 bit display!" 
-    sys.exit()
+  SetDisplayMode(mainconfig)
+  
   pygame.display.set_caption('pyDDR')
   pygame.mouse.set_visible(0)
   eventManager = EventManager()
@@ -2709,6 +2719,7 @@ def main():
   if totalsongs < 1:
     print "You don't have any songs, and you need one. Go here: http://clickass.org/~tgz/pyddr/"
     sys.exit()
+
 
   text_fadeon(screen, font, "Prerendering....", (320, 240))
   print 'Prerendering'
@@ -3078,12 +3089,7 @@ def domenu(songs):
   # they got the Pope to declare rats fish, so they could eat them every
   # Friday?
 
-  if int(mainconfig["vesacompat"]):
-    screen = pygame.display.set_mode((640, 480), 16)
-  elif int(mainconfig["fullscreen"]):
-    screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF|FULLSCREEN, 16)
-  else:
-    screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF, 16)
+  SetDisplayMode(mainconfig)
 
   # Make structures appropriate for the menu
   def onoff_opt(name):
