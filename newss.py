@@ -351,7 +351,9 @@ class MainWindow(object):
       elif ev == ui.CONFIRM:
         if optionscreen.player_opt_driver(self._screen, self._configs):
           music.fadeout(500)
-          dance.play(self._screen, [(self._song.filename, self._diff_names)],
+          diffs = [self._song.diff_list[self._game][self._diffs[i]]
+                   for i in range(len(self._diffs))]
+          dance.play(self._screen, [(self._song.filename, diffs)],
                      self._configs, self._config, self._game)
           music.fadeout(500) # The just-played song
           ui.ui.empty()
