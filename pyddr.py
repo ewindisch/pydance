@@ -3149,6 +3149,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
         print "holding right plus start quits. pyDDR now exiting."
         sys.exit()
       elif (event.states[(i, E_START)] and event.states[(i, E_LEFT)]):
+        ev = (0, E_QUIT)
         break
       else:
         pass
