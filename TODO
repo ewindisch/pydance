@@ -106,6 +106,23 @@ A Comprehensive List of Features for pydance 1.2
    The MSD format is a lot like the DWI format I think. pyDDR had an
    old msd2step.py.
 
+* Finish KSF parser.
+   Specifically, do BPM changes. Though, KSF files thankfully are
+   becomming less popular.
+
+* vFolders?
+   (Pavel) piman: By the way, here is a feature idea: have a menu that
+           controls which songs are displayed on the list. E.g. "don't
+           display any songs that don't have steps with difficulty less
+           than 6", or something like that.
+
+   A good way to do this would be something like Evolution's vFolders
+   that let you search for arbitrary criteria. It would also fit okay
+   into the pydance UI ("New Folder", "Add Criteria"...) and current
+   song selector.
+
+   This would require arbitrary nesting of subfolders, maybe.
+
 * Song installer
    We should have a song package format that pydance should either be
    able to load directly, or have an install-dance-package.sh that
