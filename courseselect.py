@@ -154,7 +154,7 @@ class CourseDisplay(object):
         self.image.blit(t3, r3)
 
     if self.banner_fn and os.path.exists(self.banner_fn):
-      self.banner, self.clip = load_banner(self.banner_fn)
+      self.banner, self.clip = load_banner(self.banner_fn, False)
     else: self.banner = CourseDisplay.no_banner
 
 class FolderDisplay(object):
@@ -176,7 +176,7 @@ class FolderDisplay(object):
     for path in [rc_path, pydance_path]:
       filename = os.path.join(path, "banners", self._type, name+".png")
       if os.path.exists(filename):
-        self.banner, self.clip = load_banner(filename)
+        self.banner, self.clip = load_banner(filename, False)
         break
 
     else:
@@ -184,7 +184,7 @@ class FolderDisplay(object):
         for dir in mainconfig["coursedir"].split(os.pathsep):
           dir = os.path.expanduser(dir)
           fn = os.path.join(dir, self.name + ".png")
-          if os.path.exists(fn): self.banner, self.clip = load_banner(fn)
+          if os.path.exists(fn): self.banner, self.clip = load_banner(fn, False)
 
     if self.banner == None: self.banner = CourseDisplay.no_banner
 
