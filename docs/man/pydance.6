@@ -2,7 +2,21 @@
 .SH NAME
 pydance \- a dancing simulator game
 .SH SYNOPSIS
-\fBpydance\fR
+\fBpydance\fR [\fB\-\-filename \fIfilename \fR[ \fB\-\-mode\fI mode \fB\-\-difficulty\fI difficulty\fR ] ]
+.SH OPTIONS
+.IP \-\-help,\ \-h
+Display a brief summary of command line options.
+.IP \-\-version,\ \-v
+Display the version of pydance (and features found, e.g. Psyco).
+.IP \-\-filename\, \-f
+Load and play a single file, then quit. By default, this is in
+SINGLE (4 panel) mode, on BASIC difficulty.
+.IP \-\-mode,\ \-m
+Use a particular mode (e.g. VERSUS, 6PANEL, DMX). This only has an effect
+when you also use \fB\-\-filename\fR.
+.IP \-\-difficulty,\ \-d
+Use a particular difficulty (e.g. TRICK, SMANIAC). This only has an effect
+when you also use \fB\-\-filename\fR.
 .SH DESCRIPTION
 pydance is much like the popular arcade game "Dance Dance Revolution", in
 which you stand on a mat on the floor, with 4 buttons pointing forward,
@@ -40,16 +54,25 @@ with it.
 By default, pydance will look in these directories for your songs, step files,
 and other game data. You can configure this with the \fBsongdir\fR
 option in your pydance.cfg file.
-.PP
+.IP
 Note that for DWI files, you will need to put everything (the music file,
 lyric file, background, and banner) in its own separate directory, and
 that directory inside \fIanother\fR subdirectory in the \fIsongs\fR
 folder. This is a limitation of the DWI format; it uses its path name
 and files in the same directory, rather than specifying things in the
-file itself like \fB.dance\fR does.
+file itself like .dance files do.
+.IP /usr/share/games/pydance/courses,\ /usr/local/share/games/pydance/courses,\ ~/.pydance/courses
+Similar to above, but for course files. You can use \fBcoursedir\fR to
+override this.
 .IP /etc/pydance.cfg,\ ~/.pydance/pydance.cfg
 pydance configuration files. The settings in your local one override
 the system-wide settings.
+.IP ~/.pydance/records
+Your top scores for each song. This is a pickled Python file. It can be
+safely deleted to reset your scores.
+.IP ~/.pydance/input.cfg
+Your input settings. This is a pickled Python file. It can be safely
+deleted to reset your input configuration.
 .IP /usr/share/games/pydance
 Various data needed by pydance, such as background music and Python modules.
 .SH AUTHORS

@@ -4,7 +4,9 @@
 import os
 import sys
 import util
-import getopt
+import games
+import dance
+from getopt import getopt
 import pygame
 import colors
 import records
@@ -29,6 +31,28 @@ def set_display_mode(mainconfig):
     print "E: Can't get a 16 bit display!" 
     sys.exit(3)
   return screen
+
+def print_help():
+  print
+  print "Usage: %s [options]" % sys.argv[0]
+  print " -h, --help         display this help text and exit"
+  print " -v, --version      display the version and exit"
+  print " -f, --filename     load and play a step file"
+  print " -m, --mode         the mode to play the file in (default SINGLE)"
+  print " -d, --difficulty   the difficult to play the file (default BASIC)"
+  sys.exit()
+
+def print_version(): sys.exit()
+
+def play_and_quit(fn, mode, difficulty):
+  print "Entering debug (play-and-quit) mode."
+  screen = set_display_mode(mainconfig)  
+  pygame.display.set_caption("pydance " + VERSION)
+  pygame.mouse.set_visible(0)
+  pc = games.GAMES[mode].players
+  dance.play(screen, [(fn, [difficulty] * pc)],
+             [player_config] * pc, game_config, mode)
+  sys.exit()
 
 def load_files(screen, files, type, Ctr, args):
   if len(files) == 0: return []
@@ -74,7 +98,19 @@ def main():
       psyco.full()
     except ImportError: print "Psyco optimizing compiler not found."
 
-  # FIXME Debug mode needs to be added again. Or some command line options.
+  mode = "SINGLE"
+  difficulty = "BASIC"
+  test_file = None
+  for opt, arg in getopt(sys.argv[1:],
+                         "hvf:d:m:", ["help", "version", "filename=",
+                                      "difficulty=", "mode="])[0]:
+    if opt in ["-h", "--help"]: print_help()
+    elif opt in ["-v", "--version"]: print_version()
+    elif opt in ["-f", "--filename"]: test_file = arg
+    elif opt in ["-m", "--mode"]: mode = arg
+    elif opt in ["-d", "--difficulty"]: difficulty = arg
+
+  if test_file: play_and_quit(test_file, mode, difficulty)
 
   song_list = []
   course_list = []
