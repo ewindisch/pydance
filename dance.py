@@ -288,8 +288,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
     tgroup.add([fpstext, timewatch])
   else: fpstext = None
 
-  if mainconfig['showlyrics']:
-    lgroup.add(song.lyricdisplay.channels.values())
+  if mainconfig['showlyrics']: lgroup.add(song.lyricdisplay.channels())
 
   songtext = fontfx.zztext(song.title, 480,12)
   grptext = fontfx.zztext(song.artist, 160,12)
