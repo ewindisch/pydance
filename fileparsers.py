@@ -94,7 +94,7 @@ class StepFile:
       del(self.info["bg"])
 
     if not self.info.has_key("subtitle"):
-      for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
+      for pair in (("[", "]"), ("(", ")"), ("~", "~")):
         if pair[0] in self.info["title"] and pair[1] in self.info["title"]:
           l = self.info["title"].index(pair[0])
           r = self.info["title"].rindex(pair[1])
