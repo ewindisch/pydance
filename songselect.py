@@ -302,7 +302,7 @@ class SongSelect(object):
       self.player_configs.append(copy.copy(player_config))
       self.player_diff_names.append(diff_name)
 
-    event.set_repeat(500, 30)
+    pad.set_repeat(500, 30)
 
     self.diff_list = []
     self.song_list = []
@@ -380,7 +380,7 @@ class SongSelect(object):
         OPEN_SOUND.play()
         self.scroll_out(self.index)
         self.set_up_songlist(self.songs[self.index].name)
-        event.empty()
+        pad.empty()
         changed = True
 
       # Start the dancing!
@@ -395,7 +395,7 @@ class SongSelect(object):
           while ann.chan.get_busy(): pygame.time.wait(1)
         except: pass
 
-        event.set_repeat()
+        pad.set_repeat()
         if optionscreen.player_opt_driver(screen, self.player_configs):
           audio.fadeout(500)
 
@@ -406,11 +406,11 @@ class SongSelect(object):
 
           preview = SongPreview()
 
-          event.empty()
+          pad.empty()
           self.screen.blit(self.bg, (0, 0))
           pygame.display.flip()
 
-        event.set_repeat(500, 30)
+        pad.set_repeat(500, 30)
         changed = True
 
         # Reset the playlist
@@ -515,7 +515,7 @@ class SongSelect(object):
     audio.load(os.path.join(sound_path, "menu.ogg"))
     audio.set_volume(1.0)
     audio.play(4, 0.0)
-    event.set_repeat()
+    pad.set_repeat()
     player_config.update(self.player_configs[0]) # Save player 1's settings
 
   def render(self, changed):

@@ -214,7 +214,13 @@ class Pad(object):
       pygame.time.wait(delay)
     return ev
 
+  def empty(self):
+    ev = (0, E_QUIT)
+    while ev[1] != E_PASS: ev = self.poll()
+
   def write(self, fn):
     pickle.dump(self.events, file(fn, "w"))
+
+  def set_repeat(*args): pass
     
 pad = Pad()

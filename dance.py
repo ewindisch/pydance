@@ -342,11 +342,11 @@ def dance(screen, song, players, prevscr, ready_go, game):
       elif ev[1] == pad.SCREENSHOT:
         screenshot = 1
       elif ev[1] == pad.LEFT: key.append((ev[0], 'l'))
-      elif ev[1] == pad.MARK: key.append((ev[0], 'w'))
-      elif ev[1] == pad.UNMARK: key.append((ev[0], 'k'))
+      elif ev[1] == pad.DOWNLEFT: key.append((ev[0], 'w'))
+      elif ev[1] == pad.UPLEFT: key.append((ev[0], 'k'))
       elif ev[1] == pad.RIGHT: key.append((ev[0], 'r'))
-      elif ev[1] == pad.PGUP: key.append((ev[0], 'z'))
-      elif ev[1] == pad.PGDN: key.append((ev[0], 'g'))
+      elif ev[1] == pad.UPRIGHT: key.append((ev[0], 'z'))
+      elif ev[1] == pad.DOWNRIGHT: key.append((ev[0], 'g'))
       elif ev[1] == pad.UP: key.append((ev[0], 'u'))
       elif ev[1] == pad.DOWN: key.append((ev[0], 'd'))
       elif ev[1] == pad.CENTER: key.append((ev[0], 'c'))
