@@ -192,7 +192,7 @@ class Steps:
 # Player-indep data generated from SongItem.
 
 class SongData:
-  def __init__(self, song):
+  def __init__(self, song, config):
     if song.info["background"]: self.background = song.info["background"]
     else: self.background = os.path.join(image_path, "bg.png")
 
@@ -200,6 +200,8 @@ class SongData:
       self.__dict__[key] = song.info[key]
 
     self.crapout = 0
+
+    self.__dict__.update(config)
 
     clrs = [colors.color[c] for c in mainconfig["lyriccolor"].split("/")]
     clrs.reverse()

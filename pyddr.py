@@ -478,17 +478,17 @@ class ArrowSprite(CloneSprite):
     samples[d] = pygame.mixer.Sound(os.path.join(sound_path,
                                                  "assist-" + d + ".ogg"))
   
-  def __init__ (self, spr, curtime, endtime, player):
+  def __init__ (self, spr, curtime, endtime, player, song):
     CloneSprite.__init__(self, spr)
     self.endtime = endtime
     self.life  = endtime - curtime
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
+    self.battle = song.battle
 
     if mainconfig['assist']: self.sample = ArrowSprite.samples[self.dir]
     else: self.sample = None
 
-    self.pos = {}
     if player.scrollstyle == 2:
       self.top = 236
       self.bottom = random.choice((748, -276))
@@ -515,8 +515,12 @@ class ArrowSprite(CloneSprite):
     self.arrowspin = player.spin
     self.arrowscale = player.scale
     self.speed = player.speed
-    
-    self.centerx = self.rect.centerx + 320 * player.pid
+
+    self.goalcenterx = self.rect.centerx + 320 * player.pid
+    if self.battle:
+      self.rect.centerx += 146
+      self.origcenterx = self.centerx = self.rect.centerx
+    else: self.centerx = self.rect.centerx = self.goalcenterx
 
   def update (self, curtime, curbpm, lbct):
     if (self.sample) and (curtime >= self.endtime -0.0125):
@@ -526,9 +530,6 @@ class ArrowSprite(CloneSprite):
     if curtime > self.endtime + (240.0/curbpm): # == 0.004 * 60000 / curbpm
       self.kill()
       return
-
-    self.rect = self.image.get_rect()
-    self.rect.centerx = self.centerx
 
     top = self.top
     
@@ -554,11 +555,21 @@ class ArrowSprite(CloneSprite):
       bpmbeats = float(bpmdoom / onefbeat)
       top = top - int(bpmbeats*self.diff/8.0 * self.speed)
 
+    self.cimage = self.bimage
+    
+    self.rect = self.image.get_rect()
     if top > 480: top = 480
     self.rect.top = top
     
-    self.cimage = self.bimage
-    
+    if self.battle:
+      pct = abs(float(self.rect.top - self.top) / self.diff)
+      if pct > 4.5 / 6: self.rect.centerx = self.origcenterx
+      elif pct > 2.5 / 6:
+        p = (pct - 2.5/6) / (2.0 / 6)
+        self.rect.centerx = (1 - p) * self.goalcenterx + p * self.origcenterx
+      else: self.rect.centerx = self.goalcenterx
+    else: self.rect.centerx = self.centerx
+
     if self.arrowscale != 1:
       arrscale = int(float((self.rect.top-64)/416.0)*64)
       arrscale = min(64, max(0, arrscale))
@@ -589,13 +600,13 @@ class ArrowSprite(CloneSprite):
     if alp != self.image.get_alpha():  self.image.set_alpha(alp)
 
 class HoldArrowSprite(CloneSprite):
-  def __init__ (self, spr, curtime, times, player):
+  def __init__ (self, spr, curtime, times, player, song):
     CloneSprite.__init__(self, spr)
     self.timef1 = times[1]
     self.timef2 = times[2]
     self.timef = times[2]
     self.life  = times[2]-curtime
-    self.pos = {}
+    self.battle = song.battle
     if player.scrollstyle == 2:
       self.top = 236
       self.bottom = random.choice((748, -276))
@@ -639,8 +650,12 @@ class HoldArrowSprite(CloneSprite):
     self.arrowscale = player.scale
     self.speed = player.speed
     
-    self.centerx = self.rect.centerx + 320 * player.pid
-    
+    self.goalcenterx = self.rect.centerx + 320 * player.pid
+    if self.battle:
+      self.rect.centerx += 146
+      self.origcenterx = self.centerx = self.rect.centerx
+    else: self.centerx = self.rect.centerx = self.goalcenterx
+
   def update(self,curtime,curbpm,lbct):
     if (self.playedsound is None) and (curtime >= self.timef1 -0.0125):
       self.sample.play()
@@ -650,9 +665,6 @@ class HoldArrowSprite(CloneSprite):
       self.kill()
       return
       
-    self.rect = self.image.get_rect()
-    self.rect.centerx = self.centerx
-
     top = self.top
     bottom = self.top
 
@@ -718,6 +730,19 @@ class HoldArrowSprite(CloneSprite):
     self.cimage.blit( pygame.transform.scale(self.bimage, (64,holdsize)), (0,32) )
     self.cimage.blit(self.oimage2,(0,0))
     self.cimage.blit(self.oimage,(0,holdsize+32))
+
+    self.rect = self.image.get_rect()
+    if top > 480: top = 480
+    self.rect.top = top
+    
+    if self.battle:
+      pct = abs(float(self.rect.top - self.top) / self.diff)
+      if pct > 4.5 / 6: self.rect.centerx = self.origcenterx
+      elif pct > 2.5 / 6:
+        p = (pct - 2.5/6) / (2.0 / 6)
+        self.rect.centerx = (1 - p) * self.goalcenterx + p * self.origcenterx
+      else: self.rect.centerx = self.goalcenterx
+    else: self.rect.centerx = self.centerx
 
     if self.arrowscale != 1:
       arrscale = int(float((self.rect.top-64)/416.0)*64)
@@ -922,7 +947,7 @@ def blatantplug():
   sys.exit()    
 
 
-def playSequence(playlist, configs, playmode):
+def playSequence(playlist, configs, songconf, playmode):
   global screen
 
   numplayers = len(configs)
@@ -938,7 +963,7 @@ def playSequence(playlist, configs, playmode):
     current_song = fileparsers.SongItem(songfn)
     pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
-    songdata = steps.SongData(current_song)
+    songdata = steps.SongData(current_song, songconf)
 
     for pid in range(len(players)):
       players[pid].set_song(steps.Steps(current_song, diff[pid], players[pid],
@@ -1187,13 +1212,13 @@ def dance(song, players, prevscr, ready_go):
               if num & 1:
                 if not (num & 2):
                   ArrowSprite(plr.theme.arrows[dirstr].c,
-                              curtime, ev.when, plr).add(groups)
+                              curtime, ev.when, plr, song).add(groups)
 
               if num & 2:
                 holdindex = plr.steps.holdref.index((DIRECTIONS.index(dir),
                                                      ev.when))
                 HoldArrowSprite(plr.theme.arrows[dirstr].c, curtime,
-                                plr.steps.holdinfo[holdindex], plr).add(groups)
+                                plr.steps.holdinfo[holdindex], plr, song).add(groups)
 
     for plr in players:
       if len(plr.steps.lastbpmchangetime) > 0:

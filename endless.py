@@ -72,7 +72,7 @@ class FakePlaylist:
 class Endless:
   def __init__(self, songitems, screen, playSequence, gametype):
     self.player_configs = [copy.copy(player_config)]
-
+    self.game_config = copy.copy(game_config)
     songitems = [s for s in songitems if s.difficulty.has_key(gametype)]
     oldaf = mainconfig["autofail"]
     diffs = []
@@ -113,7 +113,7 @@ class Endless:
         if self.optionscreen(screen):
           playSequence(FakePlaylist(songitems, self.constraints,
                                     screen, gametype),
-                       self.player_configs, gametype)                     
+                       self.player_configs, self.game_config, gametype)
 
         audio.load(os.path.join(sound_path, "menu.ogg"))
         audio.play(4, 0.0)

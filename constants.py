@@ -93,6 +93,9 @@ player_config = {"spin": 0,
                  "colortype": 4,
                  "scrollstyle": 0 }
 
+game_config = {"battle": 0
+               }
+
 if osname == "posix":
   mainconfig.load("/etc/pyddr.cfg", True)
 elif osname == "macosx":

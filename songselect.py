@@ -180,6 +180,8 @@ class SongSelect:
       audio.load(os.path.join(sound_path, "menu.ogg"))
       audio.play(4, 0.0)
 
+    self.game_config = copy.copy(game_config)
+
     self.player_diffs = [0]
     self.player_configs = [copy.copy(player_config)]
     self.player_diff_names = [self.songs[self.index].song.diff_list[self.gametype][self.player_diffs[0]]]
@@ -308,13 +310,12 @@ class SongSelect:
           while ann.chan.get_busy(): pygame.time.wait(1)
         except: pass
 
-        if self.optionscreen():
+        if optionscreen.driver(screen, E_START, self.player_configs,
+                               "Song Select"):
           audio.fadeout(500)
 
-          # playSequence can probably derive the number of players from
-          # the length of the other lists
           playSequence(zip(self.song_list, self.diff_list),
-                       self.player_configs, gametype)
+                       self.player_configs, self.game_config, gametype)
 
           audio.fadeout(500) # This is the just-played song
 
@@ -354,7 +355,11 @@ class SongSelect:
         changed = True
 
       elif ev[1] == E_SELECT:
-        self.index = random.randint(0, self.numsongs - 1)
+        if optionscreen.driver(screen, E_SELECT, [self.game_config],
+                               "Song Select"):
+          self.index = random.randint(0, self.numsongs - 1)
+	changed = True
+        all_changed = True
 
       # Change sort modes - FIXME: terrible event name
       elif ev[1] == E_SCREENSHOT:
@@ -644,16 +649,3 @@ class SongSelect:
       self.helpimage.set_colorkey(self.helpimage.get_at((0,0)), RLEACCEL)
       self.helpimage.set_alpha(0)
       self.last_help_update = pygame.time.get_ticks()
-
-  def optionscreen(self):
-    ev = (0, E_QUIT)
-    start = pygame.time.get_ticks()
-
-    while (event.states[(0, E_START)] and
-           pygame.time.get_ticks() - start < 1500):
-      ev = event.poll()
-
-    if event.states[(0, E_START)]:
-      op = optionscreen.OptionScreen(self.player_configs, "Song Select")
-      return op.display(self.screen)
-    else: return True
