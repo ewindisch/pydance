@@ -7,10 +7,6 @@ from lyrics import Lyrics
 from util import toRealTime
 from constants import *
 
-BEATS = { 'x': 0.25, 't': 0.5, 'u': 1.0/3.0, 'f': 2.0/3.0,
-          's': 1.0, 'w': 4.0/3.0, 'e': 2.0,
-          'q': 4.0, 'h': 8.0, 'o': 16.0, 'n': 1/12.0 }
-
 # FIXME: This can probably be replaced by something smaller, like a tuple.
 class SongEvent(object):
   def __init__ (self, bpm, when=0.0, beat = 0, feet=None, next=None,
@@ -93,7 +89,7 @@ class Steps(object):
         self.ready = cur_time
         last_event_was_freeze = False
         coloring_mod = 0
-      elif words[0] in BEATS or isinstance(words[0], float):
+      elif isinstance(words[0], float):
         # Don't create arrow events with no arrows
         arrowcount = 0
         for i in words[1:]: arrowcount += int(i)
@@ -131,8 +127,7 @@ class Steps(object):
             if arrowadder & 1:
               self.totalarrows += 1
 
-        if words[0] in BEATS: beat = BEATS[words[0]]
-        else: beat = words[0]
+        beat = words[0]
 
         cur_time += toRealTime(cur_bpm, beat)
         cur_beat += beat
@@ -164,7 +159,7 @@ class Steps(object):
       elif words[0] == "L" and lyrics:
         lyrics.addlyric(cur_time - 0.4, words[1], words[2])
 
-    self.length = cur_time + toRealTime(cur_bpm, BEATS['o'])
+    self.length = cur_time + toRealTime(cur_bpm, 8.0)
 
     self.holdinfo = zip(holdlist, holdtimes, releasetimes)
     self.holdref = zip(holdlist, holdtimes)

@@ -122,6 +122,10 @@ class GenericFile(object):
 class DanceFile(GenericFile):
   WAITING,METADATA,DESCRIPTION,LYRICS,BACKGROUND,GAMETYPE,STEPS = range(7)
 
+  BEATS = { 'x': 0.25, 't': 0.5, 'u': 1.0/3.0, 'f': 2.0/3.0,
+            's': 1.0, 'w': 4.0/3.0, 'e': 2.0,
+            'q': 4.0, 'h': 8.0, 'o': 16.0, 'n': 1/12.0 }
+
   def __init__(self, filename, need_steps):
     GenericFile.__init__(self, filename, need_steps)
     self.comment = "#"
@@ -184,7 +188,8 @@ class DanceFile(GenericFile):
       if parts[0] in ("B", "W", "S", "D"):
         steps[0].append(float(parts[1]))
         steps[1].append(float(parts[1]))
-      elif parts[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x", "n", "u"):
+      elif parts[0] in DanceFile.BEATS:
+        steps = [[DanceFile.BEATS[parts[0]]], [DanceFile.BEATS[parts[0]]]]
         steps[0].extend([int(s) for s in parts[1]])
         steps[1].extend([int(s) for s in parts[2]])
       elif parts[0] == "L":
@@ -196,7 +201,8 @@ class DanceFile(GenericFile):
     else:
       steps = [parts[0]]
       if parts[0] in ("B", "W", "S", "D"): steps.append(float(parts[1]))
-      elif parts[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x", "n", "u"):
+      elif parts[0] in DanceFile.BEATS:
+        steps = [DanceFile.BEATS[parts[0]]]
         steps.extend([int(s) for s in parts[1]])
       elif parts[0] == "L": steps.extend((int(parts[1]), " ".join(parts[2:])))
       self.steps[data[0]][data[1]].append(steps)
@@ -580,7 +586,10 @@ class SMFile(GenericFile):
     for measure in measures:
       measure = measure.replace(" ", "")
       notetype = len(measure)/count
-      note = 16.0 / notetype
+
+      if notetype != 0: note = 16.0 / notetype
+      else: beat += 4.0 # This was an empty measure
+
       while len(measure) != 0:
         sd = measure[0:count]
         measure = measure[count:]
@@ -607,7 +616,6 @@ class SMFile(GenericFile):
               stepdata.append(["B", float(xyz[1])])
             bpmidx += 1
         for xyz in self.freezes[freezeidx:]:
-          print xyz, beat
           if beat >= xyz[0]:
             if gametype in games.COUPLE:
               stepdata[0].append(["S", float(xyz[1])])

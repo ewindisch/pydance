@@ -183,7 +183,7 @@ def play(screen, playlist, configs, songconf, playmode):
 
   for songfn, diff in playlist:
     try: current_song = fileparsers.SongItem(songfn)
-    except:
+    except None:
       error.ErrorMessage(screen, ["There was an error loading",
                                   os.path.split(songfn)[1]])
       continue

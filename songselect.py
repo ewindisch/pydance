@@ -100,7 +100,7 @@ class SongItemDisplay(object):
           # One of the older banners that we need to rotate
           # Don't scale, because it's hard to calculate and looks bad
           banner.set_colorkey(banner.get_at((0,0)), RLEACCEL)
-          self.banner = pygame.transform.rotate(banner, -45)
+          self.banner = pygame.transform.rotozoom(banner, -45, 1.0)
       else:
         self.banner = NO_BANNER
         self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
