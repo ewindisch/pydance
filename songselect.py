@@ -4,7 +4,7 @@
 import os, string, pygame, random, copy
 from constants import *
 
-import fileparsers, spritelib, announcer
+import spritelib, announcer
 
 # FIXME - we use various fonts all over the place, this should be in constants
 # Hash of names?

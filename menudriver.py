@@ -6,22 +6,38 @@ from constants import *
 from announcer import Announcer
 from gfxtheme import GFXTheme
 
-# A simple on/off setting, 0 or 1
+# A simple on/off setting, 1 or 0
 def get_onoff(name):
   if mainconfig[name]: return None, "on"
   else: return None, "off"
 
 def switch_onoff(name):
   mainconfig[name] ^= 1
+  return get_onff(name)
+
+def on_onoff(name):
+  mainconfig[name] = 1
   return get_onoff(name)
 
-# A simple on/off setting, 1 or 0 :)
+def off_onoff(name):
+  mainconfig[name] = 0
+  return get_onoff(name)
+
+# A simple on/off setting, 0 or 1
 def get_offon(name):
   if mainconfig[name]: return None, "off"
   else: return None, "on"
 
 def switch_offon(name):
   mainconfig[name] ^= 1
+  return get_offon(name)
+
+def on_offon(name):
+  mainconfig[name] = 0
+  return get_offon(name)
+
+def off_offon(name):
+  mainconfig[name] = 1
   return get_offon(name)
 
 # Rotate through a list of option strings
@@ -82,10 +98,16 @@ def switch_tuple_back(name, list):
   list.reverse()
   return switch_tuple(name, list)
 
+def wrap_ss(SongSelect, args):
+  SongSelect(*args)
+  return None, None
+
 def do(screen, songselect, songdata):
 
-  onoff_opt = { E_START: switch_onoff, E_CREATE: get_onoff }
-  offon_opt = { E_START: switch_offon, E_CREATE: get_offon }
+  onoff_opt = { E_START: switch_onoff, E_CREATE: get_onoff,
+                 E_LEFT: off_onoff, E_RIGHT: on_onoff }
+  offon_opt = { E_START: switch_offon, E_CREATE: get_offon,
+                 E_LEFT: off_offon, E_RIGHT: on_offon }
   rotate_opt = { E_START: switch_rotate,
                  E_LEFT: switch_rotate_back,
                  E_RIGHT: switch_rotate,
@@ -99,7 +121,7 @@ def do(screen, songselect, songdata):
                 E_RIGHT: switch_tuple,
                 E_CREATE: get_tuple }
 
-  m = (["Play Game", {E_START: songselect}, songdata],
+  m = (["Play Game", {E_START: wrap_ss}, (songselect, songdata)],
        ("Game Options",
         ["Autofail", onoff_opt, ("autofail",)],
         ["Arrow Colors", tuple_opt, ('arrowcolors', [(0, 'flat'), (4, 'normal')])],
@@ -121,8 +143,9 @@ def do(screen, songselect, songdata):
         ),
        ("Graphic Options",
         ["Theme", rotate_opt, ('gfxtheme', GFXTheme.themes())],
-        ["Effects", rotate_index_opt,
+        ["Arrow Effects", rotate_index_opt,
          ('explodestyle', ('none', 'rotate', 'scale', 'rotate & scale'))],
+        ["Gratuitous Extras", onoff_opt, ('gratuitous',)],
         ["Spin Arrows", onoff_opt, ("arrowspin",)],
         ["Backgrounds", onoff_opt, ('showbackground',)],
         ["Brightness", tuple_opt, ('bgbrightness',

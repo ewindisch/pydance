@@ -16,7 +16,7 @@ from config import Config
 from gfxtheme import GFXTheme
 from spritelib import *
 
-import fontfx, menudriver
+import fontfx, menudriver, fileparsers, songselect
 
 import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
 import os, sys, glob, random, fnmatch, types, operator, copy, string
@@ -247,6 +247,8 @@ class Judge:
       if off < 7:
         self.steppedtime = curtime
         self.combo += 1
+        if self.combo % 100 == 0:
+          self.announcer.say("combos", self.combo / 10)
         if self.combo > self.bestcombo:
           self.bestcombo = self.combo 
 
@@ -388,6 +390,11 @@ class GradingScreen:
       print "Player "+repr(judges.index(judge)+1)+":"
     
       grade = judge.grade()
+      if grade != "?":
+        grades = {"!!!": (100, 90), "wow": (95, 85), "SSS": (90, 80),
+                  "SS": (90, 75), "S": (90, 70), "A": (80, 60),
+                  "B": (70, 50), "C": (60, 40), "D": (50, 30), "doh!": (40, 0)}
+        Announcer(mainconfig["djtheme"]).say(grades[grade])
       totalsteps = (judge.marvelous + judge.perfect + judge.great + judge.ok + judge.crap + judge.shit + judge.miss)
       steps = (grade, judge.diff, totalsteps, judge.bestcombo, judge.combo)
 
@@ -1631,200 +1638,6 @@ def find (path, pattern):
           matches.append(filepath)
   return matches
 
-class fastSong:
-  def __init__ (self, fn, path=None):
-    self.objectcreationtime = pygame.time.get_ticks()
-    # note that I'm only copying DIFFICULTIES because it's the right size..
-    self.haslyrics = ''
-    self.fooblah = fn
-
-    try:
-      try:
-        print fn[:-5]+'-full.png?',
-        self.lilbanner = pygame.image.load(fn[:-5]+'-full.png').convert()
-        self.bannertype = 2
-        print "yes"
-      except:
-        print fn[:-5]+'.png?',
-        self.lilbanner = pygame.image.load(fn[:-5]+'.png').convert()
-        if (self.lilbanner.get_rect().size[0] / 2) > self.lilbanner.get_rect().size[1]:
-          print "yes, rotated banner was fullsize"
-          self.bannertype = 2
-        else:
-          self.lilbanner = pygame.transform.rotate(self.lilbanner,-45)
-          self.lilbanner.set_colorkey(self.lilbanner.get_at((0,0)))
-          self.bannertype = 1
-          print "yes"
-    except:
-      print "settling for blank banner for",fn
-      self.lilbanner = pygame.surface.Surface((1,1))
-      self.lilbanner.set_colorkey(self.lilbanner.get_at((0,0)))
-      self.bannertype = 0
- 
-    self.bannercreationtime = pygame.time.get_ticks()
-    self.rrrr = self.lilbanner.get_rect()
-    self.rrrr.center = (320,300)
-    r = screen.blit(self.lilbanner,self.rrrr)
-    update_screen(r)
-    self.file = None
-    self.modes = modes = MODES.copy()
-    self.modelist = []
-    self.modediff = {}
-    self.modeinfo = {}
-    self.modeinfodict = {}
-    self.path = path
-    for key in MODELIST: modes[key]=DIFFICULTIES.copy()
-    curTime = 0.0
-    curBPM = 0.0
-    self.length = None
-    self.offset = 0.0
-    self.isValid = 0
-    self.startsec = 0.0
-    self.endsec = -1.0
-    self.bpm = 146.0
-    self.bgfile = ' '
-    self.mixname = '---'
-    self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
-    self.mixerclock = mainconfig['mixerclock']
-#    self.lyricdisplay = LyricDispKludge(400)
-#    self.transdisplay = LyricDispKludge(428)
-    little = mainconfig['little']
-    self.totarrows = 0
-    chompNext = None
-    self.variablecreationtime = pygame.time.get_ticks()
-    for fileline in open(fn):
-      fileline = fileline.strip()
-      if fileline == '' or fileline[0] == '#': continue
-      fsplit = fileline.split()
-      firstword = fsplit[0]
-      if len(fsplit)>1:                nextword, rest = fsplit[1], fsplit[1:]
-      else:                            nextword, rest = None, None
-      if chompNext is not None:
-        if len(chompNext) == 1:
-          # look for the DIFFICULTY keyword, we already know which MODE
-          modeDict, = chompNext
-          difficulty = firstword
-          modeDict[difficulty]  = SongEvent(when=curTime,bpm=curBPM,extra=int(rest[0]))
-          chompNext = modeDict,modeDict[difficulty]
-        
-        elif len(chompNext) == 2:
-          modeDict, tail = chompNext
-          if firstword == 'end':
-            chompNext = None
-      elif firstword == 'LYRICS':
-        self.haslyrics = '  (LYRICS)'
-        chompNext = None, 0
-      elif firstword == 'song':        self.song = " ".join(rest)
-      elif firstword == 'mix':         self.mixname = " ".join(rest)
-      elif firstword == 'group':       self.group = " ".join(rest)
-      elif firstword == 'bpm':         self.bpm = float(nextword) 
-      elif firstword in modes.keys():  chompNext=(modes[firstword],)
-      elif firstword == 'file':        self.file = " ".join(rest)
-      elif firstword == 'version':     self.version = float(nextword)
-    for mkey,mval in modes.items():
-      if mval is not None:
-        for dkey,dval in mval.items():
-          if dval is None: del(mval[dkey])
-        if len(mval.keys()) == 0: mval = None
-      if mval is None: del(modes[key])
-    if len(modes.keys()): 
-      print repr(self)
-    self.isValid=1
-    # setup lists to make it easy and in order for the song selector
-    self.modelist = filter(lambda m,modes=modes: modes.has_key(m), MODELIST)
-    self.filereadcreationtime = pygame.time.get_ticks()
-
-    if path is None:
-      self.path = os.path.dirname(fn)
-
-    if self.file is None:
-      self.file = string.join(fn[len(self.path)+1:-5].split("/")[-1:],"")
-      for ext in [".ogg",".mp3",".wav",".mid"]:
-        if os.path.isfile(os.path.join(self.path,self.file+ext)):
-          self.file = self.file+ext
-          break
-
-    self.osfile=os.path.join(self.path,self.file)
-    
-    for m in self.modelist:
-      # get filtered list of difficulties in proper order
-      self.modediff[m] = filter(lambda d,diffs=modes[m]: diffs.has_key(d), DIFFICULTYLIST)
-      tmp = []
-      # head of every difficulty list is just difficulty info, get info and discard head
-      for d in self.modediff[m]:
-        tmp.append(modes[m][d].extra)
-        modes[m][d] = modes[m][d].next
-      # zip together the difficulties and their "hardness" for easy usage
-      self.modeinfo[m] = zip(self.modediff[m],tmp)
-      # this is so much easier in 2.2
-      # self.modeinfodict[m] = dict(self.modeinfo[m])
-      self.modeinfodict[m] = {}
-      for key,val in self.modeinfo[m]:
-        self.modeinfodict[key]=val
-
-    self.modereadcreationtime = pygame.time.get_ticks()
-    
-  def renderListText(self,totalsongs,j):
-    listimage = BlankSprite((560,48))
-    if self.mixname:
-      text = fontfx.shadefade(self.mixname,32,2,(128,28),(80,80,80))
-      listimage.blit(text,(432,2))
-      
-#    cmap = (63+j*(192/(totalsongs+1)),j*(240/(totalsongs+1)),240-(j*255/(totalsongs+1)))
-    cmap = (224,224,224)
-
-    text = fontfx.shadefade(self.song,20,3,(500,20),cmap)
-    text.set_colorkey(text.get_at((0,0)))
-    listimage.blit(text,(160,2))
-    text = fontfx.shadefade("- "+self.group,18,3,(500,18),cmap)
-    text.set_colorkey(text.get_at((0,0)))
-    listimage.blit(text,(168,14))
-    stext = "%d BPM"%int(round(self.bpm)) + "".join(map(lambda (n,d): "  %s %d"%(n,d),self.modeinfo[playmode])) + self.haslyrics
-    text = fontfx.embfade(stext,20,3,(500,20),cmap)
-    text.set_colorkey(text.get_at((0,0)))
-    listimage.blit(text,(160,30))
-    if self.bannertype == 2:
-      rectSize = self.lilbanner.get_rect().size
-      listimage.blit(pygame.transform.scale(self.lilbanner, (int(rectSize[0]/2), int(rectSize[1]/2))), (20, 4))
-    elif self.bannertype == 1:
-      rectSize = self.lilbanner.get_rect().size
-      listimage.blit(pygame.transform.scale(self.lilbanner, (int(rectSize[0]/1.5), int(rectSize[1]/1.5))), (3, 65 - int(rectSize[1]/2)))
-
-    pygame.draw.line(listimage.image,(191,191,191),(4,1),(12,46),2)
-    pygame.draw.line(listimage.image,(191,191,191),(544,1),(552,46),2)
-
-    pygame.draw.line(listimage.image,(191,191,191),(4,1),(544,1),2)
-    pygame.draw.line(listimage.image,(191,191,191),(12,46),(552,46),2)
-    
-    titleimage = BlankSprite((640,80))
-    colorthinger = pygame.surface.Surface((640,16))
-    for i in range(4):
-      colorthinger.fill((12*i,12*i,12*i))
-      titleimage.blit(colorthinger,(0,16+(16*i)))
-    sn = repr(j)+"/"+repr(totalsongs)
-    text = fontfx.embfade(sn,20,2,(56,16),(160,160,160))
-    titleimage.blit(text, (584,0))
-    text = fontfx.shadefade(self.group,60,3,(640,64),(192,64,64))
-    text.set_colorkey(text.get_at((0,0)))
-    titleimage.blit(text,(8,0))
-    text = fontfx.shadefade(self.song,44,3,(640,48),(192,64,192))
-    text.set_colorkey(text.get_at((0,0)))
-    titleimage.blit(text, (32,36))
-    
-    self.listimage  = listimage
-    listimage.set_colorkey(listimage.get_at((0,0)))
-    self.titleimage = titleimage
-    
-  def discardListText(self):
-    self.listimage = None
-    self.titleimage = None
-
-  def __nonzero__ (self):
-    return self.isValid
-    
-  def __repr__ (self):
-    return '<song song=%r group=%r bpm=%s file=%r>'%(self.song,self.group,repr(self.bpm)[:7],self.file)
-
 #DCY: Bottom of 640 gives lots of "update rejecting"    
 if mainconfig['reversescroll']:
   ARROWTOP  = 408
@@ -2156,7 +1969,6 @@ def SetDisplayMode(mainconfig):
     print "Can't get a 16 bit display!" 
     sys.exit()
 
-# so it's currently in one routine. shut up, I'm learning python =]
 def main():
   global screen,background,eventManager,currentTheme,playmode
   print "pyDDR, by theGREENzebra (tgz@clickass.org)"
@@ -2204,73 +2016,55 @@ def main():
 
   background = BlankSprite(screen.get_size())
 
-  print "Loading Images.."
-
   playmode = 'SINGLE'
   
-  font = pygame.font.Font(None, 32)
+  font = pygame.font.Font(None, 60)
 
   if debugmode:
     print "Entering debug mode. Not loading the song list."
     totalsongs = 1
   else:
-    text_fadeon(screen, font, "Looking for songs..", (320, 240))
-    print 'Searching for STEP files..'
     # Search recursively for all STEP files
     fileList = []
     for dir in songdir.split(os.pathsep):
       print "searching", dir
       fileList += find(dir, '*.step')
 
-    for f in fileList:
-      print "file: ", f
-    totalsongs = len(fileList)
-    fileList.sort()
-    # return the list of valid songs
-    songs = filter(None,map(fastSong,fileList))
-    text_fadeoff(screen, font, "Looking for songs..", (320, 240))
+  totalsongs = len(fileList)
+  parsedsongs = 0
+  songs = []
+
+  pbar = fontfx.TextProgress(font, "Found " + str(totalsongs) + " files. Loading...",
+                             WHITE, BLACK)
+  for f in fileList:
+    try: songs.append(fileparsers.SongItem(f))
+    except: pass
+    img = pbar.render(parsedsongs * 100.0 / totalsongs)
+    r = img.get_rect()
+    r.center = (320, 240)
+    screen.blit(img, r)
+    pygame.display.flip()
+    parsedsongs += 1
 
   ev = event.poll()
+  while ev[1] != E_PASS: ev = event.poll()
 
   difWrap = 2*len(DIFFICULTIES)
 
-  if totalsongs < 1:
+  if len(songs) < 1:
     print "You don't have any songs, and you need one. Go here: http://icculus.org/pyddr/"
     sys.exit()
 
-
-  text_fadeon(screen, font, "Prerendering....", (320, 240))
-  print 'Prerendering'
-  if not debugmode:
-    # prerender the list texts for songs, speed up song selector
-    brect = Rect(220, 250, 190, 5)
-    ox = brect.left+4
-    pixelbar = pygame.surface.Surface((1,3))
-    pixelbar.fill((192,192,192))
-    fuxor = 1
-    for n in songs:
-      x = brect.size[0] * fuxor/ totalsongs
-      dirty = []
-      for i in range(x-ox):
-        dirty.append(screen.blit(pixelbar,(brect.left+ox+i,brect.bottom+3)))
-      pygame.display.update(dirty)
-      ox = x-1
-      n.renderListText(totalsongs,fuxor)
-      fuxor += 1
-  
   global holdkey, sortmode
   
   holdkey = {}
   for playerID in range(MAXPLAYERS):
     holdkey[playerID] = keykludge()
+
+  screen.fill(BLACK)
     
-  text_fadeoff(screen, font, "Prerendering....", (320, 240))
-
-#  pygame.time.delay(500)
-
-  print "pyDDR ready. Entering song selector...."
-
-  menudriver.do(screen, songSelect, (songs, 1))
+  menudriver.do(screen, songselect.SongSelect,
+                (songs, screen, playSequence, GradingScreen))
   mainconfig.write(os.path.join(rc_path, "pyddr.cfg"))
 
 def blatantplug():
@@ -2334,542 +2128,14 @@ def blatantplug():
   print "pyDDR exited properly."
   sys.exit()    
 
-def songSelect(songs, players):
-  global screen,background,currentTheme,playmode
-  pygame.mixer.music.fadeout(500)
-  totalredraw = 1
+
+def playSequence(players, diffList, songList):
+  global screen,currentTheme
+  megajudge = []
+  lifebars = []
 
   currentTheme = GFXTheme(mainconfig['gfxtheme'])
 
-  fooblah = " "
-
-  if fooblah == " ":
-    oldfoo = 0  
-  else:
-    oldfoo = 1  #so the song selector doesn't keep it on the same song and we can save it from the menus
-    
-  while 1:
-    if totalredraw:
-      totalredraw = 0
-      # let's calm the impatient crowd
-      font = pygame.font.Font(None,40)
-      niftyscreenclear = pygame.surface.Surface((640,8))
-      niftyscreenclear.fill((0,0,0))
-      start = pygame.time.get_ticks()
-      ticktime = 500 / 30
-      for i in range(31):
-        r1 = screen.blit(niftyscreenclear,(0,8*i))
-        r2 = screen.blit(niftyscreenclear,(0,480-(8*i)))
-        update_screen((r1, r2))
-        pygame.time.delay(ticktime*i - (pygame.time.get_ticks() - start))
-
-      realdiff = realdiff2 = -1
-      songidx = scrolloff = s = difficulty = difficulty2 = 0
-      evenbiggerdifflist = []    # I know, I know, we should probably come up with a better name for this
-      helpfiles = ["keyboard-ik.png","mat-updn.png","keyboard-s.png","keyboard-jl.png","mat-leftright.png","keyboard-scroll.png","mat-scroll.png","random.png","start.png"]
-      oldhelp = CloneSprite(pygame.surface.Surface((1,1)))
-      oldhelp.set_colorkey(oldhelp.get_at((0,0)))
-      oldhelp.set_alpha(0)
-      curhelp = CloneSprite(oldhelp)
-      helptime = pygame.time.get_ticks()
-      fontdisp = dozoom = 1
-      idir = -8
-      i = 192
-      sortmode = mainconfig["sortmode"]
-      s = 1
-      # filter out songs that don't support the current mode (e.g. 'SINGLE')
-      songs = filter(lambda song,mode=playmode: song.modes.has_key(mode),songs)
-      totalsongs = len(songs)
-    #  fuxor = 1
-    #  for n in songs: 
-    #    n.renderListText(totalsongs,fuxor)
-    #    fuxor += 1
-      dirtyBar=dirtyBar2=songSelectDirty=None
-      dif=numbars=-1
-      dif2=numbars2=-1
-      background.fill((48,48,48))
-      background.draw(screen)
-      pygame.display.flip()
-      dirtyRect=None
-      eraseRects=[]
-      fEraseRects=[]
-      lastidx = None
-      sprList = []
-
-      # need bkgcolor or else it will use per-pixel alpha
-      arrowTextMax      = TextSprite(size=32*2, bkgcolor=BLACK, text='>')
-      songSelectTextMax = TextSprite(size=47*2, bkgcolor=BLACK, text='SONG SELECT')
-      prevsong = songs[0]
-      previewMusic = mainconfig['previewmusic']
-      sortmode -= 1
-      songChanged = 1
-
-    if oldfoo:
-      newlist = []
-      for sorti in songs:
-        newlist.append(sorti.fooblah)
-      songidx = newlist.index(fooblah)
-      print "songidx set to", songidx, "because stepfile was",fooblah
-      songChanged = 1
-      oldfoo = 0
-      
-    pygame.time.wait(1)
-    dirtyRects=[]
-    dirtyRects2=[]
-    for n in eraseRects: dirtyRects.append(background.draw(screen,n,n))
-    eraseRects=[]
-    currentSong = songs[songidx]
-    diffList = currentSong.modediff[playmode]
-
-    # If preview music option is set, switch songs when the song is changed
-    if previewMusic:
-      if songChanged:
-        songChanged = 0
-        songswitchedat = pygame.time.get_ticks()
-        try:
-          pygame.mixer.music.stop()
-          pygame.mixer.music.load(currentSong.osfile)
-          # Just an arbitrary start position, an attempt to pick up the chorus or
-          # the most recognizable part of the song.
-          previewStart = 45
-          pygame.mixer.music.set_volume(1.0)
-          pygame.mixer.music.play(0, currentSong.startsec + previewStart)
-          pygame.mixer.music.set_volume(0.0)
-        except pygame.error:
-          print "had a problem previewing", currentSong.osfile
-      timesince = (pygame.time.get_ticks() - songswitchedat)/1000.0
-      if timesince <= 1.0:
-        pygame.mixer.music.set_volume(timesince)
-      if 9.0 <= timesince <= 10.0:
-        pygame.mixer.music.set_volume(10.0-timesince)
-      if timesince > 10.0:
-        pygame.mixer.music.set_volume(0)
-        pygame.mixer.music.stop()
-    else:
-      pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
-      try:
-        pygame.mixer.music.play(4, 0.0)
-      except TypeError:
-        print "Sorry, pyDDR needs a more up to date Pygame or SDL than you have."
-        sys.exit()
-  
-    ev = event.poll()
-    if  ev[1] == E_QUIT:
-      pygame.mixer.music.fadeout(1000)
-      pygame.time.delay(1000)
-      pygame.mixer.music.stop()
-      pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
-      pygame.mixer.music.play(4, 0.0)
-      pygame.mixer.music.set_volume(1.0)
-      fooblah = currentSong.fooblah
-      return None, None
-    elif ev < 0:                                  pass # key up
-    elif ev[1] == E_PASS:                            pass
-    elif ev[1] == E_FULLSCREEN:
-      pygame.display.toggle_fullscreen()
-      mainconfig["fullscreen"] ^= 1
-    elif ev[1] == E_SCREENSHOT:                      s = 1
-    elif (ev == (0, E_LEFT)):    difficulty -= 1
-    elif (ev == (0, E_RIGHT)):   difficulty += 1
-    elif (ev == (1, E_LEFT)):   difficulty2 -= 1
-    elif (ev == (1, E_RIGHT)):  difficulty2 += 1
-    elif (ev[1] == E_UP):
-      prevsong = songs[songidx]
-      songChanged = 1
-      if songidx>0:
-        songidx -= 1
-        scrolloff = -60
-        fontdisp = 1
-        sod = 0
-      else:
-        songidx = totalsongs-1
-        scrolloff = 60
-        fontdisp = 1
-        sod = 0
-    elif (ev[1] == E_DOWN):
-      prevsong = songs[songidx]
-      songChanged = 1
-      if songidx<(totalsongs-1):
-        songidx += 1
-        scrolloff = 60
-        fontdisp = 1
-        sod = 0
-      else:
-        songidx = 0
-        scrolloff = -60
-        fontdisp = 1
-        sod = 0
-    elif ev[1] == E_PGUP:
-      prevsong = songs[songidx]
-      songChanged = 1
-      if songidx-5 > 0:
-        songidx -= 5
-        scrolloff = -60
-        fontdisp = 1
-        sod = 0
-      else:
-        songidx = 0
-        scrolloff = 60
-        fontdisp = 1
-        sod = 0
-    elif ev[1] == E_PGDN:
-      prevsong = songs[songidx]
-      songChanged = 1
-      if songidx<(totalsongs-5):
-        songidx += 5
-        scrolloff = 60
-        fontdisp = 1
-        sod = 0
-      else:
-        songidx = totalsongs-1
-        scrolloff = -60
-        fontdisp = 1
-        sod = 0
-      '''
-      print "fastsong total creation time was", songs[songidx].modereadcreationtime - songs[songidx].objectcreationtime
-      print "      to make the banner it took", songs[songidx].bannercreationtime - songs[songidx].objectcreationtime
-      print "     to define variables it took", songs[songidx].variablecreationtime - songs[songidx].bannercreationtime
-      print "        to read the file it took", songs[songidx].filereadcreationtime - songs[songidx].variablecreationtime
-      print "     to filter the modes it took", songs[songidx].modereadcreationtime - songs[songidx].filereadcreationtime
-      '''
-    elif (ev[1] == E_SELECT):
-      newidx = int(random.random()*len(songs))
-      if newidx < songidx:
-        scrolloff = 60
-      else:
-        scrolloff = -60
-      prevsong = songs[songidx]
-      songidx = newidx
-      songChanged = 1
-      fontdisp = 1
-      sod = 0
-    elif ev[1] == E_MARK:
-      currentSong.listimage.blit(fontfx.embfade("T",18,3,(12,16),(255,255,0)),(536,28))
-      print currentSong,":",
-
-      biggerdifflist = [diffList[difficulty]]
-      if players == 2:
-        biggerdifflist.append(diffList[difficulty2])
-      print "difficulty",biggerdifflist,
-      evenbiggerdifflist.append(biggerdifflist)
-
-      try:
-        taglist.append(currentSong)
-        print "added to taglist."
-      except:
-        print "new taglist created."
-        taglist = [currentSong]
-
-    elif ev[0] and ev[1] == E_START: # If this isn't 0 a 2nd or higher player button was hit
-      players = ev[0] + 1
-    elif ev[1] == E_START:
-      pygame.mixer.music.fadeout(1000)
-      ann = Announcer(mainconfig["djtheme"])
-      ann.say("menu")
-      background.blit(screen,(0,0))
-      for n in range(63):
-        background.set_alpha(255-(n*4))
-        screen.fill(BLACK)
-        background.draw(screen)
-        pygame.display.flip()
-        pygame.time.wait(1)
-        if (event.poll()[1] == E_QUIT): 
-          print "song was cancelled!"
-          break
-      background.set_alpha()
-      screen.fill(BLACK)
-      try:
-        while ann.chan.get_busy():
-          pass
-      except:
-        pass
-
-      try:
-        print "nonstop: taglist is",taglist
-      except:
-        print "single song, no taglist"
-        taglist = [currentSong]
-
-      if not evenbiggerdifflist:
-        biggerdifflist = [diffList[difficulty]]
-        if players == 2:
-          biggerdifflist.append(diffList[difficulty2])
-
-        evenbiggerdifflist.append(biggerdifflist)
-
-      megajudge = playSequence(players, evenbiggerdifflist, taglist)
-      fooblah = taglist[len(taglist)-1].fooblah
-      oldfoo = 1
-          
-      if mainconfig['grading']:
-        grade = GradingScreen(megajudge)
-
-        if grade.make_gradescreen(screen):
-          grade.make_waitscreen(screen)
-
-      del(taglist)
-      evenbiggerdifflist = []
-      
-      totalredraw = 1
-
-    if not totalredraw:
-      # No difficulty selected.
-      if difficulty<0: difficulty=len(diffList)-1
-      if difficulty2<0: difficulty2=len(diffList)-1
-
-      # User really wants to be on a different difficulty.
-      # We had switched because the previous song didn't have the one the user wants.
-      if realdiff != -1 and realdiff < len(diffList):
-         difficulty=realdiff
-         realdiff=-1
-      if realdiff2 != -1 and realdiff2 < len(diffList):
-         difficulty2=realdiff2
-         realdiff2=-1
-
-      # This song doesn't have the currently selected difficulty.
-      if difficulty>=len(diffList): 
-         realdiff=difficulty # Save it...
-         difficulty=0 # And set to whatever the first one it has is.
-      if difficulty2>=len(diffList): 
-         realdiff2=difficulty2 # Save it...
-         difficulty2=0 # And set to whatever the first one it has is.
-      if dozoom:
-        fontdisp=1
-        dz = 0
-
-      dz+=dozoom*16
-
-      if fontdisp==1:
-        if dz>255: 
-          dozoom = 0
-          dz=255
-        for m in fEraseRects: dirtyRects.append(background.draw(screen,m,m))
-        fEraseRects=[]
-        screen.set_clip((0,0,640,388))
-        clip=screen.get_clip()
-        if lastidx!=songidx:
-          lastidx = songidx
-          sprList = []
-          for j in range(7):
-            idx = songidx-3+j
-            if idx<0 or idx>=totalsongs:
-              continue
-            spr = CloneSprite(songs[idx].listimage)
-            mra = 255-(abs(3-j)*91)
-            if mra > 255:
-              mra = 255
-            spr.set_alpha(mra)
-            spr.orig = 32+60*j
-            if j != 3:
-              sprList.append(spr)
-        for spr in sprList:
-          spr.rect.top = spr.orig+scrolloff+4
-          spr.rect.left = 40
-          ro=spr.draw(screen)
-          if ro:
-            dirtyRects.append(ro)
-            fEraseRects.append(ro)
-        screen.set_clip((0,0,640,480))
-
-        currentSong.titleimage.set_alpha()
-        dirtyRects.append(currentSong.titleimage.draw(screen))
-
-      # currently selected song flasher thingy
-      spr = CloneSprite(songs[songidx].listimage)
-      mra = 192+(i/4)
-      if mra > 255:
-        mra = 255
-      spr.set_alpha(mra)
-      spr.rect = (40,212+scrolloff+4)
-      ro=spr.draw(screen)
-      if ro:
-        dirtyRects.append(ro)
-        fEraseRects.append(ro)
-
-      if fontdisp==1:
-        if (scrolloff<=2) and (scrolloff>=-2):
-          scrolloff = 0
-          fontdisp = 0
-          sod = -1
-        if sod > -1:
-          sod += 1
-        if scrolloff:
-          scrolloff = scrolloff/sod 
-        if sod == 2:
-          sod = 0
-
-      i += idir
-      if i < 64:
-        idir = 8
-      if i > 240:
-        idir = -8
-      ii = 256-i
-
-      if oldhelp.get_alpha() > 8:
-        oldhelp.set_alpha(oldhelp.get_alpha()-8)
-      if curhelp.get_alpha() < 244:
-        curhelp.set_alpha(curhelp.get_alpha()+8)
-
-      eraseRects.append(oldhelp.rect)
-      eraseRects.append(curhelp.rect)
-      dirtyRects.append(oldhelp.draw(screen))
-      dirtyRects.append(curhelp.draw(screen))
-
-      if helptime+4000 < pygame.time.get_ticks():
-        helptime = pygame.time.get_ticks()
-        oldhelp = CloneSprite(curhelp)
-        curhelp = CloneSprite(pygame.image.load(os.path.join(image_path, helpfiles[0])).convert())
-        helpfiles.append(helpfiles.pop(0))
-        curhelp.rect.left = 128
-        curhelp.rect.top = 400
-        oldhelp.set_alpha(255)
-        curhelp.set_alpha(0)
-
-      scale = (0.5+float(i)/240.0)/2
-      arrow = TransformSprite(arrowTextMax,scale=scale)
-      arrow.set_alpha(scale*255)
-      arrow.rect.right = 32
-      arrow.rect.centery = screen.get_rect().centery
-      eraseRects.append(arrow.rect)
-      dirtyRects.append(arrow.draw(screen))
-
-      arrow = TransformSprite(arrow,hflip=1)
-      arrow.set_alpha(scale*255)
-      arrow.rect.left = 608
-      arrow.rect.centery = screen.get_rect().centery
-      eraseRects.append(arrow.rect)
-      dirtyRects.append(arrow.draw(screen))
-
-      try:
-        sortimg = TextSprite(size=20, bkgcolor=BLACK, text=string.upper(sortbytext))
-        sortimg.rect.centerx = 320
-        sortimg.rect.top = 388
-        sortimg.set_alpha(192)
-        eraseRects.append(sortimg.rect)
-        dirtyRects.append(sortimg.draw(screen))
-      except:
-        pass
-
-      select = TransformSprite(songSelectTextMax,scale=scale/1.5)
-      select.set_alpha(scale*127)
-      select.rect.centerx = 320
-      select.rect.bottom = 482
-      eraseRects.append(select.rect)
-      dirtyRects.append(select.draw(screen))
-
-      ldif=dif
-      lnumbars=numbars
-      dif=DIFFICULTYLIST.index(diffList[difficulty])
-      numbars=currentSong.modeinfo[playmode][difficulty][1]
-      if ldif!=dif or lnumbars!=numbars or dz>0:
-        if dirtyBar: 
-          dirtyRects.append(background.draw(screen,dirtyBar,dirtyBar))
-        color = ((0,255,0),(255,128,0),(255,0,0))[dif]
-        text = fontfx.embfade(DIFFICULTYLIST[dif],28,3,(96,32),color)
-        text2 = fontfx.embfade(DIFFICULTYLIST[dif],28,3,(96,32),color)
-        text2.set_colorkey((0,0,0))
-        text.fill((48,48,48))
-        text.blit(text2,(0,0))
-        if dz>0: text.set_alpha(dz*20)
-        dirtyRects.append(screen.blit(text, (8,420) ))
-        kr = range(8)
-        bars = currentTheme.bars
-        for j in range(numbars):
-          sj = 6+j*10
-          for k in range(6):
-            b=[bars.grn,bars.org,bars.red][dif]
-            if dz>0:
-              b.set_alpha(dz*16)
-            else:
-              b.set_alpha()
-            dirtyRects.append(b.draw(screen,(sj+k,448)))
-        dirtyBar = ([8,448],[8+12*10,32])
-
-      if players == 2:
-        ldif2=dif2
-        lnumbars2=numbars2
-        dif2=DIFFICULTYLIST.index(diffList[difficulty2])
-        numbars2=currentSong.modeinfo[playmode][difficulty2][1]
-        if ldif2!=dif2 or lnumbars2!=numbars2 or dz>0:
-          if dirtyBar2: 
-            dirtyRects.append(background.draw(screen,dirtyBar2,dirtyBar2))
-          color = ((0,255,0),(255,128,0),(255,0,0))[dif2]
-          text = fontfx.embfade(DIFFICULTYLIST[dif2],28,3,(96,32),color)
-          text2 = fontfx.embfade(DIFFICULTYLIST[dif2],28,3,(96,32),color)
-          text2.set_colorkey((0,0,0))
-          text.fill((48,48,48))
-          text.blit(text2,(0,0))
-          if dz>0: text.set_alpha(dz*20)
-          dirtyRects.append(screen.blit(text, (560,420) ))
-          kr = range(8)
-          bars = currentTheme.bars
-          for j in range(numbars2):
-            sj = 6+j*10
-            for k in range(6):
-              b=[bars.grn,bars.org,bars.red][dif2]
-              if dz>0:
-                b.set_alpha(dz*16)
-              else:
-                b.set_alpha()
-              dirtyRects.append(b.draw(screen,(640-(sj+k),448)))
-          dirtyBar2 = ([544,448],[640,32])
-
-      pygame.time.delay(8)
-      pygame.display.update(dirtyRects)
-
-      if s:        # sort songs
-        # 0 - alpha by step file
-        # 1 - alpha by songname
-        # 2 - alpha by groupname
-        # 3 - ascending by bpm
-        # 4 - ascending by difficulty
-        # 5 - ascending by mix
-
-        dozoom = 1
-        lastidx = None
-
-        newlist = []
-
-        sortmode += 1
-        if sortmode > 5 or sortmode < 0:
-          sortmode = 0
-        sortbytext = "sorted by "
-        if sortmode == 0:
-          sortbytext+= "filename"
-          for sorti in songs:
-            newlist.append(sorti.fooblah)
-        if sortmode == 1:
-          sortbytext+= "songname"
-          for sorti in songs:
-            newlist.append(sorti.song)
-        if sortmode == 2:
-          sortbytext+= "groupname"
-          for sorti in songs:
-            newlist.append(sorti.group)
-        if sortmode == 3:
-          sortbytext+= "bpm"
-          for sorti in songs:
-            newlist.append(sorti.bpm)
-        if sortmode == 4:
-          sortbytext+= "difficulty"
-          for sorti in songs:
-            newlist.append(sorti.modeinfo[playmode][difficulty][1])
-        if sortmode == 5:
-          sortbytext+= "mix"
-          for sorti in songs:
-            newlist.append(sorti.mixname)
-
-        print sortbytext
-
-        blah = zip(newlist,songs)
-        blah.sort()
-        songs = map(lambda x:x[1], blah)
-        songidx = songs.index(currentSong)
-        s = 0
-
-def playSequence(players, diffList, songList):
-  megajudge = []
-  lifebars = []
   print diffList
   for playerID in range(players):
     if len(songList)-1:
@@ -2882,8 +2148,7 @@ def playSequence(players, diffList, songList):
   for thisSong in songList:
     combos = map(lambda plr: plr.combo, megajudge)
 
-    fooblah = thisSong.fooblah
-    mrsong = Song(fooblah)
+    mrsong = Song(thisSong)
     pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
     screen.fill(BLACK)
@@ -2893,8 +2158,6 @@ def playSequence(players, diffList, songList):
     for playerID in range(players):
       megajudge[playerID].munch(thisjudging[playerID])
 
-    thisSong.listimage.blit(pygame.surface.Surface((12,16)),(536,28))
-        
   return megajudge
 
 def dance(song,players,difficulty,prevlife,combos,prevscr):

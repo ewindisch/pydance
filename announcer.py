@@ -49,6 +49,7 @@ class Announcer:
         self.sections[sec].append(os.path.join(filename, line.strip()))
 
   def __play(self, filename):
+    if not os.path.isfile(filename): return
     if (pygame.time.get_ticks() - self.lasttime > 6000):
       snd = pygame.mixer.Sound(filename)
       snd.play()
