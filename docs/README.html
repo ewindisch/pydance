@@ -350,90 +350,8 @@ dl.faq dt { font-weight: bold }
     need to open up the step file and delete the LYRICS section if you
     want to add new lyrics.</p>
     <h1>FAQ</h1>
-      <p>The old FAQ is currently at <a
-    href="http://www.icculus.org/pyddr/faq.php">http://www.icculus.org/pyddr/faq.php</a>. Eventually that will be replaced with this one.</p>
-    <dl class="faq">
-      <dt>My MP3 fails to load.</dt>
-      <dd><p>pyDDR's MP3 support comes via the SMPEG, which is
-      suboptimal, but integrates with SDL's mixer library
-      easily. You have three options. The first is to try stripping
-      ID3 tags from your MP3 files; you can do this in UNIX with <a
-      href="http://www.dakotacom.net/~donut/programs/id3ed.html">id3ed</a>
-      for regular ID3 tags, or <a
-      href="http://www.geocities.com/matsp888/unix/">v2strip</a> for
-      ID3v2 tags, On Mac OS X, you can use <a
-      href="http://www.versiontracker.com/dyn/moreinfo/macosx/16665">Taggerwocky</a>.
-      Secondly, you can convert them to the <a
-      href="http://www.vorbis.com">Ogg Vorbis</a> format. <a
-      href="http://faceprint.com/code/">mp32ogg</a> can do this
-      nicely. The third possibility is to merge <a
-      href="http://spacepants.org/src/pymad/">pymad</a> support into
-      pyDDR, and send us the patches.</p></dd>
-      <dt>pyDDR keeps crashing with a "KeyError". How do I fix it?</dt>
-      <dd><p>The format of some options in pyddr.cfg changes
-      periodically. This should no longer be a problem after 0.6.2
-      because the file is kept to a minimum, and the changes are made
-      in the source itself. However, if you are upgrading from an
-      older version to 0.6.2, you may need to delete your
-      configuration file and have pyDDR recreate it.</p></dd>
-      <dt>My soft mat sucks. Can I improve it?</dt>
-      <dd><p>Yes, you can 'convert' a soft mat into a hard mat in a
-      number of ways. One popular, simple, and fast way is to buy some
-      plywood and staple-gun some vinyl hardwood-floor covering to the
-      board over your DDR mat. Another thing you can do is take your
-      soft mat apart and reenforce it with extra foam, wood, and
-      sheet metal. One of the pyDDR developers has written a <a
-      href="http://clickass.org/~tgz/pyddr/hardmat/">guide on doing
-      this</a>.</p></dd>
-      <dt>I bought this adapter from Radio Shack, and...</dt>
-      <dd><p>Take it back, now. The Radio Shack adapter works by
-      mapping the up/down/left/right button to the X and Y joystick
-      axes. This means that it can only read one of up/down or
-      left/right at the same time (that is, jumps are impossible, and
-      leaving your foot on an opposite arrow is also
-      impossible). Besides the recommended <a
-      href="http://levelsix.com/products/pc/EMSUSB2.shtml">EMSUSB2</a>
-	  adapter, pyDDR
-      should work on anything that maps the directional arrows to
-      buttons. Make sure your adapter does that.</p></dd>
-      <dt>Why do I get weird colors or graphic artifacts?</dt>
-      <dd><p>You may be running 8 or 24 bit color. pyDDR shouldn't
-      actually run at 8 bit color at all, and it's not supported. The
-      issues with 24 bit color should be fixed; contact the developers
-      with a bug report if they're not.</p></dd>
-      <dt>Why doesn't pyDDR use DWI files?</dt>
-      <dd><p>Because it's not called Dance With Intensity. :) More
-      realistically, it's because it was easier to write a new file
-      format than support DWI's (whose documentation is lacking)
-      initially. Also, since pyDDR has no step editor yet, it was
-      necessary to have a format that was human readable.</p>
-	<p>Right now, you can use <tt>dwi2step</tt> to convert DWIs to
-      pyDDR's .step format. In a future version, pyDDR will be able to
-      read from DWI files without conversion.</p></dd>
-      <dt>While I was building SMPEG, I got undefined symbol problems.</dt>
-      <dd><p>If you're using gcc 3.2, you may need to add these
-      <kbd>-lgcc_s and -lsupc++</kbd> to the compilation
-      options.</p></dd>
-      <dt>pyDDR is way, way too slow.</dt>
-      <dd><p>There's no "answer" to this - the program needs
-      work. However, there are a couple of things you can try.</p>
-	<ul><li>Turn off backgrounds, and arrow explosions. These
-      often make the biggest difference performance-wise.</li>
-	  <li>Switch from 24 bit to 16 bit color. This greatly
-      increases the frame rate on many computers.</li>
-	  <li>Run pyDDR in fullscreen mode. It has to deal with less
-      refresh events in such a case.</li>
-	  <li>Upgrade your video card. pyDDR is very video-intensive;
-      a high-powered processor with a bad video card will perform
-      terribly.</li>
-	</ul></dd>
-      <dt>What about adding &lt;insert feature here&gt;?</dt>
-      <dd><p>If that feature is one of the following, you have
-      incurred our wrath: OpenGL support, internet play. Otherwise, we
-      almost certainly have it planned already. If you have some
-      "great new idea" for pyDDR that already exists in regular DDR,
-      you can also enjoy our wrath.</p></dd>
-    </dl>
+      <p>The FAQ is available online at <a
+    href="http://www.icculus.org/pyddr/faq.php">http://www.icculus.org/pyddr/faq.php</a>. Please read it before contacting the developers.</p>
     <h1>Contacts</h1>
     <p>There are several different ways to get in touch with the pyDDR
       developers.</p>
@@ -453,7 +371,6 @@ dl.faq dt { font-weight: bold }
 	the <a href="http://www.freenode.net">Freenode IRC
 	  network</a>. Surprisingly, the channel is named
 	<tt>#pyddr</tt>. The main developers are often in the channel as
-	P2E (Brendan) and piman (Joe). Jerub and DShadow may also be
-	  able to answer questions about bugs.</p>
+	P2E (Brendan), piman (Joe), and DShadow (John).</p>
   </body>
 </html>
