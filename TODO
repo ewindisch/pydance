@@ -2,7 +2,7 @@ Optimizations
  - clear one huge sprite group
 
 UI Fixes & Improvements
- - In-game help (menu context help, mostly)
+ - In-game help
  - Up/down indicators on menus (smaller menus => not needed?)
  - Menu and song select theming (including new songselect.pys)
  - Less ugly grading screen (bar chart, etc)
