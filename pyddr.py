@@ -3258,14 +3258,14 @@ def blatantplug():
     pygame.mixer.music.set_volume(i/2.0)
     pygame.time.delay(16)
     
-  pygame.time.delay(450)
+  pygame.time.delay(225)
 
   screen.blit(pygamelogo,pygamelogorect)
   screen.blit(oddlogo,oddlogorect)
   screen.blit(xiphlogo,xiphlogorect)
   pygame.display.flip()
 
-  pygame.time.delay(450)
+  pygame.time.delay(225)
   
   tfont = pygame.font.Font(None,48)
   plugtext = ["You have been playing pyDDR","by Brendan Becker","which is available at:","http://icculus.org/pyddr/"," ","If you like it, please donate a few bucks!","The programmer is unemployed! =]"," ","it was made possible by:","Python, SDL,  Pygame,  and Xiph.org"]
@@ -3276,7 +3276,7 @@ def blatantplug():
     mrtextrect.top = plugtext.index(i)*43
     screen.blit(mrtext,mrtextrect)
     pygame.display.flip()
-    pygame.time.delay(450)
+    pygame.time.delay(225)
 
   pygame.time.delay(4500)
 
