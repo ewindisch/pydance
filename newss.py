@@ -12,6 +12,8 @@ import optionscreen
 from constants import *
 from pygame.mixer import music
 
+NO_BANNER = os.path.join(image_path, "no-banner.png")
+
 DIFF_COLORS = { "BEGINNER": colors.color["white"],
                 "LIGHT": colors.color["orange"],
                 "EASY": colors.color["orange"],
@@ -44,26 +46,6 @@ SS_HELP = [
   "Start / Enter switches between screens",
   "F11 toggles fullscreen - S changes the sort mode.",
   "Enjoy pydance 0.9.0!",
-  ]
-
-ITEMS = [
-  "A Song",
-  "Another Song",
-  "B99U",
-  "Max 3.1415926535",
-  "N.M.R sucks a lot",
-  "I need more items",
-  "BlarrrrrrrrrR!",
-  "Cthulhu Fhtagn",
-  "Almost done",
-  "19 Smarch 2038",
-  "This is not nearly",
-  "enough songs yet.",
-  "Lousy huge new song",
-  "selection screen.",
-  "I'll show you!",
-  "This is the last one",
-  "OR IS IT?!"
   ]
 
 # Make an outlined box. The size is given without the 4 pixel border.
@@ -222,6 +204,54 @@ class ListBox(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.topleft = self._topleft
 
+class BannerDisplay(pygame.sprite.Sprite):
+  def __init__(self, size, center):
+    pygame.sprite.Sprite.__init__(self)
+    self._color = [255, 0, 0]
+    self._box = make_box(self._color, [350, 350])
+    self.isfolder = False
+    self._center = center
+    self.update(0)
+
+  def set_song(self, song):
+    self._title = song.info["title"]
+    self._subtitle = song.info["subtitle"]
+    self._artist = song.info["artist"]
+    if song.info["banner"]:
+      banner = pygame.image.load(song.info["banner"])
+      size = banner.get_rect().size
+      if size <= (100, 100): # Parapara-style
+        self._banner = banner
+      elif size == (177, 135): # KSF-style 1
+        self._banner = banner
+      elif size == (300, 200): # KSF-style 2
+        banner = banner.convert()
+        banner.set_colorkey(banner.get_at([0, 0]))
+        self._banner = banner
+      elif abs(size[0] - size[1]) < 3: # "Square", need to rotate.
+        banner.set_colorkey(banner.get_at([0, 0]))
+        self._banner = pygame.transform.rotozoom(banner, -45, 2.0)
+      else: # 256x80, standard banner, I hope.
+        banner = pygame.transform.scale(banner, [256, 80])
+        self._banner = make_box([0, 0, 0], banner.get_size())
+        self._banner.blit(banner, [4, 4])
+    else:
+      self._banner = pygame.image.load(NO_BANNER).convert()
+      self._banner.set_colorkey(self._banner.get_at([0, 0]))
+    self._render()
+
+  def _render(self):
+    self.image = pygame.Surface(self._box.get_size(), SRCALPHA, 32)
+    r = self._banner.get_rect()
+    r.centerx, r.top = self.image.get_rect().size[0] / 2, 10
+    self.image.blit(self._box, [0, 0])
+    self.image.blit(self._banner, r)
+    self.rect = self.image.get_rect()
+    self.rect.center = self._center
+
+  def update(self, time):
+    pass
+
 class SongPreview(object):
   def __init__(self):
     self._playing = False
@@ -281,8 +311,8 @@ class MainWindow(object):
     self._song = self._songs[self._index]
     self._game = game
     self._config = dict(game_config)
-    titles = [s.info["title"] for s in songs]
 
+    titles = [s.info["title"] for s in songs]
 
     players = games.GAMES[game].players
     self._diffs = [] # Current difficulty setting
@@ -298,7 +328,7 @@ class MainWindow(object):
       d = DifficultyBox(i, 2)
       rank = records.get(self._song.filename, diff_name, game)[0]
       grade = grades.grades[self._config["grade"]].grade_by_rank(rank)
-      d.set(diff_name, DIFF_COLORS[diff_name],
+      d.set(diff_name, DIFF_COLORS.get(diff_name, [127, 127, 127]),
             self._song.difficulty[game][diff_name],
             grade)
       self._diff_widgets.append(d)
@@ -308,6 +338,9 @@ class MainWindow(object):
     self._sprites.add(self._diff_widgets)
     self._sprites.add(self._list)
     ActiveIndicator([405, 233]).add(self._sprites)
+    self._banner = BannerDisplay([350, 300], [210, 230])
+    self._banner.set_song(self._song)
+    self._banner.add(self._sprites)
     self._sprites.add(HelpText(SS_HELP, [255, 255, 255], [0, 0, 0],
                                pygame.font.Font(None, 22), [206, 20]))
     self._screen.blit(self._bg, [0, 0])
@@ -369,6 +402,7 @@ class MainWindow(object):
 
       if ev in [ui.QUIT, ui.UP, ui.DOWN, ui.SELECT]:
         self._preview.preview(self._song)
+        self._banner.set_song(self._song)
 
       if ev in [ui.UP, ui.DOWN, ui.SELECT]:
         for i in range(len(self._diffs)):
@@ -382,7 +416,7 @@ class MainWindow(object):
           name = self._song.diff_list[self._game][self._diffs[i]]
           rank = records.get(self._song.filename, name, game)[0]
           grade = grades.grades[self._config["grade"]].grade_by_rank(rank)
-          self._diff_widgets[i].set(name, DIFF_COLORS[name],
+          self._diff_widgets[i].set(name, DIFF_COLORS.get(name, [127,127,127]),
                                     self._song.difficulty[self._game][name],
                                     grade)
 
