@@ -1,4 +1,4 @@
-import os, stat
+import os, stat, util
 
 # FIXME: DanceFile and StepFile can easily share a parent class.
 
@@ -322,6 +322,27 @@ class DWIFile:
 
       self.find_subtitle()
 
+      # This is how DWI finds its stupid mix name. I hate it.
+      if self.info.get("mix", "").lower() == "all music!": # we don't do this
+        del(self.info["mix"])
+        
+      if not self.info.has_key("mix"):
+        mixname = os.path.split(os.path.split(dir)[0])[1]
+        if mixname != "songs": self.info["mix"] = mixname
+
+      for key in ("title", "subtitle", "artist", "mix"):
+        if self.info.has_key(key):
+          self.info[key] = util.titlecase(self.info[key])
+
+      for game in self.difficulty:
+        for odiff, ndiff in (("ANOTHER", "TRICK"), ("SMANIAC", "HARDCORE")):
+          if self.difficulty[game].has_key(odiff):
+            self.difficulty[game][ndiff] = self.difficulty[game][odiff]
+            del(self.difficulty[game][odiff])
+            if need_steps:
+              self.steps[game][ndiff] = self.steps[game][odiff]
+              del(self.steps[game][odiff])
+
   def strip_line(self, line):
     try:
       i = line.index("//")
@@ -332,8 +353,8 @@ class DWIFile:
   # FIXME We share this with StepFile...
   def find_subtitle(self):
     if not self.info.has_key("subtitle"):
-      for pair in (("[", "]"), ("(", ")"), ("~", "~")):
-        if pair[0] in self.info["title"] and pair[1] in self.info["title"]:
+      for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
+        if pair[0] in self.info["title"] and pair[1] == self.info["title"][-1]:
           l = self.info["title"].index(pair[0])
           r = self.info["title"].rindex(pair[1])
           if l != 0 and r > l + 1:

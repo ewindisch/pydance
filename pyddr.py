@@ -973,6 +973,9 @@ def playSequence(numplayers, playlist):
                                         lyrics = songdata.lyricdisplay),
                                         Judge)
 
+    print "Playing", songfn
+    print songdata.title, "by", songdata.artist
+  
     if dance(songdata, players, prevscr):
       break # Failed
 
@@ -1096,9 +1099,6 @@ def dance(song, players, prevscr):
                                "could not be found."))
     return False # The player didn't fail.
 
-  print "Playing", song.filename
-  print song.title, "by", song.artist
-  
   screenshot = 0
 
   if mainconfig['assist']: pygame.mixer.music.set_volume(0.6)
@@ -1223,7 +1223,7 @@ def dance(song, players, prevscr):
         if (curtime >= plr.steps.lastbpmchangetime[0][0]):
           nbpm = plr.steps.lastbpmchangetime[0][1]
           plr.change_bpm(nbpm)
-          print "Last changed BPM at", plr.steps.lastbpmchangetime[0]
+          #print "Last changed BPM at", plr.steps.lastbpmchangetime[0]
           plr.steps.lastbpmchangetime.pop(0)
      
     for plr in players: plr.check_sprites(curtime)

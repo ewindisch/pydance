@@ -105,7 +105,7 @@ class SongItemDisplay:
       color = colors.color[rcolors[random.randint(0, len(rcolors) - 1)]]
 
       if info["mix"]: # ... pick a consistent mix color
-        idx = hash(info["mix"]) % len(rcolors)
+        idx = hash(info["mix"].lower()) % len(rcolors)
         color = colors.color[rcolors[idx]]
 
       color = colors.brighten(color, 145)
