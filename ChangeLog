@@ -10,8 +10,8 @@ legend:
 + 6 panel ("solo") and 8 panel support.
 * Song selector UI tweaks (faster animations, nicer folder opening).
 * Respace the arrows to be closer together in single/versus.
-* All 8 directions can always be done on the numeric pad for player 1.
- - azerty 2nd player start key changed to Enter on the numeric pad.
+* All 9 directions can always be done on the numeric pad for player 1.
+ - azerty 2nd player start key changed to '+' on the numeric pad.
 * Some more speed optimizations for slower processors.
 
 0.7.2 -	Dilaudid, how I love thee                               [2003.07.14]

@@ -236,6 +236,70 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
           self.image.blit(self.space,(x,0))
         self.slotold[i] = self.slotnow[i]
 
+class JudgingDisp(pygame.sprite.Sprite):
+  def __init__(self, playernum, game):
+    pygame.sprite.Sprite.__init__(self)
+
+    self.sticky = mainconfig['stickyjudge']
+    self.needsupdate = 1
+    self.stepped = 0
+    self.oldzoom = -1
+    self.bottom = 320
+    self.centerx = game.sprite_center + (playernum * game.player_offset)
+        
+    # prerender the text for judging for a little speed boost
+    tx = FONTS[48].size("MARVELOUS")[0]+4
+    self.marvelous = fontfx.shadefade("MARVELOUS",48,4,(tx,40),(224,224,224))
+    tx = FONTS[48].size("PERFECT")[0]+4
+    self.perfect   = fontfx.shadefade("PERFECT"  ,48,4,(tx,40),(224,224, 32))
+    tx = FONTS[48].size("GREAT")[0]+4
+    self.great     = fontfx.shadefade("GREAT"    ,48,4,(tx,40),( 32,224, 32))
+    tx = FONTS[48].size("OK")[0]+4
+    self.ok        = fontfx.shadefade("OK"       ,48,4,(tx,40),( 32, 32,224))
+    tx = FONTS[48].size("BOO")[0]+4
+    self.boo      = fontfx.shadefade("BOO"      ,48,4,(tx,40),( 96, 64, 32))
+    tx = FONTS[48].size("MISS")[0]+4
+    self.miss      = fontfx.shadefade("MISS"     ,48,4,(tx,40),(224, 32, 32))
+    self.space     = FONTS[48].render( " ",       1, (  0,   0,   0) )
+
+    self.marvelous.set_colorkey(self.marvelous.get_at((0,0)),RLEACCEL)
+    self.perfect.set_colorkey(self.perfect.get_at((0,0)),RLEACCEL)
+    self.great.set_colorkey(self.great.get_at((0,0)),RLEACCEL)
+    self.ok.set_colorkey(self.ok.get_at((0,0)),RLEACCEL)
+    self.boo.set_colorkey(self.boo.get_at((0,0)),RLEACCEL)
+    self.miss.set_colorkey(self.miss.get_at((0,0)),RLEACCEL)
+    
+    self.image = self.space
+        
+  def update(self, steptimediff, judgetype):
+    if steptimediff < 0.5 or (judgetype == ('MISS' or ' ')):
+      if   judgetype == "MARVELOUS":       self.image = self.marvelous
+      elif judgetype == "PERFECT":         self.image = self.perfect
+      elif judgetype == "GREAT":           self.image = self.great
+      elif judgetype == "OK":              self.image = self.ok
+      elif judgetype == "BOO":             self.image = self.boo
+      elif judgetype == " ":               self.image = self.space
+      elif judgetype == "MISS":            self.image = self.miss
+
+      zoomzoom = steptimediff
+
+      if zoomzoom != self.oldzoom:
+        self.needsupdate = True
+        if (steptimediff > 0.36) and (self.sticky == 0) and self.stepped:
+          self.image = self.space
+          self.stepped = 0
+
+        if steptimediff > 0.2: zoomzoom = 0.2
+        self.image = pygame.transform.rotozoom(self.image, 0, 1-(zoomzoom*2))
+        self.stepped = 1
+
+    if self.needsupdate:
+      self.rect = self.image.get_rect()
+      self.rect.centerx = self.centerx
+      self.rect.bottom = self.bottom
+      self.image.set_colorkey(self.image.get_at((0,0)))
+      self.needsupdate = False
+
 class ComboDisp(pygame.sprite.Sprite):
   def __init__(self, playernum, game):
     pygame.sprite.Sprite.__init__(self,)
@@ -370,10 +434,17 @@ class Player:
     self.arrow_group = pygame.sprite.RenderUpdates()
     self.toparr_group = pygame.sprite.RenderUpdates()
     self.fx_group = pygame.sprite.RenderUpdates()
+    self.text_group = pygame.sprite.RenderUpdates()
     for d in self.game.dirs:
       if mainconfig["explodestyle"] > -1: self.toparrfx[d].add(self.fx_group)
       if not self.dark: self.toparr[d].add(self.toparr_group)
-  
+    for i in range(mainconfig["totaljudgings"]):
+      jd = JudgingDisp(self.pid, self.game)
+      self.judging_list.append(jd)
+      jd.add(self.text_group)
+    self.text_group.add([self.score, self.lifebar, self.holdtext])
+    if mainconfig["showcombo"]: self.text_group.add(self.combos)
+
   def get_next_events(self):
     self.evt = self.steps.get_events()
     self.fx_data = []
@@ -464,12 +535,15 @@ class Player:
         self.steps.lastbpmchangetime.pop(0)
 
   def update_sprites(self, screen):
-    rects = self.toparr_group.draw(screen)
+    rects = []
+    rects.extend(self.toparr_group.draw(screen))
     rects.extend(self.arrow_group.draw(screen))
     rects.extend(self.fx_group.draw(screen))
+    rects.extend(self.text_group.draw(screen))
     return rects
 
   def clear_sprites(self, screen, bg):
+    self.text_group.clear(screen, bg)
     self.fx_group.clear(screen, bg)
     self.arrow_group.clear(screen, bg)
     self.toparr_group.clear(screen, bg)
