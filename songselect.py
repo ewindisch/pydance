@@ -374,7 +374,7 @@ class SongSelect(object):
           changed = True
 
       # Open up a new folder
-      elif ev[1] == E_START and ev[0] == 0 and self.songs[self.index].isfolder:
+      elif ev[1] == E_START and self.songs[self.index].isfolder:
         OPEN_SOUND.play()
         self.scroll_out(self.index)
         self.set_up_songlist(self.songs[self.index].name)
