@@ -1,10 +1,60 @@
 # Code to construct pydance's menus
 
-import pygame, menus, os, sys, copy, colors, games, ui, pad
+import pygame
+import menus
+import os
+import sys
+import games
+import ui
+import pad
 from constants import *
 from announcer import Announcer
 from gfxtheme import ThemeFile
 from gameselect import MainWindow as GameSelect
+
+class Credits(pygame.sprite.Sprite):
+  def __init__(self, lines):
+    pygame.sprite.Sprite.__init__(self)
+    self._font = pygame.font.Font(None, 16)
+    self._lines = lines
+    self._idx = 0
+    self._update = pygame.time.get_ticks() + 7000
+    self._w = max([self._font.size(l)[0] for l in self._lines])
+    self._h = max([self._font.size(l)[1] for l in self._lines])
+    self.update()
+
+  def update(self):
+    t = pygame.time.get_ticks()
+    self.image = pygame.Surface([self._w, self._h])
+    self.image.fill([255, 255, 255])
+    self.rect = self.image.get_rect()
+    self.rect.bottomleft = [10, 479]
+    if self._update - t > 2000:
+      txt = self._font.render(self._lines[self._idx], True, [0, 0, 0])
+      r = txt.get_rect()
+      r.center = [self._w / 2, self._h / 2]
+      self.image.blit(txt, r)
+    elif t < self._update:
+      p = (self._update - t) / 2000.0
+      wy = int(self._h * p)
+      idx1 = self._idx
+      idx2 = (self._idx + 1) % len(self._lines)
+      txt1 = self._font.render(self._lines[idx1], True, [0, 0, 0])
+      txt2 = self._font.render(self._lines[idx2], True, [0, 0, 0])
+      r1 = txt1.get_rect()
+      r2 = txt2.get_rect()
+      r2.centerx = r1.centerx = self._w / 2
+      r2.top = wy
+      r1.bottom = wy
+      self.image.blit(txt1, r1)
+      self.image.blit(txt2, r2)
+    else:
+      self._idx = (self._idx + 1) % len(self._lines)
+      self._update = t + 4000
+      txt = self._font.render(self._lines[self._idx], True, [0, 0, 0])
+      r = txt.get_rect()
+      r.center = [self._w / 2, self._h / 2]
+      self.image.blit(txt, r)
 
 # A simple on/off setting, 1 or 0
 def get_onoff(name):
@@ -95,10 +145,10 @@ def switch_tuple(name, list):
   elif mainconfig[name] == orig: mainconfig[name] = list[0][0]  
   return get_tuple(name, list)
 
-def switch_tuple_back(name, list):
-  list = copy.copy(list)
-  list.reverse()
-  return switch_tuple(name, list)
+def switch_tuple_back(name, l):
+  l = l[:]
+  l.reverse()
+  return switch_tuple(name, l)
 
 # Wrap an object constructor
 def wrap_ctr(Obj, args):
@@ -126,6 +176,17 @@ def do(screen, songdata):
                 ui.RIGHT: switch_tuple,
                 menus.CREATE: get_tuple }
 
+  sprites = pygame.sprite.RenderUpdates()
+  try:
+    Credits(["pydance %s" % VERSION] +
+            file(os.path.join(pydance_path, "CREDITS")).read().split("\n")
+            ).add(sprites)
+  except:
+    Credits(["pydance %s" % VERSION,
+             "http://icculus.org/pyddr",
+             "By Joe Wreschnig & Brendan Becker",
+             "(Your CREDITS file is missing.)",
+             ]).add(sprites)
 
   m = (["Play Game", {ui.START: wrap_ctr, ui.CONFIRM: wrap_ctr},
 	(GameSelect, songdata)],
@@ -192,5 +253,5 @@ def do(screen, songdata):
         )
        )
 
-  me = menus.Menu("Main Menu", m, screen)
+  me = menus.Menu("Main Menu", m, screen, sprites)
   me.display()

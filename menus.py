@@ -90,8 +90,9 @@ class Menu(object):
   # Menus are defined based on a tree of tuples (submenus) ending
   # in a list (the final item). The first item of the tuple is
   # a string of text which gets displayed.
-  def __init__(self, name, itemlist, screen):
+  def __init__(self, name, itemlist, screen, sprites):
     self.items = []
+    self.sprites = sprites
     self.text = name
     self.rgb = LIGHT_GRAY
     self.bg = button_bg
@@ -103,7 +104,7 @@ class Menu(object):
         self.items.append(MenuItem(i[0], i[1], i[2]))
         self.items[-1].activate(CREATE)
       elif type(i) == type((0,0)): # New submenus are tuples
-        self.items.append(Menu(i[0], i[1:], screen))
+        self.items.append(Menu(i[0], i[1:], screen, sprites))
 
   # Menu rendering is tons easier, since it never changes.
   def render(self):
@@ -193,7 +194,10 @@ class Menu(object):
                                 TOP_OFFSET + i * (BUTTON_HEIGHT +
                                                   BUTTON_PADDING))))
 
+      self.sprites.update()
+      r.extend(self.sprites.draw(screen))
       pygame.display.update(r)
+      #self.sprites.clear(screen, Menu.bgimage)
       clock.tick(30)
 
     if ev == ui.QUIT:
