@@ -4,6 +4,7 @@ Type=Application
 Version=0.9.4
 Encoding=UTF-8
 Name=pydance
+Icon=pydance.png
 GenericName=Dancing Game
 TryExec=pydance
 Exec=pydance

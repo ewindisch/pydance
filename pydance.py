@@ -27,10 +27,10 @@ if len(sys.argv) < 2: pass
 elif sys.argv[1] in ["--help", "-h"]: print_help()
 elif sys.argv[1] in ["--version", "-v"]: print_version()
 
-from constants import * # This needs to be here to set sys.path.
-
 # Don't import anything that initializes the joysticks or config until
 # after we're (reasonable) sure no one wants --help or --version.
+from constants import * # This needs to be here to set sys.path.
+
 import util
 import games
 import dance
@@ -142,6 +142,12 @@ def main():
   
   pygame.display.set_caption("pydance " + VERSION)
   pygame.mouse.set_visible(False)
+  try:
+    if os.path.exists("/usr/share/pixmaps/pydance.png"):
+      icon = pygame.image.load("/usr/share/pixmaps/pydance.png")
+    else: icon = pygame.image.load(os.path.join(pydance_path, "icon.png"))
+    pygame.display.set_icon(icon)
+  except: pass
 
   music.load(os.path.join(sound_path, "menu.ogg"))
   music.play(4, 0.0)
