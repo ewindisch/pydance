@@ -11,6 +11,8 @@ Legend:
 + The TODO file has been revised with plans for pydance 1.2.
 + Display a "Press Confirm" on the grading screen over the banner.
 + Add an icon (pydance-icon.png).
++ Using a pydance.zip (containing the modules needed) works now. (This
+  is mostly of interest to packagers).
 * Fix a possible divide-by-zero in FPS calculuation.
 
 0.9.1 - This release is dedicated to Gentoo bug #35890.		[2004.02.11]

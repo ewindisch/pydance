@@ -27,6 +27,8 @@ if len(sys.argv) < 2: pass
 elif sys.argv[1] in ["--help", "-h"]: print_help()
 elif sys.argv[1] in ["--version", "-v"]: print_version()
 
+from constants import * # This needs to be here to set sys.path.
+
 # Don't import anything that initializes the joysticks or config until
 # after we're (reasonable) sure no one wants --help or --version.
 import util
@@ -44,7 +46,6 @@ from fontfx import TextProgress
 from error import ErrorMessage
 
 from pad import pad
-from constants import *
 
 # Set our required display paramters. Currently, this is nothing
 # strange on any platforms, but in the past and likely in the future

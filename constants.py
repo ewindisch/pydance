@@ -2,16 +2,9 @@
 # This file should be kept as small as possible, probably. (But I seem
 # to be failing at doing that.)
 
-import config
-import pygame
-import games
 import sys
 import os
-import colors
 import locale
-
-from pygame.locals import *
-
 VERSION = "1.0.0"
 locale.setlocale(locale.LC_ALL, '')
 
@@ -63,6 +56,13 @@ search_paths = (pydance_path, rc_path)
 if not sys.stdout.isatty():
   sys.stdout = file(os.path.join(rc_path, "pydance.log"), "w")
   sys.stderr = sys.stdout
+
+import pygame
+import games
+import config
+import colors
+
+from pygame.locals import *
 
 # Set up the configuration file
 default_conf = {

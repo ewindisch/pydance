@@ -1,6 +1,7 @@
 MANPAGES += docs/man
 UTILS += utils/findbpm.py
-PYMODS += config.py announcer.py fontfx.py constants.py menus.py menudriver.py gfxtheme.py songselect.py fileparsers.py colors.py player.py endless.py gradescreen.py lyrics.py steps.py util.py error.py options.py games.py judge.py dance.py stepfilters.py gameselect.py lifebars.py scores.py combos.py listener.py grades.py stats.py arrows.py pad.py ui.py courses.py records.py interface.py courseselect.py
+ALLMODS += $(PYMODS)
+ZIPMODS += config.py announcer.py fontfx.py menus.py menudriver.py gfxtheme.py songselect.py fileparsers.py colors.py player.py endless.py gradescreen.py lyrics.py steps.py util.py error.py options.py games.py judge.py dance.py stepfilters.py gameselect.py lifebars.py scores.py combos.py listener.py grades.py stats.py arrows.py pad.py ui.py courses.py records.py interface.py courseselect.py
 
 DATA += themes images sound CREDITS
 
@@ -10,6 +11,5 @@ clean:
 distclean: clean
 	rm -f pydance.cfg Makefile
 
-zip:
-	zip pydance.zip $(PYMODS)
-	zip -d pydance.zip pydance.py
+pydance.zip:
+	zip pydance.zip $(ZIPMODS)
