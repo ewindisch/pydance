@@ -2,7 +2,7 @@
                                   About pyDDR
 
    pyDDR is a dancing simulator, primarily for GNU/Linux, but it also
-   runs on other UNIX-like operating systems, Windows, and MacOS X. DDR
+   runs on other UNIX-like operating systems, Windows, and Mac OS X. DDR
    stands for "Dance Dance Revolution", a game that's slowly earning
    popularity in the United States and other countries, that comes from
    Japan. The game idea is simple. There's a mat with four directional
@@ -49,7 +49,7 @@
    pyDDR reads from configuration files in appropriate places. This means
    /etc/pyddr.cfg and ~/.pyddr/pyddr.cfg on UNIX,
    /Library/Preferences/pyDDR/pyddr.cfg and
-   ~/Library/Preferences/pyDDR/pyddr.cfg on MacOS X, and pyddr.cfg in the
+   ~/Library/Preferences/pyDDR/pyddr.cfg on Mac OS X, and pyddr.cfg in the
    current directory on all platforms (note that this is the only
    configuration file Windows systems will read). Files are read in the
    order listed above.
@@ -61,7 +61,8 @@ Adding Songs
    directories. This is the songdir configuration variable. On POSIX
    systems this is /usr/share/games/pyddr/songs,
    /usr/local/share/games/pyddr/songs, and ~/.pyddr/songs. On Windows,
-   this is anywhere in the directory pyDDR was installed in.
+   this is anywhere in the directory pyDDR was installed in. On Mac OS X,
+   this is the folder "pyDDR Songs" in your Music folder.
 
 pyddr.cfg
 
@@ -296,7 +297,7 @@ GNU/Linux
    input, hid, and joydev modules are loaded (the first two are required
    for any USB input device).
 
-MacOS X
+Mac OS X
 
    Plug-and-play, or so I've heard. Just plug in your pad using the USB
    adapter, and off you go.
