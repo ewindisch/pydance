@@ -218,7 +218,7 @@ class GradingScreen(InterfaceWindow):
         StatSprite([15, 406], "BOO:", plr.stats["B"], s, 1333),
         StatSprite([15, 440], "MISS:", plr.stats["M"], s, 1666),
         StatSprite([215, 270], "Score:", int(plr.score.score), s, 666),
-        HoldSprite([215, 304], "Holds:", plr.stats.good_holds,
+        HoldStatSprite([215, 304], "Holds:", plr.stats.good_holds,
                    plr.stats.hold_count, s, 1000),
         StatSprite([215, 338], "Max Combo:", plr.stats.maxcombo, s, 1333),
         StatSprite([215, 372], "Early:", plr.stats.early, s, 1666),
