@@ -988,8 +988,8 @@ class Song:
     little = mainconfig["little"]
     coloringmod = 0
     self.totarrows = {}
-    self.holdinfo = []
-    self.holdref = []
+    self.holdinfo = [None,None,None]
+    self.holdref = [None,None,None]
     numholds = 1
     holdlist = []
     releaselist = []
@@ -997,6 +997,7 @@ class Song:
     releasetimes = []
     holding = [0,0,0,0]
     chompNext = None
+    difficulty = None
     for fileline in open(fn).readlines():
       fileline = fileline.strip()
       if fileline == '' or fileline[0] == '#': continue
@@ -1025,8 +1026,9 @@ class Song:
             coloringmod = 0
 
             # append the hold info for this mode
-            self.holdinfo.append( zip(holdlist,holdtimes,releasetimes) )
-            self.holdref.append( zip(holdlist,holdtimes) )
+            if difficulty:
+              self.holdinfo[DIFFICULTYLIST.index(difficulty)] = zip(holdlist,holdtimes,releasetimes)
+              self.holdref[DIFFICULTYLIST.index(difficulty)] = zip(holdlist,holdtimes)
 
             # reset all the hold arrow stuff and operate on next mode
             holdlist = []
@@ -1083,8 +1085,7 @@ class Song:
                   elif ((feetstep[checkforholds] & 128) or (feetstep[checkforholds] & 8)) and holding[checkforholds] and didnothold:
                       releasetimes.insert(holding[checkforholds],curTime)
                       releaselist.insert(holding[checkforholds],checkforholds)
-                      if feetstep[checkforholds] & 8:
-                        feetstep[checkforholds] ^= 8       # xor the arrow event only
+                      feetstep[checkforholds] = 0       # drop the whole event in the event of a broken stepfile
                       holding[checkforholds] = 0
               tail.next = SongEvent(when=curTime,
                                     bpm=curBPM,
@@ -1123,6 +1124,7 @@ class Song:
         self.haslyrics = '  (LYRICS)'
         curTime = 0.0
         curBPM = self.bpm
+        difficulty = None
         self.lyrics = SongEvent(when=curTime,bpm=curBPM)
         chompNext = None,self.lyrics
       elif firstword == 'song':        self.song = " ".join(rest)
@@ -1738,7 +1740,7 @@ def playSequence(numplayers, playlist):
 
   players = []
   for playerID in range(numplayers):
-    plr = Player(playerID, HoldJudgeDisp(playerID), ComboDisp(playerID))
+    plr = Player(playerID, HoldJudgeDisp(playerID), ComboDisp(playerID), DIFFICULTYLIST)
     players.append(plr)
     
   for songfn, diff in playlist:
@@ -2030,7 +2032,7 @@ def dance(song, players):
                   ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr.pid).add([plr.arrow_group, rgroup])
 
               if num & 128:
-                diffnum = song.modediff[playmode].index(plr.difficulty)
+                diffnum = DIFFICULTYLIST.index(plr.difficulty)
                 holdindex = song.holdref[diffnum].index((DIRECTIONS.index(dir),ev.when))
                 HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr.pid).add([plr.arrow_group, rgroup])
           

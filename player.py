@@ -4,7 +4,7 @@ from gfxtheme import GFXTheme
 import fontfx, spritelib, colors
 
 class Player:
-  def __init__(self, pid, holdtext, combos, mode = "SINGLE"):
+  def __init__(self, pid, holdtext, combos, difflist, mode = "SINGLE"):
     self.theme = GFXTheme(mainconfig["gfxtheme"])
     if mainconfig["reversescroll"]:
       self.arrow_top = 408
@@ -27,6 +27,7 @@ class Player:
     self.holds = None
     self.evt = None
     self.mode = mode
+    self.difficultylist = difflist
 
     self.sudden = mainconfig['sudden']
     self.hidden = mainconfig['hidden']
@@ -40,7 +41,7 @@ class Player:
     self.difficulty = diff
     self.score.set_text(diff)
     difflist = self.song.modediff[self.mode]
-    holds = self.song.holdref[self.song.modediff[self.mode].index(self.difficulty)]
+    holds = self.song.holdref[self.difficultylist.index(self.difficulty)]
     if holds: self.holds = len(holds)
     else: self.holds = 0
     j = Judge(self.song.bpm, self.holds,
@@ -92,7 +93,7 @@ class Player:
       self.toparrfx[d].update(curtime, self.judge.combo)
 
   def should_hold(self, direction, curtime):
-    l = self.song.holdinfo[self.song.modediff[self.mode].index(self.difficulty)]
+    l = self.song.holdinfo[self.difficultylist.index(self.difficulty)]
     for i in range(len(l)):
       if l[i][0] == DIRECTIONS.index(direction):
         if ((curtime - 15.0/self.song.playingbpm > l[i][1])
