@@ -22,7 +22,7 @@ except: records = {}
 def add(filename, diff, game, rank, name):
   game = games.VERSUS2SINGLE.get(game, game)
   newfn = os.path.join(*filename.split(os.sep)[-3:])
-  if newfn in records:
+  if (newfn, diff, game) in records:
     if rank > records[newfn][0]:
       records[(newfn, diff, game)][0] = (rank, name)
       return True
