@@ -68,7 +68,6 @@ class AbstractCourse(object):
   def next(self):
     # We're done.
     if self.index == len(self.songs): raise StopIteration
-    
     name, diff, mods = self.songs[self.index]
     fullname = None
 
@@ -92,7 +91,19 @@ class AbstractCourse(object):
         fullname = s.filename
         if isinstance(diff, list):
           diff = [d for d in diff if d in s.difficulty[self.gametype]][0]
-
+    elif name[0] == "LIKES":
+      s = self.recordkeys.get(records.like(name[1], diff, self.gametype),None)
+      if s:
+        fullname = s.filename
+        if isinstance(diff, list):
+          diff = [d for d in diff if d in s.difficulty[self.gametype]][0]
+    elif name[0] == "DISLIKES":
+      s = self.recordkeys.get(records.dislike(name[1], diff, self.gametype),None)
+      if s:
+        fullname = s.filename
+        if isinstance(diff, list):
+          diff = [d for d in diff if d in s.difficulty[self.gametype]][0]
+          
     elif name[-1] == "*": # A random song
       # First pull out all the songs that we might be acceptable.
       if "/" in name:

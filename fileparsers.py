@@ -246,6 +246,33 @@ class MSDFile(GenericFile):
   def find_audio(self):
     return self.find_files(["ogg", "mp3", "wav", ".xm"])
 
+  # Try to locate the audio file from a Windows path.
+  # This function makes lots and lots of assumptions about the directory layout.
+  # It should only be used as last resort, when all other methods for locating
+  # the audio file have been exhausted.
+  def find_winfname(self):
+    fpathparts = self.info['filename'].split('\\')
+    if fpathparts[0] == '.': fpathparts = fpathparts[1:]
+    if fpathparts[0].lower() == 'songs': fpathparts = fpathparts[1:]
+    
+    fpaths = [os.path.expanduser(path) for path in mainconfig["songdir"].split(os.pathsep)]
+  
+    for fpathpart in fpathparts:
+      # The following is a bit convoluted, but it does the trick:
+      # Taking each candidate path, we look at its subdirectories. If any
+      # match what we are looking for, we add that to the candidate path.
+      fpaths = [os.path.join(fpath,matched_part)
+                for fpath in fpaths
+                for matched_part in os.listdir(fpath)
+                if matched_part.lower() == fpathpart.lower()]
+
+    # If all goes well (as well as it could go at this point, anyway), we
+    # should have exactly one "candidate" left.
+    if len(fpaths) == 1:
+      self.info["filename"] = fpaths[0]
+    else:
+      del self.info["filename"]
+
   # DWI finds files based on their image size, not on any naming conventions.
   # However, naming conventions are a useful and accurate heuristic.
 
@@ -278,6 +305,8 @@ class MSDFile(GenericFile):
           elif (fn.lower()[-3:] in ["mp3", "wav"] and
                 self.info.get("filename", "").lower()[-3:] != "ogg"):
             self.info["filename"] = fn
+      elif 'filename' in self.info:
+        self.find_winfname()
 
     lyrics = self.find_files(["lrc"])
     if len(lyrics) > 0: self.parse_lyrics(lyrics[0])
@@ -350,9 +379,10 @@ class DWIFile(MSDFile):
       # fields (not many; basically all SMs do).
       if rest == "": continue
 
-      # don't support filenames. They're useless cross-platform.
       # Don't support genre, it's a dumbass tag
       if parts[0] == "GAP": self.info["gap"] = -int(float(rest))
+      # If filename given, save it, and let MSDFile.find_winfname() have a stab at it.
+      elif parts[0] == "FILE": self.info["filename"] = rest
       elif parts[0] == "TITLE": self.info["title"] = rest.decode("iso-8859-1").encode("utf-8")
       elif parts[0] == "ARTIST": self.info["artist"] = rest.decode("iso-8859-1").encode("utf-8")
       elif parts[0] == "MD5": self.info["md5sum"] = rest

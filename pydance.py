@@ -28,7 +28,7 @@ elif sys.argv[1] in ["--help", "-h"]: print_help()
 elif sys.argv[1] in ["--version", "-v"]: print_version()
 
 # Don't import anything that initializes the joysticks or config until
-# after we're (reasonable) sure no one wants --help or --version.
+# after we're (reasonably) sure no one wants --help or --version.
 from constants import * # This needs to be here to set sys.path.
 
 import util

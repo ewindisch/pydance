@@ -271,8 +271,14 @@ class OptionSelect(pygame.sprite.Sprite):
       r = r2
 
 class OptionScreen(InterfaceWindow):
-  def __init__(self, player_configs, game_config, screen):
+  def __init__(self, player_configs, game_config, screen, whitelist=None):
     InterfaceWindow.__init__(self, screen, "option-bg.png")
+
+    if whitelist is None:
+      self.optlist = OPTS
+    else:
+      self.optlist = [opt for opt in OPTS if opt in whitelist]
+
     self._configs = player_configs
     self._config = game_config
     self._players = len(self._configs)
@@ -280,14 +286,14 @@ class OptionScreen(InterfaceWindow):
     self._lists = [ListBox(pygame.font.Font(None, 24), [255, 255, 255],
                            25, 9, 176, [10, 10])]
     self._text = [WrapTextDisplay(28, 430, [198, 165], centered = True,
-                                  str = OPTIONS[OPTS[0]][DESCRIPTION])]
-    val = self._configs[0][OPTS[0]]
-    names = [v[NAME] for v in OPTIONS[OPTS[0]][VALUES]]
-    desc = OPTIONS[OPTS[0]][VALUES][index_of(val, OPTS[0])][DESCRIPTION]
+                                  str = OPTIONS[self.optlist[0]][DESCRIPTION])]    
+    val = self._configs[0][self.optlist[0]]
+    names = [v[NAME] for v in OPTIONS[self.optlist[0]][VALUES]]
+    desc = OPTIONS[self.optlist[0]][VALUES][index_of(val, self.optlist[0])][DESCRIPTION]
     self._text2 = [WrapTextDisplay(22, 430, [198, 105], centered = True,
                                   str = desc)]
     self._displayers = [OptionSelect(names, [415, 40],
-                                     index_of(val, OPTS[0]))]
+                                     index_of(val, self.optlist[0]))]
     self._index = [0]
     ActiveIndicator([5, 106], height = 25, width = 185).add(self._sprites)
     if self._players == 2:
@@ -295,21 +301,21 @@ class OptionScreen(InterfaceWindow):
                                  25, 9, 176, [453, 246]))
       self._index.append(0)
       self._text.append(WrapTextDisplay(28, 430, [10, 275], centered = True,
-                                        str = OPTIONS[OPTS[0]][DESCRIPTION]))
+                                        str = OPTIONS[self.optlist[0]][DESCRIPTION]))
       ActiveIndicator([448, 341], height = 25, width = 185).add(self._sprites)
-      val = self._configs[1][OPTS[0]]
-      desc = OPTIONS[OPTS[0]][VALUES][index_of(val, OPTS[0])][DESCRIPTION]
+      val = self._configs[1][self.optlist[0]]
+      desc = OPTIONS[self.optlist[0]][VALUES][index_of(val, self.optlist[0])][DESCRIPTION]
       self._text2.append(WrapTextDisplay(22, 430, [10, 350], centered = True,
                                          str = desc))
       self._displayers.append(OptionSelect(names, [220, 440],
-                                           index_of(val, OPTS[0])))
+                                           index_of(val, self.optlist[0])))
 
     HelpText(O_HELP, [255, 255, 255], [0, 0, 0],
              pygame.font.Font(None, 22), [320, 241]).add(self._sprites)
     self._sprites.add(self._lists + self._displayers + self._text +
                       self._text2)
 
-    for l in self._lists: l.set_items([OPTIONS[k][1] for k in OPTS])
+    for l in self._lists: l.set_items([OPTIONS[k][1] for k in self.optlist])
     self._screen.blit(self._bg, [0, 0])
 
     pygame.display.update()
@@ -319,28 +325,28 @@ class OptionScreen(InterfaceWindow):
     pid, ev = ui.ui.poll()
     for i, l in enumerate(self._lists): l.set_index(self._index[i])
     for i in range(self._players):
-      opt = OPTS[self._index[i]]
+      opt = self.optlist[self._index[i]]
       self._displayers[i].set_index(index_of(self._configs[i][opt], opt))
 
     while ev not in [ui.START, ui.CANCEL, ui.CONFIRM]:
       if pid >= self._players: pass
 
       elif ev == ui.UP:
-        self._index[pid] = (self._index[pid] - 1) % len(OPTS)
+        self._index[pid] = (self._index[pid] - 1) % len(self.optlist)
         self._lists[pid].set_index(self._index[pid], -1)
       elif ev == ui.DOWN:
-        self._index[pid] = (self._index[pid] + 1) % len(OPTS)
+        self._index[pid] = (self._index[pid] + 1) % len(self.optlist)
         self._lists[pid].set_index(self._index[pid], 1)
 
       elif ev == ui.LEFT:
-        opt = OPTS[self._index[pid]]
+        opt = self.optlist[self._index[pid]]
         if OPTIONS[opt][PP]: index = index_of(self._configs[pid][opt], opt)
         else: index = index_of(self._config[opt], opt)
         if index > 0: index -= 1
         if OPTIONS[opt][PP]: self._configs[pid][opt] = value_of(index, opt)
         else: self._config[opt] = value_of(index, opt)
       elif ev == ui.RIGHT:
-        opt = OPTS[self._index[pid]]
+        opt = self.optlist[self._index[pid]]
         if OPTIONS[opt][PP]: index = index_of(self._configs[pid][opt], opt)
         else: index = index_of(self._config[opt], opt)
         if index != len(OPTIONS[opt][VALUES]) - 1: index += 1
@@ -352,13 +358,13 @@ class OptionScreen(InterfaceWindow):
         pygame.display.toggle_fullscreen()
 
       if ev in [ui.UP, ui.DOWN]:
-        values = OPTIONS[OPTS[self._index[pid]]][VALUES]
+        values = OPTIONS[self.optlist[self._index[pid]]][VALUES]
         names = [v[NAME] for v in values]
         self._displayers[pid].set_possible(names)
-        self._text[pid].set_text(OPTIONS[OPTS[self._index[pid]]][DESCRIPTION])
+        self._text[pid].set_text(OPTIONS[self.optlist[self._index[pid]]][DESCRIPTION])
 
       if ev in [ui.LEFT, ui.RIGHT, ui.UP, ui.DOWN]:
-        opt = OPTS[self._index[pid]]
+        opt = self.optlist[self._index[pid]]
         if OPTIONS[opt][PP]:
           val = self._configs[pid][opt]
           idx = index_of(val, opt)

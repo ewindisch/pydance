@@ -7,10 +7,14 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
-1.0.3 - Like that's possible.
-* An import conflict with python-stats was fixed. This mostly affects
-  Ubuntu users.
+1.0.3 - Like that's possible.					[2005.04.04]
+* An import conflict with python-stats was fixed.
 * Take a shot at detecting 3 axis 10 button joypads.
+* Fix crash when using flat mode. (Drake Wilson)
+* Better Xbox pad support. (David Fifield)
+* Change options between songs. (Pavel Nikolai Krivitsky)
+* Support for #FILE in DWI files. (Pavel Nikolai Krivitsky)
+* Fixes for player's best/worst courses. (Pavel Nikolai Krivitsky)
 
 1.0.2 - Moist!							[2004.07.06]
 * Defafult announcer theme courtsey of DJ Nz17!

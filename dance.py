@@ -219,7 +219,8 @@ class SongInfoScreen(InterfaceWindow):
 
       pid, ev = ui.ui.poll()
       if ev == ui.START:
-        options.OptionScreen(self.configs, self.songconf, self._screen)
+        options.OptionScreen(self.configs, self.songconf, self._screen,
+                             whitelist = [x[0] for x in changeable_between])
         
         for pid in range(len(self.diffs)):
           self._player_opts[pid].set_text(self.opt_summary(pid))

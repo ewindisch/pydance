@@ -79,11 +79,34 @@ A2B8 = { 4: UP, 6: DOWN,  5: LEFT, 7: RIGHT, 2: START,
 A3B10 = { 0: LEFT, 1: DOWN, 2: RIGHT, 3: UP, 4: UPLEFT, 5: UPRIGHT,
           6: DOWNLEFT, 7: DOWNRIGHT, 8: SELECT, 9: START }
   
-# X-Box controller with X-Box Linux
-A14B10 = { 4: UP, 0: DOWN, 3: LEFT, 1: RIGHT,  6: START, 9: QUIT }
+# Xbox gamepads, Linux driver
+# With joydev module: 8 axes, 10 buttons
+# With evdev module: 6 axes, 1 hat, 10 buttons
+# B: 1, A: 0, X: 3, Y: 4, White: 5, Black: 2
+# Back: 9, Start: 6
+# Left analog stick: 7, Right analog stick: 8
+A8B10 = { 4: UP, 0: DOWN, 3: LEFT, 1: RIGHT, 6: START, 9: QUIT }
+
+# XBox gamepads, Xbox Linux driver (2.4.25 and 2.6.4 and earlier)
+# With joydev module: 14 axes, 10 buttons
+# With evdev module: 6 axes, 4 hats, 10 buttons
+# B: 1, A: 0, X: 3, Y: 4, White: 5, Black: 2
+# Back: 9, Start: 6
+# Left analog stick: 7, Right analog stick: 8
+A14B10 = { 4: UP, 0: DOWN, 3: LEFT, 1: RIGHT, 6: START, 9: QUIT }
+
+# XBox gamepads, Xbox Linux driver
+# With joydev module: 14 axes, 14 buttons
+# With evdev module: 6 axes, 4 hats, 14 buttons
+# Left: 12, Up: 9, Right: 10, Down: 11
+# B: 1, A: 0, X: 3, Y: 4, White: 5, Black: 2
+# Back: 13, Start: 6
+# Left analog stick: 7, Right analog stick: 8
+A14B14 = { 13: QUIT, 9: UP, 1: UPLEFT, 12: LEFT, 4: DOWNLEFT, 11: DOWN,
+           3: DOWNRIGHT, 10: RIGHT, 0: UPRIGHT, 6: START }
 
 MATS = { (6, 12): A6B12, (14, 10): A14B10, (2, 10): A2B10, (2, 8): A2B8,
-         (3, 10): A3B10 }
+         (8, 10): A8B10, (14, 14): A14B14 }
 
 class Pad(object):
 
@@ -110,6 +133,8 @@ class Pad(object):
       m = pygame.joystick.Joystick(i)
       m.init()
       args = (i, m.get_numaxes(), m.get_numbuttons())
+      # One hat is two axes.
+      args = (i, m.get_numaxes() + 2 * m.get_numhats(), m.get_numbuttons())
       print "Joystick %d initialized: %d axes, %d buttons." % args
 
       if args[2] == 32: emsusb2 = i
@@ -138,15 +163,15 @@ class Pad(object):
       print "EMSUSB2 found. Using preset EMSUSB2 config."
     elif mat != None:
       joy = pygame.joystick.Joystick(mat)
-      but, axes = joy.get_numaxes(), joy.get_numbuttons()
+      axes, but = joy.get_numaxes() + 2 * joy.get_numhats(), joy.get_numbuttons()
       print "Initializing player 1 using js%d." % mat
-      self.merge_events(0, mat, MATS[(but, axes)])
+      self.merge_events(0, mat, MATS[(axes, but)])
 
       if mat2:
         joy = pygame.joystick.Joystick(mat2)
-        but, axes = joy.get_numaxes(), joy.get_numbuttons()
+        axes, but = joy.get_numaxes() + 2 * joy.get_numhats(), joy.get_numbuttons()
         print "Initializing player 2 using js%d." % mat2
-        self.merge_events(1, mat2, MATS[(but, axes)])
+        self.merge_events(1, mat2, MATS[(axes, but)])
     elif totaljoy > 0:
       print "No known joysticks found! If you want to use yours,"
       print "you'll have to map its button manually once to use it."

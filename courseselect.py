@@ -75,7 +75,7 @@ class CourseDisplay(object):
           subtitle = "(You need to play more songs!)"
 
       elif name[0] == "WORST":
-        song = recordkeys.get(records.best(name[1], diff, game))
+        song = recordkeys.get(records.worst(name[1], diff, game))
         if song:
           subtitle = (song.info["subtitle"] or "") + (" (Worst #%d)" % name[1])
           name = song.info["title"]
