@@ -74,6 +74,7 @@ if osname == "win32":
   print "Make sure your pyddr.cfg file points to your song directory."
 elif osname == "macosx":
   print "This OSs support is not yet integrated into this program."
+  print "Please use the DMG file on http://www.icculus.org/pyddr."
 elif osname == "posix":
   print "Configuration for UNIX-like systems complete. 'make install' should"
   print "properly install pyDDR, by default into /usr/local. You can override"

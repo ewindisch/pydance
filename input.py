@@ -61,6 +61,9 @@ class EventManager:
       elif ddrmat.get_numbuttons() == 12 and ddrmat.get_numaxes() == 6:
         if mat == None: mat = i
         elif mat2 == None: mat2 = i
+      else:
+        print "You have a joystick attached, but it doesn't seem to be a DDR mat."
+        print "It has", ddrmat.get_numbuttons(), "buttons and", ddrmat.get_numaxes(), "axes."
       ddrmat.quit()
     if emsusb2 != None: # EMSUSB2, if found, is the only device we'll use.
       ddrmat = pygame.joystick.Joystick(emsusb2)

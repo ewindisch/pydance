@@ -44,8 +44,6 @@ if USE_GL:
   pygame.display.set_mode = gl_display_set_mode
 
 
-pygame_time_get_ticks = pygame.time.get_ticks
-
 # extend the sprite class with layering support
 pygame.sprite.Sprite.zindex = DEFAULTZINDEX
 #def zcompare(self,other):
@@ -163,7 +161,6 @@ class Judge:
     self.combo = self.bestcombo = self.broke = 0
     self.steppedtime = -1000
     self.recentsteps = [' ',' ',' ']
-#    self.table = string.maketrans("", "")
     self.early = self.late = self.ontime = 0
     self.totalcombos = 1
     self.bpm = bpm
@@ -917,7 +914,7 @@ class TopArrow(pygame.sprite.Sprite):
 
 class Blinky(pygame.sprite.Sprite):
   def __init__ (self, bpm):
-    pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
+    pygame.sprite.Sprite.__init__(self)
     self.tick = toRealTime(bpm, 1);
     self.frame = 0
     self.oldframe = -100
@@ -1116,15 +1113,15 @@ class LifeBarDisp(pygame.sprite.Sprite):
               self.redbar_pos.left = 2+ barpos*4
               self.redbar_pos.top = 2
               self.image.blit(self.redbar,self.redbar_pos)
-            if barpos > 10 and barpos <= 20:
+            elif barpos <= 20:
               self.orgbar_pos.left = 2+ barpos*4
               self.orgbar_pos.top = 2
               self.image.blit(self.orgbar,self.orgbar_pos)
-            if barpos > 20 and barpos <= 35:
+            elif barpos <= 35:
               self.yelbar_pos.left = 2+ barpos*4
               self.yelbar_pos.top = 2
               self.image.blit(self.yelbar,self.yelbar_pos)
-            if barpos > 35 and barpos < 50:
+            elif barpos < 50:
               self.grnbar_pos.left = 2+ barpos*4
               self.grnbar_pos.top = 2
               self.image.blit(self.grnbar,self.grnbar_pos)
@@ -1134,7 +1131,7 @@ class LifeBarDisp(pygame.sprite.Sprite):
 
 class JudgingDisp(pygame.sprite.Sprite):
     def __init__(self,playernum):
-        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+        pygame.sprite.Sprite.__init__(self)
 
         self.total = mainconfig['totaljudgings']
         self.sticky = mainconfig['stickyjudge']
@@ -1550,10 +1547,10 @@ class Song:
         pygame.mixer.music.play(0, self.startsec)
     except TypeError:
       print "Sorry, pyDDR needs a more up to date Pygame or SDL than you have."
-      sys.exit()
+      sys.exit(1)
 
     self.curtime = 0.0
-    self.tickstart = pygame_time_get_ticks()
+    self.tickstart = pygame.time.get_ticks()
     self.head = self.fhead = self.modes[mode][difficulty]
 
   def kill(self):
@@ -1564,7 +1561,7 @@ class Song:
     if self.mixerclock:
       self.curtime = float(pygame.mixer.music.get_pos())/1000.0 # -self.tickstart causes desync
     else:
-      self.curtime = float(pygame_time_get_ticks() - self.tickstart)/1000.0
+      self.curtime = float(pygame.time.get_ticks() - self.tickstart)/1000.0
     return self.curtime
 
   def get_events(self):
