@@ -9,6 +9,7 @@ Legend:
 ----- - CURRENT
 1.0.0 - 							[2004.03.XX]
 + The TODO file has been revised with plans for pydance 1.2.
+* Fix a possible divide-by-zero in FPS calculuation.
 
 0.9.1 - This release is dedicated to Gentoo bug #35890.		[2004.02.11]
 + Display the average time off (in milliseconds) when grading.

@@ -55,7 +55,7 @@ class FPSDisp(pygame.sprite.Sprite):
     self.image = pygame.surface.Surface([1, 1])
     self._oldtime = -10000000
     self._clock = pygame.time.Clock()
-    self._cycles = 0
+    self._cycles = 1
     self._totalcount = 0
     self._font = FONTS[16]
 
