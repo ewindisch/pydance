@@ -523,7 +523,6 @@ class SMFile(GenericFile):
         if need_steps:
           self.steps[game][parts[2].upper()] = self.parse_steps(parts[6], game)
 
-    self.find_subtitle()
     self.find_mixname()
     for k in ("banner", "background", "filename"):
       if not os.path.isfile(self.info.get(k, "")):
