@@ -5,19 +5,14 @@
 # inputs into values that matter, e.g. K_LEFT and a joystick left
 # should generate E_LEFT1.
 
-# Keep a hash of tuples of (eventtype, eventval), with the values
-# being the event to return.
-
 # In addition, we have to track some degree of local state, for hold
 # arrows. This only matters for direction arrows, but do it for
 # everything anyway.
 
-
 import pygame
 from constants import *
 
-E_PASS,E_QUIT,E_LEFT1,E_RIGHT1,E_UP1,E_DOWN1,E_FULLSCREEN,E_START1,E_SCREENSHOT,E_HCENTER,E_VCENTER,E_PGUP,E_PGDN,E_LEFT2,E_RIGHT2,E_UP2,E_DOWN2,E_START2,E_SELECT = range(19)
-
+# Basic keyboard configuration
 KEYCONFIG = {
   K_ESCAPE: E_QUIT,
   K_f: E_FULLSCREEN,
@@ -29,14 +24,17 @@ KEYCONFIG = {
   K_2: E_START2
 }
 
+# 4 axis, 16 button joystick (common type)
 A4B16 = { }
 A4B16_1 = { }
 A4B16_2 = { }
 
+# 6 axis, 12 button joystick (BNS parallel adapter)
 A6B12 = { 1: E_PGUP, 3: E_PGDN, 8: E_SELECT }
 A6B12_1 = { 4: E_LEFT1, 5: E_RIGHT1, 6: E_DOWN1, 7: E_UP1, 9: E_START1 }
 A6B12_2 = { 4: E_LEFT2, 5: E_RIGHT2, 6: E_DOWN2, 7: E_UP2, 9: E_START2 }
 
+# EMSUSB2, one adapter, two joysticks
 EMSUSB2 = {
   1: E_PGUP, 3: E_PGDN, 8: E_SELECT,
   17: E_PGUP, 20: E_PGDN, 24: E_SELECT,
@@ -49,14 +47,15 @@ class EventManager:
     self.handler = handler
     self.handler.set_blocked(range(NUMEVENTS))
     self.handler.set_allowed((KEYUP, KEYDOWN))
-    self.states = {}
+    self.states = {} # States of buttons
+    # Tuples of events, key is tuple: (from, val), value is one of E_*.
+    # Types are "kb" or "jsX" where X is a joystick number.
     self.events = {}
-  
+
+    # These store the joystick numbers of the device
     mat = mat2 = emsusb2 = None
-    try:
-      totaljoy = pygame.joystick.get_count()
-    except:
-      totaljoy = 0
+    try: totaljoy = pygame.joystick.get_count()
+    except: totaljoy = 0
     print totaljoy, "joystick[s] found in total."
     for i in range(totaljoy):
       ddrmat = pygame.joystick.Joystick(i)
@@ -66,14 +65,14 @@ class EventManager:
         emsusb2 = i
       elif ddrmat.get_numbuttons() == 16 and ddrmat.get_numaxes() == 4:
         if mat == None: mat = i
-        else:
+        else: # A 4/16 should be P1 if available, overriding 6/12.
           mat2 = mat
           mat =i
       elif ddrmat.get_numbuttons() == 12 and ddrmat.get_numaxes() == 6:
         if mat == None: mat = i
         elif mat2 == None: mat2 = i
       ddrmat.quit()
-    if emsusb2 != None:
+    if emsusb2 != None: # EMSUSB2, if found, is the only device we'll use.
       ddrmat = pygame.joystick.Joystick(emsusb2)
       ddrmat.init()
       print "EMSUSB2 adapter initialized: js", emsusb2
@@ -107,6 +106,7 @@ class EventManager:
 
   def setupKeys(self, config):
     keys = {}
+    # Keymap settings. The 'r' varieties are just swapped.
     if config["keyboard"] == "qwerty":
       keys[K_i], keys[K_k], keys[K_j], keys[K_l] = E_UP1, E_DOWN1, E_LEFT1, E_RIGHT1
       keys[K_UP], keys[K_DOWN], keys[K_LEFT], keys[K_RIGHT] = E_UP2, E_DOWN2, E_LEFT2, E_RIGHT2
@@ -121,6 +121,7 @@ class EventManager:
       keys[K_c], keys[K_t], keys[K_h], keys[K_n] = E_UP2, E_DOWN2, E_LEFT2, E_RIGHT2
     else: print "Error! Unknown keyboard type", config["keyboard"]
 
+    # Custom bindings for player keys.
     if config["p1_keys"]:
       ks = eval(config["p1_keys"])
       keys[ks[0]], keys[ks[1]], keys[ks[2]], keys[ks[3]] = E_UP1, E_DOWN1, E_LEFT1, E_RIGHT1
@@ -138,6 +139,12 @@ class EventManager:
       if not self.states.has_key(events[key]):
         self.states[events[key]] = 0
 
+  # Clear waiting events and reset key states.
+  def clear(self):
+    self.handler.clear()
+    for key in self.states: self.states[key] = 0
+
+  # Poll the event handler and normalize the result.
   def poll(self):
     ev = self.handler.poll()
     t = ''
@@ -152,7 +159,6 @@ class EventManager:
     else:
       return
     
-    print "Retreiving event", t, v
     v = self.events.get((t, v))
     if v:
       if ev.type == JOYBUTTONUP or ev.type == KEYUP:
@@ -162,7 +168,4 @@ class EventManager:
         self.states[v] += 1
     else: v = E_PASS
 
-    print "Event is : ", v
-    print "States:"
-    for s in self.states: print "state : ", s, " : value : ", self.states[s]
     return v
