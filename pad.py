@@ -280,10 +280,10 @@ class PadConfig(object):
            (ev.type != KEYDOWN or ev.key != K_ESCAPE)):
       ev = pygame.event.wait()
     if ev.type != KEYDOWN or ev.key != K_ESCAPE:
-      if keyb: dev = -1
-      else: dev = ev.joy
+      if keyb: dev, but = -1, ev.key
+      else: dev, but = ev.joy, ev.button
       pad.delete_event(pid, keyb, dir)
-      pad.add_event(dev, ev.key, pid, dir)
+      pad.add_event(dev, but, pid, dir)
 
   def render(self):
     offset = 640 / 5
