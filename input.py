@@ -165,8 +165,6 @@ class EventManager:
     t = ''
     v = 0
     if ev.type == QUIT: return (0, E_QUIT)
-    elif ev.type == ACTIVEEVENT: return (0, E_EXPOSE)
-    elif ev.type == VIDEOEXPOSE: return (0, E_EXPOSE)
     elif ev.type == JOYBUTTONDOWN or ev.type == JOYBUTTONUP:
       t = "js" + str(ev.joy)
       v = ev.button
