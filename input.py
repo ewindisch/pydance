@@ -156,15 +156,16 @@ class EventManager:
       t = "kb"
       v = ev.key
     else:
-      return
+      return E_PASS
     
     v = self.events.get((t, v))
-    if v:
+    if v != None:
       if ev.type == JOYBUTTONUP or ev.type == KEYUP:
         self.states[v] -= 1
         v = -v
       elif ev.type == JOYBUTTONDOWN or ev.type == KEYDOWN:
         self.states[v] += 1
-    else: v = E_PASS
+    else:
+      v = E_PASS
 
     return v

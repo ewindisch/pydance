@@ -70,7 +70,7 @@ def config_write(path):
   
 def fullscreen_toggle(dummy):
   mainconfig["fullscreen"] ^= 1
-  # FIXME Actually change screen size somehow
+  pygame.display.toggle_fullscreen()
   return None, None, None
 
 def do(screen, songselect, songdata):
@@ -90,14 +90,6 @@ def do(screen, songselect, songdata):
                 E_RIGHT: switch_color_text,
                 "initial": get_color_text }
 
-  lyric_colors = (('cyan', (0, 244, 244)),
-                  ('aqua', (0, 244, 122)),
-                  ('yellow', (244, 244, 122)),
-                  ('white', (244, 244, 244)),
-                  ('red', (244, 122, 122)),
-                  ('purple', (244, 122, 244)),
-                  ('orange', (244, 170, 0)))
-  
   m = (["Play Game", {E_START: songselect}, songdata],
        ("Game Options",
         ["Autofail", onoff_opt, ("killsongonfail",)],
@@ -109,7 +101,7 @@ def do(screen, songselect, songdata):
          ("hidden", ("off", "hide one","hide two","hide three"))],
         ["Sudden", rotate_index_opt,
          ("sudden", ("off", "hide one", "hide two", "hide three"))],
-        ["Top Arrows", onoff_opt, ("toparrows",)],
+        ["Top Arrows", onoff_opt, ("showtoparrows",)],
         ["Scale Arrows", rotate_index_opt,
          ("arrowscale", ("shrink", "normal", "grow"))],
         ["Spin Arrows", onoff_opt, ("arrowspin",)],
@@ -130,7 +122,7 @@ def do(screen, songselect, songdata):
         ("sortmode", ["file", "song", "group", "bpm",
                               "difficulty", "mix"])],
        ["Save Changes", {E_START: config_write},
-        ((os.path.join(rscdir, "pyddr.cfg")), )],
+        ((os.path.join(rc_path, "pyddr.cfg")), )],
        # ^^^ FIXME Should that be a constant variable?
        ["Quit", None, None]
        )

@@ -8,9 +8,14 @@
 #from psyco.classes import *
 
 
+import pygame
+pygame.init()
+from constants import *
+
 from announcer import Announcer
 from config import Config
-import fontfx
+import fontfx, menudriver
+
 
 import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
 import os, sys, glob, random, fnmatch, types, operator, copy, string
@@ -19,36 +24,7 @@ import pygame.transform
 from pygame.locals import *
 from stat import *
 
-osname = None
-if os.name == "nt": osname = "nt"
-elif os.name == "posix":
-  if os.path.islink("/System/Library/CoreServices/WindowServer"):
-    osname = "macosx"
-  elif os.environ.has_key("HOME"):
-    osname = "posix"
-else:
-  print "Your platform (%s) is not supported by pyDDR. We're going to call it"#'
-  print "POSIX, and then just let it crash."
-
-# Run pyDDR from anywhere
-pyddr_path = sys.argv[0]
-if osname == "posix":
-  pyddr_path = os.path.split(os.path.realpath(pyddr_path))[0]
-else: pyddr_path = os.path.split(os.path.abspath(pyddr_path))[0]
-sys.path.append(pyddr_path)
 os.chdir(pyddr_path)
-
-rscdir = None
-
-if osname == "posix":
-  rscdir = os.path.join(os.environ["HOME"], ".pyddr")
-  if not os.path.isdir(rscdir): os.mkdir(rscdir)
-elif osname == "macosx":
-  rscdir = os.path.join(os.environ["HOME"], "Library", "Preferences", "pyDDR")
-elif osname == "nt":
-  rscdir = "."
-
-if not os.path.isdir(rscdir): os.mkdir(rscdir)
 
 USE_GL = 0
 
@@ -100,57 +76,11 @@ class QuitGame:
 MAXPLAYERS = 2
 DIRECTIONS = ['l', 'd', 'u', 'r']
 
-#MAIN CONFIG FILE
-
-mainconfig = Config({ # Wow we have a lot of options
-  "gfxtheme": "classic", "djtheme": "none", "songdir": ".",
-  "stickycombo": 1,  "lowestcombo": 4,  "totaljudgings": 1,  "stickyjudge": 1,
-  "lyriccolor": "0,244,244",  "transcolor": "0,244,122",
-  "mixerclock": 0, "onboardaudio": 0, "masteroffset": 0,
-  "reversescrolls": 0, "scrollspeed": 1,
-  "explodestyle": 3, "arrowspin": 0, "arrowscale" : 1,
-  "joy_left": 4, "joy_right": 5, "joy_up": 7, "joy_down": 6,
-  "joy_start": 9, "joy_select": 8, "joy_pgup": 1, "joy_pgdn": 3,
-  "mat_buttons": 12, "mat_axes": 6,
-  "vesacompat": 0, "fullscreen": 0,
-  "sortmode": 0, "sortpersist": 1,
-  "previewmusic": 1,
-  "showbackground": 1, "bgbrightness": 127,
-  "sudden": 0, "hidden": 0, "little": 0, "assist": 0,
-  "arrowcolors": 4, "fpsdisplay": 1, "showlyrics": 1,
-  "showcombo": 1, "showtoparrows": 1,
-  "killsongonfail": 0,
-  "grading": 1,
-  "keyboard": "qwerty",
-  "strobe": 0
-  })
-
-if osname == "posix":
-  mainconfig.load("/etc/pyddr.cfg", True)
-elif osname == "macosx":
-  mainconfig.load("/Library/Preferences/pyDDR/pyddr.cfg")
-
-mainconfig.load("pyddr.cfg")
-mainconfig.load(os.path.join(rscdir, "pyddr.cfg"))
-
 DefaultThemeDir = os.path.join('themes','gfx')
 theme = mainconfig['gfxtheme']
 songdir = mainconfig['songdir']
 anncname = mainconfig['djtheme']
 annc = Announcer(os.path.join('themes','dj',anncname,'djtheme.cfg'))
-
-p1d = p1u = p1l = p1r = p2l = p2r = p2u = p2d = 0
-
-# Keyboard configuration
-if mainconfig["keyboard"] == "qwerty":
-  p1u, p1d, p1l, p1r = K_i, K_k, K_j, K_l
-  p2u, p2d, p2l, p2r = K_UP, K_DOWN, K_LEFT, K_RIGHT
-elif mainconfig["keyboard"] == "dvorak":
-  p1u, p1d, p1l, p1r = K_c, K_t, K_h, K_n
-  p2u, p2d, p2l, p2r = K_UP, K_DOWN, K_LEFT, K_RIGHT  
-
-if mainconfig["p1_keys"]: p1u, p1d, p1l, p1r = eval(mainconfig["p1_keys"])
-if mainconfig["p2_keys"]: p2u, p2d, p2l, p2r = eval(mainconfig["p2_keys"])
 
 class Theme:
   def __init__(self,name,themeDir=DefaultThemeDir):
@@ -666,13 +596,13 @@ class GradingScreen:
       elif i > 224:     idir = -4
 
       i += idir
-      event = eventManager.poll()
-      if (event == E_QUIT) or (event == E_START):
+      ev = event.poll()
+      if (ev == E_QUIT) or (ev == E_START1) or (ev == E_START2):
         break
-      elif event == E_FULLSCREEN:  #f
+      elif ev == E_FULLSCREEN:
         print "fullscreen toggle"
         pygame.display.toggle_fullscreen()
-      elif event == E_SCREENSHOT: #s
+      elif ev == E_SCREENSHOT:
         print "writing next frame to screenshot.bmp"
         screenshot = 1
           
@@ -682,7 +612,7 @@ class GradingScreen:
       gradetextpos.bottom = screen.get_rect().bottom - 16
       r = screen.blit(gradetext,gradetextpos)
       update_screen(r)
-      pygame.time.wait(1)     # don't peg the CPU on the grading screen
+      pygame.time.wait(20)     # don't peg the CPU on the grading screen
 
       if screenshot:
         pygame.image.save(pygame.transform.scale(screen, (640,480)), "screenshot.bmp")
@@ -1402,8 +1332,10 @@ class Song:
     self.mixname = 'unspecified mix'
     self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
     self.mixerclock = mainconfig['mixerclock']
-    self.lyricdisplay = LyricDispKludge(400, map((lambda x: int(x)), mainconfig['lyriccolor'].split(',')))
-    self.transdisplay = LyricDispKludge(428, map((lambda x: int(x)), mainconfig['transcolor'].split(',')))
+    self.lyricdisplay = LyricDispKludge(400,
+                                        color_hash[mainconfig['lyriccolor']])
+    self.transdisplay = LyricDispKludge(428,
+                                        color_hash[mainconfig['transcolor']])
     little = mainconfig["little"]
     coloringmod = 0
     self.totarrows = {}
@@ -2304,286 +2236,7 @@ class HoldArrowSprite(CloneSprite):
       self.image.set_alpha(alp)
   
 #    print "alpha ",alp
-      
-# enum would be nice
-E_PASS,E_QUIT,E_LEFT,E_RIGHT,E_UP,E_DOWN,E_FULLSCREEN,E_START,E_SCREENSHOT,E_HCENTER,E_VCENTER,E_PGUP,E_PGDN,E_LEFT2,E_RIGHT2,E_UP2,E_DOWN2,E_START2,E_SELECT,E_MARK = range(20)
-
-HAXIS,VAXIS = 0,1
-ZERO,NEGATIVE,POSITIVE = 0,1,2
-
-SHIFTPAD     = 0 # 4 bits: joypad 0-15
-SHIFTAXIS    = 4 # 2 bits: HAXIS, VAXIS
-SHIFTDIR     = 6 # 3 bits: NEGATIVE,ZERO,POSITIVE
-SHIFTBUTTON  = 8 # N bits: button0,button1,...buttonN-1
-
-def joyEvent(button=None,axis=None,dir=None,pad=0):
-  ev = pad
-  # axis is low 2 bits, dir is next two bits, button is rest
-  if axis is not None:
-    ev |= 1L << (SHIFTAXIS   + axis)
-  if dir is not None:
-    ev |= 1L << (SHIFTDIR    + dir)
-  if button is not None:
-    ev |= 1L << (SHIFTBUTTON + button)
-  return ev
-  
-KEYCONFIG = { E_QUIT:       [K_ESCAPE],
-              E_LEFT:       [p1l],
-              E_RIGHT:      [p1r],
-              E_UP:         [p1u],
-              E_DOWN:       [p1d],
-              E_FULLSCREEN: [K_f],
-              E_SCREENSHOT: [K_s],
-              E_START:      [13,271],
-              E_PGUP:       [K_PAGEUP],
-              E_PGDN:       [K_PAGEDOWN],
-              E_LEFT2:      [p2l],
-              E_RIGHT2:     [p2r],
-              E_UP2:        [p2u],
-              E_DOWN2:      [p2d],
-              E_START2:     [K_2],
-              E_SELECT:     [K_r],
-              E_MARK:       [K_m]
-            }
-
-EMS2CONFIG= { E_QUIT:       [],
-              E_LEFT:       [joyEvent( button=15 )],
-              E_RIGHT:      [joyEvent( button=13 )],
-              E_UP:         [joyEvent( button=12 )],
-              E_DOWN:       [joyEvent( button=14 )],
-              E_FULLSCREEN: [],
-              E_SCREENSHOT: [],
-              E_START:      [joyEvent( button=9 )],
-              E_PGUP:       [joyEvent( button=1 )],
-              E_PGDN:       [joyEvent( button=3 )],
-              E_LEFT2:      [joyEvent( button=31 )],
-              E_RIGHT2:     [joyEvent( button=29 )],
-              E_UP2:        [joyEvent( button=28 )],
-              E_DOWN2:      [joyEvent( button=30 )],
-              E_START2:     [joyEvent( button=25)],
-              E_SELECT:     [joyEvent( button=8 )],
-              E_MARK:       [joyEvent( button=0 )]
-            }
-J2CONFIG  = { E_LEFT2:      [joyEvent( button=mainconfig["joy_left"])],
-              E_RIGHT2:     [joyEvent( button=mainconfig['joy_right'])],
-              E_UP2:        [joyEvent( button=mainconfig['joy_up'])],
-              E_DOWN2:      [joyEvent( button=mainconfig['joy_down'])],
-            }
-JOYCONFIG = { E_LEFT:       [joyEvent( button=mainconfig['joy_left'])],
-              E_RIGHT:      [joyEvent( button=mainconfig['joy_right'])],
-              E_UP:         [joyEvent( button=mainconfig['joy_up'])],
-              E_DOWN:       [joyEvent( button=mainconfig['joy_down'])],
-              E_SELECT:     [joyEvent( button=mainconfig['joy_select'])],
-              E_START:      [joyEvent( button=mainconfig['joy_start'])],
-              E_PGUP:       [joyEvent( button=mainconfig['joy_pgup'])],
-              E_PGDN:       [joyEvent( button=mainconfig['joy_pgdn'])],
-            }
-
-class EventManager:
-  def __init__ (self,kConfig=KEYCONFIG,jConfig=JOYCONFIG,pygameevent=pygame.event):
-    self.pygameevent = pygameevent
-    pygameevent.set_blocked(range(NUMEVENTS))
-    pygameevent.set_allowed((KEYUP,KEYDOWN))
-    # joystick
-    matjoy = self.matjoy = None
-    matjoy2 = self.matjoy2 = None
-    emsusb2 = self.emsusb2 = None
-    try:
-      totaljoy = pygame.joystick.get_count()
-    except:
-      totaljoy = 0
-    print totaljoy,"joystick[s] total. ",
-    for i in range(totaljoy):
-      ddrmat = pygame.joystick.Joystick(i)
-      ddrmat.init()
-      matbuttons = mainconfig['mat_buttons']
-      mataxes = mainconfig['mat_axes']
-      if ddrmat.get_numbuttons() == 32 and ((ddrmat.get_numaxes() == 11) or (ddrmat.get_numaxes() == 8)):
-        emsusb2 = i
-      elif ddrmat.get_numbuttons() == matbuttons and ddrmat.get_numaxes() == mataxes:
-        if matjoy is None:
-          matjoy = i
-        else:
-          matjoy2 = i
-      ddrmat.quit()
-    if emsusb2 is not None:
-      ddrmat = pygame.joystick.Joystick(emsusb2)
-      ddrmat.init()
-      print "EMSUSB2 initialised: js",emsusb2
-      self.emsusb2 = emsusb2
-      pygameevent.set_allowed((JOYBUTTONUP,JOYBUTTONDOWN))
-      self.setupEMS()
-    elif (matjoy is not None) or (matjoy2 is not None):
-      if matjoy2 is not None:
-        ddrmat2 = pygame.joystick.Joystick(matjoy2)
-        ddrmat2.init()
-        print "DDR mat 2 initialised: js",matjoy2
-        self.matjoy2 = matjoy2
-        pygameevent.set_allowed((JOYBUTTONUP,JOYBUTTONDOWN))
-        self.setupJoy2()
-      if matjoy is not None:
-        ddrmat = pygame.joystick.Joystick(matjoy)
-        ddrmat.init()
-        print "DDR mat 1 initialised: js",matjoy
-        self.matjoy = matjoy
-        pygameevent.set_allowed((JOYBUTTONUP,JOYBUTTONDOWN))
-        self.setupJoy(jConfig)
-    else:
-      print "No DDR mat found! Not initialising joystick"
-    self.setupKeys(kConfig)
-
-  def __getattr__(self,attr):
-    return getattr(self.pygameevent,attr)
-
-  def setupKeys(self,kConfig=KEYCONFIG):
-    keymap = {}
-    for event,lst in kConfig.items():
-      for key in lst:
-        keymap[key]=event
-    self.keymap=keymap
-
-  def setupEMS(self,jConfig=EMS2CONFIG):
-    joymap = {}
-    for event,lst in jConfig.items():
-      for joy in lst:
-        joymap[joy]=event
-    self.emsmap=joymap
-    print self.emsmap
-
-  def setupJoy(self,jConfig=JOYCONFIG):
-    joymap = {}
-    for event,lst in jConfig.items():
-      for joy in lst:
-        joymap[joy]=event
-    self.joymap=joymap
-
-  def setupJoy2(self,jConfig=J2CONFIG):
-    joymap = {}
-    for event,lst in jConfig.items():
-      for joy in lst:
-        joymap[joy]=event
-    self.joymap2=joymap
-
-  def nextEvent(self,event):
-#    print event
-    if   event.type == QUIT:          return E_QUIT
-    elif event.type == JOYAXISMOTION: return self.joyMove(event.axis,event.value)
-    elif event.type == JOYBUTTONDOWN: return self.joyButton(event.joy,event.button)
-    elif event.type == JOYBUTTONUP:   return -self.joyButton(event.joy,event.button)
-    elif event.type == KEYDOWN:       return self.keyDown(event.key)
-    elif event.type == KEYUP:         return -self.keyDown(event.key)
-    else:                             return E_PASS
-
-  def joyMove(self,axis,dir):
-    if   dir<0: dir = NEGATIVE
-    elif dir>0: dir = POSITIVE
-    else:       dir = ZERO
-    return self.joymap.get(joyEvent(axis=axis,dir=dir),E_PASS)
-
-  def joyButton(self,joy,button):
-#    print "joy",joy,"button",button
-#    print "this button is", joyEvent(button=button)
-#    print "matjoy",self.matjoy,"matjoy2",self.matjoy2,"emsusb2",self.emsusb2
-    if joy == self.matjoy:
-      return self.joymap.get(joyEvent(button=button),E_PASS)
-    if joy == self.matjoy2:
-      return self.joymap2.get(joyEvent(button=button),E_PASS)
-    if joy == self.emsusb2:
-      return self.emsmap.get(joyEvent(button=button),E_PASS)
-
-  def keyDown(self,key):
-    return self.keymap.get(key,E_PASS)
-
-  def keyUp(self,key):
-    return -self.keymap.get(key,E_PASS)
-  
-  def poll(self):
-    blah = self.nextEvent(self.pygameevent.poll())
-#    if blah > 0: 
-#      print "pressed",
-    if blah < 0:
-#      print "released",
-      if blah == -2: holdkey[0].letgo('l')
-      if blah == -3: holdkey[0].letgo('r')
-      if blah == -4: holdkey[0].letgo('u')
-      if blah == -5: holdkey[0].letgo('d')
-      if blah == -13: holdkey[1].letgo('l')
-      if blah == -14: holdkey[1].letgo('r')
-      if blah == -15: holdkey[1].letgo('u')
-      if blah == -16: holdkey[1].letgo('d')
- #   if blah != E_PASS:
- #     print ['E_PASS','E_QUIT','E_LEFT','E_RIGHT','E_UP','E_DOWN','E_FULLSCREEN','E_START','E_SCREENSHOT','E_HCENTER','E_VCENTER','E_PGUP','E_PGDN','E_LEFT2','E_RIGHT2','E_UP2','E_DOWN2','E_START2','E_SELECT'][blah]
-    return blah
     
-J_UP,J_DOWN,J_RIGHT,J_LEFT = map(lambda n: 1<<n, range(4))
-J_UP2,J_DOWN2,J_RIGHT2,J_LEFT2 = map(lambda n: 1<<n, range(13,17,1))
-
-# print a number as binary, low 16 bits
-def sbin16(d,bits=16):
-  return sbin32(d,bits)
-
-# print a number as binary, all 32 bits
-def sbin32(d,bits=32):
-  bin=''
-  for n in range(bits):
-    bin = str(d&1)+bin
-    d>>=1
-  return bin
-
-def J_B(n):
-  return 1<<(4+n)
-
-JBUTTONS = [[E_START],[E_SCREENSHOT],[E_FULLSCREEN],[E_QUIT]]
-class JoyPad:
-  def __init__(self,eventManager=None,buttons=JBUTTONS,history=10):
-    if eventManager is None: eventManager = EventManager()
-    self.eventManager=eventManager
-    self.state = 0
-    self.bdict = bdict = {E_UP:      J_UP,
-                          E_DOWN:    J_DOWN,
-                          E_LEFT:    J_LEFT,
-                          E_RIGHT:   J_RIGHT,
-                          E_UP2:     J_UP2,
-                          E_DOWN2:   J_DOWN2,
-                          E_LEFT2:   J_LEFT2,
-                          E_RIGHT2:  J_RIGHT2}
-    for (button,lst) in zip(map(J_B,range(len(buttons))),buttons):
-      for event in lst: bdict[event] = button
-    self.history = None
-    if history:
-      self.history = map(None,range(history))
-
-  def poll(self):
-    _bd = self.bdict
-    _bd_has = _bd.has_key
-    _em = self.eventManager
-    _st = _stold = self.state
-    _em_peek = _em.peek
-    _em_poll = _em.poll
-    _sh = self.history
-    if _em.peek():
-#      print _em_peek()
-      oevent = event = _em_poll()
-#      if   event == E_PASS:     continue
-      # handled as a button
-      #elif event == E_QUIT:     raise QuitGame("Caught a quit from the JoyPad")
-#      event = abs(event)
-      _bm = 0 # bitmask
-      if   event == E_HCENTER:    _st &= ~(J_LEFT|J_RIGHT)
-      elif event == E_VCENTER:    _st &= ~(J_UP|J_DOWN)
-      # print event
-      if _bd_has(event):        _bm = _bd[event]
-      if oevent>0:                _st |= _bm
-      else:                       _st &= ~_bm
-    delta = _st^_stold
-#    if delta == ~0: delta=0
-    rval = pygame_time_get_ticks(), _st, delta
-    if delta and _sh:
-      # record time, state, change
-      _sh.append(rval)
-      del(_sh[0])
-    return rval
-
 # acts like a subclass of Sprite
 class SimpleAnim:
   def __init__ (self, path, prefix, separator, imgtype='png', frameNumbers=None, files=None, zindex=DEFAULTZINDEX):
@@ -2755,7 +2408,6 @@ def main():
   
   pygame.display.set_caption('pyDDR')
   pygame.mouse.set_visible(0)
-  eventManager = EventManager()
 
   global update_screen
   if (screen.get_flags()&DOUBLEBUF == DOUBLEBUF):
@@ -2800,7 +2452,7 @@ def main():
     songs = filter(None,map(fastSong,fileList))
     text_fadeoff(screen, font, "Looking for songs..", (320, 240))
 
-  event = eventManager.poll()
+  ev = event.poll()
 
   difWrap = 2*len(DIFFICULTIES)
 
@@ -2859,453 +2511,9 @@ class TextSprite(BlankSprite):
     self.rect = surf.get_rect()
       
 def domenu(songs):
-  global fooblah
+  global fooblah, screen
   
-  class MenuItem:
-    # Simplest option switcher - select the next option in the list
-    def opt_rotate(self, initial = 0):
-      option_name = self.extras["option_name"]
-      options = self.extras["options"]
-      if not initial:
-        current_val = mainconfig[option_name]
-        new_val = None
-        if current_val == None:
-          new_val = options[0]
-        else:
-          new_val = options[(options.index(current_val) + 1) % len(options)]
-        mainconfig[option_name] = new_val
-        return new_val
-      else:
-        return mainconfig[option_name]
-
-    # Slightly more advanced option switcher -
-    # the displayed text is the list value, but the option value is
-    # the index.
-    def opt_rotate_with_index(self, initial = 0):
-      option_name = self.extras["option_name"]
-      options = self.extras["options"]
-      if not initial:
-        current_val = mainconfig[option_name]
-        new_val = None
-        if current_val == None: new_val = 0
-        else:
-          new_val = (current_val + 1) % len(options)
-          mainconfig[option_name] = new_val
-        return options[new_val]
-      else:
-        return options[mainconfig[option_name]]
-
-    # For settings with a range of values - divide into 25 discrete values,
-    # cycle through them
-    def change(self, sign, initial = 0):
-      if type(self.extras) != types.DictionaryType: return None
-      option_name = self.extras["option_name"]
-      options = self.extras["options"]
-      if not initial:
-        try:
-          delta = (self.extras["max"] - self.extras["min"])
-          if type(delta) == types.FloatType:
-            delta /= (sign * 15)
-          else:
-            delta /= (sign * min(delta, 20))
-          try:
-            val = mainconfig[option_name] + delta
-          except ValueError:
-            val = mainconfig[option_name] + delta
-          val = max(self.extras["min"], min(self.extras["max"], val))
-          mainconfig[option_name] = val
-          self.add_text = str(val)
-          self.render()
-          return val
-        except KeyError:
-          return mainconfig[option_name]
-      else:
-        return mainconfig[option_name]
-
-    # This is used for lyric & trans colors - it changes the text color
-    # of the object and the data value
-    def color_text(self, initial = 0):
-      options = self.extras["options"]
-      option_name = self.extras["option_name"]
-      if not initial:
-        is_next = False
-        current_val = mainconfig[option_name]
-        for colors in options:
-          if colors[0] == current_val:
-            print colors[0], "is current_val"
-            is_next = True
-          elif is_next:
-            print colors[0], "was found next"
-            mainconfig[option_name] = colors[0]
-            self.add_text = colors[1]
-            self.rgb = map((lambda x: int(x)), colors[0].split(","))
-            is_next = False
-            break
-        if is_next: # we were at the end of the list
-            mainconfig[option_name] = options[0][0]
-            self.add_text = options[0][1]
-            self.rgb = map((lambda x: int(x)), options[0][0].split(","))
-      else:
-        colorval = mainconfig[option_name]
-        for colors in options:
-          if colors[0] == colorval:
-            self.add_text = colors[1]
-        if self.add_text == None: # try to track manual changes and DTRT
-          self.add_text = "custom"
-        self.rgb = map((lambda x: int(x)), colorval.split(","))
-
-      return self.add_text
-
-    def __init__(self, itemname, extras):
-      self.itemname = itemname    # actual item name
-      self.extras = extras        # actual command/menu/list 
-      self.image = pygame.surface.Surface((1,1))
-      self.rgb = (224, 224, 224)
-      self.add_text = None
-      if type(self.extras) == types.DictionaryType:
-        self.add_text = str(self.extras["function"](self, 1))
-      else:
-        self.add_text = None
-
-    def activate(self):
-      if callable(self.extras): # function to execute
-        self.extras()
-        return None, None
-      elif type(self.extras) == types.DictionaryType:
-          self.add_text = str(self.extras["function"](self))
-          self.render()
-          return None, None
-      elif type(self.extras) == types.ListType:
-        # Another menu
-        return self.itemname, self.extras
-      elif type(self.extras) == types.StringType:
-        TextCycler(self.extras.split("\n"))
-        return None, None
-      elif self.extras == None:
-        return -1, -1  # "Back"
-      print "Error! Unknown menu structure."
-      return None, None
-
-    def render(self):
-      # pretty box
-      self.image = pygame.surface.Surface((192,40))
-      for i in range(192):
-        pygame.draw.line(self.image,(192-i,192-i,192-i),(i,0),(i,47))
-        pygame.draw.line(self.image,(i,i,i),(i,0),(i,1))
-        pygame.draw.line(self.image,(i,i,i),(i,46),(i,47))
-      for i in range(2):
-        pygame.draw.line(self.image,(192,192,192),(190+i,0),(190+i,47))
-        pygame.draw.line(self.image,(0,0,0),(i,0),(i,47))
-      # menu text
-      if self.add_text == None:
-        f = pygame.font.Font(None,32)
-        itemtext = f.render(self.itemname,1, self.rgb)
-        self.image.blit(itemtext, (96-(f.size(self.itemname)[0]/2), 8))
-      else:
-        f1 = pygame.font.Font(None, 26)
-        f2 = pygame.font.Font(None, 20)
-        itemtext = f1.render(self.itemname, 1, self.rgb)
-        subtext = f2.render(self.add_text, 1, self.rgb)
-        self.image.blit(itemtext ,(96-(f1.size(self.itemname)[0]/2), 4))
-        self.image.blit(subtext,(96-(f2.size(self.add_text)[0]/2), 22))
-
-  class Menu:
-    def __init__(self, menuitemlist):
-      self.itemlist = copy.copy(menuitemlist)
-      self.items = []
-      for i in menuitemlist:
-        curitem = MenuItem(i[0], i[1])
-        self.items.append(curitem)
-      for i in self.items:
-        i.render()
-
-  class TextCycler:
-    def __init__(self, strings):
-      pos = 0
-      print len(strings)
-      self.image = pygame.surface.Surface((640, 480))
-      last_ev = None
-
-      self.image.fill((0,0,0))
-      f = pygame.font.Font(None, 36)
-      mstring = strings[pos].strip()
-      text = f.render(mstring, 1, (224, 224, 224))
-      self.image.blit(text, ((640 - f.size(mstring)[0])/2, 240))
-      offset = 40
-      for i in range(28, 0, -4):
-        f = pygame.font.Font(None, i)
-        mstring = strings[pos - (32 - i) / 4].strip()
-        text = f.render(mstring, 1, (6*i, 6*i, 6*i))
-        self.image.blit(text, ((640-f.size(mstring)[0])/2, 245 - offset))
-        mstring = strings[(pos + (32 - i) / 4) % len(strings)].strip()
-        text = f.render(mstring, 1, (6*i, 6*i, 6*i))
-        self.image.blit(text, ((640-f.size(mstring)[0])/2, 240 + offset))
-        offset += i
-      screen.fill((0,0,0))
-      screen.blit(self.image, (0, 0))
-      pygame.display.flip()
-
-      force_scroll = 0
-      while True:
-        force_scroll += 1
-        e = pygame.event.poll()
-        if e.type == KEYUP:
-          last_ev = None
-        elif e.type == KEYDOWN or last_ev or force_scroll == 30:
-          key = None
-          if last_ev:
-            key = last_ev
-            last_ev = key
-          elif force_scroll == 30:
-            key = p1d
-          else:
-            key = e.key
-            last_ev = key
-          screen.fill((0,0,0))
-          force_scroll = 0
-
-          if key == p1u or key == p2u:
-            pos = pos - 1
-            if pos == -1: pos = len(strings) - 1
-
-          elif key == p1d or key == p2d:
-            pos = (pos + 1) % len(strings)
-
-          elif key == K_ESCAPE or key == K_RETURN:
-            break
-
-          self.image.fill((0,0,0))
-          f = pygame.font.Font(None, 36)
-          mstring = strings[pos].strip()
-          try:
-            print mstring
-            text = f.render(mstring, 1, (224, 224, 224))
-          except:
-            text = f.render(' ', 1, (224, 224, 224))
-          self.image.blit(text, ((640-(f.size(mstring)[0]))/2, 240))
-          offset = 36
-          for i in range(28, 0, -4):
-            f = pygame.font.Font(None, i)
-            mstring = strings[pos - (32 - i) / 4].strip()
-            text = f.render(mstring, 1, (6*i, 6*i, 6*i))
-            self.image.blit(text, ((640-(f.size(mstring)[0]))/2, 245 - offset))
-            mstring = strings[(pos + (32 - i) / 4) % len(strings)].strip()
-            text = f.render(mstring, 1, (6*i, 6*i, 6*i))
-            self.image.blit(text, ((640-(f.size(mstring)[0]))/2,
-                                     240 + offset))
-            offset += i
-          screen.fill((0,0,0))
-          screen.blit(self.image, (0, 0))
-          pygame.display.flip()
-
-        pygame.time.delay(500)
-
-  # Hey, did you know at one point, Boliva was so overrun with rats that
-  # they got the Pope to declare rats fish, so they could eat them every
-  # Friday?
-
-  SetDisplayMode(mainconfig)
-
-  # Make structures appropriate for the menu
-  def onoff_opt(name):
-    return { "function" : MenuItem.opt_rotate_with_index,
-             "option_name" : name,
-             "options" : ['off', 'on'] }
-
-  def list_opt(name, list):
-    return { "function" : MenuItem.opt_rotate,
-             "option_name" : name,
-             "options" : list }
-
-  def list_index_opt(name, list):
-    return { "function" : MenuItem.opt_rotate_with_index,
-             "option_name" : name,
-             "options" : list }
-
-  def range_opt(name, max, min = 0):
-    return { "min" : min, 
-             "max" : max,
-             "options" : [],
-             "option_name" : name,
-             "function" : (lambda x, y=0 : MenuItem.change(x, 1, y)) }
-
-  help_strings = """\
-  pyDDR is a simple game. There's that mat (look down)
-  and there's your feet. On the mat are four arrows,
-  (up, down, left, and right), which is where you place
-  your feet. Stepping on those is like pressing the
-  arrows on the keyboard. There's also the start button
-  which is like enter. Got it? Good. That's all the
-  controls there are.
-  ---
-  Now, you're going to want to start an actual game. From
-  the main menu, select New Game, then Single. A huge
-  list of songs will come up - scroll through the list
-  using up and down until you find one you like. In the
-  bottom left there's going to be a number of bars. The
-  more bars, the harder this song is. You can use left
-  and right to select different difficulty levels. Once
-  you hear a song you like, hit enter (or start) to
-  start the game.
-  ---
-  Now there's a bunch of arrows scrolling up the screen.
-  When they reach the top (which is also going to be
-  on-beat with the music), step on that arrow. Keep
-  doing this until the song's over. That's the whole
-  game."""
-
-  game_opts = ['Game Options',
-               [("Autofail", onoff_opt("killsongonfail")),
-                ("Arrow Speed",  range_opt("scrollspeed", 4.0, 1.0)),
-                ("Reverse", onoff_opt("reversescroll")),
-                ("Little", list_index_opt("little",
-                                          ["show all notes", "no 16ths",
-                                           "no 8ths", "no 8ths or 16ths"])),
-                ("Hidden", list_index_opt("hidden", ["none", "hide one",
-                                                     "hide two", "hide three"])),
-                ("Sudden", list_index_opt("sudden", ["none", "hide one",
-                                                     "hide two", "hide three"])),
-                ("Top Arrows", onoff_opt("showtoparrows")),
-                ("Arrow Scale", list_index_opt("arrowscale", ["shrink", "none", "grow"])),
-                ("Arrows Spin", onoff_opt("arrowspin")),
-                ("Back", None)
-                ]
-               ]
-
-  lyric_colors = [('0,244,244', 'cyan'),
-                  ('0,244,122', 'aqua'),
-                  ('244,244,122', 'yellow'),
-                  ('244,244,244', 'white'),
-                  ('244,122,122', 'red'),
-                  ('244,122,244', 'purple'),
-                  ('244,170,0', 'orange')]
-
-  lyr_opts = ['Lyric Options',
-              [('Show Lyrics', onoff_opt("showlyrics")),
-               ('Lyric Color',
-                { 'function': MenuItem.color_text,
-                  'option_name': 'lyriccolor',
-                  'options': lyric_colors }),
-               ('Translation Color',
-                { 'function': MenuItem.color_text,
-                  'option_name': 'transcolor',
-                  'options': lyric_colors }),
-               ("Back", None)
-               ]]
-
-  def fullscreen_toggle():
-    mainconfig["fullscreen"] = mainconfig["fullscreen"] ^ 1
-    SetDisplayMode(mainconfig)
-
-  gr_opts = ['Graphic Options',
-             [('Fullscreen', fullscreen_toggle),
-              ('Arrow Theme', list_opt('gfxtheme', ['classic', 'bryan'])),
-              ('Backgrounds', onoff_opt("showbackground")),
-              ('BG Brightness', range_opt("bgbrightness", 255)),
-              ('Exploding',
-               list_index_opt("explodestyle",
-                              ['none', 'rotate', 'scale', 'rotate & scale'])),
-              ('FPS Counter', onoff_opt("fpsdisplay")),
-              ('Show Combo', onoff_opt("showcombo")),
-              ('Back', None)
-              ]]
-
-
-  mainmenu = [['PLAY GAME',
-              [('SINGLE', (lambda : songSelect(songs, 1) )),
-               ('VERSUS', (lambda : songSelect(songs, 2) )),
-               ('DOUBLE', (lambda : sys.stdout.write("double\n"))),
-               ('NONSTOP', (lambda : sys.stdout.write("nonstop\n"))),
-               ('UNISON', (lambda : sys.stdout.write("unison\n"))),
-               ('ONI', (lambda : sys.stdout.write("oni\n"))),
-               ('Back', None)
-               ]],
-              ['OPTIONS',
-               [game_opts, gr_opts, lyr_opts,
-#                ("Preview Songs", onoff_opt("previewmusic")),
-                ("Sort By", list_index_opt("sortmode",
-                                           ["file", "song", "group", "bpm",
-                                            "difficulty", "mix"])),
-                ("Save Changes",
-                 (lambda : mainconfig.write(os.path.join(rscdir, "pyddr.cfg")))),
-                ("Back", None)
-                ]],
-              ('HELP', help_strings),
-              ('CREDITS', (lambda : sys.stdout.write("credits strings\n"))),
-              ('EXIT GAME', lambda : blatantplug() )
-             ]
-
-  blah = Menu(mainmenu)
-  lastmenu = []
-  lasttext = []
-  footopscreen = fontfx.TextZoomer("MAIN MENU",127,63,255)
-  fooblah = ' '
-  curitem = topitem = 0
-  z = 8
-  zd = -1
-
-  while 1:
-    k = pygame.event.poll()
-    if k.type == KEYDOWN:
-      if (k.key == p1d or k.key == p2d) and (curitem < len(blah.items)-1):
-        curitem += 1
-        if curitem >= topitem+7: 
-          topitem += 1
-      elif (k.key == p1u or k.key == p2u) and (curitem > 0):
-        curitem -= 1
-        if curitem < topitem: 
-          topitem = curitem
-
-      elif k.key == K_ESCAPE:
-        if lastmenu == []:
-          blatantplug()
-        else:
-          blah = Menu(lastmenu[-1:][0])
-          lastmenu = lastmenu[:-1]
-          footopscreen.changetext(lasttext[-1:][0])
-          lasttext = lasttext[:-1]
-          curitem=topitem=0
-
-      elif k.key == p1l or k.key == p2l:
-        blah.items[curitem].change(-1)
-      elif k.key == p1r or k.key == p2r:
-        blah.items[curitem].change(1)
-
-      elif k.key == K_RETURN:
-        zoomtext, newblah = blah.items[curitem].activate()
-        if zoomtext == -1 and newblah == -1: # back
-          blah = Menu(lastmenu[-1:][0])
-          lastmenu = lastmenu[:-1]
-          footopscreen.changetext(lasttext[-1:][0])
-          lasttext = lasttext[:-1]
-          curitem=topitem=0
-        elif newblah:
-          lastmenu.append(blah.itemlist)
-          lasttext.append(footopscreen.zoomtext)
-          blah = Menu(newblah)
-          footopscreen.changetext(zoomtext)
-          topitem = curitem = 0
-
-    #blanx0r      
-    screen.fill((0,0,0))
-
-    # flashy header
-    footopscreen.iterate()
-    screen.blit(footopscreen.tempsurface,(0,0))
-
-    # zooming text thinger for menuselect
-    z += zd
-    if (z > 12) or (z < 0):  zd *= -1
-
-    for i in range(7):
-      if i+topitem < len(blah.items):
-        if i+topitem == curitem:
-          screen.blit(pygame.transform.scale(blah.items[topitem+i].image,(200-z,48-(z/2))),(220+(z/2),76+(z/4)+i*48))
-        else:
-          screen.blit(blah.items[topitem+i].image,(224,80+i*48))
-
-    pygame.display.flip()
-    pygame.time.wait(10)
+  menudriver.do(screen, songSelect, (songs, 1))
 
 def blatantplug():
   xiphlogo = pygame.image.load(os.path.join("images", "xifish.png")).convert()
@@ -3369,9 +2577,11 @@ def blatantplug():
   sys.exit()    
 
 def songSelect(songs, players):
-  global screen,background,eventManager,currentTheme,playmode,fooblah
+  global screen,background,currentTheme,playmode
   pygame.mixer.music.fadeout(500)
   totalredraw = 1
+
+  fooblah = " "
 
   if fooblah == " ":
     oldfoo = 0  
@@ -3482,8 +2692,8 @@ def songSelect(songs, players):
         print "Sorry, pyDDR needs a more up to date Pygame or SDL than you have."
         sys.exit()
   
-    event = eventManager.poll()
-    if  event == E_QUIT:
+    ev = event.poll()
+    if  ev == E_QUIT:
       pygame.mixer.music.fadeout(1000)
       pygame.time.delay(1000)
       pygame.mixer.music.stop()
@@ -3491,18 +2701,18 @@ def songSelect(songs, players):
       pygame.mixer.music.play(4, 0.0)
       pygame.mixer.music.set_volume(1.0)
       fooblah = currentSong.fooblah
-      break
-    elif event < 0:                                  pass # key up
-    elif event == E_PASS:                            pass
-    elif event == E_FULLSCREEN:
+      return None, None, None
+    elif ev < 0:                                  pass # key up
+    elif ev == E_PASS:                            pass
+    elif ev == E_FULLSCREEN:
       pygame.display.toggle_fullscreen()
       mainconfig["fullscreen"] = mainconfig["fullscreen"] ^ 1
-    elif event == E_SCREENSHOT:                      s = 1
-    elif (event == E_LEFT):    difficulty -= 1
-    elif (event == E_RIGHT):   difficulty += 1
-    elif (event == E_LEFT2):   difficulty2 -= 1
-    elif (event == E_RIGHT2):  difficulty2 += 1
-    elif (event == E_UP) or (event == E_UP2):
+    elif ev == E_SCREENSHOT:                      s = 1
+    elif (ev == E_LEFT1):    difficulty -= 1
+    elif (ev == E_RIGHT1):   difficulty += 1
+    elif (ev == E_LEFT2):   difficulty2 -= 1
+    elif (ev == E_RIGHT2):  difficulty2 += 1
+    elif (ev == E_UP1) or (ev == E_UP2):
       prevsong = songs[songidx]
       songChanged = 1
       if songidx>0:
@@ -3515,7 +2725,7 @@ def songSelect(songs, players):
         scrolloff = 60
         fontdisp = 1
         sod = 0
-    elif (event == E_DOWN) or (event == E_DOWN2):
+    elif (ev == E_DOWN1) or (ev == E_DOWN2):
       prevsong = songs[songidx]
       songChanged = 1
       if songidx<(totalsongs-1):
@@ -3528,7 +2738,7 @@ def songSelect(songs, players):
         scrolloff = -60
         fontdisp = 1
         sod = 0
-    elif event == E_PGUP:
+    elif ev == E_PGUP:
       prevsong = songs[songidx]
       songChanged = 1
       if songidx-5 > 0:
@@ -3541,7 +2751,7 @@ def songSelect(songs, players):
         scrolloff = 60
         fontdisp = 1
         sod = 0
-    elif event == E_PGDN:
+    elif ev == E_PGDN:
       prevsong = songs[songidx]
       songChanged = 1
       if songidx<(totalsongs-5):
@@ -3561,7 +2771,7 @@ def songSelect(songs, players):
       print "        to read the file it took", songs[songidx].filereadcreationtime - songs[songidx].variablecreationtime
       print "     to filter the modes it took", songs[songidx].modereadcreationtime - songs[songidx].filereadcreationtime
       '''
-    elif (event == E_SELECT):
+    elif (ev == E_SELECT):
       newidx = int(random.random()*len(songs))
       if newidx < songidx:
         scrolloff = 60
@@ -3572,7 +2782,7 @@ def songSelect(songs, players):
       songChanged = 1
       fontdisp = 1
       sod = 0
-    elif event == E_MARK:
+    elif ev == E_MARK:
       currentSong.listimage.blit(fontfx.embfade("T",18,3,(12,16),(255,255,0)),(536,28))
       print currentSong,":",
       try:
@@ -3581,9 +2791,9 @@ def songSelect(songs, players):
       except:
         print "new taglist created."
         taglist = [currentSong]
-    elif event == E_START2 and players != 2:
+    elif ev == E_START2 and players != 2:
       players = 2
-    elif event == E_START or event == E_START2:
+    elif ev == E_START1 or ev == E_START2:
       pygame.mixer.music.fadeout(1000)
       annc.say('menu')
       background.blit(screen,(0,0))
@@ -3593,7 +2803,7 @@ def songSelect(songs, players):
         background.draw(screen)
         pygame.display.flip()
         pygame.time.wait(1)
-        if (eventManager.poll() == E_QUIT): 
+        if (event.poll() == E_QUIT): 
           print "song was cancelled!"
           break
       background.set_alpha()
@@ -3919,12 +3129,6 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
 
   pygame.mixer.init()
 
-  #JBUTTONS = [[E_START],[E_SCREENSHOT],[E_FULLSCREEN],[E_QUIT]]
-  #            J_B(0)    J_B(1)         J_B(2)         J_B(3)
-  
-  G_START, G_SCREENSHOT, G_FULLSCREEN, G_QUIT = map(J_B,range(4))
-  
-  joypad = JoyPad(eventManager=eventManager)
   # render group, almost[?] every sprite that gets rendered
   rgroup = RenderLayered()
   # text group, EG. judgings and combos
@@ -4092,9 +3296,9 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
     pygame.display.flip()
 
     while 1:
-      event = pygame.event.poll()
-      if (event.type == KEYDOWN and (event.key==13 or event.key==271)) or (event.type==JOYBUTTONDOWN and event.button==9):
-        break
+      ev = event.poll()
+      if ev == E_START1 or ev == E_START2 or ev == E_QUIT: break
+      pygame.time.wait(50)
 
   screenshot = 0
 
@@ -4142,9 +3346,6 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
       if songFailed:
         song.kill()
     
-    # ticks is current ticks for joy history, state is joypad state, delta is change in joy state
-    ticks, state, delta = joypad.poll()
-    
     for plr in playerContents:
       plr['evt'] = plr['song'].get_events()
       plr['fxData'] = None
@@ -4156,44 +3357,40 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
       # we need the current time for a few things, and it should be the same for all players
       curtime = playerContents[0]['evt'][2]
     
-    # nstate is the set of bits that were just turned on
-    nstate = state&delta
-    
     key = []
 
-    if delta:
-      if nstate&G_START:
-        if holdkey[0].checkstate('r'):
-          print "holding right plus start quits. pyDDR now exiting."
-          sys.exit()
-        elif holdkey[0].checkstate('l'):
-          break
-        else:
-          pass
-      
-      if state&G_QUIT:       break
-      if nstate&G_FULLSCREEN: 
+    ev = event.poll()
+
+    if ((event.states[E_START1] and event.states[E_RIGHT1]) or
+        (event.states[E_START2] and event.states[E_RIGHT2])):
+      print "holding right plus start quits. pyDDR now exiting."
+      sys.exit()
+    elif ((event.states[E_START1] and event.states[E_LEFT1]) or
+          (event.states[E_START2] and event.states[E_LEFT2])):
+      break
+    else:
+      pass
+
+    while ev != E_PASS:
+      if ev == E_QUIT: break
+      elif ev == E_FULLSCREEN:
         pygame.display.toggle_fullscreen()
-      if nstate&G_SCREENSHOT: 
+      elif ev == E_SCREENSHOT:
         screenshot = 1
-      if nstate&J_LEFT:
-        key.append('l0')
-      if nstate&J_RIGHT:
-        key.append('r0')
-      if nstate&J_UP:
-        key.append('u0')
-      if nstate&J_DOWN:
-        key.append('d0')
-      if players == 2:
-        if nstate&J_LEFT2:
-          key.append('l1')
-        if nstate&J_RIGHT2:
-          key.append('r1')
-        if nstate&J_UP2:
-          key.append('u1')
-        if nstate&J_DOWN2:
-          key.append('d1')
-  
+      elif ev == E_LEFT1: key.append('l0')
+      elif ev == E_RIGHT1: key.append('r0')
+      elif ev == E_UP1: key.append('u0')
+      elif ev == E_DOWN1: key.append('d0')
+      elif players == 2:
+        if ev == E_LEFT2: key.append('l1')
+        elif ev == E_RIGHT2: key.append('r1')
+        elif ev == E_UP2: key.append('u1')
+        elif ev == E_DOWN2: key.append('d1')
+
+      ev = event.poll()
+
+    if ev == E_QUIT: break
+
     for keyAction in key:
       playerID = int(keyAction[1])
       if playerID <= players:
@@ -4202,13 +3399,19 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
         holdkey[playerID].pressed(keyPress)
         playerContents[playerID]['fxData'] = playerContents[playerID]['judge'].handle_key(keyPress, curtime)
     
+
+    # This maps the old holdkey system to the new event ID one
+    # We should phase this out
+    keymap_kludge = ({"u": E_UP1, "d": E_DOWN1, "l": E_LEFT1, "r": E_RIGHT1},
+                     {"u": E_UP2, "d": E_DOWN2, "l": E_LEFT2, "r": E_RIGHT2})
+
     for plr in playerContents:
       for checkhold in DIRECTIONS:
         plr['toparrfx'][checkhold].holding(0)
         currenthold = plr['holdkey'].shouldhold(checkhold, curtime, song.holdinfo[song.modediff[playmode].index(plr['difficulty'])], song.playingbpm)
         dirID = DIRECTIONS.index(checkhold)
         if currenthold is not None:
-          if plr['holdkey'].checkstate(checkhold):
+          if event.states[keymap_kludge[plr['playerID']][checkhold]]:
             if plr['judge'].holdsub[plr['tempholding'][dirID]] != -1:
               plr['toparrfx'][checkhold].holding(1)
             plr['tempholding'][dirID] = currenthold

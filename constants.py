@@ -39,6 +39,17 @@ elif osname == "nt":
 
 if not os.path.isdir(rc_path): os.mkdir(rc_path)
 
+lyric_colors = (('cyan', (0, 244, 244)),
+                ('aqua', (0, 244, 122)),
+                ('yellow', (244, 244, 122)),
+                ('white', (244, 244, 244)),
+                ('red', (244, 122, 122)),
+                ('purple', (244, 122, 244)),
+                ('orange', (244, 170, 0)))
+# The above, as a hash
+color_hash = {}
+for color in lyric_colors: color_hash[color[0]] = color[1]
+
 # Set up the configuration file
 mainconfig = config.Config({ # Wow we have a lot of options
   "gfxtheme": "classic", "djtheme": "none", "songdir": ".",

@@ -2,7 +2,7 @@ This is my (piman's) rough outline of where I want to be. Other people,
 add to it.
 
 0.6.2
- - Make pyddr.py use constants.py, new input manager, new menus.
+ - Make pyddr.py use constants.py, new input manager, new menus. (merged)
  - Clean up the main select/dance/judge loop.
  - A release we can safely use for demos, packages, etc.
 
@@ -16,4 +16,4 @@ add to it.
    (loads file, gets metadata, creates Song given a difficulty)
    - This should remove fastSong.
    - Possible 0.6.3.
- - DWI loader natively using the SOngFile interface.
+ - DWI loader natively using the SongFile interface.
