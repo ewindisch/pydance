@@ -51,8 +51,7 @@ class Judge(object):
     self.ontime += anotherjudge.ontime
         
   def changebpm(self, bpm):
-    if bpm >= 1:
-      self.tick = toRealTime(bpm, 0.16666666666666666)
+    if bpm >= 1: self.tick = toRealTime(bpm, 0.16666666666666666)
     self.bpm = bpm
         
   def numholds(self):
@@ -72,15 +71,15 @@ class Judge(object):
     done = 0
     early = late = ontime = 0
     off = -1
-    for i in range(len(times)):
-      if (curtime - self.tick*12) < times[i] < (curtime + self.tick*12):
-        if dir in self.steps[times[i]]:
-          off = (curtime-times[i]) / self.tick
+    for t in times:
+      if (curtime - self.tick*12) < t < (curtime + self.tick*12):
+        if dir in self.steps[t]:
+          off = (curtime-t) / self.tick
           if off < 1: self.early += 1
           elif off > 1: self.late += 1
           else: self.ontime += 1
           done = 1
-          etime = times[i]
+          etime = t
           self.steps[etime] = self.steps[etime].replace(dir, "")
           break
 
@@ -136,28 +135,23 @@ class Judge(object):
 
     return text, dir, etime
 
-  def expire_arrows(self, time):
-    self.times = self.steps.keys()
-    self.times.sort()
-    for k in range(len(self.times)):
-      if (self.times[k] < time - self.tick*12) and self.steps[self.times[k]]:
-        n = len(self.steps[self.times[k]]) 
-        del self.steps[self.times[k]]
+  def expire_arrows(self, cur_time):
+    times = self.steps.keys()
+    for time in times:
+      if (time < cur_time - self.tick * 12) and self.steps[time]:
+        n = len(self.steps[time]) 
+        del(self.steps[time])
         for i in range(n):
           self.miss += 1
-          self.combos.broke(time)
+          self.combos.broke(cur_time)
           self.lifebar.update_life("M")
-          self.display.judge(time, "MISS")
+          self.display.judge(cur_time, "MISS")
           self.dance_score -= 8
           self.arrow_count += 1
   
   def handle_arrow(self, key, etime):
-    self.times = self.steps.keys()
-    if etime in self.times:
-      self.steps[etime] += key
-    else:
-      self.steps[etime] = key
-      self.times = self.steps.keys()
+    if etime in self.steps: self.steps[etime] += key
+    else: self.steps[etime] = key
 
   def grade(self):
     totalsteps = (self.marvelous + self.perfect + self.great + self.ok +
