@@ -2005,7 +2005,7 @@ def dance(song, players):
 
     for i in range(len(players)):
       if (event.states[(i, E_START)] and event.states[(i, E_RIGHT)]):
-        print "holding right plus start quits. pyDDR now exiting."
+        print "Holding right plus start quits pyDDR."
         sys.exit()
       elif (event.states[(i, E_START)] and event.states[(i, E_LEFT)]):
         ev = (0, E_QUIT)
@@ -2079,7 +2079,7 @@ def dance(song, players):
         for ev in nevents:
           #print "future event: %r"%ev
           if ev.extra == 'CHBPM' and plr.pid == 0:
-            plr.song.lastbpmchangetime.append([ev.when,ev.bpm])
+            song.lastbpmchangetime.append([ev.when,ev.bpm])
             print [ev.when,ev.bpm], "was added to the bpm changelist"
           
           if ev.feet:
@@ -2097,10 +2097,10 @@ def dance(song, players):
       if (curtime >= song.lastbpmchangetime[1][0]):
         nbpm = song.lastbpmchangetime[1][1]
         for plr in players:  plr.change_bpm(nbpm)
-        oldbpm = nbpm
-        song.lastbpmchangetime = song.lastbpmchangetime[1:]
         print "BPM changed from", oldbpm, "to", nbpm
         print "Last changed BPM at", song.lastbpmchangetime
+        oldbpm = nbpm
+        song.lastbpmchangetime.pop(0)
         bpmchanged = 0
      
     for plr in players: plr.check_sprites(curtime)

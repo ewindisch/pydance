@@ -102,7 +102,6 @@ class ScoringDisp(pygame.sprite.Sprite):
         self.playernum = playernum
         
         self.set_text(text)
-        self.oldscore = -1
         self.image = pygame.surface.Surface((160,48))
         self.rect = self.image.get_rect()
         self.rect.bottom = 484
@@ -115,7 +114,7 @@ class ScoringDisp(pygame.sprite.Sprite):
                                              (tx,48))
       self.baseimage = pygame.surface.Surface((128,48))
       self.baseimage.blit(self.basemode,(64-(tx/2),0))
-      self.oldscore = 0 # Force a refresh
+      self.oldscore = -1 # Force a refresh
 
     def update(self, score):
       if score != self.oldscore:
