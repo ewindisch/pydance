@@ -97,19 +97,23 @@ def main():
   songs = load_files(screen, song_list, "songs", SongItem, (False,))
 
   song_dict = {}
+  record_dict = {}
   for song in songs:
     mix = song.info["mix"].lower()
     title = song.info["title"].lower()
     if song.info["subtitle"]: title += song.info["subtitle"].lower()
     if not song_dict.has_key(mix): song_dict[mix] = {}
     song_dict[mix][title] = song
+    record_dict[song.info["recordkey"]] = song
 
-  courses = load_files(screen, course_list, "courses", CRSFile, (song_dict,))
+  courses = load_files(screen, course_list, "courses", CRSFile,
+                       (song_dict, record_dict))
 
+  records.verify(record_dict)
   # Let the GC clean these up if it needs to.
   song_list = None
   course_list = None
-
+  record_dict = None
   pad.empty()
 
   if len(songs) < 1:

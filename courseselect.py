@@ -104,6 +104,12 @@ class CourseDisplay(object):
     i = 1
     for name, diff, mods in course.songs:
       if "*" in name: name, subtitle = "??????????", ""
+      elif name[0] == "BEST":
+        name = "Player's Best #%d" % name[1]
+        subtitle = ""
+      elif name[0] == "WORST":
+        name = "Player's Worst #%d" % name[1]
+        subtitle = ""
       else: name, subtitle = util.find_subtitle(name.split("/")[-1])
 
       if "." in diff: diff = "?"

@@ -6,6 +6,7 @@ import pygame
 import random
 import util
 import error
+import records
 import os
 
 class CRSFile(object):
@@ -35,12 +36,13 @@ class CRSFile(object):
                    "dark": ("dark", 1),
                    }
 
-  def __init__(self, filename, all_songs):
+  def __init__(self, filename, all_songs, song_by_recordkey):
     self.filename = filename
     self.songs = []
     self.name = "A Course"
     self.mixname = " "
     self.all_songs = all_songs
+    self.recordkeys = song_by_recordkey
     lines = []
     f = open(filename)
     for line in f:
@@ -70,10 +72,9 @@ class CRSFile(object):
           modifiers = modifiers.split(",")
         else: continue
 
-        if name[0:4] == "BEST" or name[0:5] == "WORST":
-          raise RuntimeError("Player's best and worst is not supported.")
-
-        name = name.replace("\\", "/") # DWI uses Windows-style separators.
+        if name[0:4] == "BEST": name = ("BEST", int(name[4:]))
+        elif name[0:5] == "WORST": name = ("WORST", int(name[5:]))
+        else: name = name.replace("\\", "/") # DWI uses Windows-style
 
         mods = {}
         for mod in modifiers:
@@ -118,7 +119,13 @@ class CRSFile(object):
     elif len(diff) < 3: a, b = int(diff), int(diff)
     if a or b: diff = range(a, b + 1)
 
-    if name[-1] == "*": # A random song
+    if name[0] == "BEST":
+      s = self.recordkeys.get(records.best(name[1], diff), None)
+      if s: fullname = s.filename
+    elif name[0] == "WORST":
+      s = self.recordkeys.get(records.worst(name[1], diff), None)
+      if s: fullname = s.filename
+    elif name[-1] == "*": # A random song
       if "/" in name:
         folder, dummy = name.split("/")
         folder = folder.lower()
@@ -152,12 +159,14 @@ class CRSFile(object):
           if len(file_list) != 0: fullname = file_list[0]
         if fullname: break
 
-    if not fullname: # Still haven't found it...
+    if not fullname and len(name[0]) == 1: # Still haven't found it...
       folder, song = name.split("/")
       song = self.all_songs.get(folder.lower(), {}).get(song.lower())
       if song: fullname = song.filename
 
     if not fullname:
+      if name[0] == "BEST" or name[0] == "WORST":
+        name = "Player's %s #%d" % (name[0].capitalize(), name[1])
       error.ErrorMessage(self.screen, [name, "was not found."])
       raise StopIteration
 
