@@ -170,14 +170,14 @@ class ScrollingArrow(object):
         s = pygame.Surface([w, w])
         s.blit(self._image, [0, -i * w])
         self._images.append(s)
+      self._beatcount = len(self._images) / 4
       self._image = None
-
 
   def get_image(self, beat):
     if self._image: return self._image
     else:
-      beat %= 16.0
-      beat /= 4.0
+      beat %= self._beatcount
+      beat /= self._beatcount
       pct = beat - int(beat)
       i = int(float(len(self._images)) * pct)
       return self._images[i]

@@ -119,7 +119,7 @@ class AbstractArrow(pygame.sprite.Sprite):
   def update(self, curtime, curbpm, beat, lbct):
     # NB - Making a new surface, then blitting the image in place, is 20%
     # slower than calling image.convert() (and is longer to type).
-    self.image = self.arrow.get_image(self.endbeat - beat).convert()
+    self.image = self.arrow.get_image(beat).convert()
     self.baseimage = self.image
     self.rect = self.image.get_rect()
     self.rect.left = self.arrow.left
