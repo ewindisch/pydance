@@ -198,7 +198,7 @@ class GradingScreen(InterfaceWindow):
       StatSprite([400, 180], "TOTAL:", plr.stats.arrow_count, s, 2333)
       ])
     self._sprites.add(GradeSprite([98, 183], plr.grade.grade(plr.failed)))
-    self._sprites.add(GrooveGaugeSprite([10, 10], [176, 100],
+    self._sprites.add(GrooveGaugeSprite([10, 22], [176, 100],
                                         plr.lifebar.record))
 
     if len(self.players) == 2:
@@ -219,7 +219,7 @@ class GradingScreen(InterfaceWindow):
         StatSprite([215, 440], "TOTAL:", plr.stats.arrow_count, s, 2333),
         ])
       self._sprites.add(GradeSprite([541, 294], plr.grade.grade(plr.failed)))
-      self._sprites.add(GrooveGaugeSprite([453, 358], [176, 100],
+      self._sprites.add(GrooveGaugeSprite([453, 370], [176, 100],
                                           plr.lifebar.record))
 
     ui.ui.clear()
