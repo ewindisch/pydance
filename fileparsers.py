@@ -1,7 +1,7 @@
 # Read in various file formats and translate them to the internal structure
 # that Steps and SongData want.
 
-import os, stat, util, string, dircache
+import os, stat, util, string, dircache, copy
 
 import games
 
@@ -344,8 +344,8 @@ class MSDFile(GenericFile):
         time = self.parse_time(line[1:line.index("]")])
         lyr = line[line.index("]") + 1:].split("|")
         lyr.reverse()
-        self.lyrics = [(time, i, lyr[i]) for i in range(len(lyr)) if
-                       lyr[i] != ""]
+        self.lyrics.extend([(time, i + 1, lyr[i]) for i in range(len(lyr)) if
+                            lyr[i] != ""])
 
   # Return a list of all the images in the directory, sorted by file size
   def find_images(self):
@@ -833,6 +833,7 @@ class SongItem(object):
              "5PANEL": "5VERSUS",
              "6PANEL": "6VERSUS",
              "8PANEL": "8VERSUS",
+             "9PANEL": "9VERSUS",
              }
   
   def __init__(self, filename, need_steps = True):
@@ -883,14 +884,30 @@ class SongItem(object):
     self.filename = filename
     self.description = song.description
 
-    if self.info["mix"] == "": self.info["mix"] = "No Mix"
+    if self.info["mix"] == "": self.info["mix"] = "No Mix Available"
   
     for k, v in SongItem.equivs.items():
       if self.difficulty.has_key(k) and not self.difficulty.has_key(v):
         self.difficulty[v] = self.difficulty[k]
         self.steps[v] = self.steps[k]
 
+    # FIXME: Be more intelligent about equivalencies between modes.
+    for game in games.SINGLE:
+      if game not in self.difficulty and "SINGLE" in self.difficulty:
+        self.difficulty[game] = copy.copy(self.difficulty["SINGLE"])
+
+    for game in games.VERSUS:
+      if game not in self.difficulty and "VERSUS" in self.difficulty:
+        self.difficulty[game] = copy.copy(self.difficulty["VERSUS"])
+
+    for game in games.COUPLE:
+      if game not in self.difficulty and "COUPLE" in self.difficulty:
+        self.difficulty[game] = copy.copy(self.difficulty["COUPLE"])
+
+    for game in games.DOUBLE:
+      if game not in self.difficulty and "DOUBLE" in self.difficulty:
+        self.difficulty[game] = copy.copy(self.difficulty["DOUBLE"])
+
     self.diff_list = {}
     for key in self.difficulty:    
       self.diff_list[key] = sorted_diff_list(self.difficulty[key])
-

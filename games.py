@@ -69,6 +69,10 @@ GAMES = {
   "8VERSUS": GameType(players = 2, dirs = "wlkduzrg", width = 32),
   "8COUPLE": GameType(players = 2, dirs = "wlkduzrg", width = 32, couple = True),
   "8DOUBLE": GameType(players = 1, dirs = "wlkduzrg", width = 32, double = True),
+  "9PANEL": GameType(players = 1, dirs = "wlkdcuzrg"),
+  "9VERSUS": GameType(players = 2, dirs = "wlkdcuzrg", width = 32),
+  "9COUPLE": GameType(players = 2, dirs = "wlkdcuzrg", width = 32, couple = True),
+  "9DOUBLE": GameType(players = 1, dirs = "wlkdcuzrg", width = 32, double = True),
   }
 
 SINGLE = [mode for mode in GAMES if (GAMES[mode].players == 1 and

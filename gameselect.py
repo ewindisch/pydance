@@ -34,6 +34,11 @@ MODES = {
   ("8P", "VERSUS"): "8VERSUS",
   ("8P", "COUPLE"): "8COUPLE",
   ("8P", "DOUBLE"): "8DOUBLE",
+
+  ("9P", "SINGLE"): "9PANEL",
+  ("9P", "VERSUS"): "9VERSUS",
+  ("9P", "COUPLE"): "9COUPLE",
+  ("9P", "DOUBLE"): "9DOUBLE",
   }
 
 # Descriptions to output on the screen for each mode.
@@ -42,6 +47,7 @@ DESCRIPTIONS = {
   "5P": "Diagonals and the center.",
   "6P": "4 panel with a twist.",
   "8P": "Dance around the whole pad.",
+  "9P": "Every button is used.",
 
   "SINGLE": "Play by yourself.",
   "VERSUS": "Challenge an opponent to the same steps.",
@@ -93,7 +99,7 @@ class GameSelect(object):
         state = 0
 
   def select_mode(self):
-    return self.select_general(0, ["4P", "5P", "6P", "8P"])
+    return self.select_general(0, ["4P", "5P", "6P", "8P", "9P"])
 
   def select_submode(self):
     return self.select_general(1, ["SINGLE", "VERSUS", "COUPLE", "DOUBLE"])
