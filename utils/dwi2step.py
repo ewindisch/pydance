@@ -72,7 +72,7 @@ class Detail:
 
 # A beat
 class Beat:
-  stepmodes = {'{':('sixty',1/64.0), '[':('twtfr',1/24.0), '(':('steps',1.0), 
+  stepmodes = {'{':('sixty',1.0/4.0), '[':('twtfr',2.0/3.0), '(':('steps',1.0), 
     ')':('eight',2.0), ']':('eight',2.0), '}':('eight',2.0)}
 
   def __init__(self, dc):

@@ -779,12 +779,11 @@ class HoldArrowSprite(CloneSprite):
     self.centerx = self.rect.centerx+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
-    # assist
-    if (self.playedsound is None) and (curtime >= self.timef1 -0.0125): #- (0.001*(60000.0/curbpm))):
+    if (self.playedsound is None) and (curtime >= self.timef1 -0.0125):
       self.sample.play()
       self.playedsound = 1
 
-    if curtime > self.timef2:  #+ (0.001*(60000.0/curbpm)):
+    if curtime > self.timef2:
       self.kill()
       return
       
@@ -792,38 +791,47 @@ class HoldArrowSprite(CloneSprite):
     self.rect.centerx = self.centerx
 
     self.top = self.pos['top']
-    self.bottom = self.pos['top'] #+ int(self.pos['diff']/8.0)
+    self.bottom = self.pos['top']
 
-    finaltime = 0
-    if len(lbct)<2: # single run (I hope)
+    if len(lbct) == 0:
       onebeat = float(60000.0/curbpm)/1000
       doomtime = self.timef1 - curtime
-      if self.broken == 0:
-        if doomtime < 0:
-          doomtime = 0
+      if self.broken == 0 and doomtime < 0: doomtime = 0
       beatsleft = float(doomtime / onebeat)
       self.top = self.top - int( (beatsleft/8.0)*self.pos['diff'] )
+
       doomtime = self.timef2 - curtime
       beatsleft = float(doomtime / onebeat)
       self.bottom = self.bottom - int( (beatsleft/8.0)*self.pos['diff'] )
     else:
-      oldbpmsub = [curtime,curbpm]
+      oldbpmsub = [curtime, curbpm]
       bpmbeats = 0
       for bpmsub in lbct:
-        if bpmsub[0] <= self.timef1 or bpmsub <= self.timef2:
+        if bpmsub[0] <= self.timef1:
           onefbeat = float(60000.0/oldbpmsub[1])/1000
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           bpmbeats = float(bpmdoom / onefbeat)
-	  if bpmsub[0] <= self.timef1:
-	    self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
-          if bpmsub[0] <= self.timef2:
-            self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0)
+          self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
           oldbpmsub = bpmsub
+        else: break
 
       onefbeat = float(60000.0/oldbpmsub[1])/1000
       bpmdoom = self.timef1 - oldbpmsub[0]
       bpmbeats = float(bpmdoom / onefbeat)
       self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
+
+      oldbpmsub = [curtime, curbpm]
+      bpmbeats = 0
+      for bpmsub in lbct:
+        if bpmsub[0] <= self.timef2:
+          onefbeat = float(60000.0/oldbpmsub[1])/1000
+          bpmdoom = bpmsub[0] - oldbpmsub[0]
+          bpmbeats = float(bpmdoom / onefbeat)
+          self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0)
+          oldbpmsub = bpmsub
+        else: break
+
+      onefbeat = float(60000.0/oldbpmsub[1])/1000
       bpmdoom = self.timef2 - oldbpmsub[0]
       bpmbeats = float(bpmdoom / onefbeat)
       self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0)
