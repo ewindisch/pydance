@@ -6,6 +6,13 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
+0.7.0 - Applesauce makes the apples go yonder                   [2003.06.04]
++ More optimizations from JZig (movies this time)
++ Native DWI support
+* Judge rewrite!
+  * Proper speed change handling in Judge
+  * Proper miss handling in Judge
+
 0.6.5 - Boy, did I mess that up.				[2003.05.30]
 + Major graphics optimization patch (1.5x-2x increase in fps) from JZig.
 * Two player mode works again.
