@@ -233,9 +233,9 @@ def emptyDictFromList(lst):
 
 DIFFICULTYLIST = ['BASIC','TRICK','MANIAC']
 DIFFICULTIES   = emptyDictFromList(DIFFICULTYLIST)
-MODELIST = ['SINGLE','COUPLE']
+MODELIST = ['SINGLE','DOUBLE']
 MODES = emptyDictFromList(MODELIST)
-BEATS = {'sixty':0.25,'twtfr':1.0/3.0,'steps':1.0,'tripl':4.0/3.0,'eight':2.0,'qurtr':4.0,'halfn':8.0,'whole':16.0} 
+BEATS = {'sixty':0.25,'thrty':0.5,'twtfr':2.0/3.0,'steps':1.0,'tripl':4.0/3.0,'eight':2.0,'qurtr':4.0,'halfn':8.0,'whole':16.0} 
 
 def toRealTime(bpm,steps):
   if bpm != 0:
@@ -308,10 +308,10 @@ class keykludge:
 
 
 class Judge:
-  def __init__ (self, bpm, holds):
+  def __init__ (self, bpm, holds, feet, stepcount):
     self.steps = {}
     self.tick = toRealTime(bpm, 1)
-    self.perfect = self.great = self.ok = self.crap = self.shit = self.miss = 0
+    self.marvelous = self.perfect = self.great = self.ok = self.crap = self.shit = self.miss = 0
     self.combo = self.bestcombo = self.broke = 0
     self.steppedtime = -1000
     self.recentsteps = [' ',' ',' ']
@@ -319,6 +319,11 @@ class Judge:
     self.early = self.late = self.ontime = 0
     self.totalcombos = 1
     self.bpm = bpm
+    scorecoeff = (((5000000.0 * (feet + 1.0)) / 10.0) /
+                  (stepcount * (stepcount + 1.0) / 2.0)) # 5th mix
+    self.score_coeff = int(scorecoeff) + 1
+    self.score = 0
+    self.badholds = 0
     self.holdsub = []
     for i in range(holds):
       self.holdsub.append(0)
@@ -329,9 +334,13 @@ class Judge:
         
   def getbpm(self):
     return self.bpm
+
+  def numholds(self):
+    return len(self.holdsub)
     
   def botchedhold(self,whichone):
     self.holdsub[whichone] = -1
+    self.badholds += 1
     
   def handle_key(self, dir, curtime):
     times = self.steps.keys()
@@ -343,8 +352,8 @@ class Judge:
       if time+i in times:
         if dir in self.steps[time+i]:
           off = i
-          if off > 3: self.early += 1
-          elif off < -3: self.late += 1
+          if off > 1: self.early += 1
+          elif off < 1: self.late += 1
           else: self.ontime += 1
           done = 1
           self.steps[time+i] = self.steps[time+i].replace(dir, "")
@@ -362,12 +371,19 @@ class Judge:
         if self.combo > self.bestcombo:
           self.bestcombo = self.combo 
 
-        if off < 4:
+        if off <= 1:
+          self.marvelous += 1
+          self.score += 20 * self.score_coeff * self.combo
+          text = "MARVELOUS"
+          anncrange = (80, 100)
+        elif 1 < off <= 4:
           self.perfect += 1
+          self.score += 10 * self.score_coeff * self.combo
           text = "PERFECT"
           anncrange = (80, 100)
         else:
           self.great += 1
+          self.score += 5 * self.score_coeff * self.combo
           text = "GREAT"
           anncrange = (70, 94)
 
@@ -379,6 +395,7 @@ class Judge:
         if off < 9:
           self.ok += 1
           text = "OK"
+          self.score += 2 * self.score_coeff
           anncrange = (40, 69)
         elif off < 11:
           self.crap += 1
@@ -407,7 +424,7 @@ class Judge:
     curtick = round((time - 2*self.tick) / (self.tick / 6))
     self.times = self.steps.keys()
     self.times.sort()
-    for k in xrange(24):
+    for k in range(24):
       j = curtick - k
       if j in self.times and self.steps[j]:
         self.broke = 1
@@ -440,7 +457,162 @@ class Judge:
       for i in dellist:
         del self.steps[i]
       self.times = self.steps.keys()
-      
+
+  def grade(self):
+    totalsteps = (self.marvelous + self.perfect + self.great + self.ok +
+                  self.crap + self.shit + self.miss)
+
+    if totalsteps == 0: return "?"
+
+    marvpct = self.marvelous * 100.0 / totalsteps
+    perfectpct = self.perfect * 100.0 / totalsteps
+    greatpct = self.great * 100.0 / totalsteps
+    okpct = self.ok * 100.0 / totalsteps
+    crappypct = self.crap * 100.0 / totalsteps
+    shitpct = self.shit * 100.0 / totalsteps
+    misspct = self.miss * 100.0 / totalsteps
+    mpg_count = self.marvelous + self.perfect + self.great
+
+    #pick a grade
+    if self.marvelous == totalsteps: return '!!!'
+    elif self.marvelous + self.perfect == totalsteps: return 'wow'
+    elif (marvpct + perfectpct >= 92) and (mpg_count == totalsteps):
+      return 'SSS'
+    elif ((self.marvelous + self.perfect >= self.great) and
+          (mpg_count == totalsteps)):
+      return 'SS'
+    elif mpg_count == totalsteps:
+      return 'S'
+    elif ((mpg_count >= totalsteps*0.8) and (misspct <= 2) and
+          (shitpct <= 4) and (crappypct <= 6) and (okpct <= 8)):
+      return 'A'
+    elif ((mpg_count >= totalsteps*0.6) and (misspct <= 4) and
+          (shitpct <= 8) and (crappypct <= 12) and (okpct <= 16)):
+      return 'B'
+    elif ((mpg_count >= totalsteps*0.4) and (misspct <= 6) and
+          (shitpct <= 12) and (crappypct <= 18) and (okpct <= 24)):
+      return 'C'
+    elif ((mpg_count >= totalsteps*0.2) and (misspct <= 8) and
+          (shitpct <= 16) and (crappypct <= 24) and (okpct <= 32)):
+      return "D"
+    else: return "doh!"
+
+
+
+class GradingScreen:
+  def __init__(self, judges):
+    self.judges = judges
+
+    for judge in judges:
+      grade = judge.grade()
+      totalsteps = (judge.marvelous + judge.perfect + judge.great +
+                    judge.ok + judge.crap + judge.shit + judge.miss)
+      steps = (grade, totalsteps, judge.bestcombo, judge.combo)
+
+      numholds = judge.numholds()
+      goodholds = numholds - judge.badholds
+
+      steptypes = (judge.marvelous, judge.perfect, judge.great,
+                   judge.ok, judge.crap, judge.shit, judge.miss, goodholds,
+                   numholds)
+      print ("GRADE: %s - total steps: %d best combo" +
+             " %d current combo: %d") % steps
+
+      print ("V: %d P: %d G: %d O: %d C: " +
+             "%d S: %d M: %d - %d/%d holds") % steptypes
+      print
+
+  def make_gradescreen(self, screen):
+    judge = self.judges[0]
+    totalsteps = (judge.marvelous + judge.perfect + judge.great +
+                  judge.ok + judge.crap + judge.shit + judge.miss)
+
+    if totalsteps == 0: return None
+
+    font = pygame.font.Font(None, 28)
+
+    grading = fontfx.sinkblur("GRADING",64,4,(224,72),(64,64,255))
+    screen.blit(grading, (320-grading.get_rect().centerx,-8) )
+
+    rows = ["MARVELOUS", "PERFECT", "GREAT", "OK", "CRAPPY", "ACK",
+            "MISS", "early", "late", "TOTAL", " ", "MAX COMBO",
+            "HOLDS", " ", "SCORE"]
+
+    for j in range(4):
+      for i in range(len(rows)):
+        fc = ((j*32)+96-(i*8))
+        if fc < 0: fc=0
+        gradetext = fontfx.shadefade(rows[i],28,j,(224,32), (fc,fc,fc))
+        gradetext.set_colorkey(gradetext.get_at((0,0)))
+        gradetextpos = gradetext.get_rect()
+        gradetextpos.right = 32 + screen.get_rect().centerx + 8-j
+        gradetextpos.top = 64 + (i*24) + 8-j
+        screen.blit(gradetext, (320-font.size(rows[i])[0]/2,
+                                64 + (i*24) + 8-j))
+        pygame.display.flip()
+
+    player = 0
+
+    for judge in self.judges:
+      grade = judge.grade()
+      for i in range(4):
+        font = pygame.font.Font(None, 100-(i*2))
+        gradetext = font.render(grade, 1, (48 + i*16, 48 + i*16, 48 + i*16))
+        gradetext.set_colorkey(gradetext.get_at((0,0)))
+        screen.blit(gradetext, (200 + 250 * player - (font.size(grade))[0]/2, 150))
+        pygame.time.delay(48)
+
+      totalsteps = (judge.marvelous + judge.perfect + judge.great + judge.ok +
+                    judge.crap + judge.shit + judge.miss)
+      rows = [judge.marvelous, judge.perfect, judge.great, judge.ok,
+              judge.crap, judge.shit, judge.miss, judge.early, judge.late]
+
+      for j in range(4):
+        for i in range(len(rows)):
+          fc = ((j*32)+96-(i*8))
+          if fc < 0: fc=0
+          text = "%d (%d%%)" % (rows[i], 100 * rows[i] / totalsteps)
+          gradetext = fontfx.shadefade(text,28,j,(224,32), (fc,fc,fc))
+          gradetext.set_colorkey(gradetext.get_at((0,0)))
+          screen.blit(gradetext, (40 + 500 * player - j, 72 + (i*24) - j))
+          pygame.display.flip()
+
+      # Total
+      for j in range(4):
+        gradetext = fontfx.shadefade(str(totalsteps),28,j,(224,32), (fc,fc,fc))
+        gradetext.set_colorkey(gradetext.get_at((0,0)))
+        screen.blit(gradetext, (40 + 500*player - j, 288 - j))
+        pygame.display.flip()
+
+      # Combo
+      for j in range(4):
+        text = "%d (%d%%)" % (judge.bestcombo,
+                              judge.bestcombo * 100 / totalsteps)
+        gradetext = fontfx.shadefade(text,28,j,(224,32), (fc,fc,fc))
+        gradetext.set_colorkey(gradetext.get_at((0,0)))
+        screen.blit(gradetext, (40 + 500*player - j, 336 - j))
+        pygame.display.flip()
+
+      # Holds
+      for j in range(4):
+        text = "%d / %d" % (judge.numholds() - judge.badholds, judge.numholds())
+        gradetext = fontfx.shadefade(text,28,j,(224,32), (fc,fc,fc))
+        gradetext.set_colorkey(gradetext.get_at((0,0)))
+        screen.blit(gradetext, (40 + 500*player - j, 360 - j))
+        pygame.display.flip()
+
+      # Score
+      for j in range(4):
+        gradetext = fontfx.shadefade(str(judge.score), 28, j,
+                                     (224,32), (fc,fc,fc))
+        gradetext.set_colorkey(gradetext.get_at((0,0)))
+        screen.blit(gradetext, (40 + 500*player - j, 412 - j))
+        pygame.display.flip()
+
+      player += 1
+
+    return 1
+
 class zztext(pygame.sprite.Sprite):
     def __init__(self,text,x,y):
       pygame.sprite.Sprite.__init__(self) #call Sprite initializer
@@ -502,9 +674,9 @@ class DancerAnim(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.top = 240-(self.y/2)
     self.rect.left = 480-(self.x/2)
-
+"""
 class ComboDisp(pygame.sprite.Sprite):
-    def __init__(self,topnum,progx,progy):
+    def __init__(self,topnum,progx,progy,playernum):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
         self.trect = 296+(int(mainconfig.get_value('totaljudgings',default=1))*24)
         self.sticky = int(mainconfig.get_value('stickycombo',default=1))
@@ -521,7 +693,7 @@ class ComboDisp(pygame.sprite.Sprite):
         self.image.set_colorkey(self.image.get_at((0,0)))
         self.rect.top = self.trect
         self.rect.centerx = 160
-
+        self.playernum = playernum - 1
         pixelbar = pygame.surface.Surface((1,3))
         pixelbar.fill((192,192,192))
         
@@ -530,7 +702,7 @@ class ComboDisp(pygame.sprite.Sprite):
         for i in range(topnum):
           if (i % 5) == 0:
             screen.blit(pixelbar, (progx+(i/5),progy))
-            pygame.display.flip()
+            pygame.display.update()
           text = repr(i) + "x COMBO"
           image1 = self.font.render(text,1,(16,16,16))
           image2 = self.font.render(text,1,(224,224,224))
@@ -554,11 +726,152 @@ class ComboDisp(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.top = self.trect
-        self.rect.centerx = 160
+        self.rect.centerx = 160 + (self.playernum*320)
+
+class ComboDisp(pygame.sprite.Sprite):
+  def __init__(self,playernum):
+    pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+    self.sticky = int(mainconfig.get_value('stickycombo',default=1))
+    self.lowcombo = int(mainconfig.get_value('lowestcombo',default=4))
+
+    self.trect = 296+(int(mainconfig.get_value('totaljudgings',default=1))*24)
+    self.playernum = playernum - 1
+    self.centerx = (320*self.playernum) + 160
+    
+    fonts = []
+    for x in range(5):
+      fonts.append(pygame.font.Font(None, 32+x*3))
+
+    self.words = []
+    for f in fonts:
+      render = []
+      for w in ('0','1','2','3','4','5','6','7','8','9','x COMBO'):
+        img1 = f.render(w, 1, (16, 16, 16))
+        img2 = f.render(w, 1, (224, 224, 224))
+        img3 = pygame.Surface(img1.get_size())
+        img3.blit(img1, (-2, 2))
+        img3.blit(img1, (2, -2))
+        img3.blit(img2, (0, 0))
+        img3.set_colorkey(img3.get_at((0, 0)))
+        render.append(img3)
+      self.words.append(render)
+
+    self.dirty = 0
+
+  def update(self, xcombo, steptimediff):
+    if steptimediff < 0.36 or self.sticky:
+      self.drawcount = xcombo
+      self.drawsize = min(int(0.2*5), len(self.words))
+    else:
+      self.drawcount = 0
+
+  def draw(self, screen):
+    if self.drawcount >= self.lowcombo:
+      render = self.words[self.drawsize]
+      width = render[-1].get_width()
+      hundreds = self.drawcount / 100
+      tens = self.drawcount / 10
+      ones = self.drawcount % 10
+      #get width
+      if hundreds:
+        width += render[hundreds].get_width()
+      if tens:
+        width += render[tens].get_width()
+      width += render[ones].get_width()
+      startleft = left = self.centerx - width / 2
+      #render
+      if hundreds:
+        screen.blit(render[hundreds], (left, self.trect))
+        left += render[hundreds].get_width()
+      if tens:
+        screen.blit(render[tens], (left, self.trect))
+        left += render[tens].get_width()
+      screen.blit(render[ones], (left, self.trect))
+      left += render[ones].get_width()
+      r = screen.blit(render[-1], (left, self.trect))
+      self.dirty = Rect(startleft, r.top, r.right - startleft, r.height)
+
+  def clear(self, screen, bgd):
+    if self.dirty:
+      screen.blit(bgd, self.dirty, self.dirty)
+      self.dirty = 0
+"""
+class ComboDisp(pygame.sprite.Sprite):
+  def __init__(self,playernum):
+    pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+    self.sticky = int(mainconfig.get_value('stickycombo',default=1))
+    self.lowcombo = int(mainconfig.get_value('lowestcombo',default=4))
+
+    self.trect = 296+(int(mainconfig.get_value('totaljudgings',default=1))*24)
+    self.playernum = playernum - 1
+    self.centerx = (320*self.playernum) + 160
+    
+    fonts = []
+    for x in range(11, 0, -1):
+      fonts.append(pygame.font.Font(None, 28+int(x*1.82)))
+
+    self.words = []
+    for f in fonts:
+      render = []
+      for w in ('0','1','2','3','4','5','6','7','8','9','x COMBO'):
+        img1 = f.render(w, 1, (16, 16, 16))
+        img2 = f.render(w, 1, (224, 224, 224))
+        img3 = pygame.Surface(img1.get_size())
+        img3.blit(img1, (-2, 2))
+        img3.blit(img1, (2, -2))
+        img3.blit(img2, (0, 0))
+        img3.set_colorkey(img3.get_at((0, 0)))
+        render.append(img3)
+      self.words.append(render)
+
+    self.dirty = 0
+
+  def update(self, xcombo, steptimediff):
+    if steptimediff < 0.36 or self.sticky:
+      self.drawcount = xcombo
+      self.drawsize = min(int(steptimediff*50), len(self.words)-1)
+    else:
+      self.drawcount = 0
+
+  def draw(self, screen):
+    if self.drawcount >= self.lowcombo:
+      render = self.words[self.drawsize]
+      width = render[-1].get_width()
+      hundreds = self.drawcount / 100
+      tens = self.drawcount / 10
+      ones = self.drawcount % 10
+      #get width
+      if hundreds:
+        hundreds = render[hundreds%10]
+        width += hundreds.get_width()
+      if tens:
+        tens = render[tens%10]
+        width += tens.get_width()
+      ones = render[ones]
+      width += ones.get_width()
+      startleft = left = self.centerx - width / 2
+      #render
+      if hundreds:
+        screen.blit(hundreds, (left, self.trect))
+        left += hundreds.get_width()
+      if tens:
+        screen.blit(tens, (left, self.trect))
+        left += tens.get_width()
+      screen.blit(ones, (left, self.trect))
+      left += ones.get_width()
+      r = screen.blit(render[-1], (left, self.trect))
+      self.dirty = Rect(startleft, r.top, r.right - startleft, r.height)
+
+  def clear(self, screen, bgd):
+    if self.dirty:
+      screen.blit(bgd, self.dirty, self.dirty)
+      self.dirty = 0
+
 
 class HoldJudgeDisp(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,playernum):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+        self.playernum = playernum-1
 
         self.space = pygame.surface.Surface((48,24))
         self.space.fill((0,0,0))
@@ -573,7 +886,7 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.image.set_colorkey(self.image.get_at((0,0)))
         self.rect.top = 112
-        self.rect.left = 48
+        self.rect.left = 48+(320*self.playernum)
 
         self.slotnow = ['','','','']        
         self.slotold = ['','','','']
@@ -704,10 +1017,10 @@ class fpsDisp(pygame.sprite.Sprite):
         self.loops = 0
 
 class TopArrow(pygame.sprite.Sprite):
-  def __init__ (self, bpm, direction, ypos):
+  def __init__ (self, bpm, direction, ypos, playernum):
     pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
     self.presstime = -1
-    self.steps = {}
+#    self.steps = {}
     self.tick = toRealTime(bpm, 1);
     self.frame = 0
     self.oldframe = -1
@@ -716,6 +1029,7 @@ class TopArrow(pygame.sprite.Sprite):
     self.adder = 0
     self.direction = direction
     self.topimg = []
+    self.playernum = playernum-1
     self.ypos = ypos
 
     for i in range(8):
@@ -724,6 +1038,16 @@ class TopArrow(pygame.sprite.Sprite):
       fn = os.path.join('themes','gfx',theme,'arr_') + ftemp + self.direction + '_' + repr(i) + '.png'
       self.topimg.append(pygame.image.load(fn))
       self.topimg[i].set_colorkey(self.topimg[i].get_at((0,0)),RLEACCEL)
+
+      self.image = self.topimg[0]
+      self.rect = self.image.get_rect()
+      self.rect.top = self.ypos
+      if self.direction == 'l':        self.rect.left = 12
+      if self.direction == 'd':        self.rect.left = 88
+      if self.direction == 'u':        self.rect.left = 164
+      if self.direction == 'r':        self.rect.left = 240
+
+      self.rect.left += (320*self.playernum)
 
   def stepped(self, modifier, time):
     if modifier:    self.adder = 4
@@ -739,25 +1063,47 @@ class TopArrow(pygame.sprite.Sprite):
 
     if self.frame != self.oldframe:
       self.image = self.topimg[self.frame]
+      self.oldframe = copy.copy(self.frame)
 
-      self.rect = self.image.get_rect()
-      self.image.set_colorkey(self.image.get_at((0,0)))
-      self.rect.top = self.ypos
-      if self.direction == 'l':        self.rect.left = 12
-      if self.direction == 'd':        self.rect.left = 88
-      if self.direction == 'u':        self.rect.left = 164
-      if self.direction == 'r':        self.rect.left = 240
+class Blinky(pygame.sprite.Sprite):
+  def __init__ (self, bpm):
+    pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
+    self.tick = toRealTime(bpm, 1);
+    self.frame = 0
+    self.oldframe = -100
+    self.topimg = []
+    
+    im = pygame.surface.Surface((48,40))
+    im.fill((1,1,1))
+    self.topimg.append(im.convert())
+    self.topimg.append(im.convert())
+    im.fill((255,255,255))
 
-    self.oldframe = copy.copy(self.frame)
+    for i in range(2):          
+      self.topimg.append(im.convert())
+
+    self.image = self.topimg[3]
+    self.rect = self.image.get_rect()
+    self.rect.top = 440
+    self.rect.left = 592
+
+  def update(self,time):
+    self.frame = int(time / (self.tick / 2)) % 8
+    if self.frame > 3:        self.frame = 3
+
+    if self.frame != self.oldframe:
+      self.image = self.topimg[self.frame]
+      self.oldframe = copy.copy(self.frame)
 
 class ArrowFX(pygame.sprite.Sprite):
-  def __init__ (self, bpm, direction, ypos):
+  def __init__ (self, bpm, direction, ypos, playernum):
     pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
     self.presstime = -1000000
     self.tick = toRealTime(bpm, 1);
     self.centery = ypos + 32
     self.centerx = {'l':44, 'd':120, 'u':196, 'r':272}[direction]
-
+    self.playernum = playernum-1
+    
     fn = os.path.join('themes','gfx',theme,'arr_n_') + direction + '_3.png'
     self.baseimg = pygame.image.load(fn).convert(16)
     self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
@@ -783,6 +1129,8 @@ class ArrowFX(pygame.sprite.Sprite):
     tinter = pygame.surface.Surface((64,64))
     if tinttype == 'PERFECT':
       tinter.fill((255,255,0))
+    if tinttype == 'MARVELOUS':
+      tinter.fill((255,255,255))
     if tinttype == 'GREAT':
       tinter.fill((0,255,0))
     tinter.set_alpha(127)
@@ -792,7 +1140,7 @@ class ArrowFX(pygame.sprite.Sprite):
     if self.direction == 1: self.direction = -1
     else: self.direction = 1
 
-  def update(self, time):
+  def update(self, time, combo):
     steptimediff = time - self.presstime
     if (steptimediff < 0.2) or self.holdtype:
       self.displaying = 1
@@ -801,7 +1149,7 @@ class ArrowFX(pygame.sprite.Sprite):
         if self.holdtype:
           scale = 1.54
         else:
-          scale = 1.0 + (steptimediff * 4.0)
+          scale = 1.0 + (steptimediff * 4.0) * (1.0+(combo/256.0))
         newsize = [x*scale for x in self.image.get_size()]
         self.image = pygame.transform.scale(self.image, newsize)
       if self.rotating:
@@ -820,14 +1168,18 @@ class ArrowFX(pygame.sprite.Sprite):
       self.rect = self.image.get_rect()
       self.rect.center = self.centerx, self.centery
 
+      self.rect.left += (320*self.playernum)
+
 class LifeBarDisp(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,playernum):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+        self.playernum = playernum-1
         self.oldlife = self.failed = 0
         self.life = 25
         self.image = pygame.Surface((204,28))
         self.blkbar = pygame.Surface((3,24))
         self.grade = None
+        self.vamt = 0.4
         self.pamt = 0.25
         self.gamt = 0
         self.oamt = -0.5
@@ -864,18 +1216,19 @@ class LifeBarDisp(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.top = 30
-        self.rect.left = 58
+        self.rect.left = 58+(320*self.playernum)
 
     def failed(self):
        return self.failed
        
     def update(self, judges):
-      tstmp = judges.perfect + judges.great + judges.ok + judges.crap + judges.shit + judges.miss
+      tstmp = judges.marvelous + judges.perfect + judges.great + judges.ok + judges.crap + judges.shit + judges.miss
       if tstmp: 
         self.life += judges.combo*8 / tstmp
         self.life += judges.bestcombo*8 / tstmp
 
       self.life = 25
+      self.life += judges.marvelous * self.vamt
       self.life += judges.perfect * self.pamt
       self.life += judges.great * self.gamt
       self.life += judges.ok * self.oamt
@@ -892,10 +1245,10 @@ class LifeBarDisp(pygame.sprite.Sprite):
         self.life = 52
       if int(self.life) != int(self.oldlife):
 #        print "life went to",self.life
-        for j in xrange(50-self.life):
+        for j in range(50-self.life-1):
           self.image.blit(self.blkbar, ((2+int(self.life+j)*4), 2) )
-        for j in xrange(self.life):
-          barpos = int(self.life-j-1)
+        for j in range(self.life):
+          barpos = int(self.life-(j+1))
           if barpos <= 10:
             self.redbar_pos.left = 2+ barpos*4
             self.redbar_pos.top = 2
@@ -919,31 +1272,35 @@ class LifeBarDisp(pygame.sprite.Sprite):
       self.oldlife = copy.copy(self.life)
 
 class JudgingDisp(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,playernum):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
 
         self.total = int(mainconfig.get_value('totaljudgings',default=1))
         self.sticky = int(mainconfig.get_value('stickyjudge',default=1))
         self.needsupdate = 1
+        self.playernum = playernum-1
         self.stepped = 0
         self.oldzoom = -1
         
         # prerender the text for judging for a little speed boost
         font = pygame.font.Font(None, 48)
+        tx = font.size("MARVELOUS")[0]+4
+        self.marvelous = fontfx.shadefade("MARVELOUS",48,4,(tx,40),(224,224,224))
         tx = font.size("PERFECT")[0]+4
-        self.perfect = fontfx.shadefade("PERFECT",48,4,(tx,40),(224,224, 32))
+        self.perfect   = fontfx.shadefade("PERFECT"  ,48,4,(tx,40),(224,224, 32))
         tx = font.size("GREAT")[0]+4
-        self.great   = fontfx.shadefade("GREAT"  ,48,4,(tx,40),( 32,224, 32))
+        self.great     = fontfx.shadefade("GREAT"    ,48,4,(tx,40),( 32,224, 32))
         tx = font.size("OK")[0]+4
-        self.ok      = fontfx.shadefade("OK"     ,48,4,(tx,40),( 32, 32,224))
+        self.ok        = fontfx.shadefade("OK"       ,48,4,(tx,40),( 32, 32,224))
         tx = font.size("CRAPPY")[0]+4
-        self.crappy  = fontfx.shadefade("CRAPPY" ,48,4,(tx,40),(128, 32,128))
+        self.crappy    = fontfx.shadefade("CRAPPY"   ,48,4,(tx,40),(128, 32,128))
         tx = font.size("ACK")[0]+4
-        self.shit    = fontfx.shadefade("ACK"    ,48,4,(tx,40),( 96, 64, 32))
+        self.shit      = fontfx.shadefade("ACK"      ,48,4,(tx,40),( 96, 64, 32))
         tx = font.size("MISS")[0]+4
-        self.miss    = fontfx.shadefade("MISS"   ,48,4,(tx,40),(224, 32, 32))
-        self.space   = font.render( " ",       1, (  0,   0,   0) )
+        self.miss      = fontfx.shadefade("MISS"     ,48,4,(tx,40),(224, 32, 32))
+        self.space     = font.render( " ",       1, (  0,   0,   0) )
 
+        self.marvelous.set_colorkey(self.marvelous.get_at((0,0)),RLEACCEL)
         self.perfect.set_colorkey(self.perfect.get_at((0,0)),RLEACCEL)
         self.great.set_colorkey(self.great.get_at((0,0)),RLEACCEL)
         self.ok.set_colorkey(self.ok.get_at((0,0)),RLEACCEL)
@@ -955,36 +1312,84 @@ class JudgingDisp(pygame.sprite.Sprite):
         
     def update(self, listnum, steptimediff, judgetype):
       if steptimediff < 0.5 or (judgetype == ('MISS' or ' ')):
-        if judgetype == " ":               self.image = self.space
-        if judgetype == "PERFECT":         self.image = self.perfect
-        if judgetype == "GREAT":           self.image = self.great
-        if judgetype == "OK":              self.image = self.ok
-        if judgetype == "CRAPPY":          self.image = self.crappy
-        if judgetype == "SHIT":            self.image = self.shit
-        if judgetype == "MISS":            self.image = self.miss
+        if   judgetype == "MARVELOUS":       self.image = self.marvelous
+        elif judgetype == "PERFECT":         self.image = self.perfect
+        elif judgetype == "GREAT":           self.image = self.great
+        elif judgetype == "OK":              self.image = self.ok
+        elif judgetype == "CRAPPY":          self.image = self.crappy
+        elif judgetype == "SHIT":            self.image = self.shit
+        elif judgetype == " ":               self.image = self.space
+        elif judgetype == "MISS":            self.image = self.miss
 
         zoomzoom = steptimediff
 
         if zoomzoom != self.oldzoom:
+          self.needsupdate = 1
           if (steptimediff > 0.36) and (self.sticky == 0) and self.stepped:
             self.image = self.space
-            self.needsupdate = 1
             self.stepped = 0
           if listnum == 0:
             if steptimediff > 0.2:                zoomzoom = 0.2
             self.image = pygame.transform.rotozoom(self.image, 0, 1-(zoomzoom*2))
-            self.needsupdate = 1
             self.stepped = 1
           else:
             self.image = pygame.transform.rotozoom(self.image, 0, 0.6)
-            self.needsupdate = 1
 
       if self.needsupdate:
         self.rect = self.image.get_rect()
         self.image.set_colorkey(self.image.get_at((0,0)))
         self.rect.bottom = 320+(listnum*24)
-        self.rect.centerx = 160
+        self.rect.centerx = 160+(self.playernum*320)
         self.needsupdate = 0
+
+class ScoringDisp(pygame.sprite.Sprite):
+    def __init__(self,playernum,playmode):
+        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+        self.playernum = playernum-1
+        
+        # prerender the baseimage
+        self.font = pygame.font.Font(None, 28)
+        tx = self.font.size(playmode)[0]+2
+        self.basemode = pygame.transform.scale(fontfx.embfade(playmode,28,2,(tx,24),(127,127,127)),(tx,48))
+        self.baseimage = pygame.surface.Surface((128,48))
+        self.baseimage.blit(self.basemode,(64-(tx/2),0))
+        self.oldscore = -1
+        self.image = pygame.surface.Surface((160,48))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = 484
+        self.rect.centerx = 160+(self.playernum*320)
+        
+    def update(self, score):
+      if score != self.oldscore:
+        self.image.blit(self.baseimage,(0,0))
+        scoretext = self.font.render(repr(score),1,(192,192,192))
+        self.image.blit(scoretext,(64-(scoretext.get_rect().size[0]/2),13))
+        self.image.set_colorkey(self.image.get_at((0,0)),RLEACCEL)
+        self.oldscore = score
+
+class TimeDisp(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+        self.font = pygame.font.Font(None, 40)
+        self.oldtime = "-1000"
+        self.image = pygame.surface.Surface((1,1))
+        self.rect = self.image.get_rect()
+        self.rect.top = 25
+        self.rect.centerx = 320
+        self.blahmod = 0
+        
+    def update(self, time):
+      nowtime = repr(time)[:repr(time).index('.')+3]
+      if (nowtime != self.oldtime) and (self.blahmod > 3):
+        self.image = self.font.render(nowtime,1,(224,224,224))
+        self.image.set_colorkey(self.image.get_at((0,0)),RLEACCEL)
+        self.oldtime = copy.copy(nowtime)
+        self.rect = self.image.get_rect()
+        self.rect.top = 25
+        self.rect.centerx = 320
+        self.blahmod = 0
+      else:
+        self.blahmod += 1
 
 class Song:
   def __init__ (self, fn, path=None):
@@ -992,8 +1397,14 @@ class Song:
     self.haslyrics = ''
     self.fooblah = fn
     try:
-      self.lilbanner = pygame.transform.rotate(pygame.image.load(fn[:-5]+'.png').convert(),-45)
+      try:
+        print "trying full banner",fn[:-5]+'-full.png'
+        self.lilbanner = pygame.image.load(fn[:-5]+'-full.png').convert()
+      except:
+        print "nogo, trying rotated banner",fn[:-5]+'.png'
+        self.lilbanner = pygame.transform.rotate(pygame.image.load(fn[:-5]+'.png').convert(),-45)
     except:
+      print "settling for blank banner for",fn
       self.lilbanner = pygame.surface.Surface((1,1))
     self.lilbanner.set_colorkey(self.lilbanner.get_at((0,0)))
     self.modes = modes = MODES.copy()
@@ -1024,7 +1435,7 @@ class Song:
     self.transdisplay = LyricDispKludge(428, map((lambda x: int(x)), mainconfig.get_value('transcolor',default='0,224,122').split(',')))
     little = int(mainconfig.get_value('little',default='0'))
     coloringmod = 0
-    self.totarrows = 0
+    self.totarrows = {}
     self.holdinfo = []
     self.holdref = []
     numholds = 1
@@ -1048,6 +1459,7 @@ class Song:
           curTime = float(self.offset) #/1000.0
           curBPM = self.bpm
           difficulty = firstword
+          self.totarrows[difficulty] = 0
           modeDict[difficulty] = SongEvent(when=curTime,bpm=curBPM,extra=int(rest[0]))
           chompNext = modeDict,modeDict[difficulty]
         elif len(chompNext) == 2:
@@ -1117,18 +1529,25 @@ class Song:
                                     feet=feetstep,
                                     extra=firstword,
                                     color=(coloringmod%4))
+              for arrowadder in feetstep:
+                if arrowadder & 8:
+                  self.totarrows[difficulty] += 1
               chompNext = modeDict, tail.next
-              self.totarrows += 1
             curTime += toRealTime(curBPM,BEATS[firstword])
             coloringmod += BEATS[firstword]
           elif firstword == 'delay':
-            curTime += toRealTime(curBPM,BEATS['qurtr']*int(nextword))
-            coloringmod += (4*int(nextword))
+            curTime += toRealTime(curBPM,BEATS['qurtr']*float(nextword))
+            coloringmod += (4*float(nextword))
             tail.next = SongEvent(when=curTime,bpm=curBPM,extra="DELAY")
             chompNext = modeDict, tail.next
           elif firstword == 'chbpm':
             curBPM = float(nextword)
             tail.next = SongEvent(when=curTime,bpm=curBPM,extra="CHBPM")
+            chompNext = modeDict, tail.next
+          elif firstword == 'tstop':
+            tail.next = SongEvent(when=curTime,bpm=float(nextword),extra="TSTOP")
+            curTime += float(nextword)/1000
+            print "found total stop at",curTime
             chompNext = modeDict, tail.next
           elif firstword == 'lyric':
              self.lyricdisplay.addlyric(curTime-0.4,rest)
@@ -1249,10 +1668,10 @@ class Song:
       print "Skipping %f seconds" % self.startsec
 #      ss.skip(self.startsec)
     
-  def play(self,mode,difficulty):
+  def play(self,mode,difficulty,actuallyplay):
 #    self.ss.play()
     try:
-      if self.crapout == 0:
+      if self.crapout == 0 and actuallyplay:
         pygame.mixer.music.play(0, self.startsec)
     except TypeError:
       raise QuitGame("Sorry, pyDDR needs at least pygame 1.4.9")
@@ -1343,15 +1762,22 @@ class fastSong:
     self.haslyrics = ''
     self.fooblah = fn
     try:
-      self.lilbanner = pygame.transform.rotate(pygame.image.load(fn[:-5]+'.png').convert(),-45)
+      try:
+        print "trying full banner",fn[:-5]+'-full.png'
+        self.lilbanner = pygame.image.load(fn[:-5]+'-full.png').convert()
+      except:
+        print "nogo, trying rotated banner",fn[:-5]+'.png'
+        self.lilbanner = pygame.transform.rotate(pygame.image.load(fn[:-5]+'.png').convert(),-45)
+        self.lilbanner.set_colorkey(self.lilbanner.get_at((0,0)))
     except:
+      print "settling for blank banner for",fn
       self.lilbanner = pygame.surface.Surface((1,1))
+      self.lilbanner.set_colorkey(self.lilbanner.get_at((0,0)))
     self.bannercreationtime = pygame.time.get_ticks()
-    self.lilbanner.set_colorkey(self.lilbanner.get_at((0,0)))
     self.rrrr = self.lilbanner.get_rect()
     self.rrrr.center = (320,300)
     screen.blit(self.lilbanner,self.rrrr)
-    pygame.display.flip()
+    pygame.display.update()
     self.file = None
     self.modes = modes = MODES.copy()
     self.modelist = []
@@ -1368,7 +1794,7 @@ class fastSong:
     self.endsec = -1.0
     self.bpm = 146.0
     self.bgfile = ' '
-    self.mixname = 'unspecified mix'
+    self.mixname = '---'
     self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
     self.mixerclock = int(mainconfig.get_value('mixerclock',default='0'))
 #    self.lyricdisplay = LyricDispKludge(400)
@@ -1450,12 +1876,17 @@ class fastSong:
     
   def renderListText(self,totalsongs,j):
     listimage = BlankSprite((640,48))
+    if self.mixname:
+      text = fontfx.embfade(self.mixname,48,2,(96,40),(48,48,48))
+      listimage.blit(text,(520,8))
     stext = "%s - %s"%(self.group,self.song)
     cmap = (63+j*(192/(totalsongs+1)),j*(240/(totalsongs+1)),240-(j*255/(totalsongs+1)))
     text = fontfx.shadefade(stext,28,3,(640,32),cmap)
+    text.set_colorkey(text.get_at((0,0)))
     listimage.blit(text,(32,0))
     stext = "BPM: %d"%int(round(self.bpm)) + "".join(map(lambda (n,d): "  %s %d"%(n,d),self.modeinfo[playmode])) + self.haslyrics
     text = fontfx.embfade(stext,28,3,(640,32),cmap)
+    text.set_colorkey(text.get_at((0,0)))
     listimage.blit(text,(64,24))
     
     titleimage = BlankSprite((640,90))
@@ -1465,7 +1896,6 @@ class fastSong:
     text.set_colorkey(text.get_at((0,0)))
     titleimage.blit(text, (32,40))
     sn = repr(j)+"/"+repr(totalsongs)
-#    print sn
     text = fontfx.embfade(sn,20,2,(56,16),(160,160,160))
     text.set_colorkey(text.get_at((0,0)))
     titleimage.blit(text, (584,0))
@@ -1600,7 +2030,7 @@ else:
 ARROWDIFF = float(ARROWTOP-ARROWBOT)
 
 class ArrowSprite(CloneSprite):
-  def __init__ (self, spr, curtime, endtime, bpm, zindex=ARROWZINDEX):
+  def __init__ (self, spr, curtime, endtime, bpm, playernum, zindex=ARROWZINDEX):
     CloneSprite.__init__(self,spr,zindex=zindex)
     self.timeo = curtime
     self.timef = endtime
@@ -1608,11 +2038,12 @@ class ArrowSprite(CloneSprite):
     self.bpm = bpm
     self.curalpha = -1
     self.r = 0
+    self.playernum = playernum-1
     self.bimage = self.image
     self.arrowspin = float(mainconfig.get_value("arrowspin",default="0"))
     self.arrowshrink = float(mainconfig.get_value("arrowshrink",default="0"))
     self.arrowgrow = float(mainconfig.get_value("arrowgrow",default="0"))
-    self.centerx = copy.copy(self.rect.centerx)
+    self.centerx = copy.copy(self.rect.centerx)+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
     if curtime>self.timef: # +(0.5*(60000/float(curbpm)))
@@ -1686,7 +2117,7 @@ class ArrowSprite(CloneSprite):
       self.image.set_alpha(alp)
 
 class HoldArrowSprite(CloneSprite):
-  def __init__ (self, spr, curtime, times, bpm, lastbpmtime, zindex=ARROWZINDEX):
+  def __init__ (self, spr, curtime, times, bpm, lastbpmtime, playernum, zindex=ARROWZINDEX):
     CloneSprite.__init__(self,spr,zindex=zindex)
     self.timeo = curtime
     self.timef1 = times[1]
@@ -1694,6 +2125,7 @@ class HoldArrowSprite(CloneSprite):
     self.life  = times[2]-curtime
     self.bpm = bpm
     self.lastbpmtime = lastbpmtime
+    self.playernum = playernum-1
     self.curalpha = -1
     self.r = 0
     self.oimage = pygame.surface.Surface((64,32))
@@ -1707,7 +2139,7 @@ class HoldArrowSprite(CloneSprite):
     self.arrowspin = float(mainconfig.get_value("arrowspin",default="0"))
     self.arrowshrink = float(mainconfig.get_value("arrowshrink",default="0"))
     self.arrowgrow = float(mainconfig.get_value("arrowgrow",default="0"))
-    self.centerx = copy.copy(self.rect.centerx)
+    self.centerx = copy.copy(self.rect.centerx)+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
     if curtime > self.timef2:
@@ -1835,7 +2267,7 @@ class HoldArrowSprite(CloneSprite):
 #    print "alpha ",alp
       
 # enum would be nice
-E_PASS,E_QUIT,E_LEFT,E_RIGHT,E_UP,E_DOWN,E_FULLSCREEN,E_START,E_SCREENSHOT,E_HCENTER,E_VCENTER,E_PGUP,E_PGDN = range(13)
+E_PASS,E_QUIT,E_LEFT,E_RIGHT,E_UP,E_DOWN,E_FULLSCREEN,E_START,E_SCREENSHOT,E_HCENTER,E_VCENTER,E_PGUP,E_PGDN,E_LEFT2,E_RIGHT2,E_UP2,E_DOWN2,E_START2,E_SELECT = range(19)
 
 HAXIS,VAXIS = 0,1
 ZERO,NEGATIVE,POSITIVE = 0,1,2
@@ -1849,32 +2281,61 @@ def joyEvent(button=None,axis=None,dir=None,pad=0):
   ev = pad
   # axis is low 2 bits, dir is next two bits, button is rest
   if axis is not None:
-    ev |= 1 << (SHIFTAXIS   + axis)
+    ev |= 1L << (SHIFTAXIS   + axis)
   if dir is not None:
-    ev |= 1 << (SHIFTDIR    + dir)
+    ev |= 1L << (SHIFTDIR    + dir)
   if button is not None:
-    ev |= 1 << (SHIFTBUTTON + button)
+    ev |= 1L << (SHIFTBUTTON + button)
   return ev
   
 KEYCONFIG = { E_QUIT:       [K_ESCAPE],
-              E_LEFT:       [260,K_LEFT],
-              E_RIGHT:      [262,K_RIGHT],
-              E_UP:         [264,K_UP],
-              E_DOWN:       [258,K_DOWN],
-              E_FULLSCREEN: [102],
-              E_SCREENSHOT: [115],
+              E_LEFT:       [K_j],
+              E_RIGHT:      [K_l],
+              E_UP:         [K_i],
+              E_DOWN:       [K_k],
+              E_FULLSCREEN: [K_f],
+              E_SCREENSHOT: [K_s],
               E_START:      [13,271],
               E_PGUP:       [K_PAGEUP],
               E_PGDN:       [K_PAGEDOWN],
+              E_LEFT2:      [K_LEFT],
+              E_RIGHT2:     [K_RIGHT],
+              E_UP2:        [K_UP],
+              E_DOWN2:      [K_DOWN],
+              E_START2:     [K_2],
+              E_SELECT:     [K_r]
             }
 
-JOYCONFIG = { E_LEFT:       [joyEvent(axis=HAXIS,dir=NEGATIVE),joyEvent( button=int(mainconfig.get_value('joy_left',default='4')) )],
-              E_RIGHT:      [joyEvent(axis=HAXIS,dir=POSITIVE),joyEvent( button=int(mainconfig.get_value('joy_right',default='5')) )],
-              E_UP:         [joyEvent(axis=VAXIS,dir=NEGATIVE),joyEvent( button=int(mainconfig.get_value('joy_up',default='7')) )],
-              E_DOWN:       [joyEvent(axis=VAXIS,dir=POSITIVE),joyEvent( button=int(mainconfig.get_value('joy_down',default='6')) )],
+EMS2CONFIG= { E_QUIT:       [],
+              E_LEFT:       [joyEvent( button=15 )],
+              E_RIGHT:      [joyEvent( button=13 )],
+              E_UP:         [joyEvent( button=12 )],
+              E_DOWN:       [joyEvent( button=14 )],
+              E_FULLSCREEN: [],
+              E_SCREENSHOT: [],
+              E_START:      [joyEvent( button=9 )],
+              E_PGUP:       [joyEvent( button=1 )],
+              E_PGDN:       [joyEvent( button=3 )],
+              E_LEFT2:      [joyEvent( button=31 )],
+              E_RIGHT2:     [joyEvent( button=29 )],
+              E_UP2:        [joyEvent( button=28 )],
+              E_DOWN2:      [joyEvent( button=30 )],
+              E_START2:     [joyEvent( button=25)],
+              E_SELECT:     [joyEvent( button=8 )],
+            }
+J2CONFIG  = { E_LEFT2:      [joyEvent( button=int(mainconfig.get_value('joy_left',default='4')) )],
+              E_RIGHT2:     [joyEvent( button=int(mainconfig.get_value('joy_right',default='5')) )],
+              E_UP2:        [joyEvent( button=int(mainconfig.get_value('joy_up',default='7')) )],
+              E_DOWN2:      [joyEvent( button=int(mainconfig.get_value('joy_down',default='6')) )],
+            }
+JOYCONFIG = { E_LEFT:       [joyEvent( button=int(mainconfig.get_value('joy_left',default='4')) )],
+              E_RIGHT:      [joyEvent( button=int(mainconfig.get_value('joy_right',default='5')) )],
+              E_UP:         [joyEvent( button=int(mainconfig.get_value('joy_up',default='7')) )],
+              E_DOWN:       [joyEvent( button=int(mainconfig.get_value('joy_down',default='6')) )],
+              E_SELECT:     [joyEvent( button=int(mainconfig.get_value('joy_select',default='8')) )],
               E_START:      [joyEvent( button=int(mainconfig.get_value('joy_start',default='9')) )],
-              E_PGUP:       [joyEvent(axis=VAXIS,dir=NEGATIVE),joyEvent( button=int(mainconfig.get_value('joy_pgup',default='1')) )],
-              E_PGDN:       [joyEvent(axis=VAXIS,dir=POSITIVE),joyEvent( button=int(mainconfig.get_value('joy_pgdn',default='3')) )],
+              E_PGUP:       [joyEvent( button=int(mainconfig.get_value('joy_pgup',default='1')) )],
+              E_PGDN:       [joyEvent( button=int(mainconfig.get_value('joy_pgdn',default='3')) )],
             }
 
 class EventManager:
@@ -1883,29 +2344,52 @@ class EventManager:
     pygameevent.set_blocked(range(NUMEVENTS))
     pygameevent.set_allowed((KEYUP,KEYDOWN))
     # joystick
-    matjoy = None
+    matjoy = self.matjoy = None
+    matjoy2 = self.matjoy2 = None
+    emsusb2 = self.emsusb2 = None
     try:
       totaljoy = pygame.joystick.get_count()
     except:
       totaljoy = 0
     print totaljoy,"joystick[s] total. ",
-    for i in xrange(totaljoy):
+    for i in range(totaljoy):
       ddrmat = pygame.joystick.Joystick(i)
       ddrmat.init()
       matbuttons = int(mainconfig.get_value('mat_buttons',default='12'))
       mataxes = int(mainconfig.get_value('mat_axes',default='6'))
-      if ddrmat.get_numbuttons() == matbuttons and ddrmat.get_numaxes() == mataxes:
-        matjoy = copy.copy(i)
+      if ddrmat.get_numbuttons() == 32 and ((ddrmat.get_numaxes() == 11) or (ddrmat.get_numaxes() == 8)):
+        emsusb2 = copy.copy(i)
+      elif ddrmat.get_numbuttons() == matbuttons and ddrmat.get_numaxes() == mataxes:
+        if matjoy is None:
+          matjoy = copy.copy(i)
+        else:
+          matjoy2 = copy.copy(i)
       ddrmat.quit()
-    if matjoy is not None:
-      ddrmat = pygame.joystick.Joystick(matjoy)
+    if emsusb2 is not None:
+      ddrmat = pygame.joystick.Joystick(emsusb2)
       ddrmat.init()
-      print "DDR mat initialised: js",matjoy
+      print "EMSUSB2 initialised: js",emsusb2
+      self.emsusb2 = emsusb2
       pygameevent.set_allowed((JOYBUTTONUP,JOYBUTTONDOWN))
+      self.setupEMS()
+    elif (matjoy is not None) or (matjoy2 is not None):
+      if matjoy2 is not None:
+        ddrmat2 = pygame.joystick.Joystick(matjoy2)
+        ddrmat2.init()
+        print "DDR mat 2 initialised: js",matjoy2
+        self.matjoy2 = matjoy2
+        pygameevent.set_allowed((JOYBUTTONUP,JOYBUTTONDOWN))
+        self.setupJoy2()
+      if matjoy is not None:
+        ddrmat = pygame.joystick.Joystick(matjoy)
+        ddrmat.init()
+        print "DDR mat 1 initialised: js",matjoy
+        self.matjoy = matjoy
+        pygameevent.set_allowed((JOYBUTTONUP,JOYBUTTONDOWN))
+        self.setupJoy(jConfig)
     else:
       print "No DDR mat found! Not initialising joystick"
     self.setupKeys(kConfig)
-    self.setupJoy(jConfig)
 
   def __getattr__(self,attr):
     return getattr(self.pygameevent,attr)
@@ -1917,6 +2401,14 @@ class EventManager:
         keymap[key]=event
     self.keymap=keymap
 
+  def setupEMS(self,jConfig=EMS2CONFIG):
+    joymap = {}
+    for event,lst in jConfig.items():
+      for joy in lst:
+        joymap[joy]=event
+    self.emsmap=joymap
+    print self.emsmap
+
   def setupJoy(self,jConfig=JOYCONFIG):
     joymap = {}
     for event,lst in jConfig.items():
@@ -1924,11 +2416,19 @@ class EventManager:
         joymap[joy]=event
     self.joymap=joymap
 
+  def setupJoy2(self,jConfig=J2CONFIG):
+    joymap = {}
+    for event,lst in jConfig.items():
+      for joy in lst:
+        joymap[joy]=event
+    self.joymap2=joymap
+
   def nextEvent(self,event):
+#    print event
     if   event.type == QUIT:          return E_QUIT
     elif event.type == JOYAXISMOTION: return self.joyMove(event.axis,event.value)
-    elif event.type == JOYBUTTONDOWN: return self.joyButton(event.button)
-    elif event.type == JOYBUTTONUP:   return -self.joyButton(event.button)
+    elif event.type == JOYBUTTONDOWN: return self.joyButton(event.joy,event.button)
+    elif event.type == JOYBUTTONUP:   return -self.joyButton(event.joy,event.button)
     elif event.type == KEYDOWN:       return self.keyDown(event.key)
     elif event.type == KEYUP:         return -self.keyDown(event.key)
     else:                             return E_PASS
@@ -1939,8 +2439,16 @@ class EventManager:
     else:       dir = ZERO
     return self.joymap.get(joyEvent(axis=axis,dir=dir),E_PASS)
 
-  def joyButton(self,button):
-    return self.joymap.get(joyEvent(button=button),E_PASS)
+  def joyButton(self,joy,button):
+#    print "joy",joy,"button",button
+#    print "this button is", joyEvent(button=button)
+#    print "matjoy",self.matjoy,"matjoy2",self.matjoy2,"emsusb2",self.emsusb2
+    if joy == self.matjoy:
+      return self.joymap.get(joyEvent(button=button),E_PASS)
+    if joy == self.matjoy2:
+      return self.joymap2.get(joyEvent(button=button),E_PASS)
+    if joy == self.emsusb2:
+      return self.emsmap.get(joyEvent(button=button),E_PASS)
 
   def keyDown(self,key):
     return self.keymap.get(key,E_PASS)
@@ -1950,14 +2458,24 @@ class EventManager:
   
   def poll(self):
     blah = self.nextEvent(self.pygameevent.poll())
+#    if blah > 0: 
+#      print "pressed",
     if blah < 0:
+#      print "released",
       if blah == -2: holdkey.letgo('l')
       if blah == -3: holdkey.letgo('r')
       if blah == -4: holdkey.letgo('u')
       if blah == -5: holdkey.letgo('d')
+      if blah == -13: holdkey2.letgo('l')
+      if blah == -14: holdkey2.letgo('r')
+      if blah == -15: holdkey2.letgo('u')
+      if blah == -16: holdkey2.letgo('d')
+ #   if blah != E_PASS:
+ #     print ['E_PASS','E_QUIT','E_LEFT','E_RIGHT','E_UP','E_DOWN','E_FULLSCREEN','E_START','E_SCREENSHOT','E_HCENTER','E_VCENTER','E_PGUP','E_PGDN','E_LEFT2','E_RIGHT2','E_UP2','E_DOWN2','E_START2','E_SELECT'][blah]
     return blah
     
 J_UP,J_DOWN,J_RIGHT,J_LEFT = map(lambda n: 1<<n, range(4))
+J_UP2,J_DOWN2,J_RIGHT2,J_LEFT2 = map(lambda n: 1<<n, range(13,17,1))
 
 # print a number as binary, low 16 bits
 def sbin16(d,bits=16):
@@ -1983,7 +2501,11 @@ class JoyPad:
     self.bdict = bdict = {E_UP:      J_UP,
                           E_DOWN:    J_DOWN,
                           E_LEFT:    J_LEFT,
-                          E_RIGHT:   J_RIGHT}
+                          E_RIGHT:   J_RIGHT,
+                          E_UP2:     J_UP2,
+                          E_DOWN2:   J_DOWN2,
+                          E_LEFT2:   J_LEFT2,
+                          E_RIGHT2:  J_RIGHT2}
     for (button,lst) in zip(map(J_B,range(len(buttons))),buttons):
       for event in lst: bdict[event] = button
     self.history = None
@@ -2008,7 +2530,7 @@ class JoyPad:
       _bm = 0 # bitmask
       if   event == E_HCENTER:    _st &= ~(J_LEFT|J_RIGHT)
       elif event == E_VCENTER:    _st &= ~(J_UP|J_DOWN)
-      # print event ********
+      # print event
       if _bd_has(event):        _bm = _bd[event]
       if oevent>0:                _st |= _bm
       else:                       _st &= ~_bm
@@ -2108,14 +2630,19 @@ class RenderLayered(pygame.sprite.RenderClear):
 
 # so it's currently in one routine. shut up, I'm learning python =]
 def main():
-  global screen,background,eventManager,currentTheme,playmode
+  global screen,background,eventManager,currentTheme,playmode,players
   print "pyDDR, by theGREENzebra (tgz@clickass.org)"
   print "Initialising.."
+  # SDL_mixer is retarded when trying to play oggs; doesn't force stereo
+  if os.name == 'posix':
+    try:
+      pygame.mixer.pre_init(44100,-16,2)
+    except:
+      pygame.mixer.pre_init()
   # set up the screen and all that other stuff
   pygame.init()
-  # SDL_mixer is retarded when trying to play oggs; doesn't force stereo
-  pygame.mixer.quit()
-  pygame.mixer.init(44100,-16,2)
+
+  players = 1
 
   # DEBUG MODE - user just wants to test a step file
   debugmode = 0
@@ -2126,9 +2653,12 @@ def main():
       stepspecd += ".step"
     stepspecd = os.path.join(songdir,stepspecd)
     if len(sys.argv) > 2:
-      difficulty = string.upper(sys.argv[2])
+      difficulty = [string.upper(sys.argv[2])]
+      if len(sys.argv) > 3:
+        difficulty.append(string.upper(sys.argv[3]))
+        players = 2
     else:
-      difficulty = 'BASIC'
+      difficulty = ['BASIC']
 
   pygame.mixer.music.load("loading.ogg")
   try:
@@ -2162,7 +2692,7 @@ def main():
     print "Entering debug mode. Not loading the song list."
     totalsongs = 1
   else:
-    for i in xrange(31):
+    for i in range(31):
       text = font.render("Looking for songs..",1,(i*8,i*8,i*8))
       trect = text.get_rect()
       trect.centerx = 320
@@ -2180,7 +2710,7 @@ def main():
     # return the list of valid songs
     songs = filter(None,map(fastSong,fileList))
 
-    for i in xrange(31):
+    for i in range(31):
       a = (31-i)*8
       text = font.render("Looking for songs..",1,(a,a,a))
       trect = text.get_rect()
@@ -2196,7 +2726,7 @@ def main():
   if totalsongs < 1:
     raise QuitGame("No songs? Download one: http://clickass.org/~tgz/pyddr/")
 
-  for i in xrange(31):
+  for i in range(31):
     text = font.render("Prerendering....",1,(i*8,i*8,i*8))
     trect = text.get_rect()
     trect.centerx = 320
@@ -2206,7 +2736,7 @@ def main():
 
   if not debugmode:
     # prerender the list texts for songs, speed up song selector
-    ox = copy.copy(trect.left)
+    ox = copy.copy(trect.left+4)
     pixelbar = pygame.surface.Surface((1,3))
     pixelbar.fill((192,192,192))
     fuxor = 1
@@ -2219,12 +2749,14 @@ def main():
       n.renderListText(totalsongs,fuxor)
       fuxor += 1
 
-  global p1combo, holdkey, sortmode
   print "Prerendering.."
-  p1combo = ComboDisp(768,trect.left,trect.bottom+6)
+  p1combo = ComboDisp(1)
   holdkey = keykludge()
+  p2combo = ComboDisp(2)
+  holdkey2 = keykludge()
+  global p1combo, p2combo, holdkey, holdkey2, sortmode
   
-  for i in xrange(31):
+  for i in range(31):
     a = (31-i)*8
     text = font.render("Prerendering....",1,(a,a,a))
     trect = text.get_rect()
@@ -2251,7 +2783,9 @@ def main():
       else:
         stfile = song.fooblah
       song = Song(stfile)
-      dance(song,difficulty)
+      pygame.mixer.quit()
+      dance(song,players,difficulty)
+      #blatantplug()
       if debugmode:
         print "Ending game, debug mode finished."
         break
@@ -2276,6 +2810,563 @@ class TextSprite(BlankSprite):
     self.image = surf
     self.rect = surf.get_rect()
       
+def domenu():
+  class MenuItem:
+    # Simplest option switcher - select the next option in the list
+    def opt_rotate(self, initial = 0):
+      option_name = self.extras["option_name"]
+      options = self.extras["options"]
+      if not initial:
+        current_val = config.get_value(option_name)
+        new_val = None
+        if current_val == None:
+          new_val = options[0]
+        else:
+          new_val = options[(options.index(current_val) + 1) % len(options)]
+        config.set_value(option_name, new_val)
+        return new_val
+      else:
+        return config.get_value(option_name)
+
+    # Slightly more advanced option switcher -
+    # the displayed text is the list value, but the option value is
+    # the index.
+    def opt_rotate_with_index(self, initial = 0):
+      option_name = self.extras["option_name"]
+      options = self.extras["options"]
+      if not initial:
+        current_val = config.get_value(option_name)
+        new_val = None
+        if current_val == None: new_val = 0
+        else:
+          new_val = str((int(current_val) + 1) % len(options))
+          config.set_value(option_name, new_val)
+        return options[int(new_val)]
+      else:
+        return options[int(config.get_value(option_name))]
+
+    # For settings with a range of values - divide into 25 discrete values,
+    # cycle through them
+    def change(self, sign, initial = 0):
+      if type(self.extras) != types.DictionaryType: return None
+      option_name = self.extras["option_name"]
+      options = self.extras["options"]
+      if not initial:
+        try:
+          delta = (self.extras["max"] - self.extras["min"])
+          if type(delta) == types.FloatType:
+            delta /= (sign * 15)
+          else:
+            delta /= (sign * min(delta, 20))
+          try:
+            val = int(config.get_value(option_name)) + delta
+          except ValueError:
+            val = float(config.get_value(option_name)) + delta
+          val = str(max(self.extras["min"], min(self.extras["max"], val)))
+          config.set_value(option_name, val) 
+          self.add_text = val
+          self.render()
+          return val
+        except KeyError:
+          return config.get_value(option_name)
+      else:
+        return config.get_value(option_name)
+
+    # This is used for lyric & trans colors - it changes the text color
+    # of the object and the data value
+    def color_text(self, initial = 0):
+      options = self.extras["options"]
+      option_name = self.extras["option_name"]
+      if not initial:
+        is_next = False
+        current_val = config.get_value(option_name)
+        for colors in options:
+          if colors[0] == current_val:
+            print colors[0], "is current_val"
+            is_next = True
+          elif is_next:
+            print colors[0], "was found next"
+            config.set_value(option_name, colors[0])
+            self.add_text = colors[1]
+            self.rgb = map((lambda x: int(x)), colors[0].split(","))
+            is_next = False
+            break
+        if is_next: # we were at the end of the list
+            config.set_value(option_name, options[0][0])
+            self.add_text = options[0][1]
+            self.rgb = map((lambda x: int(x)), options[0][0].split(","))
+      else:
+        colorval = config.get_value(option_name)
+        for colors in options:
+          if colors[0] == colorval:
+            self.add_text = colors[1]
+        if self.add_text == None: # try to track manual changes and DTRT
+          self.add_text = "custom"
+        self.rgb = map((lambda x: int(x)), colorval.split(","))
+
+      return self.add_text
+
+    def __init__(self, itemname, extras):
+      self.itemname = itemname    # actual item name
+      self.extras = extras        # actual command/menu/list 
+      self.image = pygame.surface.Surface((1,1))
+      self.rgb = (224, 224, 224)
+      self.add_text = None
+      if type(self.extras) == types.DictionaryType:
+        self.add_text = self.extras["function"](self, 1)
+      else:
+        self.add_text = None
+
+    def activate(self):
+      if callable(self.extras): # function to execute
+        self.extras()
+        return None, None
+      elif type(self.extras) == types.DictionaryType:
+          self.add_text = self.extras["function"](self)
+          self.render()
+          return None, None
+      elif type(self.extras) == types.ListType:
+        # Another menu
+        return self.itemname, self.extras
+      elif type(self.extras) == types.StringType:
+        TextCycler(self.extras.split("\n"))
+        return None, None
+      elif self.extras == None:
+        return -1, -1  # "Back"
+      print "Error! Unknown menu structure."
+      return None, None
+
+    def render(self):
+      # pretty box
+      self.image = pygame.surface.Surface((192,40))
+      for i in range(192):
+        pygame.draw.line(self.image,(192-i,192-i,192-i),(i,0),(i,47))
+        pygame.draw.line(self.image,(i,i,i),(i,0),(i,1))
+        pygame.draw.line(self.image,(i,i,i),(i,46),(i,47))
+      for i in range(2):
+        pygame.draw.line(self.image,(192,192,192),(190+i,0),(190+i,47))
+        pygame.draw.line(self.image,(0,0,0),(i,0),(i,47))
+      # menu text
+      if self.add_text == None:
+        f = pygame.font.Font(None,32)
+        itemtext = f.render(self.itemname,1, self.rgb)
+        self.image.blit(itemtext, (96-(f.size(self.itemname)[0]/2), 8))
+      else:
+        f1 = pygame.font.Font(None, 26)
+        f2 = pygame.font.Font(None, 20)
+        itemtext = f1.render(self.itemname, 1, self.rgb)
+        subtext = f2.render(self.add_text, 1, self.rgb)
+        self.image.blit(itemtext ,(96-(f1.size(self.itemname)[0]/2), 4))
+        self.image.blit(subtext,(96-(f2.size(self.add_text)[0]/2), 22))
+
+  class Menu:
+    def __init__(self, menuitemlist):
+      self.itemlist = copy.copy(menuitemlist)
+      self.items = []
+      for i in menuitemlist:
+        curitem = MenuItem(i[0], i[1])
+        self.items.append(curitem)
+      for i in self.items:
+        i.render()
+
+  class TextCycler:
+    def __init__(self, strings):
+      pos = 0
+      print len(strings)
+      self.image = pygame.surface.Surface((640, 480))
+      last_ev = None
+
+      self.image.fill((0,0,0))
+      f = pygame.font.Font(None, 36)
+      mstring = strings[pos].strip()
+      text = f.render(mstring, 1, (224, 224, 224))
+      self.image.blit(text, ((640 - f.size(mstring)[0])/2, 240))
+      offset = 40
+      for i in range(28, 0, -4):
+        f = pygame.font.Font(None, i)
+        mstring = strings[pos - (32 - i) / 4].strip()
+        text = f.render(mstring, 1, (6*i, 6*i, 6*i))
+        self.image.blit(text, ((640-f.size(mstring)[0])/2, 245 - offset))
+        mstring = strings[(pos + (32 - i) / 4) % len(strings)].strip()
+        text = f.render(mstring, 1, (6*i, 6*i, 6*i))
+        self.image.blit(text, ((640-f.size(mstring)[0])/2, 240 + offset))
+        offset += i
+      screen.fill((0,0,0))
+      screen.blit(self.image, (0, 0))
+      pygame.display.flip()
+
+      force_scroll = 0
+      while True:
+        force_scroll += 1
+        e = pygame.event.poll()
+        if e.type == KEYUP:
+          last_ev = None
+        elif e.type == KEYDOWN or last_ev or force_scroll == 30:
+          key = None
+          if last_ev:
+            key = last_ev
+            last_ev = key
+          elif force_scroll == 30:
+            key = K_DOWN
+          else:
+            key = e.key
+            last_ev = key
+          screen.fill((0,0,0))
+          force_scroll = 0
+
+          if key == K_UP:
+            pos = pos - 1
+            if pos == -1: pos = len(strings) - 1
+
+          elif key == K_DOWN:
+            pos = (pos + 1) % len(strings)
+
+          elif key == K_ESCAPE or key == K_RETURN:
+            break
+
+          self.image.fill((0,0,0))
+          f = pygame.font.Font(None, 36)
+          mstring = strings[pos].strip()
+          try:
+            print mstring
+            text = f.render(mstring, 1, (224, 224, 224))
+          except:
+            text = f.render(' ', 1, (224, 224, 224))
+          self.image.blit(text, ((640-(f.size(mstring)[0]))/2, 240))
+          offset = 36
+          for i in range(28, 0, -4):
+            f = pygame.font.Font(None, i)
+            mstring = strings[pos - (32 - i) / 4].strip()
+            text = f.render(mstring, 1, (6*i, 6*i, 6*i))
+            self.image.blit(text, ((640-(f.size(mstring)[0]))/2, 245 - offset))
+            mstring = strings[(pos + (32 - i) / 4) % len(strings)].strip()
+            text = f.render(mstring, 1, (6*i, 6*i, 6*i))
+            self.image.blit(text, ((640-(f.size(mstring)[0]))/2,
+                                     240 + offset))
+            offset += i
+          screen.fill((0,0,0))
+          screen.blit(self.image, (0, 0))
+          pygame.display.flip()
+
+        time.sleep(0.05)
+
+  class TextZoomer:
+    def __init__(self,text,r,g,b):
+      self.zf = pygame.font.Font(None,60)
+      self.zoomsurface = pygame.surface.Surface((640,64))
+      self.tempsurface = pygame.surface.Surface((640,64))
+      self.r = r
+      self.g = g
+      self.b = b
+
+      self.zoomtext = text
+      self.reset()
+
+    def changetext(self,text):
+      if text:
+        self.zoomtext = text
+        self.textrendered = 0
+
+    def reset(self):
+      self.mrangle = 0
+      self.textrendered = 0
+
+    def iterate(self):
+      colortochange = random.randint(0,333) % 4
+      colordiff = (random.random()*8) - 4
+      if colortochange == 0:
+        if 255 > (self.r + colordiff) > 0:
+          self.r += colordiff
+      if colortochange == 1:
+        if 255 > (self.g + colordiff) > 0:
+          self.g += colordiff
+      if colortochange == 2:
+        if 255 > (self.b + colordiff) > 0:
+          self.b += colordiff
+
+      self.mrangle += 1
+
+      self.zoomsurface = pygame.transform.scale(self.tempsurface,(656,72))
+      self.zoomsurface = pygame.transform.rotate(self.zoomsurface,self.mrangle)
+      self.zoomsurface.set_alpha(48)
+      zsrect = self.zoomsurface.get_rect()
+      zsrect.centerx = 320
+      zsrect.centery = 32
+      self.tempsurface.blit(self.zoomsurface,zsrect)
+      self.textrendered = 0
+      if not self.textrendered:
+        self.text = self.zf.render(self.zoomtext,1,(self.r,self.g,self.b))
+        self.trect = self.text.get_rect()
+        self.textrendered = 1
+      self.tempsurface.blit(self.text,(320-(self.trect.size[0]/2),32-(self.trect.size[1]/2)))
+
+  # BEGIN      
+
+  # Hey, did you know at one point, Boliva was so overrun with rats that
+  # they got the Pope to declare rats fish, so they could eat them every
+  # Friday?
+
+  pygame.init()
+  pygame.event.set_blocked(MOUSEMOTION)
+
+  config = ConfigFile.ConfigFile(["%s/pyddr.cfg" % os.environ["HOME"]], {},
+                                 None, 0)
+
+  screen = pygame.display.set_mode((640,480),DOUBLEBUF|HWSURFACE)
+
+  # Make structures appropriate for the menu
+  def onoff_opt(name):
+    return { "function" : MenuItem.opt_rotate_with_index,
+             "option_name" : name,
+             "options" : ['off', 'on'] }
+
+  def list_opt(name, list):
+    return { "function" : MenuItem.opt_rotate,
+             "option_name" : name,
+             "options" : list }
+
+  def list_index_opt(name, list):
+    return { "function" : MenuItem.opt_rotate_with_index,
+             "option_name" : name,
+             "options" : list }
+
+  def range_opt(name, max, min = 0):
+    return { "min" : min, 
+             "max" : max,
+             "options" : [],
+             "option_name" : name,
+             "function" : (lambda x, y=0 : MenuItem.change(x, 1, y)) }
+
+  help_strings = """\
+  pyDDR is a simple game. There's that mat (look down)
+  and there's your feet. On the mat are four arrows,
+  (up, down, left, and right), which is where you place
+  your feet. Stepping on those is like pressing the
+  arrows on the keyboard. There's also the start button
+  which is like enter. Got it? Good. That's all the
+  controls there are.
+  ---
+  Now, you're going to want to start an actual game. From
+  the main menu, select New Game, then Single. A huge
+  list of songs will come up - scroll through the list
+  using up and down until you find one you like. In the
+  bottom left there's going to be a number of bars. The
+  more bars, the harder this song is. You can use left
+  and right to select different difficulty levels. Once
+  you hear a song you like, hit enter (or start) to
+  start the game.
+  ---
+  Now there's a bunch of arrows scrolling up the screen.
+  When they reach the top (which is also going to be
+  on-beat with the music), step on that arrow. Keep
+  doing this until the song's over. That's the whole
+  game."""
+
+  game_opts = ['Game Options',
+               [("Autofail", onoff_opt("killsongonfail")),
+                ("Arrow Speed",  range_opt("scrollspeed", 4.0, 1.0)),
+                ("Reverse", onoff_opt("reversescroll")),
+                ("Little", list_index_opt("little",
+                                          ["show all notes", "no 16ths",
+                                           "no 8ths", "no 8ths or 16ths"])),
+                ("Hidden", list_index_opt("hidden", ["none", "hide one",
+                                                     "hide two", "hide three"])),
+                ("Sudden", list_index_opt("sudden", ["none", "hide one",
+                                                     "hide two", "hide three"])),
+                ("Top Arrows", onoff_opt("showtoparrows")),
+                ("Arrows Shrink", onoff_opt("arrowshrink")),
+                ("Arrows Grow", onoff_opt("arrowgrow")),
+                ("Arrows Spin", onoff_opt("arrowspin")),
+                ("Back", None)
+                ]
+               ]
+
+  lyric_colors = [('0,244,244', 'cyan'),
+                  ('0,244,122', 'aqua'),
+                  ('244,244,122', 'yellow'),
+                  ('244,244,244', 'white'),
+                  ('244,122,122', 'red'),
+                  ('244,122,244', 'purple'),
+                  ('244,170,0', 'orange')]
+
+  lyr_opts = ['Lyric Options',
+              [('Show Lyrics', onoff_opt("showlyrics")),
+               ('Lyric Color',
+                { 'function': MenuItem.color_text,
+                  'option_name': 'lyriccolor',
+                  'options': lyric_colors }),
+               ('Translation Color',
+                { 'function': MenuItem.color_text,
+                  'option_name': 'transcolor',
+                  'options': lyric_colors }),
+               ("Back", None)
+               ]]
+
+
+  gr_opts = ['Graphic Options',
+             [('Fullscreen',
+               (lambda : sys.stdout.write("Toggle fullscreen\n"))),
+              ('Arrow Theme', list_opt('gfxtheme', ['classic', 'bryan'])),
+              ('Backgrounds', onoff_opt("showbackground")),
+              ('BG Brightness', range_opt("bgbrightness", 255)),
+              ('Exploding',
+               list_index_opt("explodestyle",
+                              ['none', 'rotate', 'scale', 'rotate & scale'])),
+              ('FPS Counter', onoff_opt("fpsdisplay")),
+              ('Show Combo', onoff_opt("showcombo")),
+              ('Back', None)
+              ]]
+
+
+  mainmenu = [['PLAY GAME',
+              [('SINGLE', (lambda : playgame(1) )),
+               ('VERSUS', (lambda : playgame(2) )),
+               ('DOUBLE', (lambda : sys.stdout.write("double\n"))),
+               ('NONSTOP', (lambda : sys.stdout.write("nonstop\n"))),
+               ('UNISON', (lambda : sys.stdout.write("unison\n"))),
+               ('ONI', (lambda : sys.stdout.write("oni\n"))),
+               ('Back', None)
+               ]],
+              ['OPTIONS',
+               [game_opts, gr_opts, lyr_opts,
+                ("Preview Songs", onoff_opt("previewmusic")),
+                ("Sort By", list_index_opt("sortmode",
+                                           ["file", "song", "group", "bpm",
+                                            "difficulty", "mix"])),
+                ("Save Changes", config.update),
+                ("Back", None)
+                ]],
+              ('HELP', help_strings),
+              ('CREDITS', (lambda : sys.stdout.write("credits strings\n"))),
+              ('EXIT GAME', sys.exit)
+             ]
+
+  blah = Menu(mainmenu)
+  lastmenu = []
+  lasttext = []
+  footopscreen = TextZoomer("MAIN MENU",127,63,255)
+  curitem = topitem = 0
+  z = 8
+  zd = -1
+
+  while 1:
+    k = pygame.event.poll()
+    if k.type == KEYDOWN:
+      if (k.key == K_DOWN) and (curitem < len(blah.items)-1):
+        curitem += 1
+        if curitem >= topitem+7: 
+          topitem += 1
+      elif (k.key == K_UP) and (curitem > 0):
+        curitem -= 1
+        if curitem < topitem: 
+          topitem = copy.copy(curitem)
+
+      elif k.key == K_ESCAPE:
+        if lastmenu == []:
+          sys.exit()
+        else:
+          blah = Menu(lastmenu[-1:][0])
+          lastmenu = lastmenu[:-1]
+          footopscreen.changetext(lasttext[-1:][0])
+          lasttext = lasttext[:-1]
+          curitem=topitem=0
+
+      elif k.key == K_LEFT:
+        blah.items[curitem].change(-1)
+      elif k.key == K_RIGHT:
+        blah.items[curitem].change(1)
+
+      elif k.key == K_RETURN:
+        zoomtext, newblah = blah.items[curitem].activate()
+        if zoomtext == -1 and newblah == -1: # back
+          blah = Menu(lastmenu[-1:][0])
+          lastmenu = lastmenu[:-1]
+          footopscreen.changetext(lasttext[-1:][0])
+          lasttext = lasttext[:-1]
+          curitem=topitem=0
+        elif newblah:
+          lastmenu.append(blah.itemlist)
+          lasttext.append(footopscreen.zoomtext)
+          blah = Menu(newblah)
+          footopscreen.changetext(zoomtext)
+          topitem = curitem = 0
+
+    #blanx0r      
+    screen.fill((0,0,0))
+
+    # flashy header
+    footopscreen.iterate()
+    screen.blit(footopscreen.tempsurface,(0,0))
+
+    # zooming text thinger for menuselect
+    z += zd
+    if (z > 12) or (z < 0):  zd *= -1
+
+    for i in range(7):
+      if i+topitem < len(blah.items):
+        if i+topitem == curitem:
+          screen.blit(pygame.transform.scale(blah.items[topitem+i].image,(200-z,48-(z/2))),(220+(z/2),76+(z/4)+i*48))
+        else:
+          screen.blit(blah.items[topitem+i].image,(224,80+i*48))
+
+    pygame.display.flip()
+    time.sleep(0.01)
+
+def blatantplug():
+  xiphlogo = pygame.image.load("xifish.png").convert()
+  pygamelogo = pygame.image.load("pygamelogo.png").convert()
+  oddlogo = pygame.image.load("oddlogos.png").convert()
+  xiphlogo.set_colorkey(xiphlogo.get_at((0,0)))
+  pygamelogo.set_colorkey(pygamelogo.get_at((0,0)))
+  oddlogo.set_colorkey(oddlogo.get_at((0,0)))
+  xiphlogo.set_alpha(32)
+  pygamelogo.set_alpha(32)
+  oddlogo.set_alpha(32)
+  xiphlogorect = xiphlogo.get_rect()
+  pygamelogorect = pygamelogo.get_rect()
+  oddlogorect = oddlogo.get_rect()
+  
+  oddlogorect.centerx = 320;  oddlogorect.centery = 128
+  pygamelogorect.centerx = 320;  pygamelogorect.centery = 256
+  xiphlogorect.centerx = 320;  xiphlogorect.centery = 384
+    
+  pygame.mixer.music.load("plugmusic.ogg")
+  pygame.mixer.music.play(0,14.75)
+  pygame.mixer.music.set_volume(0)
+  
+  for i in range(26):
+    screen.fill((i*8,i*8,i*8))
+    pygame.display.flip()
+    pygame.mixer.music.set_volume(i/2.0)
+    pygame.time.delay(16)
+    
+  pygame.time.delay(450)
+
+  screen.blit(pygamelogo,pygamelogorect)
+  screen.blit(oddlogo,oddlogorect)
+  screen.blit(xiphlogo,xiphlogorect)
+  pygame.display.flip()
+
+  pygame.time.delay(450)
+  
+  tfont = pygame.font.Font(None,48)
+  plugtext = ["You have been playing:","pyDDR","by:","Brendan Becker","which is available at:","http://clickass.org"," ","Say hi to him if you like it!"," ","it was made possible by:","Python, SDL,  Pygame,  and Xiph.org"]
+  for i in plugtext:
+    mrtext = tfont.render(i,1,(plugtext.index(i)*8,plugtext.index(i)*8,plugtext.index(i)*8))
+    mrtextrect = mrtext.get_rect()
+    mrtextrect.centerx = 320
+    mrtextrect.top = plugtext.index(i)*43
+    screen.blit(mrtext,mrtextrect)
+    pygame.display.flip()
+    pygame.time.delay(45)
+
+  pygame.time.delay(2250)
+
+  for i in range(26):
+    pygame.mixer.music.set_volume((26-i)/2.0)
+    pygame.time.delay(4)
+    
+
 def songSelect(songs,fooblah):
   global screen,background,eventManager,currentTheme,playmode,sortmode
 
@@ -2284,12 +3375,13 @@ def songSelect(songs,fooblah):
   niftyscreenclear = pygame.surface.Surface((640,8))
   niftyscreenclear.fill((0,0,0))
 
-  for i in xrange(31):
+  for i in range(31):
     screen.blit(niftyscreenclear,(0,8*i))
     screen.blit(niftyscreenclear,(0,480-(8*i)))
     pygame.display.flip()
 
-  songidx = scrolloff = s = difficulty = 0
+  realdiff = realdiff2 = -1
+  songidx = scrolloff = s = difficulty = difficulty2 = 0
   fontdisp = dozoom = 1
   idir = -8
   i = 192
@@ -2306,8 +3398,9 @@ def songSelect(songs,fooblah):
 #  for n in songs: 
 #    n.renderListText(totalsongs,fuxor)
 #    fuxor += 1
-  dirtyBar=songSelectDirty=None
+  dirtyBar=dirtyBar2=songSelectDirty=None
   dif=numbars=-1
+  dif2=numbars2=-1
   background.fill(BLACK)
   background.draw(screen)
   pygame.display.flip()
@@ -2357,6 +3450,7 @@ def songSelect(songs,fooblah):
         pygame.mixer.music.set_volume(10.0-timesince)
       if timesince > 10.0:
         pygame.mixer.music.set_volume(0)
+        pygame.mixer.music.pause()
     else:
       pygame.mixer.music.load("menu.ogg")
       try:
@@ -2368,13 +3462,15 @@ def songSelect(songs,fooblah):
     if   event == E_QUIT:       
       pygame.mixer.music.fadeout(1000)
       raise QuitGame("Quit from songSelect")
-    elif event < 0:             pass # key up
-    elif event == E_PASS:       pass
-    elif event == E_FULLSCREEN: pygame.display.toggle_fullscreen()
-    elif event == E_SCREENSHOT: s = 1
-    elif event == E_LEFT:       difficulty -= 1
-    elif event == E_RIGHT:      difficulty += 1
-    elif event == E_UP:
+    elif event < 0:                                  pass # key up
+    elif event == E_PASS:                            pass
+    elif event == E_FULLSCREEN:                      pygame.display.toggle_fullscreen()
+    elif event == E_SCREENSHOT:                      s = 1
+    elif (event == E_LEFT):    difficulty -= 1
+    elif (event == E_RIGHT):   difficulty += 1
+    elif (event == E_LEFT2):   difficulty2 -= 1
+    elif (event == E_RIGHT2):  difficulty2 += 1
+    elif (event == E_UP) or (event == E_UP2):
       prevsong = songs[songidx]
       songChanged = 1
       if songidx>0:
@@ -2387,7 +3483,7 @@ def songSelect(songs,fooblah):
         scrolloff = 60
         fontdisp = 1
         sod = 0
-    elif event == E_DOWN:
+    elif (event == E_DOWN) or (event == E_DOWN2):
       prevsong = songs[songidx]
       songChanged = 1
       if songidx<(totalsongs-1):
@@ -2433,7 +3529,21 @@ def songSelect(songs,fooblah):
       print "        to read the file it took", songs[songidx].filereadcreationtime - songs[songidx].variablecreationtime
       print "     to filter the modes it took", songs[songidx].modereadcreationtime - songs[songidx].filereadcreationtime
       '''
-    elif event == E_START:
+    elif (event == E_START2):
+      global players
+      players = 2
+    elif (event == E_SELECT):
+      newidx = int(random.random()*len(songs))
+      if newidx < songidx:
+        scrolloff = 60
+      else:
+        scrolloff = -60
+      prevsong = songs[songidx]
+      songidx = copy.copy(newidx)
+      songChanged = 1
+      fontdisp = 1
+      sod = 0
+    elif event == E_START or ((event == E_START2) and (players==2)):
       pygame.mixer.music.fadeout(1000)
       annc.saywait('menu')
       background.blit(screen,(0,0))
@@ -2449,10 +3559,32 @@ def songSelect(songs,fooblah):
 # free some RAM
 
 #      for n in songs: n.discardListText()
-      return currentSong,diffList[difficulty]
-    
+      biggerdifflist = []
+      biggerdifflist.append(diffList[difficulty])
+      if players == 2:
+        biggerdifflist.append(diffList[difficulty2])
+      return currentSong,biggerdifflist
+
+    # No difficulty selected.
     if difficulty<0: difficulty=len(diffList)-1
-    if difficulty>=len(diffList): difficulty=0
+    if difficulty2<0: difficulty2=len(diffList)-1
+
+    # User really wants to be on a different difficulty.
+    # We had switched because the previous song didn't have the one the user wants.
+    if realdiff != -1 and realdiff < len(diffList):
+       difficulty=realdiff
+       realdiff=-1
+    if realdiff2 != -1 and realdiff2 < len(diffList):
+       difficulty2=realdiff2
+       realdiff2=-1
+
+    # This song doesn't have the currently selected difficulty.
+    if difficulty>=len(diffList): 
+       realdiff=difficulty # Save it...
+       difficulty=0 # And set to whatever the first one it has is.
+    if difficulty2>=len(diffList): 
+       realdiff2=difficulty2 # Save it...
+       difficulty2=0 # And set to whatever the first one it has is.
     
     if dozoom:
       fontdisp=1
@@ -2593,6 +3725,31 @@ def songSelect(songs,fooblah):
           dirtyRects.append(b.draw(screen,(sj+k,448)))
       dirtyBar = ([8,448],[8+12*10,32])
 
+    if players == 2:
+      ldif2=dif2
+      lnumbars2=numbars2
+      dif2=DIFFICULTYLIST.index(diffList[difficulty2])
+      numbars2=currentSong.modeinfo[playmode][difficulty2][1]
+      if ldif2!=dif2 or lnumbars2!=numbars2 or dz>0:
+        if dirtyBar2: 
+          dirtyRects.append(background.draw(screen,dirtyBar2,dirtyBar2))
+        color = ((0,255,0),(255,128,0),(255,0,0))[dif2]
+        text = fontfx.embfade(DIFFICULTYLIST[dif2],28,3,(96,32),color)
+        if dz>0: text.set_alpha(dz)
+        dirtyRects.append(screen.blit(text, (560,420) ))
+        kr = range(8)
+        bars = currentTheme.bars
+        for j in range(numbars2):
+          sj = 6+j*10
+          for k in range(6):
+            b=[bars.grn,bars.org,bars.red][dif2]
+            if dz>0:
+              b.set_alpha(dz)
+            else:
+              b.set_alpha()
+            dirtyRects.append(b.draw(screen,(640-(sj+k),448)))
+        dirtyBar2 = ([544,448],[640,32])
+
     pygame.time.delay(8)
     pygame.display.update(dirtyRects)
     
@@ -2637,11 +3794,11 @@ def songSelect(songs,fooblah):
         print "sorting by mix"
         for sorti in songs:
           newlist.append(sorti.mixname)
+
       blah = zip(newlist,songs)
       blah.sort()
       songs = map(lambda x:x[1], blah)
       songidx = songs.index(currentSong)
-      
       s = 0
 
     if fooblah != ' ':
@@ -2653,8 +3810,13 @@ def songSelect(songs,fooblah):
       songChanged = 1
       fooblah = ' '
 
-def dance(song,difficulty):
+def dance(song,players,difficulty):
   global screen,background,eventManager,currentTheme,playmode
+
+  if players == 2:
+    song2 = copy.copy(song)
+
+  pygame.mixer.init()
 
   #JBUTTONS = [[E_START],[E_SCREENSHOT],[E_FULLSCREEN],[E_QUIT]]
   #            J_B(0)    J_B(1)         J_B(2)         J_B(3)
@@ -2671,7 +3833,8 @@ def dance(song,difficulty):
   # special group for arrowfx
   fgroup = RenderLayered()
   # moving arrows group
-  agroup = pygame.sprite.Group()
+  agroup = RenderLayered()
+  agroup2 = RenderLayered()
 
   # lyric display group
   lgroup = RenderLayered()
@@ -2721,16 +3884,31 @@ def dance(song,difficulty):
   # so the current combos get displayed
   global p1combo
   global holdkey
-  p1list0 = JudgingDisp()
-  p1list1 = JudgingDisp()
-  p1list2 = JudgingDisp()
-  lifebar = LifeBarDisp()
-  fpstext = fpsDisp()
-  holdtext = HoldJudgeDisp()
+  p1list0 = JudgingDisp(1)
+  p1list1 = JudgingDisp(1)
+  p1list2 = JudgingDisp(1)
+  p1score = ScoringDisp(1,difficulty[0])
+  lifebar = LifeBarDisp(1)
+  holdtext = HoldJudgeDisp(1)
 
   holdtext.add(tgroup)
   lifebar.add(tgroup)  
+  p1score.add(tgroup)
   
+  if players == 2:
+    p2list0 = JudgingDisp(2)
+    p2list1 = JudgingDisp(2)
+    p2list2 = JudgingDisp(2)
+    p2score = ScoringDisp(2,difficulty[1])
+    lifebar2 = LifeBarDisp(2)
+    holdtext2 = HoldJudgeDisp(2)
+
+    holdtext2.add(tgroup)
+    lifebar2.add(tgroup)  
+    p2score.add(tgroup)
+  
+  fpstext = fpsDisp()
+
 #  dancer = DancerAnim(200,400)
 #  dancer.add(dgroup)
   
@@ -2743,9 +3921,8 @@ def dance(song,difficulty):
   if int(mainconfig.get_value('showlyrics',default=1)):
     song.lyricdisplay.add(lgroup)
     song.transdisplay.add(lgroup)
-    
-  if int(mainconfig.get_value('showcombo',default=1)):
-    p1combo.add(tgroup)
+
+  showcombo = int(mainconfig.get_value('showcombo',default=1))
 
   if int(mainconfig.get_value('totaljudgings',default='1')) > 0:
     p1list0.add(tgroup)
@@ -2754,11 +3931,19 @@ def dance(song,difficulty):
   if int(mainconfig.get_value('totaljudgings',default='1')) > 2:
     p1list2.add(tgroup)
 
+  if players == 2:
+    if int(mainconfig.get_value('totaljudgings',default='1')) > 0:
+      p2list0.add(tgroup)
+    if int(mainconfig.get_value('totaljudgings',default='1')) > 1:
+      p2list1.add(tgroup)
+    if int(mainconfig.get_value('totaljudgings',default='1')) > 2:
+      p2list2.add(tgroup)
+
   bg = pygame.Surface(screen.get_size())
   bg.fill((0,0,0))
 
   # FLASHY SONG ZOOM
-  for j in xrange(8):
+  for j in range(8):
     screen.blit(bg, (0,0))
     
     font = pygame.font.Font(None, ((8-j)*32)-14)
@@ -2772,8 +3957,12 @@ def dance(song,difficulty):
 
   songtext = zztext(song.song,480,12)
   grptext = zztext(song.group,160,12)
+  timewatch = TimeDisp()
+
   songtext.plunk()
   grptext.plunk()
+
+  tgroup.add(timewatch)
   tgroup.add(songtext)
   tgroup.add(grptext)
 
@@ -2781,16 +3970,16 @@ def dance(song,difficulty):
 
   blackspot,blkbar,blacktext = map(BlankSprite,((64,64),(3,24),(240,56)))
 
-  perfect=great=ok=crappy=shit=0
+  marvelous=perfect=great=ok=crappy=shit=0
   life,oldlife = 25.0,0.0
   totalmiss=bestcombo=combo=failed=0
   oldet=0
   fps=0
   tempholding = [-1,-1,-1,-1]
+  tempholding2 = [-1,-1,-1,-1]
   i,j,k=1,0,0
   screenshot=fontdisp=0
   
-#  pygame.mixer.init()
   song.cache()
   if song.crapout == 0:
     song.init()
@@ -2849,33 +4038,74 @@ def dance(song,difficulty):
 #    c.add(rgroup)
 
 #  print "playmode: %r difficulty %r modes %r" % (playmode,difficulty,song.modes)
-  song.play(playmode,difficulty)
+#  print "Total arrows are %d " % song.totarrows[difficulty]
+  song.play(playmode, difficulty[0],1)
+
+  # second instance of song created JUST to manage player 2's arrows/etc, that's it
+  if players == 2:
+    song2.play(playmode, difficulty[1],0)
+
   pygame.mixer.music.set_volume(1.0)
-  
-  holds = len(song.holdref[song.modediff[playmode].index(difficulty)])
-  dajudge = Judge(song.bpm, holds)
 
-  toparr_l = TopArrow(song.bpm,'l',ARROWTOP)
-  toparr_d = TopArrow(song.bpm,'d',ARROWTOP)
-  toparr_u = TopArrow(song.bpm,'u',ARROWTOP)
-  toparr_r = TopArrow(song.bpm,'r',ARROWTOP)
+  holds = len(song.holdref[song.modediff[playmode].index(difficulty[0])])
+  if players == 2:
+    holds2 = len(song.holdref[song.modediff[playmode].index(difficulty[1])])
+  difflist = song.modediff[playmode]
+  diffnum = difflist.index(difficulty[0])
+  dajudge = Judge(song.bpm, holds, song.modeinfo[playmode][diffnum][1],
+                  song.totarrows[difficulty[0]])
+  if players == 2:
+    diffnum2 = difflist.index(difficulty[1])
+    dajudge2 = Judge(song.bpm, holds2, song.modeinfo[playmode][diffnum2][1],
+                     song.totarrows[difficulty[1]])
 
-  toparrfx_l = ArrowFX(song.bpm,'l',ARROWTOP)
-  toparrfx_d = ArrowFX(song.bpm,'d',ARROWTOP)
-  toparrfx_u = ArrowFX(song.bpm,'u',ARROWTOP)
-  toparrfx_r = ArrowFX(song.bpm,'r',ARROWTOP)
+  extbox = Blinky(song.bpm)
+#  extbox.add(tgroup)
+
+  toparr1_l = TopArrow(song.bpm,'l',ARROWTOP,1)
+  toparr1_d = TopArrow(song.bpm,'d',ARROWTOP,1)
+  toparr1_u = TopArrow(song.bpm,'u',ARROWTOP,1)
+  toparr1_r = TopArrow(song.bpm,'r',ARROWTOP,1)
+
+  toparrfx1_l = ArrowFX(song.bpm,'l',ARROWTOP,1)
+  toparrfx1_d = ArrowFX(song.bpm,'d',ARROWTOP,1)
+  toparrfx1_u = ArrowFX(song.bpm,'u',ARROWTOP,1)
+  toparrfx1_r = ArrowFX(song.bpm,'r',ARROWTOP,1)
+
+  if players == 2:
+    toparr2_l = TopArrow(song.bpm,'l',ARROWTOP,2)
+    toparr2_d = TopArrow(song.bpm,'d',ARROWTOP,2)
+    toparr2_u = TopArrow(song.bpm,'u',ARROWTOP,2)
+    toparr2_r = TopArrow(song.bpm,'r',ARROWTOP,2)
+ 
+    toparrfx2_l = ArrowFX(song.bpm,'l',ARROWTOP,2)
+    toparrfx2_d = ArrowFX(song.bpm,'d',ARROWTOP,2)
+    toparrfx2_u = ArrowFX(song.bpm,'u',ARROWTOP,2)
+    toparrfx2_r = ArrowFX(song.bpm,'r',ARROWTOP,2)
 
   if int(mainconfig.get_value('explodestyle',default='3'))>-1:
-    toparrfx_l.add(fgroup)
-    toparrfx_d.add(fgroup)
-    toparrfx_u.add(fgroup)
-    toparrfx_r.add(fgroup)
+    toparrfx1_l.add(fgroup)
+    toparrfx1_d.add(fgroup)
+    toparrfx1_u.add(fgroup)
+    toparrfx1_r.add(fgroup)
+
+    if players == 2:
+      toparrfx2_l.add(fgroup)
+      toparrfx2_d.add(fgroup)
+      toparrfx2_u.add(fgroup)
+      toparrfx2_r.add(fgroup)
 
   if int(mainconfig.get_value('showtoparrows',default='1')):
-    toparr_l.add(sgroup)
-    toparr_d.add(sgroup)
-    toparr_u.add(sgroup)
-    toparr_r.add(sgroup)
+    toparr1_l.add(sgroup)
+    toparr1_d.add(sgroup)
+    toparr1_u.add(sgroup)
+    toparr1_r.add(sgroup)
+
+    if players == 2:
+      toparr2_l.add(sgroup)
+      toparr2_d.add(sgroup)
+      toparr2_u.add(sgroup)
+      toparr2_r.add(sgroup)
   
   oldbpm = song.playingbpm
   bpmchanged = 0
@@ -2893,70 +4123,105 @@ def dance(song,difficulty):
       if song.isOver():
         break
 
+    if players == 2:
+      ee2 = song2.get_events()
+      if ee2 is not None: 
+        events2,nevents2,curtime2,arrowtime2,bpm2 = ee2
+    
     # ticks is current ticks for joy history, state is joypad state, delta is change in joy state
     ticks, state, delta = joypad.poll()
     # nstate is the set of bits that were just turned on
     nstate = state&delta
-    key = 0
 
 #    print "nstate", nstate, "  state", state, "  delta",delta
 
     keys = 0
 
     if delta:
+#      print state
       key = []
-      if state&G_START:      pass
+      
+      if nstate&G_START:
+        if holdkey.checkstate('r'):
+          print "holding right plus start quits. pyDDR now exiting."
+          sys.exit()
+        elif holdkey.checkstate('l'):
+          break
+        else:
+          pass
+      
       if state&G_QUIT:       break
       if nstate&G_FULLSCREEN: 
         pygame.display.toggle_fullscreen()
       if nstate&G_SCREENSHOT: 
         screenshot = 1
       if nstate&J_LEFT:
-        key.append('l')
-        toparr_l.stepped(1,curtime+(song.offset*1000))
+        key.append('l1')
+        toparr1_l.stepped(1,curtime+(song.offset*1000))
         keys += 1
       if nstate&J_RIGHT:
-        key.append('r')
-        toparr_r.stepped(1,curtime+(song.offset*1000))
+        key.append('r1')
+        toparr1_r.stepped(1,curtime+(song.offset*1000))
         keys += 1
       if nstate&J_UP:
-        key.append('u')
-        toparr_u.stepped(1,curtime+(song.offset*1000))
+        key.append('u1')
+        toparr1_u.stepped(1,curtime+(song.offset*1000))
         keys += 1
       if nstate&J_DOWN:
-        key.append('d')
-        toparr_d.stepped(1,curtime+(song.offset*1000))
+        key.append('d1')
+        toparr1_d.stepped(1,curtime+(song.offset*1000))
         keys += 1
+      if players == 2:
+        if nstate&J_LEFT2:
+          key.append('l2')
+          toparr2_l.stepped(1,curtime+(song.offset*1000))
+          keys += 1
+        if nstate&J_RIGHT2:
+          key.append('r2')
+          toparr2_r.stepped(1,curtime+(song.offset*1000))
+          keys += 1
+        if nstate&J_UP2:
+          key.append('u2')
+          toparr2_u.stepped(1,curtime+(song.offset*1000))
+          keys += 1
+        if nstate&J_DOWN2:
+          key.append('d2')
+          toparr2_d.stepped(1,curtime+(song.offset*1000))
+          keys += 1
 
-    fxdir = fxtext = ' '
+    fxdir = fxtext = fxdir2 = fxtext2 = ' '
             
     if keys:
-      for checkkey in xrange(keys):
-        holdkey.pressed(key[checkkey])
-        fxtext, fxdir, fxtime = dajudge.handle_key(key[checkkey], curtime)
+      for checkkey in range(keys):
+        if key[checkkey][1] == '1':
+          holdkey.pressed(key[checkkey][0])
+          fxtext, fxdir, fxtime = dajudge.handle_key(key[checkkey][0], curtime)
+        if players == 2 and (key[checkkey][1] == '2'):
+          holdkey2.pressed(key[checkkey][0])
+          fxtext2, fxdir2, fxtime2 = dajudge2.handle_key(key[checkkey][0], curtime)
 
     directions = ['l','d','u','r']
     for checkhold in directions:
       if checkhold == 'l':
-        toparrfx_l.holding(0)
+        toparrfx1_l.holding(0)
       if checkhold == 'd':
-        toparrfx_d.holding(0)
+        toparrfx1_d.holding(0)
       if checkhold == 'u':
-        toparrfx_u.holding(0)
+        toparrfx1_u.holding(0)
       if checkhold == 'r':
-        toparrfx_r.holding(0)
-      currenthold = holdkey.shouldhold(checkhold,curtime,song.holdinfo[song.modediff[playmode].index(difficulty)],song.playingbpm)
+        toparrfx1_r.holding(0)
+      currenthold = holdkey.shouldhold(checkhold,curtime,song.holdinfo[song.modediff[playmode].index(difficulty[0])],song.playingbpm)
       if currenthold is not None:
         if holdkey.checkstate(checkhold):
           if dajudge.holdsub[tempholding[directions.index(checkhold)]] != -1:
             if checkhold == 'l':
-              toparrfx_l.holding(1)
+              toparrfx1_l.holding(1)
             if checkhold == 'd':
-              toparrfx_d.holding(1)
+              toparrfx1_d.holding(1)
             if checkhold == 'u':
-              toparrfx_u.holding(1)
+              toparrfx1_u.holding(1)
             if checkhold == 'r':
-              toparrfx_r.holding(1)
+              toparrfx1_r.holding(1)
           tempholding[directions.index(checkhold)] = currenthold
         else:
           dajudge.botchedhold(currenthold)
@@ -2967,6 +4232,38 @@ def dance(song,difficulty):
             tempholding[directions.index(checkhold)] = -1
             holdtext.fillin(curtime,directions.index(checkhold),"OK")
 
+    if players == 2:
+      for checkhold in directions:
+        if checkhold == 'l':
+          toparrfx2_l.holding(0)
+        if checkhold == 'd':
+          toparrfx2_d.holding(0)
+        if checkhold == 'u':
+          toparrfx2_u.holding(0)
+        if checkhold == 'r':
+          toparrfx2_r.holding(0)
+        currenthold = holdkey2.shouldhold(checkhold,curtime,song.holdinfo[song.modediff[playmode].index(difficulty[1])],song.playingbpm)
+        if currenthold is not None:
+          if holdkey2.checkstate(checkhold):
+            if dajudge2.holdsub[tempholding2[directions.index(checkhold)]] != -1:
+              if checkhold == 'l':
+                toparrfx2_l.holding(1)
+              if checkhold == 'd':
+                toparrfx2_d.holding(1)
+              if checkhold == 'u':
+                toparrfx2_u.holding(1)
+              if checkhold == 'r':
+                toparrfx2_r.holding(1)
+            tempholding2[directions.index(checkhold)] = currenthold
+          else:
+            dajudge2.botchedhold(currenthold)
+            holdtext2.fillin(curtime,directions.index(checkhold),"NG")
+        else:
+          if tempholding2[directions.index(checkhold)] > -1:
+            if dajudge2.holdsub[tempholding2[directions.index(checkhold)]] != -1:
+              tempholding2[directions.index(checkhold)] = -1
+              holdtext2.fillin(curtime,directions.index(checkhold),"OK")
+
     if ee is not None:
       # handle events that are happening now
       for ev in events:
@@ -2974,27 +4271,50 @@ def dance(song,difficulty):
         if ev.extra == 'CHBPM':
           if (bpm != dajudge.getbpm()):            bpmchanged = 1
 #        print ev.bpm, "at", ev.when
+        if ev.extra == 'TSTOP':
+          time.sleep(float(ev.bpm/1000))
         if ev.feet:
           for (dir,num) in zip(['l','d','u','r'],ev.feet):
             if num & 8:
               dajudge.handle_arrow(dir, curtime)
+
+    if players == 2:
+      if ee2 is not None:
+        for ev in events2:
+          if ev.feet:
+            for (dir,num) in zip(['l','d','u','r'],ev.feet):
+              if num & 8:
+                dajudge2.handle_arrow(dir, curtime)
               
-      # handle only new arrows
-      for ev in nevents:
+    # handle only new arrows
+    for ev in nevents:
 #        print "future event: %r"%ev
-        if ev.extra == 'CHBPM':
-          song.lastbpmchangetime.append([ev.when,ev.bpm])
-          print [ev.when,ev.bpm],"was added to the bpm changelist"
+      if ev.extra == 'CHBPM':
+        song.lastbpmchangetime.append([ev.when,ev.bpm])
+        print [ev.when,ev.bpm],"was added to the bpm changelist"
+      if ev.feet:
+        for (dir,num) in zip(directions,ev.feet):
+          if num & 8:
+            if not (num & 128):
+              ArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c,curtime,ev.when,ev.bpm,1).add([agroup,rgroup])
+
+          if num & 128:
+            diffnum = song.modediff[playmode].index(difficulty[0])
+            holdindex = song.holdref[diffnum].index((directions.index(dir),ev.when))
+            HoldArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c,curtime,song.holdinfo[diffnum][holdindex],ev.bpm,song.lastbpmchangetime[0],1).add([agroup,rgroup])
+
+    if players == 2:
+      for ev in nevents2:
         if ev.feet:
           for (dir,num) in zip(directions,ev.feet):
             if num & 8:
               if not (num & 128):
-                ArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c,curtime,ev.when,ev.bpm).add([agroup,rgroup])
-                
+                ArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c,curtime,ev.when,ev.bpm,2).add([agroup2,rgroup])
+
             if num & 128:
-              diffnum = song.modediff[playmode].index(difficulty)
+              diffnum = song.modediff[playmode].index(difficulty[1])
               holdindex = song.holdref[diffnum].index((directions.index(dir),ev.when))
-              HoldArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c,curtime,song.holdinfo[diffnum][holdindex],ev.bpm,song.lastbpmchangetime[0]).add([agroup,rgroup])
+              HoldArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c,curtime,song.holdinfo[diffnum][holdindex],ev.bpm,song.lastbpmchangetime[0],2).add([agroup2,rgroup])
 
     if len(song.lastbpmchangetime)>1:
       if (curtime >= song.lastbpmchangetime[1][0]):
@@ -3002,39 +4322,44 @@ def dance(song,difficulty):
         print "BPM tried to change from ",oldbpm, " to ", nbpm, " at ",curtime,"..",
         if song.lastbpmchangetime[1][1] is not None:
           if int(mainconfig.get_value('showtoparrows',default='1')):
-            toparrfx_l.remove(fgroup)
-            toparrfx_d.remove(fgroup)
-            toparrfx_u.remove(fgroup)
-            toparrfx_r.remove(fgroup)
+            toparr1_l.remove(sgroup)
+            toparr1_d.remove(sgroup)
+            toparr1_u.remove(sgroup)
+            toparr1_r.remove(sgroup)
 
-            toparr_l.remove(sgroup)
-            toparr_d.remove(sgroup)
-            toparr_u.remove(sgroup)
-            toparr_r.remove(sgroup)
-
-          toparr_l = TopArrow(nbpm,'l',ARROWTOP)
-          toparr_d = TopArrow(nbpm,'d',ARROWTOP)
-          toparr_u = TopArrow(nbpm,'u',ARROWTOP)
-          toparr_r = TopArrow(nbpm,'r',ARROWTOP)
-
-          toparrfx_l = ArrowFX(nbpm,'l',ARROWTOP)
-          toparrfx_d = ArrowFX(nbpm,'d',ARROWTOP)
-          toparrfx_u = ArrowFX(nbpm,'u',ARROWTOP)
-          toparrfx_r = ArrowFX(nbpm,'r',ARROWTOP)
-
-          if int(mainconfig.get_value('explodestyle',default='3'))>-1:
-            toparrfx_l.add(fgroup)
-            toparrfx_d.add(fgroup)
-            toparrfx_u.add(fgroup)
-            toparrfx_r.add(fgroup)
+          toparr1_l = TopArrow(nbpm,'l',ARROWTOP,1)
+          toparr1_d = TopArrow(nbpm,'d',ARROWTOP,1)
+          toparr1_u = TopArrow(nbpm,'u',ARROWTOP,1)
+          toparr1_r = TopArrow(nbpm,'r',ARROWTOP,1)
 
           if int(mainconfig.get_value('showtoparrows',default='1')):
-            toparr_l.add(sgroup)
-            toparr_d.add(sgroup)
-            toparr_u.add(sgroup)
-            toparr_r.add(sgroup)
+            toparr1_l.add(sgroup)
+            toparr1_d.add(sgroup)
+            toparr1_u.add(sgroup)
+            toparr1_r.add(sgroup)
+
+          # PLAYER 2
+          if players == 2:
+            if int(mainconfig.get_value('showtoparrows',default='1')):
+              toparr2_l.remove(sgroup)
+              toparr2_d.remove(sgroup)
+              toparr2_u.remove(sgroup)
+              toparr2_r.remove(sgroup)
+
+            toparr2_l = TopArrow(nbpm,'l',ARROWTOP,2)
+            toparr2_d = TopArrow(nbpm,'d',ARROWTOP,2)
+            toparr2_u = TopArrow(nbpm,'u',ARROWTOP,2)
+            toparr2_r = TopArrow(nbpm,'r',ARROWTOP,2)
+
+            if int(mainconfig.get_value('showtoparrows',default='1')):
+              toparr2_l.add(sgroup)
+              toparr2_d.add(sgroup)
+              toparr2_u.add(sgroup)
+              toparr2_r.add(sgroup)
 
           dajudge.changebpm(nbpm)
+          if players == 2:
+            dajudge2.changebpm(nbpm)
           oldbpm = copy.copy(nbpm)
           print "succeeded."
         else:
@@ -3044,53 +4369,92 @@ def dance(song,difficulty):
         bpmchanged = 0
     
     if fxtext != ' ':
-#      print "FX on ", fxdir, ' ', fxtext
-      if (fxtext == 'PERFECT') or (fxtext == 'GREAT'):
+      if (fxtext == 'MARVELOUS') or (fxtext == 'PERFECT') or (fxtext == 'GREAT'):
         for checkspr in range(len(agroup.sprites())):
           dummy = 1
         if fxdir == 'l':
-          toparrfx_l.stepped(curtime,fxtext)
+          toparrfx1_l.stepped(curtime,fxtext)
         if fxdir == 'd':
-          toparrfx_d.stepped(curtime,fxtext)
+          toparrfx1_d.stepped(curtime,fxtext)
         if fxdir == 'u':
-          toparrfx_u.stepped(curtime,fxtext)
+          toparrfx1_u.stepped(curtime,fxtext)
         if fxdir == 'r':
-          toparrfx_r.stepped(curtime,fxtext)
+          toparrfx1_r.stepped(curtime,fxtext)
+    if fxtext2 != ' ':
+      if (fxtext2 == 'MARVELOUS') or (fxtext2 == 'PERFECT') or (fxtext2 == 'GREAT'):
+        for checkspr in range(len(agroup2.sprites())):
+          dummy = 1
+        if fxdir2 == 'l':
+          toparrfx2_l.stepped(curtime,fxtext2)
+        if fxdir2 == 'd':
+          toparrfx2_d.stepped(curtime,fxtext2)
+        if fxdir2 == 'u':
+          toparrfx2_u.stepped(curtime,fxtext2)
+        if fxdir2 == 'r':
+          toparrfx2_r.stepped(curtime,fxtext2)
     
     dajudge.expire_arrows(curtime)
-    
     for spr in agroup.sprites():
       spr.update(curtime,dajudge.getbpm(),song.lastbpmchangetime,hiddenval,suddenval)
 
+    if players == 2:
+      dajudge2.expire_arrows(curtime)
+      for spr in agroup2.sprites():
+        spr.update(curtime,dajudge2.getbpm(),song.lastbpmchangetime,hiddenval,suddenval)
+
+    extbox.update(curtime+(song.offset*1000.0))
+
     # update the top arrows
-    toparr_l.update(curtime+(song.offset*1000.0))
-    toparr_d.update(curtime+(song.offset*1000.0))
-    toparr_u.update(curtime+(song.offset*1000.0))
-    toparr_r.update(curtime+(song.offset*1000.0))
+    toparr1_l.update(curtime+(song.offset*1000.0))
+    toparr1_d.update(curtime+(song.offset*1000.0))
+    toparr1_u.update(curtime+(song.offset*1000.0))
+    toparr1_r.update(curtime+(song.offset*1000.0))
     
-    toparrfx_l.update(curtime)
-    toparrfx_d.update(curtime)
-    toparrfx_u.update(curtime)
-    toparrfx_r.update(curtime)
+    toparrfx1_l.update(curtime,dajudge.combo)
+    toparrfx1_d.update(curtime,dajudge.combo)
+    toparrfx1_u.update(curtime,dajudge.combo)
+    toparrfx1_r.update(curtime,dajudge.combo)
+
+    if players == 2:
+      toparr2_l.update(curtime+(song.offset*1000.0))
+      toparr2_d.update(curtime+(song.offset*1000.0))
+      toparr2_u.update(curtime+(song.offset*1000.0))
+      toparr2_r.update(curtime+(song.offset*1000.0))
+
+      toparrfx2_l.update(curtime,dajudge2.combo)
+      toparrfx2_d.update(curtime,dajudge2.combo)
+      toparrfx2_u.update(curtime,dajudge2.combo)
+      toparrfx2_r.update(curtime,dajudge2.combo)
     
     song.lyricdisplay.update(curtime)
     song.transdisplay.update(curtime)
 
     # make sure the combo displayed at the bottom is current and the correct size
     p1combo.update(dajudge.combo,curtime-dajudge.steppedtime)
+    p1score.update(dajudge.score)
     p1list0.update(0, curtime-dajudge.steppedtime, dajudge.recentsteps[0])
     p1list1.update(1, curtime-dajudge.steppedtime, dajudge.recentsteps[1])
     p1list2.update(2, curtime-dajudge.steppedtime, dajudge.recentsteps[2])
     lifebar.update(dajudge)
     holdtext.update(curtime)
+    if players == 2:
+      p2combo.update(dajudge2.combo,curtime-dajudge2.steppedtime)
+      p2score.update(dajudge2.score)
+      p2list0.update(0, curtime-dajudge2.steppedtime, dajudge2.recentsteps[0])
+      p2list1.update(1, curtime-dajudge2.steppedtime, dajudge2.recentsteps[1])
+      p2list2.update(2, curtime-dajudge2.steppedtime, dajudge2.recentsteps[2])
+      lifebar2.update(dajudge2)
+      holdtext2.update(curtime)
+
     fpstext.update(curtime)
+    timewatch.update(curtime)
 
 #    dancer.update()
     backimage.update()
     backmovie.update(curtime)
 
     if backmovie.filename:
-      if backmovie.changed:
+      if backmovie.changed or (fpstext.fpsavg > 30):
         backmovie.resetchange()
         backmovie.image.set_alpha(int(mainconfig.get_value('bgbrightness',default='127')), RLEACCEL)
         background.fill(BLACK)
@@ -3104,214 +4468,96 @@ def dance(song,difficulty):
 #    bgroup.draw(screen)
     sgroup.draw(screen)
     dgroup.draw(screen)
-    rgroup.draw(screen)
+#    rgroup.draw(screen)
+    agroup.draw(screen)
+    agroup2.draw(screen)
     fgroup.draw(screen)
     tgroup.draw(screen)
     lgroup.draw(screen)
+    if showcombo:
+      p1combo.draw(screen)
+      if players == 2:
+        p2combo.draw(screen)
+
     pygame.display.update()
 
     if screenshot:
       pygame.image.save(pygame.transform.scale(screen, (640,480)), "screenshot.bmp")
       screenshot = 0
-      
-    lgroup.clear(screen,background.image)
-    tgroup.clear(screen,background.image)
-    fgroup.clear(screen,background.image)
-    rgroup.clear(screen,background.image)
-    dgroup.clear(screen,background.image)
-    sgroup.clear(screen,background.image)
+
+    trippy = 1
+
+    if not backmovie.filename:
+      if showcombo:
+        p1combo.clear(screen, background.image)
+        if players == 2:
+          p2combo.clear(screen, background.image)
+      lgroup.clear(screen,background.image)
+      tgroup.clear(screen,background.image)
+      fgroup.clear(screen,background.image)
+  #    rgroup.clear(screen,background.image)
+      agroup.clear(screen,background.image)
+      agroup2.clear(screen,background.image)
+      dgroup.clear(screen,background.image)
+      sgroup.clear(screen,background.image)
 
 #    time.sleep(0.0066667)
 #    time.sleep(0.0096066)
 
-  for i in xrange(16):
+  for i in range(16):
     bg = pygame.Surface(screen.get_size())
     bg.fill(((15-i)*16,(15-i)*16,(15-i)*16))
     screen.blit(bg, (0,0))
     pygame.display.flip()
 
-# GRADES - THIS NEEDS TO BE IN A FUNCTION OR HANDLED BY THE CLASS EVENTUALLY
+  # GRADES
   if int(mainconfig.get_value('grading',default='1')):
-    totalsteps = dajudge.perfect + dajudge.great + dajudge.ok + dajudge.crap + dajudge.shit + dajudge.miss
 
-    # do NOT put these in descending order or you'll get a D/E every time no matter how well you do =]
-    if totalsteps:
-      perfectpct = dajudge.perfect*100.0 / totalsteps
-      greatpct = dajudge.great*100.0 / totalsteps
-      okpct = dajudge.ok*100.0 / totalsteps
-      crappypct = dajudge.crap*100.0 / totalsteps
-      shitpct = dajudge.shit*100.0 / totalsteps
-      misspct = dajudge.miss*100.0 / totalsteps
+    grade = None
+    if players == 2:
+      grade = GradingScreen([dajudge, dajudge2]).make_gradescreen(screen)
+    else:
+      grade = GradingScreen([dajudge]).make_gradescreen(screen)
 
-      #pick a grade
-      grade = 'doh!'
-      if (dajudge.perfect + dajudge.great >= totalsteps*0.2) and (misspct <= 8) and (shitpct <= 16) and (crappypct <= 24) and (okpct <= 32):
-        grade = 'D'
-      if (dajudge.perfect + dajudge.great >= totalsteps*0.4) and (misspct <= 6) and (shitpct <= 12) and (crappypct <= 18) and (okpct <= 24):
-        grade = 'C'
-      if (dajudge.perfect + dajudge.great >= totalsteps*0.6) and (misspct <= 4) and (shitpct <= 8) and (crappypct <= 12) and (okpct <= 16):
-        grade = 'B'
-      if (dajudge.perfect + dajudge.great >= totalsteps*0.8) and (misspct <= 2) and (shitpct <= 4) and (crappypct <= 6) and (okpct <= 8):
-        grade = 'A'
-      if (dajudge.perfect < dajudge.great) and (dajudge.perfect + dajudge.great == totalsteps):
-        grade = 'S'
-      if (dajudge.perfect >= dajudge.great) and (dajudge.perfect + dajudge.great == totalsteps):
-        grade = 'SS'
-      if (perfectpct >= 92) and (greatpct <= 8) and (dajudge.perfect + dajudge.great == totalsteps):
-        grade = 'SSS'
-      if dajudge.perfect == totalsteps:
-        grade = '!!!!'
+    if not grade:
+      song.kill()
+      return
 
-      gotholds = len(dajudge.holdsub)
-      for i in range(len(dajudge.holdsub)):
-        gotholds += dajudge.holdsub[i]
+    print "LPS for this song was %d tops, %d on average, %d at worst." % (
+      fpstext.highest, fpstext.fpsavg(), fpstext.lowest)
 
-      print "GRADE:",grade,"- total steps:",totalsteps," best combo:",dajudge.bestcombo,"current combo:",dajudge.combo
-      print "Mode:",difficulty,"  P:",dajudge.perfect," G:",dajudge.great," O:",dajudge.ok," C:",dajudge.crap," S:",dajudge.shit," M:",dajudge.miss," - ",gotholds,"/",len(dajudge.holdsub),"holds"
-      print "LPS for this song was",fpstext.highest,"tops,",fpstext.fpsavg(),"on average,",fpstext.lowest,"at worst."
-      
-      for i in xrange(4):
-        font = pygame.font.Font(None, 448-(i*8))
-        gradetext = font.render(grade,1, (48-(i*4),48-(i*4),48-(i*4)) )
-        gradetext.set_colorkey(gradetext.get_at((0,0)))
-        gradetextpos = gradetext.get_rect()
-        gradetextpos.centerx = screen.get_rect().centerx
-        gradetextpos.centery = screen.get_rect().centery
-        screen.blit(gradetext,gradetextpos)
-        pygame.time.delay(48)
-        pygame.display.flip()
+    idir = -4
+    i = 192
+    font = pygame.font.Font(None, 32)
+    while 1:
+      if i < 32:
+        idir = 4
+      elif i > 224:
+        idir = -4
 
-      grading = fontfx.sinkblur("GRADING",64,4,(224,72),(64,64,255))
-      screen.blit(grading, (320-grading.get_rect().centerx,4) )
-
-      gnumbaby = "blah"
-      font = pygame.font.Font(None, 28)
-      for j in xrange(4):
-        for i in xrange(14):
-          if i == 0:
-            gtextbaby = "PERFECT"
-            gnumbaby = repr(dajudge.perfect)
-            gpctbaby = '%.1f'%perfectpct
-          if i == 1:
-            gtextbaby = "GREAT"
-            gnumbaby = repr(dajudge.great)
-            gpctbaby = '%.1f'%greatpct
-          if i == 2:
-            gtextbaby = "OK"
-            gnumbaby = repr(dajudge.ok)
-            gpctbaby = '%.1f'%okpct
-          if i == 3:
-            gtextbaby = "CRAPPY"
-            gnumbaby = repr(dajudge.crap)
-            gpctbaby = '%.1f'%crappypct
-          if i == 4:
-            gtextbaby = "ACK"
-            gnumbaby = repr(dajudge.shit)
-            gpctbaby = '%.1f'%shitpct
-          if i == 5:
-            gtextbaby = "MISS"
-            gnumbaby = repr(dajudge.miss)
-            gpctbaby = '%.1f'%misspct
-          if i == 6:
-            gtextbaby = "TOTAL"
-            gnumbaby = repr(totalsteps)
-            gpctbaby = "------"
-          if i == 7:
-            gtextbaby = "MAX COMBO"
-            gnumbaby = repr(dajudge.bestcombo)
-            bestcombopct = dajudge.bestcombo*100.0/totalsteps
-            gpctbaby = '%.1f'%bestcombopct
-          if i == 8:
-            gtextbaby = "CURRENT COMBO"
-            gnumbaby = repr(dajudge.combo)
-            combopct = dajudge.combo*100.0/totalsteps
-            gpctbaby = '%.1f'%combopct
-          if i == 9:
-            gtextbaby = "TOTAL COMBOS"
-            gnumbaby = repr(dajudge.totalcombos)
-            gpctbaby = "------"
-          if i == 10:
-            if len(dajudge.holdsub):
-              gtextbaby = "HOLDS/FREEZES"
-              gnumbaby = repr(gotholds)+"/"+repr(len(dajudge.holdsub))
-              holdpct = gotholds*100.0/len(dajudge.holdsub)
-              gpctbaby = '%.1f'%holdpct
-            else:
-              gtextbaby = " "
-              gnumbaby = " "
-              gpctbaby = " "
-          if i == 11:
-            gtextbaby = "early steps"
-            gnumbaby = repr(dajudge.early)
-            combopct = dajudge.early*100.0/totalsteps
-            gpctbaby = '%.1f'%combopct
-          if i == 12:
-            gtextbaby = "ontime steps"
-            gnumbaby = repr(dajudge.ontime)
-            combopct = dajudge.ontime*100.0/totalsteps
-            gpctbaby = '%.1f'%combopct
-          if i == 13:
-            gtextbaby = "late steps"
-            gnumbaby = repr(dajudge.late)
-            combopct = dajudge.late*100.0/totalsteps
-            gpctbaby = '%.1f'%combopct
-
-          gpctbaby += "%"
-
-          fc = ((j*32)+96-(i*8))
-          if fc<0:    fc=0
-          gradetext = fontfx.shadefade(gtextbaby,28,j,(224,32),(fc,fc,fc))
-          gradetext.set_colorkey(gradetext.get_at((0,0)))
-          gradetextpos = gradetext.get_rect()
-          gradetextpos.right = 32 + screen.get_rect().centerx + 8-j
-          gradetextpos.top = 64 + (i*25) + 8-j
-          screen.blit(gradetext,gradetextpos)
-
-          gradetext = font.render(gnumbaby,1, (fc,fc,fc) )
-          gradetextpos = gradetext.get_rect()
-          gradetextpos.right = 64 + screen.get_rect().centerx + 8-j
-          gradetextpos.top = 64 + (i*25) + 8-j
-          screen.blit(gradetext,gradetextpos)
-
-          gradetext = font.render(gpctbaby,1, (fc,fc,fc) )
-          gradetextpos = gradetext.get_rect()
-          gradetextpos.right = 160 + screen.get_rect().centerx + 8-j
-          gradetextpos.top = 64 + (i*25) + 8-j
-          screen.blit(gradetext,gradetextpos)
-
-          pygame.display.flip()
-
-      idir = -4
-      i = 192
-      font = pygame.font.Font(None, 32)
-      while 1:
-        if i < 32:
-          idir = 4
-        if i > 224:
-          idir = -4
-
-        i += idir
-        event = eventManager.poll()
-        if (event == E_QUIT) or (event == E_START):
-          break
-        if event == E_FULLSCREEN:  #f
-          print "fullscreen toggle"
-          pygame.display.toggle_fullscreen()
-        if event == E_SCREENSHOT: #s
-          print "writing next frame to screenshot.bmp"
-          screenshot = 1
+      i += idir
+      event = eventManager.poll()
+      if (event == E_QUIT) or (event == E_START):
+        break
+      elif event == E_FULLSCREEN:  #f
+        print "fullscreen toggle"
+        pygame.display.toggle_fullscreen()
+      elif event == E_SCREENSHOT: #s
+        print "writing next frame to screenshot.bmp"
+        screenshot = 1
           
-        gradetext = font.render("Press ESC/ENTER/START",1, (i,128,128) )
-        gradetextpos = gradetext.get_rect()
-        gradetextpos.centerx = screen.get_rect().centerx
-        gradetextpos.bottom = screen.get_rect().bottom - 16
-        screen.blit(gradetext,gradetextpos)
-        pygame.display.flip()
-        time.sleep(0.0001) # don't peg the CPU on the grading screen
+      gradetext = font.render("Press ESC/ENTER/START",1, (i,128,128) )
+      gradetextpos = gradetext.get_rect()
+      gradetextpos.centerx = screen.get_rect().centerx
+      gradetextpos.bottom = screen.get_rect().bottom - 16
+      screen.blit(gradetext,gradetextpos)
+      pygame.display.flip()
+      time.sleep(0.0001)     # don't peg the CPU on the grading screen
 
-        if screenshot:
-          pygame.image.save(pygame.transform.scale(screen, (640,480)), "screenshot.bmp")
-          screenshot = 0
+      if screenshot:
+        pygame.image.save(pygame.transform.scale(screen, (640,480)),
+                          "screenshot.bmp")
+        screenshot = 0
   song.kill()
 # "end"
 
