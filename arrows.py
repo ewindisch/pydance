@@ -34,24 +34,30 @@ class AbstractArrow(pygame.sprite.Sprite):
       self.bottom = random.choice([748, -276])
       if self.top < self.bottom:
         self.vector = 1
-        self.suddenzone = 480 - 64 * player.sudden
-        self.hiddenzone = 240 - player.game.width / 2 + 64 * player.hidden
+        self.suddenzone = 480
+        self.hiddenzone = 240 - player.game.width / 2
       else:
         self.vector = -1
-        self.suddenzone = 64 * (player.sudden - 1)
-        self.hiddenzone = 240 - player.game.width / 2 - 64 * player.hidden
+        self.suddenzone = -64
+        self.hiddenzone = 240 - player.game.width / 2
     elif player.scrollstyle == 1:
       self.vector = -1
       self.top = 352
       self.bottom = -64
-      self.suddenzone =  64 * (player.sudden - 1)
-      self.hiddenzone = 352 - 64 * player.hidden
+      self.suddenzone = -64
+      self.hiddenzone = 352
     else:
       self.vector = 1
       self.top = 64
       self.bottom = 480
-      self.suddenzone = 480 - 64 * player.sudden
-      self.hiddenzone = 64 * (player.hidden + 1)
+      self.suddenzone = 480
+      self.hiddenzone = 64
+
+    if player.fade & 1: # Sudden, fade in late.
+      self.suddenzone -= self.vector * 160
+    if player.fade & 2: # Hidden, fade out early.
+      self.hiddenzone += self.vector * 160
+        
 
     self.spin = player.spin
     self.scale = player.scale

@@ -176,7 +176,6 @@ def do(screen, songdata):
         ["Folders", onoff_opt, ("folders",)],
         ["Timer Display", onoff_opt, ('fpsdisplay',)],
         ["Gratuitous Extras", onoff_opt, ('gratuitous',)],
-        ["Display Help", onoff_opt, ("ingamehelp",)],
         ["Back", None, None]
         )
        )

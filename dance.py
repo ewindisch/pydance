@@ -179,7 +179,7 @@ def play(screen, playlist, configs, songconf, playmode):
 
   for songfn, diff in playlist:
     try: current_song = fileparsers.SongItem(songfn)
-    except None:
+    except:
       error.ErrorMessage(screen, ["There was an error loading",
                                   os.path.split(songfn)[1]])
       continue
@@ -198,7 +198,7 @@ def play(screen, playlist, configs, songconf, playmode):
       if dance(screen, songdata, players, prevscr, first, game):
         break # Failed
       first = False
-    except None:
+    except:
       error.ErrorMessage(screen, ["There was an error playing",
                                   os.path.split(songfn)[0]])
       first = True

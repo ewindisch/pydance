@@ -17,10 +17,9 @@ os.chdir(pyddr_path)
 def SetDisplayMode(mainconfig):
   try:
     flags = HWSURFACE | DOUBLEBUF
-#    if osname == "macosx": flags = 0
     if mainconfig["vesacompat"]: flags = 0
     elif mainconfig["fullscreen"]: flags |= FULLSCREEN
-    screen = pygame.display.set_mode((640, 480), flags, 16)
+    screen = pygame.display.set_mode([640, 480], flags, 16)
   except:
     print "Can't get a 16 bit display!" 
     sys.exit()
@@ -37,13 +36,12 @@ def main():
       psyco.full()
     except ImportError: print "Psyco optimizing compiler not found."
 
-  # FIXME Debug mode has been broken for like, 4 releases, take it out
+  # FIXME Debug mode needs to be added again. Or some command line options.
 
-  # Search recursively for files
   fileList = []
   for dir in mainconfig["songdir"].split(os.pathsep):
     print "Searching", dir
-    fileList += util.find(dir, ('*.step', '*.dance', '*.dwi', '*.sm', '*/song.*')) # Python's matching SUCKS
+    fileList += util.find(dir, ['*.step', '*.dance', '*.dwi', '*.sm', '*/song.*']) # Python's matching SUCKS
 
   totalsongs = len(fileList)
   parsedsongs = 0
@@ -67,12 +65,12 @@ def main():
       print "W:", message
     except RuntimeError, message:
       print "E:", message
-    except None:
+    except:
       print "E: Unknown error loading " + f
       print "E: Please contact the developers (pydance-devel@icculus.org)."
     img = pbar.render(parsedsongs / totalsongs)
     pygame.display.update(screen.blit(img, r))
-    parsedsongs += 100.0
+    parsedsongs += 100
 
   ev = event.poll()
   while ev[1] != E_PASS: ev = event.poll()
