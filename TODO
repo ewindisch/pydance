@@ -3,7 +3,6 @@ UI Fixes & Improvements
  - Up/down indicators on menus
  - Menu and song select theming (including new songselect.pys)
  - Make quitting from the menus more difficult (make esc not exit last menu)
- - Per player themes
  - "Ready? Go!" screen
 
 Code Refactors & Cleanups

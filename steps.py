@@ -76,7 +76,7 @@ class Steps:
         beat += cur_bpm * float(words[1]) / 60
       elif words[0] == 'R':
         self.events.append(SongEvent(when = cur_time, bpm = cur_bpm,
-                                     beat = cur_beat, extra= ' READY'))
+                                     beat = cur_beat, extra= 'READY'))
         coloring_mod = 0
       elif words[0] in BEATS:
         cando = True # FIXME: Do little correctly for 24th etc notes
