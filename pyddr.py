@@ -1775,13 +1775,13 @@ def playSequence(numplayers, playlist):
       players[pid].set_song(copy.copy(current_song), diff[pid], Judge)
 
     if dance(current_song, players, ARROWPOS): break # Failed
-    
+
   return [player.judge for player in players]
 
 def dance(song, players, ARROWPOS):
   global screen,background,playmode
 
-  songFailed = True
+  songFailed = False
 
   pygame.mixer.init()
 
@@ -1947,10 +1947,10 @@ def dance(song, players, ARROWPOS):
   
   while 1:
     if mainconfig['autofail']:
-      songFailed = 1
+      songFailed = True
       for plr in players:
         if plr.lifebar.failed == 0:
-          songFailed = 0
+          songFailed = False
           break
       if songFailed:
         song.kill()
@@ -1959,7 +1959,7 @@ def dance(song, players, ARROWPOS):
 
     if players[0].evt is None:
       if song.isOver():
-        return False
+        break
     else:
       # we need the current time for a few things, and it should be the same for all players
       curtime = players[0].evt[2]
@@ -1974,7 +1974,7 @@ def dance(song, players, ARROWPOS):
         sys.exit()
       elif (event.states[(i, E_START)] and event.states[(i, E_LEFT)]):
         ev = (0, E_QUIT)
-        return False
+        break
       else:
         pass
 

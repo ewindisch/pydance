@@ -125,12 +125,12 @@ def do(screen, songdata):
                 E_CREATE: get_tuple }
 
   m = (("Play Game",
+        ["Regular", {E_START: wrap_ctr}, (SongSelect, songdata)],
+        ["Endless", {E_START: wrap_ctr}, (Endless, songdata)],
         ["Oni Mode", tuple_opt, ('maxonilife',
                                  [(0, 'off'), (3, 'three lives'),
                                   (4, 'four lives'), (5, 'five lives'),
-                                  (7, 'seven lives'), (10, 'ten lives')])],
-        ["Regular", {E_START: wrap_ctr}, (SongSelect, songdata)],
-        ["Endless", {E_START: wrap_ctr}, (Endless, songdata)],
+                                  (7, 'seven lives'), (9, 'nine lives')])],
         ["Back", None, None]
         ),
        ("Game Options",
@@ -152,7 +152,8 @@ def do(screen, songdata):
         ["Top Arrows", onoff_opt, ("showtoparrows",)],
         ["Scale Arrows", rotate_index_opt,
          ("arrowscale", ("shrink", "normal", "grow"))],
-        ["Reverse", onoff_opt, ("reversescroll",)],
+        ["Scrolling", rotate_index_opt, ("reversescroll",
+                                         ("normal", "reverse", "center"))],
         ["Arrow Speed", rotate_opt, ('scrollspeed', [1, 1.5,
                                                      2, 4, 8])],
         ["Back", None, None]
