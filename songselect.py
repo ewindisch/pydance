@@ -13,14 +13,16 @@ BACKGROUND = os.path.join(image_path, "ss-bg.png")
 MOVE_SOUND = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
 
 # FIXME: We need more difficulties here
-difficulty_colors = { "BEGINNER": colors.color["yellow"],
+difficulty_colors = { "BEGINNER": colors.color["white"],
+                      "LIGHT": colors.color["yellow"],
                       "BASIC": colors.color["orange"],
-                      "LIGHT": colors.color["orange"],
+                      "STANDARD": colors.average(colors.color["red"],
+                                                 colors.color["orange"]),
                       "TRICK": colors.color["red"],
-                      "ANOTHER": colors.color["red"],
-                      "STANDARD": colors.color["red"],
+                      "ANOTHER": colors.average(colors.color["yellow"],
+                                                colors.color["orange"]),
                       "MANIAC": colors.color["green"],
-                      "HEAVY": colors.color["green"],
+                      "HEAVY": colors.darken(colors.color["green"]),
                       "HARDCORE": colors.color["purple"]
                      }
 

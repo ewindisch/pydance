@@ -6,6 +6,12 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
+0.6.4 - We're Hardcore!						[2003.XX.XX]
++ New step file parsers
+  + Beginner and hardcore (smaniac/oni/challenge) difficulty.
++ New hold arrow display
++ Bug fixes, optimizations, whippings, etc.
+
 0.6.3 - Reasonable Starting Times!				[2003.05.17]
 + New song loading display and algorithm (at least 4-5 times faster).
 + New song selector based roughly on DDR 5th Mix.

@@ -26,3 +26,6 @@ def darken(color, diff = 64):
 
 def darken_div(color, div = 3.5):
   return tuple([x / div for x in color])
+
+def average(color1, color2):
+  return tuple([(c1 + c2) / 2 for c1, c2 in zip(color1, color2)])

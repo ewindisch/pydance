@@ -3,24 +3,23 @@
 import sys, os, copy
 
 DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "TRICK", "ANOTHER", "STANDARD",
-                "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE"]
+                "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI"]
 
-def sorted_diff_list(difficulty_hash):
-  diffs = []
-  dhash = copy.copy(difficulty_hash)
-  for d in DIFFICULTIES:
-    if dhash.has_key(d):
-      diffs.append(d)
-      del(dhash[d])
-  for key in dhash: diffs.append(key)
-  return diffs
+def order_sort(a, b):
+  if a in DIFFICULTIES and b in DIFFICULTIES:
+    return cmp(DIFFICULTIES.index(a), DIFFICULTIES.index(b))
+  else: return cmp(a, b)
+
+def sorted_diff_list(difflist):
+  keys = difflist.keys()
+  keys.sort((lambda a, b: cmp(difflist[a], difflist[b]) or order_sort(a, b)))
+  return keys
 
 class StepFile:
   def __init__(self, filename):
     self.filename = filename
     self.steps = {}
     self.difficulty = {}
-    self.diff_list = {}
     self.info = {}
     self.lyrics = []
     f = open(filename)
@@ -150,6 +149,5 @@ class SongItem:
     self.filename = filename
 
     self.diff_list = {}
-    for key in self.difficulty:
+    for key in self.difficulty:    
       self.diff_list[key] = sorted_diff_list(self.difficulty[key])
-
