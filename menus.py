@@ -3,10 +3,15 @@ from constants import *
 from fontfx import TextZoomer
 from spritelib import BGimage, SimpleSprite
 
+# Hooray! Less magic numbers
 LIGHT_GRAY = (128, 128, 128)
+TOPLEFT = (0, 0)
 BUTTON_SIZE = (192, 48)
-
-
+BUTTON_WIDTH, BUTTON_HEIGHT = BUTTON_SIZE
+BUTTON_PADDING = 8
+LEFT_OFFSET, TOP_OFFSET = 365, 100
+TRANSPARENT, SOLID = 96, 255
+DISPLAYED_ITEMS = 6
 
 button_bg = pygame.image.load(os.path.join(image_path, "button.png"))
 
@@ -31,7 +36,7 @@ class MenuItem:
     self.bg = button_bg
     self.rgb = LIGHT_GRAY
     self.subtext = None
-    self.alpha = 96
+    self.alpha = TRANSPARENT
     self.text = text
     self.render()
 
@@ -43,11 +48,11 @@ class MenuItem:
   def activate(self, ev): # Note - event ID, not an event tuple
     if ev == E_SELECT:
       self.rgb = WHITE
-      self.alpha = 255
+      self.alpha = SOLID
       self.render()
     elif ev == E_UNSELECT:
       self.rgb = LIGHT_GRAY
-      self.alpha = 96
+      self.alpha = TRANSPARENT
       self.render()
     elif self.callbacks == None:
       if ev == E_START:
@@ -67,12 +72,16 @@ class MenuItem:
     self.image.blit(self.bg, (0,0))
     if self.subtext == None:
       text = font32.render(self.text, 1, self.rgb)
-      self.image.blit(text, (96 - (font32.size(self.text)[0] / 2), 8))
+      self.image.blit(text, (BUTTON_WIDTH/2 - (font32.size(self.text)[0] / 2),
+                             BUTTON_HEIGHT/2 - font32.size(self.text)[1] / 2))
     else:
       text = font26.render(self.text, 1, self.rgb)
       subtext = font20.render(self.subtext, 1, self.rgb)
-      self.image.blit(text, (96 - (font26.size(self.text)[0] / 2), 4))
-      self.image.blit(subtext, (96 - (font20.size(self.subtext)[0] / 2), 22))
+      self.image.blit(text, (BUTTON_WIDTH/2 - (font26.size(self.text)[0] / 2),
+                             BUTTON_HEIGHT/3 - font26.size(self.text)[1] / 2))
+      self.image.blit(subtext,
+                      (BUTTON_WIDTH/2 - (font20.size(self.subtext)[0] / 2),
+                       2 * BUTTON_HEIGHT/3 - font20.size(self.text)[1] / 2))
     self.image.set_alpha(self.alpha)
 
 class Menu:
@@ -90,7 +99,7 @@ class Menu:
     self.text = name
     self.rgb = LIGHT_GRAY
     self.bg = button_bg
-    self.alpha = 128
+    self.alpha = TRANSPARENT
     self.screen = screen
     self.render()
     for i in itemlist:
@@ -105,10 +114,11 @@ class Menu:
 
   # Menu rendering is tons easier, since it never changes.
   def render(self):
-    self.image = pygame.surface.Surface((192, 48))
+    self.image = pygame.surface.Surface(BUTTON_SIZE)
     self.image.blit(self.bg, (0,0))
     text = font32.render(self.text, 1, self.rgb)
-    self.image.blit(text, (96 - (font32.size(self.text)[0] / 2), 8))
+    self.image.blit(text, (BUTTON_WIDTH/2 - (font32.size(self.text)[0] / 2),
+                           BUTTON_HEIGHT/2 - font32.size(self.text)[1] / 2))
     self.image.set_alpha(self.alpha)
 
   def activate(self, ev):
@@ -116,22 +126,21 @@ class Menu:
       self.display()
     elif ev == E_SELECT:
       self.rgb = WHITE
-      self.alpha = 255
+      self.alpha = SOLID
       self.render()
     elif ev == E_UNSELECT:
       self.rgb = LIGHT_GRAY
-      self.alpha = 96
+      self.alpha = TRANSPARENT
       self.render()
 
   # Render and start navigating the menu.
   # Postcondition: Screen buffer is in an unknown state!
   def display(self):
     screen = self.screen
-    screen.blit(Menu.bgimage.image, (0, 0))
-    top_offset = 100
+    screen.blit(Menu.bgimage.image, TOPLEFT)
     curitem = 0
     topitem = 0
-    toprotater = TextZoomer(self.text, 128, 96, 64)
+    toprotater = TextZoomer(self.text, 128, 96, 64) # These are just random
 
     self.items[curitem].activate(E_SELECT)
 
@@ -149,7 +158,7 @@ class Menu:
         if curitem == len(self.items): # Loop at the bottom
           curitem = 0
           topitem = 0
-        elif curitem >= topitem + 6: # Advance the menu if necessary
+        elif curitem >= topitem + DISPLAYED_ITEMS: # Advance the menu
           topitem += 1
         ev = self.items[curitem].activate(E_SELECT)
 
@@ -160,7 +169,7 @@ class Menu:
         curitem -= 1
         if curitem < 0:
           curitem = len(self.items) - 1
-          topitem = max(0, curitem - 5)
+          topitem = max(0, curitem - DISPLAYED_ITEMS - 1)
         elif curitem < topitem:
           topitem = curitem
         ev = self.items[curitem].activate(E_SELECT)
@@ -171,11 +180,13 @@ class Menu:
         ev = self.items[curitem].activate(ev)
 
       toprotater.iterate()
-      screen.blit(Menu.bgimage.image, (0, 0))
-      screen.blit(toprotater.tempsurface, (0,0))
-      for i in range(6):
+      screen.blit(Menu.bgimage.image, TOPLEFT)
+      screen.blit(toprotater.tempsurface, TOPLEFT)
+      for i in range(DISPLAYED_ITEMS):
         if i + topitem < len(self.items):
-          screen.blit(self.items[i + topitem].image, (364, top_offset+i*56))
+          screen.blit(self.items[i + topitem].image,
+                      (LEFT_OFFSET,
+                       TOP_OFFSET + i * (BUTTON_HEIGHT + BUTTON_PADDING)))
 
       pygame.display.flip()
       
