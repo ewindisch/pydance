@@ -172,11 +172,10 @@ class ArrowSprite(AbstractArrow):
   def update(self, curtime, curbpm, curbeat, lbct):
     AbstractArrow.update(self, curtime, curbpm, curbeat, lbct)
 
-    if curtime > self.endtime + (240.0/curbpm):
+    if curbeat > self.endbeat + 1:
       self.kill()
       return
 
-    if curbpm == 1e-127: return # We're stopped
     beatsleft = self.endbeat - curbeat
 
     if self.accel == 1:
@@ -190,7 +189,7 @@ class ArrowSprite(AbstractArrow):
     # The second term (self.vector * ...) is a simplication of
     # int(beatsleft * speed * self.diff / self.beatsleft).
     top = self.top + self.vector * int(beatsleft * speed * 64)
-    
+
     if top > 480: top = 480
 
     pct = abs(float(top - self.top) / self.diff)
@@ -213,6 +212,10 @@ class HoldArrowSprite(AbstractArrow):
   def update(self, curtime, curbpm, beat, lbct):
     AbstractArrow.update(self, curtime, curbpm, beat, lbct)
 
+    if beat > self.endbeat2 + 1:
+      self.kill()
+      return
+
     c = self.image.get_colorkey()
     self.top_image = pygame.surface.Surface([self.width, self.width / 2])
     self.top_image.blit(self.image, [0, 0])
@@ -225,12 +228,6 @@ class HoldArrowSprite(AbstractArrow):
     self.center_image = pygame.surface.Surface([self.width, 1]) 
     self.center_image.blit(self.image, [0, -self.width / 2 + 1])
     self.center_image.set_colorkey(c)
-
-    if curtime > self.timef2:
-      self.kill()
-      return
-
-    if curbpm == 1e-127: return # We're stopped
 
     beatsleft_top = self.endbeat1 - beat
     beatsleft_bot = self.endbeat2 - beat
