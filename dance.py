@@ -315,6 +315,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
   autofail = mainconfig['autofail']
 
+  screenshot = False
   pad.empty()
   while 1:
     if autofail:
@@ -346,6 +347,8 @@ def dance(screen, song, players, prevscr, ready_go, game):
       if ev[1] == pad.QUIT:
         for p in players: p.escaped = True
         break
+      elif ev[1] == pad.SCREENSHOT:
+        screenshot = True
       elif ev[1] == pad.LEFT: key.append((ev[0], 'l'))
       elif ev[1] == pad.DOWNLEFT: key.append((ev[0], 'w'))
       elif ev[1] == pad.UPLEFT: key.append((ev[0], 'k'))
@@ -395,9 +398,10 @@ def dance(screen, song, players, prevscr, ready_go, game):
     else: pygame.display.update()
 
     if screenshot:
-      pygame.image.save(pygame.transform.scale(screen, (640,480)),
-                        os.path.join(rc_path, "screenshot.bmp"))
-      screenshot = 0
+      fn = os.path.join(rc_path, "screenshot.bmp")
+      print "Saving a screenshot to", fn
+      pygame.image.save(screen, fn)
+      screenshot = False
 
     if not backmovie.filename:
       lgroup.clear(screen,background)

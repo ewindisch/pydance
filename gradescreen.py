@@ -187,8 +187,7 @@ class GradingScreen(object):
         pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
       elif ev[1] == ui.SCREENSHOT:
-        print "writing next frame to", os.path.join(rc_path, "screenshot.bmp")
-        screenshot = 1
+        screenshot = True
           
       gradetext = FONTS[32].render("Press ESC/ENTER/START",1, (i,128,128) )
       gradetextpos = gradetext.get_rect()
@@ -199,8 +198,9 @@ class GradingScreen(object):
       pygame.time.wait(40)     # don't peg the CPU on the grading screen
 
       if screenshot:
-        pygame.image.save(pygame.transform.scale(screen, (640,480)),
-                          os.path.join(rc_path, "screenshot.bmp"))
-        screenshot = 0
+        fn = os.path.join(rc_path, "screenshot.bmp")
+        print "Saving a screenshot to", fn
+        pygame.image.save(screen, fn)
+        screenshot = False
 
     return

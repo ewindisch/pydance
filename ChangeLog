@@ -10,6 +10,7 @@ Legend:
 0.8.4 -
 + EZ2 and EZ2 Real support.
 * Fix DWI parsing bugs and typos introduced in 0.8.3.
+* Screenshot support is back, with Print Screen.
 
 0.8.3 - Also it should be called Streetball.			[2004.01.04]
 !!! Completely new user interface for almost all screens. Please pay

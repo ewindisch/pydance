@@ -7,13 +7,15 @@ from pygame.locals import *
 import colors
 
 (PASS, QUIT, UP, UPLEFT, LEFT, DOWNLEFT, DOWN, DOWNRIGHT,
- RIGHT, UPRIGHT, CENTER, START, SELECT) = range(13)
+ RIGHT, UPRIGHT, CENTER, START, SELECT, SCREENSHOT) = range(14)
 
 NAMES = ["", "quit", "up", "up-left", "left", "down-left", "down",
          "down-right", "right", "up-right", "center", "start", "select"]
 
 KEYS = {
   K_ESCAPE: QUIT,
+  K_PRINT: SCREENSHOT,
+  K_SYSREQ: SCREENSHOT,
   }
 
 KEY1 = {
@@ -81,7 +83,7 @@ MATS = { (6, 12): A6B12, (14, 10): A14B10, (2, 10): A2B10, (2, 8): A2B8 }
 class Pad(object):
 
   (PASS, QUIT, UP, UPLEFT, LEFT, DOWNLEFT, DOWN, DOWNRIGHT,
-   RIGHT, UPRIGHT, CENTER, START, SELECT) = range(13)
+   RIGHT, UPRIGHT, CENTER, START, SELECT, SCREENSHOT) = range(14)
 
   def __init__(self, handler = pygame.event):
     self.handler = handler
@@ -109,7 +111,6 @@ class Pad(object):
       elif mat == None and (args[1], args[2]) in MATS: mat = i
       elif mat2 == None and (args[1], args[2]) in MATS: mat2 = i
 
-    self.merge_events(-1, -1, KEYS)
     self.merge_events(0, -1, KEY1)
     self.merge_events(1, -1, KEY2)
 
@@ -144,6 +145,8 @@ class Pad(object):
     elif totaljoy > 0:
       print "No known joysticks found! If you want to use yours,"
       print "you'll have to map its button manually once to use it."
+
+    self.merge_events(-1, -1, KEYS)
 
   def reinit_pads(self):
     pygame.joystick.init()
@@ -182,7 +185,7 @@ class Pad(object):
   # Poll the event handler and normalize the result. If we don't know
   # about the event but the device is the keyboard, return (-2, key).
   # Otherwise, return pass.
-  def poll(self, passthrough = False):
+  def poll(self):
     ev = self.handler.poll()
     t = -1
     v = 0
@@ -201,7 +204,7 @@ class Pad(object):
          ev.key == K_DOWN)):
       default = (0, {K_LEFT: LEFT, K_RIGHT: RIGHT,
                      K_UP: UP, K_DOWN: DOWN}[ev.key])
-    elif (ev.type == KEYUP or ev.type == KEYDOWN) and passthrough:
+    elif (ev.type == KEYUP or ev.type == KEYDOWN):
       default = (-2, ev.key * 100)
     else: default = (-1, PASS)
 

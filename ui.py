@@ -4,10 +4,7 @@ import pad, pygame
 (PASS, CANCEL, UP, DOWN, LEFT, RIGHT, START, SELECT, UNMARK, CONFIRM,
  PGDN, FULLSCREEN, SORT, CLEAR) = range(14)
 
-PGUP = CONFIRM
 QUIT = CANCEL
-MARK = CANCEL
-
 SCREENSHOT = SORT
 
 non_player = [CANCEL, PASS]
@@ -25,6 +22,7 @@ pad_defaults = {
   pad.CENTER: CONFIRM,
   pad.DOWNLEFT: UNMARK,
   pad.SELECT: SELECT,
+  pad.SCREENSHOT: SCREENSHOT,
   }
 
 key_defaults = {
@@ -32,10 +30,7 @@ key_defaults = {
   100 * K_BACKSPACE: SORT,
   100 * K_TAB: SELECT,
   100 * K_s: SORT,
-  100 * K_PAGEUP: PGUP,
-  100 * K_PAGEDOWN: PGDN,
   100 * K_INSERT: CANCEL,
-  100 * K_DELETE: UNMARK,
   100 * K_F11: FULLSCREEN,
   100 * K_RETURN: CONFIRM,
   }
@@ -64,7 +59,7 @@ class UI(object):
       self.add_event(key, pid, event)
 
   def poll(self):
-    pid, ev = self.handler.poll(True)
+    pid, ev = self.handler.poll()
 
     nev = self.events.get(abs(ev), PASS)
 
