@@ -1,17 +1,18 @@
 from pygame.locals import *
 import pad, pygame
 
-(PASS, QUIT, UP, DOWN, LEFT, RIGHT, START, SELECT, MARK, UNMARK, CONFIRM,
+(PASS, CANCEL, UP, DOWN, LEFT, RIGHT, START, SELECT, MARK, UNMARK, CONFIRM,
  PGDN, FULLSCREEN, SORT, CLEAR) = range(15)
 
 PGUP = CONFIRM
+QUIT = CANCEL
 
 SCREENSHOT = SORT
 
 non_player = [QUIT, PASS]
 
 pad_defaults = {
-  pad.QUIT: QUIT,
+  pad.QUIT: CANCEL,
   pad.UP: UP,
   pad.DOWN: DOWN,
   pad.LEFT: LEFT,
@@ -20,7 +21,7 @@ pad_defaults = {
   pad.UPRIGHT: CONFIRM,
   pad.DOWNRIGHT: PGDN,
   pad.UPLEFT: MARK,
-  pad.CENTER: START,
+  pad.CENTER: CONFIRM,
   pad.DOWNLEFT: UNMARK,
   pad.SELECT: SELECT,
   }
