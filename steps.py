@@ -87,6 +87,8 @@ class Steps(object):
     if player.jumps: stepfilters.jumps(song_steps, player.jumps)
     if not player.holds: stepfilters.remove_holds(song_steps, player.holds)
 
+    if not player.secret_kind: stepfilters.remove_secret(song_steps)
+
     for words in song_steps:
 
       if words[0] == 'W':
@@ -132,7 +134,7 @@ class Steps(object):
                                        color = coloring_mod % 4))
 
           for arrowadder in feetstep:
-            if arrowadder & 1:
+            if arrowadder & 1 and not arrowadder & 4:
               self.totalarrows += 1
 
         # Even if there are no steps in the event, we don't want to

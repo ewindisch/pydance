@@ -167,6 +167,13 @@ def remove_holds(steps, jump):
   for s in steps:
     if s[0] not in NOT_STEPS: s[1:] = [i & 1 for i in s[1:]]
 
+# Remove secret steps; defined by the 4 bit being on, so 5, 6, or 7.
+def remove_secret(steps):
+  for s in steps:
+    if s[0] not in NOT_STEPS:
+      for i in range(len(s[1:])):
+        if s[1 + i] & 4: s[1 + i] = 0
+
 # Remove or add jumps:
 def jumps(steps, jump):
   if jump == 1: remove_jumps(steps)

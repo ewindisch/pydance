@@ -201,7 +201,9 @@ class Player(object):
     if self.scrollstyle == 2: self.top = 240 - game.width / 2
     elif self.scrollstyle == 1: self.top = 352
     else: self.top = 64
-    
+
+    self.secret_kind = songconf["secret"]
+
     self.score = scores.scores[songconf["scoring"]](pid, "NONE", game)
     self.combos = combos.combos[songconf["combo"]](pid, game)
     self.grade = grades.grades[songconf["grade"]]()
@@ -334,23 +336,28 @@ class Player(object):
       for ev in events:
         if ev.feet:
           for (dir, num) in zip(self.game.dirs, ev.feet):
-            if num & 1: judge.handle_arrow(dir, ev.when)
+            if num & 1: judge.handle_arrow(dir, ev.when, num & 4)
 
       newsprites = []
       for ev in nevents:
         if ev.feet:
           for (dir, num) in zip(self.game.dirs, ev.feet):
-            dirstr = dir + repr(int(ev.color) % self.colortype)
-            if num & 1 and not num & 2:
-              ns = arrows.ArrowSprite(arrow_gfx[dirstr], time, ev.when, self, song)
-              newsprites.append(ns)
-            elif num & 2:
-              holdindex = steps.holdref.index((self.game.dirs.index(dir),
-                                               ev.when))
-              ns = arrows.HoldArrowSprite(arrow_gfx[dirstr], time,
-                                   steps.holdinfo[holdindex], self, song)
-              newsprites.append(ns)
-                       
+            # Don't make hidden arrow sprites if we have hidden arrows
+            # off entirely, or have them set not to display.
+            if not num & 4 or self.secret_kind == 2:
+              dirstr = dir + repr(int(ev.color) % self.colortype)
+              if num & 1 and not num & 2:
+                ns = arrows.ArrowSprite(arrow_gfx[dirstr], time, num & 4,
+                                        ev.when, self, song)
+                newsprites.append(ns)
+              elif num & 2:
+                holdindex = steps.holdref.index((self.game.dirs.index(dir),
+                                                 ev.when))
+                ns = arrows.HoldArrowSprite(arrow_gfx[dirstr], time, num & 4,
+                                            steps.holdinfo[holdindex],
+                                            self, song)
+                newsprites.append(ns)
+
       arrow_grp.add(newsprites)
 
   def check_sprites(self, curtime, arrows, steps, fx_data, judge):

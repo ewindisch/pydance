@@ -10,7 +10,7 @@ class AbstractArrow(pygame.sprite.Sprite):
     samples[d] = pygame.mixer.Sound(os.path.join(sound_path,
                                                  "assist-" + d + ".ogg"))
 
-  def __init__(self, arrow, curtime, player, song):
+  def __init__(self, arrow, curtime, secret, player, song):
     pygame.sprite.Sprite.__init__(self)
 
     self.dir = arrow.dir
@@ -23,6 +23,7 @@ class AbstractArrow(pygame.sprite.Sprite):
     self.battle = song.battle
     self.rect = self.image.get_rect()
     self.rect.left = arrow.left
+    self.secret = secret
 
     if mainconfig['assist'] and self.dir in ArrowSprite.samples:
       self.sample = ArrowSprite.samples[self.dir]
@@ -134,8 +135,8 @@ class AbstractArrow(pygame.sprite.Sprite):
     if self.sample: self.sample.play()
 
 class ArrowSprite(AbstractArrow):
-  def __init__ (self, arrow, curtime, endtime, player, song):
-    AbstractArrow.__init__(self, arrow, curtime, player, song)
+  def __init__ (self, arrow, secret, curtime, endtime, player, song):
+    AbstractArrow.__init__(self, arrow, secret, curtime, player, song)
     self.hold = False
     self.endtime = endtime
 
@@ -188,11 +189,13 @@ class ArrowSprite(AbstractArrow):
     if alp > 256: alp = 256
     elif alp < 0: alp = 0
 
+    if self.secret: alp /= 5
+
     self.image.set_alpha(alp)
 
 class HoldArrowSprite(AbstractArrow):
-  def __init__ (self, arrow, curtime, times, player, song):
-    AbstractArrow.__init__(self, arrow, curtime, player, song)
+  def __init__ (self, arrow, secret, curtime, times, player, song):
+    AbstractArrow.__init__(self, arrow, secret, curtime, player, song)
     self.timef1 = self.endtime = times[1]
     self.hold = True
     self.timef2 = times[2]
@@ -282,5 +285,7 @@ class HoldArrowSprite(AbstractArrow):
 
     if self.broken and (curtime > self.timef1+(0.00025*(60000.0/curbpm))):
       alp /= 2
+
+    if self.secret: alp /= 5
 
     self.image.set_alpha(alp)

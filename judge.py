@@ -16,6 +16,9 @@ class AbstractJudge(Listener):
     self.tick = toRealTime(bpm, 0.16666666666666666) * self.scale
     self.holdsub = {}
     self.steps = {}
+    # Hidden steps were first used in Technomotion. They count for points,
+    # if you hit them, but you can't miss them.
+    self.hidden_steps = {}
 
   def _get_rating(self, dir, curtime):
     raise NotImplementedError("This class should not be instantiated.")
@@ -29,9 +32,13 @@ class AbstractJudge(Listener):
 
     return rating, dir, etime
 
-  def handle_arrow(self, key, etime):
+  def handle_arrow(self, key, etime, is_hidden):
     if etime in self.steps: self.steps[etime] += key
     else: self.steps[etime] = key
+
+    if is_hidden:
+      if etime in self.hidden_steps: self.hidden_steps[etime] += key
+      else: self.hidden_steps[etime] = key
 
   def expire_arrows(self, curtime):
     raise NotImplementedError("This class should not be instantiated.")
@@ -63,6 +70,8 @@ class TimeJudge(AbstractJudge):
         if rating != None:
           etime = t
           self.steps[etime] = self.steps[etime].replace(dir, "")
+          if etime in self.hidden_steps:
+            self.hidden_steps[etime].replace(dir, "")
           break
 
     return rating, dir, etime
@@ -72,6 +81,8 @@ class TimeJudge(AbstractJudge):
     misses = ""
     for time in times:
       if (time < curtime - self._b) and self.steps[time]:
+        for d in self.hidden_steps.get(time, ""):
+          self.steps[time] = self.steps[time].replace(d, "")
         misses += self.steps[time]
         del(self.steps[time])
     return misses
@@ -81,7 +92,12 @@ class BeatJudge(AbstractJudge):
   def set_song(self, pid, bpm, difficulty, count, holds, feet):
     AbstractJudge.set_song(self, pid, bpm, difficulty, count, holds, feet)
     self.tick = toRealTime(bpm, 0.16666666666666666)
-
+    self._v = self.scale * 1
+    self._p = self.scale * 4
+    self._g = self.scale * 7
+    self._o = self.scale * 9
+    self._b = self.scale * 12
+  
   def change_bpm(self, pid, curtime, bpm):
     if self.pid != pid: return
     if bpm >= 1: self.tick = toRealTime(bpm, 0.16666666666666666)
@@ -93,21 +109,23 @@ class BeatJudge(AbstractJudge):
     done = 0
     off = -1
     for t in times:
-      if (curtime - self.tick * 12) < t < (curtime + self.tick * 12):
+      if (curtime - self.tick * self._b) < t < (curtime + self.tick * self._b):
         if dir in self.steps[t]:
-          off = (curtime-t) / self.tick
+          off = (curtime - t) / self.tick
           done = 1
           etime = t
           self.steps[etime] = self.steps[etime].replace(dir, "")
+          if etime in self.hidden_steps:
+            self.hidden_steps[etime].replace(dir, "")
           break
 
     rating = None
     off = abs(off)
     if done == 1:
-      if off <= 1: rating = "V"
-      elif off <= 4: rating = "P"
-      elif off <= 7: rating = "G"
-      elif off <= 9: rating = "O"
+      if off <= self._v: rating = "V"
+      elif off <= self._p: rating = "P"
+      elif off <= self._g: rating = "G"
+      elif off <= self._o: rating = "O"
       else: rating = "B"
 
     return rating, dir, etime
@@ -116,7 +134,9 @@ class BeatJudge(AbstractJudge):
     times = self.steps.keys()
     misses = ""
     for time in times:
-      if (time < curtime - self.tick * 12) and self.steps[time]:
+      if (time < curtime - self.tick * self._b) and self.steps[time]:
+        for d in self.hidden_steps.get(time, ""):
+          self.steps[time] = self.steps[time].replace(d, "")
         misses += self.steps[time]
         del(self.steps[time])
     return misses

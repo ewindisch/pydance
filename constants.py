@@ -120,6 +120,7 @@ game_config = {"battle": 0,
                "judge": 0,
                "judgescale": 1.0,
                "life": 1.0,
+               "secret": 1,
                "lifebar": 0,
                "onilives": 3,
                }

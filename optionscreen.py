@@ -55,6 +55,7 @@ def game_opt_driver(screen, config):
                       (1.0, "Normal"), (1.25, "High"), (1.5, "Very High"),
                       (1.75, "Ruma")]),
     ("Oni Life", "onilives", [(i, str(i)) for i in range(1, 9)]),
+    ("Secret Arrows", "secret", [(0, "Off"), (1, "Invisible"), (2, "Faint")]),
     ("Battle", "battle", [(0, "Off"), (1, "On")]),
     ]
   clrs = [colors.color["green"]]
