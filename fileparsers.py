@@ -853,6 +853,7 @@ class SongItem(object):
 
     for k in SongItem.defaults:
       self.info[k] = self.info.get(k, SongItem.defaults[k])
+      if self.info[k] == "": self.info[k] = "Unknown"
 
     for k in ("filename",):
       if self.info[k] and not os.path.isfile(self.info[k]):
@@ -874,7 +875,7 @@ class SongItem(object):
     self.filename = filename
     self.description = song.description
 
-    if self.info["mix"] == "": self.info["mix"] = "No Mix"
+    if self.info["mix"] == "Unknown": self.info["mix"] = "No Mix"
 
     for k, v in SongItem.equivs.items():
       if self.difficulty.has_key(k) and not self.difficulty.has_key(v):
