@@ -1,6 +1,6 @@
 # Support for endless song playing!
 
-import random, copy, colors, fontfx
+import random, copy, colors, fontfx, gradescreen
 from constants import *
 
 RESOLUTION = (640, 480)
@@ -55,7 +55,7 @@ class FakePlaylist:
             [c.diff(song.difficulty[self.mode]) for c in self.constraints])
 
 class Endless:
-  def __init__(self, songitems, screen, playSequence, GradingScreen,
+  def __init__(self, songitems, screen, playSequence,
                numplayers = 1, gametype = "SINGLE"):
     oldaf = mainconfig["autofail"]
     diffs = ["BASIC", "TRICK", "MANIAC"]
@@ -77,13 +77,8 @@ class Endless:
 
       # Start game
       if ev[0] == 0 and ev[1] == E_START:
-        judges = playSequence(len(self.constraints),
-                              FakePlaylist(songitems, self.constraints))
-        print judges
-        if mainconfig['grading']:
-          grade = GradingScreen(judges)
-          if grade.make_gradescreen(screen):
-            grade.make_waitscreen(screen)
+        playSequence(len(self.constraints),
+                     FakePlaylist(songitems, self.constraints))
 
         pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
         pygame.mixer.music.play(4, 0.0)

@@ -121,9 +121,9 @@ class SongItemDisplay:
       self.menuimage.blit(grouptext, (15, 36))
 
 class SongSelect:
-  # FIXME We need to remove GradingScreen and playSequence, by refactoring
-  # them elsewhere, too
-  def __init__(self, songitems, screen, playSequence, GradingScreen,
+  # FIXME We need to remove playSequence, by refactoring
+  # it elsewhere, too
+  def __init__(self, songitems, screen, playSequence,
                players = 1, gametype = "SINGLE"):
     self.songs = [SongItemDisplay(s) for s in songitems
                   if s.difficulty.has_key(gametype)]
@@ -293,14 +293,8 @@ class SongSelect:
 
         # playSequence can probably derive the number of players from
         # the length of the other lists
-        megajudge = playSequence(len(self.player_diffs),
-                                 zip(self.song_list, self.diff_list))
-        if mainconfig['grading']:
-          grade = GradingScreen(megajudge)
-
-          if grade.make_gradescreen(self.screen):
-            grade.make_waitscreen(self.screen)
-
+        playSequence(len(self.player_diffs), zip(self.song_list,
+                                                 self.diff_list))
         # Reset the playlist
         self.song_list = []
         self.diff_list = []
