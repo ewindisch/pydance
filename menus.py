@@ -82,8 +82,11 @@ class MenuItem(object):
 class Menu(object):
 
   bgimage = pygame.image.load(os.path.join(image_path, "menu-bg.png"))
-  click_sound = pygame.mixer.Sound(os.path.join(sound_path, "clicked.ogg"))
-  click_sound.set_volume(0.45)
+  try:
+    click_sound = pygame.mixer.Sound(os.path.join(sound_path, "clicked.ogg"))
+    click_sound.set_volume(0.45)
+  except pygame.error:
+    raise SystemExit("You need SDL_mixer 1.2.5 with Vorbis support.")
   move_sound = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
   back_sound = pygame.mixer.Sound(os.path.join(sound_path, "back.ogg"))
 
