@@ -2159,12 +2159,7 @@ def main():
   global screen,background,eventManager,currentTheme,playmode
   print "pyDDR, by theGREENzebra (tgz@clickass.org)"
   print "Initialising.."
-  # SDL_mixer is retarded when trying to play oggs; doesn't force stereo
-  if osname == 'posix':
-    try:
-      pygame.mixer.pre_init(44100,-16,2)
-    except:
-      pygame.mixer.pre_init()
+
   # set up the screen and all that other stuff
   pygame.init()
 

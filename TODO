@@ -3,10 +3,11 @@ add to it.
 
 0.6.2
  - Make pyddr.py use constants.py, new input manager, new menus. (merged)
- - Clean up the main select/dance/judge loop.
- - A release we can safely use for demos, packages, etc.
+ - Clean up the main select/dance/judge loop. (better)
+ - A release we can safely use for demos, packages, etc. (will be!)
 
 0.6.3
+ - better help in game (context-sensitive menu help, key maps)
  - Player-as-object patch (possible 0.6.2).
  - Extend constants.py to cover themes directories. (done in a better way)
  - Make theme-finding use rscdir (rsc_path?) and pyddr_path. (merged)

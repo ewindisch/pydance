@@ -11,10 +11,7 @@ DEFAULTZINDEX,PADZINDEX,ARROWZINDEX,XANIMZINDEX,BARSZINDEX = range(5)
 BLACK=(0,0,0)
 WHITE=(255,255,255)
 
-# K_* constants, mostly
-from pygame.locals import *
-
-import sys, os, config
+import sys, os, config, pygame
 
 # Detect the name of the OS - MacOS X is not really UNIX.
 osname = None
@@ -27,6 +24,13 @@ elif os.name == "posix":
 else:
   print "Your platform is not supported by pyDDR. We're going to call it"
   print "POSIX, and then just let it crash."
+
+if osname == 'posix': # We need to force stereo in many cases.
+  try: pygame.mixer.pre_init(44100,-16,2)
+  except: pygame.mixer.pre_init()
+
+# K_* constants, mostly
+from pygame.locals import *
 
 # Find out our real directory - resolve symlinks, etc
 pyddr_path = sys.argv[0]
