@@ -37,7 +37,13 @@ class Config:
     fi = open(filename, "r")
     for line in fi:
       if line.isspace() or len(line) == 0 or line[0] == '#': pass
-      else: d[line[0:line.find(' ')]] = line[line.find(' ')+1:].strip()
+      else:# d[line[0:line.find(' ')]] = line[line.find(' ')+1:].strip()
+        key = line[0:line.find(' ')]
+        val = line[line.find(' ') + 1:].strip()
+        try: d[key] = int(val)
+        except ValueError:
+          try: d[key] = float(val)
+          except ValueError: d[key] = val
 
     fi.close()
 
