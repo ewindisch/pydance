@@ -112,6 +112,12 @@ class DanceFile(GenericFile):
       start, length = self.info["preview"].split()
       self.info["preview"] = (float(start), float(length))
 
+    if "bpmdisplay" in self.info:
+      if self.info["bpmdisplay"] == "*": self.info["bpmdisplay"] = [-1]
+      else:
+        self.info["bpmdisplay"] = [float(i) for i in
+                                   self.info["bpmdisplay"].split()]
+
     self.resolve_files_sanely()
 
   def parse_metadata(self, line, data):
@@ -473,7 +479,7 @@ class DWIFile(MSDFile):
         self.info["cdtitle"] = self.find_cdtitle(rest)
       elif parts[0] == "BPM":
         self.info["bpm"] = float(rest)
-        self.info["displaybpm"] = [self.info["bpm"]]
+        self.info["bpmdisplay"] = [self.info["bpm"]]
       elif parts[0] == "SAMPLESTART":
         if "preview" in self.info:
           self.info["preview"][0] = self.parse_time(rest)
@@ -484,13 +490,14 @@ class DWIFile(MSDFile):
         else: self.info["preview"] = [45, self.parse_time(rest)]
       elif parts[0] == "DISPLAYBPM":
         if parts[1] != "*":
-          self.info["displaybpm"] = [float(b) for b in parts[1].split("..")]
-        #FIXME
+          self.info["bpmdisplay"] = [float(b) for b in parts[1].split("..")]
+        else:
+          self.info["bpmdisplay"] = -1
       elif parts[0] == "CHANGEBPM":
         rest = rest.replace(" ", "")
         self.bpms = [(float(beat), float(bpm)) for beat, bpm in
                      [change.split("=") for change in rest.split(",")]]
-        self.info.setdefault("displaybpm",
+        self.info.setdefault("bpmdisplay",
                              [self.info["bpm"]] + [b[1] for b in self.bpms])
         
       elif parts[0] == "FREEZE":
@@ -619,6 +626,11 @@ class SMFile(MSDFile):
       elif parts[0] == "MD5": self.info["md5sum"] = parts[1]
       elif parts[0] == "CDTITLE":
         self.info["cdtitle"] = self.find_cdtitle(rest)
+      elif parts[0] == "DISPLAYBPM":
+        if parts[1] != "*":
+          self.info["bpmdisplay"] = [float(b) for b in parts[1].split("..")]
+        else:
+          self.info["bpmdisplay"] = -1
       elif parts[0] == "SAMPLESTART":
         if "preview" in self.info:
           self.info["preview"][0] = float(parts[1])
@@ -631,7 +643,7 @@ class SMFile(MSDFile):
         rest = rest.replace(" ", "")
         self.bpms = [(float(beat), float(bpm)) for beat, bpm in
                      [change.split("=") for change in rest.split(",")]]
-        self.info["displaybpm"] = [b[1] for b in self.bpms]
+        self.info["bpmdisplay"] = [b[1] for b in self.bpms]
         self.info["bpm"] = self.bpms.pop(0)[1]
         
       elif parts[0] == "STOPS":
@@ -916,7 +928,7 @@ class SongItem(object):
     for k in ("startat", "endat", "gap", "bpm"):
       self.info[k] = float(self.info[k])
 
-    self.info.setdefault("displaybpm", [self.info["bpm"]])
+    self.info.setdefault("bpmdisplay", [self.info["bpm"]])
 
     self.info["valid"] = int(self.info["valid"])
 

@@ -47,6 +47,7 @@ Metadata Storage:
 <Artist> ::= "artist" <Whitespace> <LongString>
 <Mix> ::= "mix" <Whitespace> <LongString>
 <BPM> ::= "bpm" <Whitespace> <Float>
+<BPMDisplay> :: "bpmdisplay" ((<Whitespace> <Float>)+ | "*")
 <Gap> ::= "gap" <Whitespace> <Int>
 <StartAt> ::= "startat" <Whitespace> <Float>
 <EndAt> ::= "endat" <Whitespace> <Float>
@@ -131,6 +132,11 @@ important data about the file. An explanation of the keys follow:
 'gap': The millisecond offset into the song at which the arrows should
        start. If the first beat is 0.3 seconds into the song, for example,
        this should be -300. This can be negative. Default 0.
+
+'bpmdisplay': A whitespace-separated list of floats, which will be
+	      cycled through on the song selector's BPM display. If
+	      not present this defaults to the BPM if the song. If "*",
+	      the BPM is displayed as constantly changing.
 
 'background': A background image (to display while the song is playing).
               Default none.
@@ -285,6 +291,10 @@ DOUBLE - Doubles, one player on both pads.
 
 Changes:
 --------
+2003.12.23
+ - 3 panel modes.
+ - bpmdisplay metadata key.
+
 2003.12.22
  - 'cdtitle' metadata line.
 

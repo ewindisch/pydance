@@ -72,28 +72,37 @@ class BPMDisplay(pygame.sprite.Sprite):
   def set_song(self, song):
     if song and "displaybpm" in song.info:
       bpms = song.info["displaybpm"]
-      self._bpm_idx = 1 # This should be one higher than the current index.
-      self._bpm = bpms[0]
-      self._bpms = bpms
+      if bpms[0] == -1:
+        self._bpm_idx = -1
+        self._bpm = 150
+        self._bpms = []
+      else:
+        self._bpm = bpms[0]
+        self._bpms = bpms
+        self._bpm_idx = 1 % len(self._bpms)
       self._last_update = pygame.time.get_ticks()
-      self._bpm_idx %= len(self._bpms)
       self._render()
     else:
       self._bpms = []
       self._bpm_idx = 0
       self._bpm = 0
-      self._last_update = pygame.time.get_ticks() + 100000000
+      self._last_update = pygame.time.get_ticks()
       self._render()
 
   def update(self, time):
     t = time - self._last_update
-    if t > 4000:
+    if len(self._bpms) == 0:
+      if self._bpm_idx and t > 50:
+        self._last_update = time
+        self._bpm = random.randrange(50, 300)
+        self._render()
+    elif t > 3000:
       self._bpm_idx = (self._bpm_idx + 1) % len(self._bpms)
       self._bpm = self._bpms[self._bpm_idx - 1]
       self._last_update = time
       self._render()
-    elif t > 3000:
-      t -= 3000
+    elif t > 2000 and len(self._bpms) > 1:
+      t -= 2000
       p = t / 1000.0
       self._bpm = (p * self._bpms[self._bpm_idx] +
                    (1 - p) * self._bpms[self._bpm_idx - 1])
