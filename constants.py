@@ -19,9 +19,9 @@ elif os.name == "posix":
   elif "HOME" in os.environ:
     osname = "posix"
 else:
-  print "Your platform is not supported by pydance. In particular, it"
-  print "doesn't seem to be Win32, Mac OS X, or a Unix that sets $HOME."
-  sys.exit(2)
+  raise SystemExit(
+    "Your platform is not supported by pydance. In particular, it\n" +
+    "doesn't seem to be Win32, Mac OS X, or a Unix that sets $HOME.")
 
 # SDL_mixer is the bane of my existance.
 if osname == 'posix': # We need to force stereo in many cases.

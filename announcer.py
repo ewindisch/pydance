@@ -30,8 +30,7 @@ class Announcer(Listener):
       if os.path.isfile(os.path.join(path,"themes","dj",name,"djtheme.cfg")):
         filename = os.path.join(path, "themes", "dj", name)
     if filename == None:
-      print "Error: Cannot load announcer theme '%s'." % name
-      sys.exit(1)
+      raise SystemExit("E: Cannot load announcer theme '%s'." % name)
 
     fi = file(os.path.join(filename, "djtheme.cfg"), "r")
     sec = ""
