@@ -566,13 +566,23 @@ class ArrowSprite(CloneSprite):
     self.pos = {}
     if mainconfig['scrollstyle'] == 2:
       self.top = 236
-      self.bottom = random.choice((639, -276))
+      self.bottom = random.choice((748, -276))
+      if self.top < self.bottom:
+        self.suddenzone = 480 - int(64.0 * player.sudden)
+        self.hiddenzone = 236 + int(64.0 * player.hidden)
+      else:
+        self.suddenzone = int(64.0 * player.sudden) 
+        self.hiddenzone = 236 - int(64.0 * player.hidden)
     elif mainconfig['scrollstyle'] == 1:
-      self.top = 408
-      self.bottom = -64
+      self.top = 384
+      self.bottom = -128
+      self.suddenzone = int(64.0 * player.sudden)
+      self.hiddenzone = 384 - int(64.0 * player.hidden)
     else:
       self.top = 64
       self.bottom = 576
+      self.suddenzone = 480 - int(64.0 * player.sudden)
+      self.hiddenzone = 64 + int(64.0 * player.hidden)
 
     self.diff = self.top - self.bottom
 
@@ -583,13 +593,6 @@ class ArrowSprite(CloneSprite):
     
     self.centerx = self.rect.centerx + 320 * player.pid
 
-    if self.top < self.bottom:
-      self.hiddenzone = self.top + int(64 * player.hidden)
-      self.suddenzone = 64 + self.bottom - int(64.0 * player.sudden)
-    else:
-      self.hiddenzone = self.bottom + int(64.0 * player.hidden)
-      self.suddenzone = 64 + self.top - int(64.0 * player.sudden)
-    
   def update (self, curtime, curbpm, lbct):
     if (self.sample) and (curtime >= self.endtime -0.0125):
       self.sample.play()
@@ -643,12 +646,17 @@ class ArrowSprite(CloneSprite):
     else:
       self.image = self.cimage
 
-    if self.top < self.bottom: atest = self.rect.top
-    else: atest = self.rect.bottom - 64
-
-    if atest < self.hiddenzone: alp = 256 - 4 * (self.hiddenzone - atest)
-    # FIXME: Sudden is broken
-    else: alp = 256
+    alp = 256
+    if self.top < self.bottom: 
+      if self.rect.top > self.suddenzone:
+        alp = 256 - 4 * (self.rect.top - self.suddenzone)
+      elif self.rect.top < self.hiddenzone:
+        alp = 256 - 4 * (self.hiddenzone - self.rect.top)
+    else:
+      if self.rect.top < self.suddenzone:
+        alp = 256 - 4 * (self.suddenzone - self.rect.top)
+      elif self.rect.top > self.hiddenzone:
+        alp = 256 - 4 * (self.rect.top - self.hiddenzone)
 
     if alp > 256: alp = 256
     elif alp < 0: alp = 0
@@ -665,13 +673,23 @@ class HoldArrowSprite(CloneSprite):
     self.pos = {}
     if mainconfig['scrollstyle'] == 2:
       self.top = 236
-      self.bottom = random.choice((639, -276))
+      self.bottom = random.choice((748, -276))
+      if self.top < self.bottom:
+        self.suddenzone = 480 - int(64.0 * player.sudden)
+        self.hiddenzone = 236 + int(64.0 * player.hidden)
+      else:
+        self.suddenzone = 64 + int(64.0 * player.sudden) 
+        self.hiddenzone = 300 - int(64.0 * player.hidden)
     elif mainconfig['scrollstyle'] == 1:
-      self.top = 408
-      self.bottom = -64
+      self.top = 384
+      self.bottom = -128
+      self.suddenzone = 64 + int(64.0 * player.sudden)
+      self.hiddenzone = 448 - int(64.0 * player.hidden)
     else:
       self.top = 64
       self.bottom = 576
+      self.suddenzone = 480 - int(64.0 * player.sudden)
+      self.hiddenzone = 64 + int(64.0 * player.hidden)
 
     self.diff = self.top - self.bottom
     self.curalpha = -1
@@ -695,13 +713,6 @@ class HoldArrowSprite(CloneSprite):
     self.arrowspin = player.spin
     self.arrowscale = player.scale
     self.speed = player.speed
-
-    if self.top < self.bottom:
-      self.hiddenzone = self.top + int(64 * player.hidden)
-      self.suddenzone = 64 + self.bottom - int(64.0 * player.sudden)
-    else:
-      self.hiddenzone = self.bottom + int(64.0 * player.hidden)
-      self.suddenzone = 64 + self.top - int(64.0 * player.sudden)
     
     self.centerx = self.rect.centerx + 320 * player.pid
     
@@ -794,12 +805,17 @@ class HoldArrowSprite(CloneSprite):
     else:
       self.image = self.cimage
 
-    if self.top < self.bottom: atest = self.rect.top
-    else: atest = self.rect.bottom-64
-
-    if atest < self.hiddenzone: alp = 256 - 4 * (self.hiddenzone - atest)
-    # FIXME: sudden is broken
-    else: alp = 256
+    alp = 256
+    if self.top < self.bottom: 
+      if self.rect.top > self.suddenzone:
+        alp = 256 - 4 * (self.rect.top - self.suddenzone)
+      elif self.rect.top < self.hiddenzone:
+        alp = 256 - 4 * (self.hiddenzone - self.rect.top)
+    else:
+      if self.rect.bottom < self.suddenzone:
+        alp = 256 - 4 * (self.suddenzone - self.rect.bottom)
+      elif self.rect.bottom > self.hiddenzone:
+        alp = 256 - 4 * (self.rect.bottom - self.hiddenzone)
 
     if alp > 256: alp = 256
     elif alp < 0: alp = 0

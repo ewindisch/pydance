@@ -8,7 +8,7 @@ class Player:
   def __init__(self, pid, holdtext, combos, mode = "SINGLE"):
     self.theme = GFXTheme(mainconfig["gfxtheme"])
     if mainconfig["scrollstyle"] == 2: self.top = 236
-    elif mainconfig["scrollstyle"] == 1: self.top = 408
+    elif mainconfig["scrollstyle"] == 1: self.top = 384
     else: self.top = 64
     
     self.pid = pid
