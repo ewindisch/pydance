@@ -21,7 +21,8 @@ Legend:
 * Movies work again (thanks to Jon Åslund).
 ! .step support removed.
 ! All your records will be deleted upon running this.
-
+! pydance no longer searches "pyddr" folders by default.
+	
 0.8.4 - We must force those people to date actual gamer nerds.	[2004.01.08]
 + EZ2 and EZ2 Real support.
 * Fix DWI parsing bugs and typos introduced in 0.8.3.
