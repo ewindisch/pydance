@@ -29,28 +29,24 @@ else: pyddr_path = os.path.split(os.path.abspath(pyddr_path))[0]
 sys.path.append(pyddr_path)
 
 # Configure the base local resource directory
-rscdir = None
+rc_path = None
 if osname == "posix":
-  rscdir = os.path.join(os.environ["HOME"], ".pyddr")
-  if not os.path.isdir(rscdir): os.mkdir(rscdir)
+  rc_path = os.path.join(os.environ["HOME"], ".pyddr")
 elif osname == "macosx":
-  rscdir = os.path.join(os.environ["HOME"], "Library", "Preferences", "pyDDR")
+  rc_path = os.path.join(os.environ["HOME"], "Library", "Preferences", "pyDDR")
 elif osname == "nt":
-  rscdir = "."
+  rc_path = "."
 
-if not os.path.isdir(rscdir): os.mkdir(rscdir)
+if not os.path.isdir(rc_path): os.mkdir(rc_path)
 
 # Set up the configuration file
 mainconfig = config.Config({ # Wow we have a lot of options
   "gfxtheme": "classic", "djtheme": "none", "songdir": ".",
   "stickycombo": 1,  "lowestcombo": 4,  "totaljudgings": 1,  "stickyjudge": 1,
-  "lyriccolor": "0,244,244",  "transcolor": "0,244,122",
+  "lyriccolor": "cyan",  "transcolor": "aqua",
   "mixerclock": 0, "onboardaudio": 0, "masteroffset": 0,
   "reversescrolls": 0, "scrollspeed": 1,
   "explodestyle": 3, "arrowspin": 0, "arrowscale" : 1,
-  "joy_left": 4, "joy_right": 5, "joy_up": 7, "joy_down": 6,
-  "joy_start": 9, "joy_select": 8, "joy_pgup": 1, "joy_pgdn": 3,
-  "mat_buttons": 12, "mat_axes": 6,
   "vesacompat": 0, "fullscreen": 0,
   "sortmode": 0, "sortpersist": 1,
   "previewmusic": 1,
@@ -70,7 +66,7 @@ elif osname == "macosx":
   mainconfig.load("/Library/Preferences/pyDDR/pyddr.cfg")
 
 mainconfig.load("pyddr.cfg")
-mainconfig.load(os.path.join(rscdir, "pyddr.cfg"))
+mainconfig.load(os.path.join(rc_path, "pyddr.cfg"))
 
 import input
 

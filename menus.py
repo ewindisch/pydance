@@ -1,5 +1,6 @@
 import pygame
 from constants import *
+from fontfx import TextZoomer
 
 DARK_GRAY = (244, 244, 244)
 BUTTON_SIZE = (192, 40)
@@ -105,7 +106,7 @@ class Menu:
     top_offset = 80
     curitem = 0
     topitem = 0
-    changed = 1
+    toprotater = TextZoomer(self.text, 127, 63, 255)
     zoom = 8
     zoomdelta = - 1
     time_to_zoom = 0
@@ -148,28 +149,26 @@ class Menu:
           if ev == E_START1 or ev == E_START2:
             # Except if we're not a button and the event was START, go to
             # the new menu.
-            self.items[curitem].display(screen, handler)
+            self.items[curitem].display(screen)
             changed = 1
             screen.fill((0,0,0)) # Reset buffer.
 
-      time_to_zoom = (time_to_zoom + 1) % 3
-      if time_to_zoom == 0:
-        changed = 1
-        zoom += zoomdelta
-        if zoom > 12 or zoom < 0: zoomdelta *= -1
+      zoom += zoomdelta
+      if zoom > 12 or zoom < 0: zoomdelta *= -1
 
-      if changed:
-        # Draw the buttons to the screen
-        screen.fill((0,0,0))
-        for i in range(7):
-          if i + topitem < len(self.items):
-            img = self.items[topitem + i].image
-            if i + topitem == curitem:
-              screen.blit(pygame.transform.scale(img, (200-zoom, 48-zoom/2)),
-                          (220 + zoom/2, 76 + zoom/4 + i*48))
-            else:
-              screen.blit(img, (224, top_offset+i*48))
+      # Draw the buttons to the screen
+      screen.fill((0,0,0))
+      toprotater.iterate()
+      screen.blit(toprotater.tempsurface, (0,0))
+      for i in range(7):
+        if i + topitem < len(self.items):
+          img = self.items[topitem + i].image
+          if i + topitem == curitem:
+            screen.blit(pygame.transform.scale(img, (200-zoom, 48-zoom/2)),
+                        (220 + zoom/2, 76 + zoom/4 + i*48))
+          else:
+            screen.blit(img, (224, top_offset+i*48))
 
-        pygame.display.flip()
-        changed = 0
-      pygame.time.wait(10)
+      pygame.display.flip()
+      
+      pygame.time.wait(20)

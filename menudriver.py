@@ -43,6 +43,26 @@ def switch_rotate_index_back(name, list):
   mainconfig[name] = (mainconfig[name] - 1) % len(list)
   return get_rotate_index(name, list)
 
+# Lyric color switching, does fun things
+def get_color_text(name, colors):
+  val = mainconfig[name]
+  for color in colors:
+    if color[0] == val:
+      return None, color[0], color[1]
+  return None, "unknown", (255, 255, 255)
+
+def switch_color_text(name, colors):
+  is_next = False
+  val = mainconfig[name]
+  for color in colors:
+    if color[0] == val:
+      is_next = True
+    elif is_next:
+      mainconfig[name] = color[0]
+      return None, color[0], color[1]
+  mainconfig[name] = colors[0][0]
+  return None, colors[0][0], colors[0][1]
+
 # Write out the config file
 def config_write(path):
   mainconfig.write(path)
@@ -64,27 +84,47 @@ def do(screen, songselect, songdata):
                        E_LEFT: switch_rotate_index_back,
                        E_RIGHT: switch_rotate_index,
                        "initial": get_rotate_index }
+
+  color_opt = { E_START: switch_color_text,
+                E_LEFT: switch_color_text,
+                E_RIGHT: switch_color_text,
+                "initial": get_color_text }
+
+  lyric_colors = (('cyan', (0, 244, 244)),
+                  ('aqua', (0, 244, 122)),
+                  ('yellow', (244, 244, 122)),
+                  ('white', (244, 244, 244)),
+                  ('red', (244, 122, 122)),
+                  ('purple', (244, 122, 244)),
+                  ('orange', (244, 170, 0)))
   
   m = (["Play Game", {E_START: songselect}, songdata],
        ("Game Options",
         ["Autofail", onoff_opt, ("killsongonfail",)],
         ["Reverse", onoff_opt, ("reversescroll",)],
         ["Little", rotate_index_opt,
-         ("little", ["show all", "no 16ths", "no 8ths",
-                             "no 8ths or 16ths"])],
+         ("little", ("show all", "no 16ths", "no 8ths",
+                             "no 8ths or 16ths"))],
         ["Hidden", rotate_index_opt,
-         ("hidden", ["off", "hide one","hide two","hide three"])],
+         ("hidden", ("off", "hide one","hide two","hide three"))],
         ["Sudden", rotate_index_opt,
-         ("sudden", ["off", "hide one", "hide two", "hide three"])],
+         ("sudden", ("off", "hide one", "hide two", "hide three"))],
         ["Top Arrows", onoff_opt, ("toparrows",)],
         ["Scale Arrows", rotate_index_opt,
-         ("arrowscale", ["shrink", "none", "grow"])],
+         ("arrowscale", ("shrink", "normal", "grow"))],
         ["Spin Arrows", onoff_opt, ("arrowspin",)],
         ["Back", None, None]
         ),
        ("Graphic Options",
         ["Fullscreen", {E_START: fullscreen_toggle}, (None,)],
-        
+        ["Exploding", rotate_index_opt,
+         ('explodestyle', ('none', 'rotate', 'scale', 'rotate & scale'))],
+        ["Backgrounds", onoff_opt, ('showbackground',)],
+        ["Lyrics", onoff_opt, ("showlyrics",)],
+        ["Main Lyrics", color_opt, ("lyriccolor", lyric_colors)],
+        ["Other Lyrics", color_opt, ("transcolor", lyric_colors)],
+        ["LPS Counter", onoff_opt, ('fpsdisplay',)],
+        ["Back", None, None]
         ),
        ["Sort By", rotate_index_opt,
         ("sortmode", ["file", "song", "group", "bpm",
