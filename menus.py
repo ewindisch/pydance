@@ -181,4 +181,7 @@ class Menu:
       
       pygame.time.wait(30)
 
-    if ev == E_START: Menu.click_sound.play()
+    if ev == E_QUIT:
+      Menu.click_sound.play()
+      self.items[curitem].activate(E_UNSELECT)
+
