@@ -69,11 +69,11 @@ class StepFile:
     dir, name = os.path.split(filename)
 
     for t in (("banner", ".png"), ("banner", "-full.png"),
-              ("bg", "-bg.png"), ("file", ".ogg")):
+              ("bg", "-bg.png"), ("file", ".ogg"), ("file", ".mp3")):
       if self.info.has_key(t[0]):
         self.info[t[0]] = os.path.join(dir, self.info[t[0]])
         if not os.path.isfile(self.info[t[0]]): del(self.info[t[0]])
-      else:
+      if not self.info.has_key(t[0]):
         possible = os.path.join(dir, name.replace(".step", t[1]))
         possible = os.path.realpath(possible)
         if os.path.isfile(possible): self.info[t[0]] = possible
