@@ -538,6 +538,7 @@ class SMFile(GenericFile):
           if not self.difficulty.has_key(game):
             self.difficulty[game] = {}
             self.steps[game] = {}
+          if parts[2] == "": parts[2] = parts[3]
           self.difficulty[game][parts[2].upper()] = int(parts[4])
           if need_steps:
             self.steps[game][parts[2].upper()] = self.parse_steps(parts[6], game)
