@@ -521,6 +521,7 @@ class SongSelect:
     self.title_list.append(text)
 
   def update_help(self):
+    # FIXME: Get this to use a real clock
     if self.last_help_update == 0:
       fn = self.helpfiles.pop(0)
       self.helpfiles.append(fn)
@@ -530,8 +531,8 @@ class SongSelect:
       self.helpimage.set_alpha(0)
     if self.last_help_update <= 25:
       self.helpimage.set_alpha(10 * self.last_help_update)
-    elif 75 <= self.last_help_update <= 100:
-      self.helpimage.set_alpha(250 - 20 * (self.last_help_update - 75))
-    elif self.last_help_update == 110:
+    elif 150 <= self.last_help_update <= 175:
+      self.helpimage.set_alpha(250 - 20 * (self.last_help_update - 150))
+    elif self.last_help_update == 200:
       self.last_help_update = -1
     self.last_help_update += 1
