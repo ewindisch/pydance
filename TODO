@@ -168,3 +168,9 @@ A Comprehensive List of Features for pydance 1.2
 
 * FIXME: There are a lot of FIXMEs in the code. Some of them get
   obsoleted over time, but most will still need fixing.
+
+* Dynamic grade in the corner of the screen as you play.
+
+* Halfass step generator, record steps as you play and do best-fit.
+
+* Ability to skip songs during Endless.

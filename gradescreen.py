@@ -241,6 +241,7 @@ class GradingScreen(InterfaceWindow):
       StatSprite([400, 126], "Late:", plr.stats.late, s, 2000),
       StatSprite([400, 155], "TOTAL:", plr.stats.arrow_count, s, 2333)
       ])
+    plr.announcer.say("rating-" + p.grade.grade(p.failed).lower())
     self._sprites.add(GradeSprite([98, 183], plr.grade.grade(plr.failed)))
     self._sprites.add(GrooveGaugeSprite([10, 22], [176, 100],
                                         plr.lifebar.record))
