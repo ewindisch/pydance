@@ -15,12 +15,12 @@ BEATS = { 'x': 0.25, 't': 0.5, 'u': 1.0/3.0, 'f': 2.0/3.0,
 # 1 - Mirror
 # 2 - Left
 # 3 - Right
-# -1 - Shuffle (calculated elsewhere)
+# -1 - Shuffle, -2 - random (calculated elsewhere)
 STEP_MAPPINGS = {
   "SINGLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
-  "DOUBLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
   "COUPLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
-  "6PANEL": [[0, 1, 2, 3, 4, 5]],
+  "6PANEL": [[0, 1, 2, 3, 4, 5], [4, 5, 3, 2, 0, 1], [2, 0, 5, 1, 3, 4],
+             [1, 3, 0, 4, 5, 2]]
   }
 
 # FIXME: This can probably be replaced by something smaller, like a tuple.
