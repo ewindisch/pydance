@@ -1,7 +1,7 @@
 # Constants used in the game and some simple initialization routines
 # This file should be kept as small as possible, probably.
 
-VERSION = "0.9.0"
+VERSION = "0.8.3"
 
 import config
 import pygame
