@@ -10,6 +10,7 @@ Legend:
 1.0.3 - Like that's possible.
 * An import conflict with python-stats was fixed. This mostly affects
   Ubuntu users.
+* Take a shot at detecting 3 axis 10 button joypads.
 
 1.0.2 - Moist!							[2004.07.06]
 * Defafult announcer theme courtsey of DJ Nz17!

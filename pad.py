@@ -75,10 +75,15 @@ A2B10 = { 0: LEFT, 1: DOWN, 2: RIGHT, 3: UP, 5: UPRIGHT, 7: DOWNRIGHT,
 A2B8 = { 4: UP, 6: DOWN,  5: LEFT, 7: RIGHT, 2: START,
          3: DOWNLEFT, 0: UPRIGHT, 1: DOWNRIGHT }
 
+# LevelSix USB pad? I'm not at all sure this is right.
+A3B10 = { 0: LEFT, 1: DOWN, 2: RIGHT, 3: UP, 4: UPLEFT, 5: UPRIGHT,
+          6: DOWNLEFT, 7: DOWNRIGHT, 8: SELECT, 9: START }
+  
 # X-Box controller with X-Box Linux
 A14B10 = { 4: UP, 0: DOWN, 3: LEFT, 1: RIGHT,  6: START, 9: QUIT }
 
-MATS = { (6, 12): A6B12, (14, 10): A14B10, (2, 10): A2B10, (2, 8): A2B8 }
+MATS = { (6, 12): A6B12, (14, 10): A14B10, (2, 10): A2B10, (2, 8): A2B8,
+         (3, 10): A3B10 }
 
 class Pad(object):
 
