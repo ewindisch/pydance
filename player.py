@@ -1,7 +1,7 @@
 from constants import *
 from gfxtheme import GFXTheme
 
-import fontfx, spritelib
+import fontfx, spritelib, colors
 
 class Player:
   def __init__(self, pid, holdtext, combos, mode = "SINGLE"):
@@ -97,47 +97,39 @@ class Player:
             and (curtime < l[i][2])):
           return i
 
+# Display the score overlaying the song difficulty
 class ScoringDisp(pygame.sprite.Sprite):
-    def __init__(self,playernum, text):
-        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-        self.playernum = playernum
-        
-        self.set_text(text)
-        self.image = pygame.surface.Surface((160,48))
-        self.rect = self.image.get_rect()
-        self.rect.bottom = 484
-        self.rect.centerx = 160+(self.playernum*320)
+    def __init__(self, playernum, text):
+      pygame.sprite.Sprite.__init__(self)
+      self.set_text(text)
+      self.image = pygame.surface.Surface((160, 48))
+      self.rect = self.image.get_rect()
+      self.rect.bottom = 484
+      self.rect.centerx = 160 + playernum * 320
 
     def set_text(self, text):
-      tx = FONTS[28].size(text)[0]+2
-      self.basemode = pygame.transform.scale(fontfx.embfade(text,28,2,(tx,24),
-                                                            (127,127,127)),
-                                             (tx,48))
-      self.baseimage = pygame.surface.Surface((128,48))
-      self.baseimage.blit(self.basemode,(64-(tx/2),0))
+      tx = FONTS[28].size(text)[0] + 2
+      txt = fontfx.embfade(text, 28, 2, (tx, 24), colors.color["gray"])
+      basemode = pygame.transform.scale(txt, (tx, 48))
+      self.baseimage = pygame.surface.Surface((128, 48))
+      self.baseimage.blit(basemode, (64 - (tx / 2), 0))
       self.oldscore = -1 # Force a refresh
 
     def update(self, score):
       if score != self.oldscore:
-        self.image.blit(self.baseimage,(0,0))
-        scoretext = FONTS[28].render(repr(score),1,(192,192,192))
-        self.image.blit(scoretext,(64-(scoretext.get_rect().size[0]/2),13))
-        self.image.set_colorkey(self.image.get_at((0,0)),RLEACCEL)
+        self.image.blit(self.baseimage, (0,0))
+        scoretext = FONTS[28].render(str(score), 1, (192,192,192))
+        self.image.blit(scoretext, (64 - (scoretext.get_rect().size[0] / 2),
+                                    13))
+        self.image.set_colorkey(self.image.get_at((0, 0)), RLEACCEL)
         self.oldscore = score
 
+# FIXME - Use two large images instead of a bunch of small ones
 class LifeBarDisp(pygame.sprite.Sprite):
     def __init__(self, playernum, theme, previously = None):
-        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-        self.playernum = playernum
-        if previously:
-          self.oldlife = -1
-          self.failed = previously.failed
-          self.prevlife = previously.life - 25
-          self.life = previously.life
-        else:
-          self.oldlife = self.failed = 0
-          self.prevlife = 0
-          self.life = 25
+        pygame.sprite.Sprite.__init__(self)
+        self.oldlife = self.failed = 0
+        self.life = 25
 
         self.image = pygame.Surface((204,28))
         self.blkbar = pygame.Surface((3,24))
@@ -154,11 +146,7 @@ class LifeBarDisp(pygame.sprite.Sprite):
                                                      'yelbar.png')).convert()
         self.grnbar = pygame.image.load(os.path.join(theme.path,
                                                      'grnbar.png')).convert()
-        self.redbar_pos = self.redbar.get_rect()
-        self.orgbar_pos = self.orgbar.get_rect()
-        self.yelbar_pos = self.yelbar.get_rect()
-        self.grnbar_pos = self.grnbar.get_rect()
-        
+
         self.failtext = fontfx.embfade("FAILED",28,3,(80,32),(224,32,32))
         self.failtext.set_colorkey(self.failtext.get_at((0,0)))
         
@@ -179,52 +167,46 @@ class LifeBarDisp(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.top = 30
-        self.rect.left = 58+(320*self.playernum)
+        self.rect.left = 58 + (320 * playernum)
 
     def failed(self):
        return self.failed
 
     def update_life(self, rating):
-      if self.deltas.has_key(rating):
+      if self.life > 0 and self.deltas.has_key(rating):
         self.oldlife = self.life
         self.life += self.deltas[rating]
-        self.life = min(self.life, 52)
+        self.life = min(self.life, 50.0)
        
     def update(self, judges):
-      if self.life >= 0: #If you failed, you failed. You can't gain more life afterwards
-        if self.life <= 0: #FAILED but we don't do anything yet
-          self.failed = 1
-          judges.failed_out = True
-          self.life = 0
-        elif self.life > 52:
-          self.life = 52.0
+      if self.failed: return
+
+      if self.life <= 0:
+        self.failed = 1
+        judges.failed_out = True
+        self.life = 0
+      elif self.life > 50.0:
+        self.life = 50.0
         
-        if self.life != self.oldlife:
-          self.oldlife = self.life
-#          print "life went to",self.life
-          for j in range(52 - int(self.life) - 1):
-            self.image.blit(self.blkbar, ((2+int(self.life+j)*4), 2) )
+      if self.life == self.oldlife: return
 
-          self.image.blit(self.bugbar,(202,2))   # because the damn bar eraser bugs out all the time
+      self.oldlife = self.life
+      intlife = int(self.life)
+      for j in range(49 - intlife):
+        self.image.blit(self.blkbar, (2 + (intlife + j) * 4, 2))
 
-          for j in range(int(self.life)):
-            barpos = int(self.life-(j+1))
-            if barpos <= 10:
-              self.redbar_pos.left = 2+ barpos*4
-              self.redbar_pos.top = 2
-              self.image.blit(self.redbar,self.redbar_pos)
-            elif barpos <= 20:
-              self.orgbar_pos.left = 2+ barpos*4
-              self.orgbar_pos.top = 2
-              self.image.blit(self.orgbar,self.orgbar_pos)
-            elif barpos <= 35:
-              self.yelbar_pos.left = 2+ barpos*4
-              self.yelbar_pos.top = 2
-              self.image.blit(self.yelbar,self.yelbar_pos)
-            elif barpos < 50:
-              self.grnbar_pos.left = 2+ barpos*4
-              self.grnbar_pos.top = 2
-              self.image.blit(self.grnbar,self.grnbar_pos)
+      self.image.blit(self.bugbar, (202, 2))
+        
+      for j in range(intlife):
+        barpos = intlife - j - 1
+        image = None
 
-          if self.failed:
-            self.image.blit(self.failtext, (70, 2) )
+        if barpos <= 10: image = self.redbar
+        elif barpos <= 20: image = self.orgbar
+        elif barpos <= 35: image = self.yelbar
+        elif barpos < 50: image = self.grnbar
+
+        if image: self.image.blit(image, (2 + barpos * 4, 2))
+
+      if self.failed:
+        self.image.blit(self.failtext, (70, 2) )
