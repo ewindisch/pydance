@@ -1,25 +1,16 @@
-# A basic 11 button dance pad abstraction
+# A basic 11 button dance pad
 
 from constants import *
 import pygame, os
 import cPickle as pickle
 from pygame.locals import *
+import colors
 
 (PASS, QUIT, UP, UPLEFT, LEFT, DOWNLEFT, DOWN, DOWNRIGHT,
  RIGHT, UPRIGHT, CENTER, START, SELECT) = range(13)
 
 NAMES = ["", "quit", "up", "up-left", "left", "down-left", "down",
          "down-right", "right", "up-right", "center", "start", "select"]
-
-# Events for the transition
-# FIXME: REMOVE THESE
-FULLSCREEN = -100
-SORT = SCREENSHOT = -200
-CLEAR = -300
-MARK = UPLEFT
-UNMARK = DOWNLEFT
-PGUP = UPRIGHT
-PGDN = DOWNRIGHT
 
 KEYS = {
   K_ESCAPE: QUIT,
@@ -93,16 +84,6 @@ class Pad(object):
   (PASS, QUIT, UP, UPLEFT, LEFT, DOWNLEFT, DOWN, DOWNRIGHT,
    RIGHT, UPRIGHT, CENTER, START, SELECT) = range(13)
 
-  # Events for the transition
-  # FIXME: REMOVE THESE
-  FULLSCREEN = -100
-  SORT = SCREENSHOT = -200
-  CLEAR = -300000000000
-  MARK = UPLEFT
-  UNMARK = DOWNLEFT
-  PGUP = UPRIGHT
-  PGDN = DOWNRIGHT
-
   def __init__(self, handler = pygame.event):
     self.handler = handler
     self.handler.set_blocked(range(NUMEVENTS))
@@ -165,7 +146,6 @@ class Pad(object):
       print "you'll have to map its button manually once to use it."
 
   def add_event(self, device, key, pid, event):
-    
     self.events[(device, key)] = (pid, event)
     self.states[(pid, event)] = False
 
@@ -178,7 +158,14 @@ class Pad(object):
       if p == pid and e == event:
         if keyboard and device == -1: return pygame.key.name(key)
         elif not keyboard and device != -1: return "%d:%d" % (device, key)
-    return "n/a"
+    return "---"
+
+  def delete_event(self, pid, keyb, event):
+    for (d, k), (p, e) in self.events.items():
+      if (p == pid and e == event and
+          ((d == -1 and keyb) or (d != -1 and not keyb))):
+        del(self.events[(d, k)])
+        self.states[(d, k)] = False
 
   def delete_events(self, pid):
     for k, v in self.events.items():
@@ -200,7 +187,14 @@ class Pad(object):
       return (-1, PASS)
 
     # Pass in all keyboard keys pressed, so the ui handler can get them.
-    if ev.type == KEYDOWN and passthrough: default = (-2, ev.key * 100)
+    # Also, if arrow keys are pressed return their direction even if they're
+    # not mapped.
+    if ((ev.type == KEYDOWN or ev.type == KEYUP) and
+        (ev.key == K_LEFT or ev.key == K_RIGHT or ev.key == K_UP or
+         ev.key == K_DOWN)):
+      default = (0, {K_LEFT: LEFT, K_RIGHT: RIGHT,
+                     K_UP: UP, K_DOWN: DOWN}[ev.key])
+    elif ev.type == KEYDOWN and passthrough: default = (-2, ev.key * 100)
     else: default = (-1, PASS)
 
     ret = self.events.get((t, v), default)
@@ -234,82 +228,98 @@ pad = Pad()
 class PadConfig(object):
 
   bg = pygame.image.load(os.path.join(image_path, "bg.png"))
-  pad = pygame.image.load(os.path.join(image_path, "big-pad.png"))
-
-  xys = {UP: [105, 65],
-         UPLEFT: [35, 65],
-         LEFT: [35, 135],
-         DOWNLEFT: [35, 205],
-         DOWN: [105, 205],
-         DOWNRIGHT: [175, 205],
-         RIGHT: [175, 135],
-         UPRIGHT: [175, 65],
-         CENTER: [105, 135],
-         SELECT: [45, 15],
-         START: [165, 15]
-         }
 
   directions = range(2, 13)
 
   def __init__(self, screen):
     self.screen = screen
+    clock = pygame.time.Clock()
+    self.loc = [0, 0]
+    self.width = [4, 11]
 
     ev = pygame.event.poll()
     while ev.type != KEYDOWN or ev.key != K_ESCAPE:
       self.render()
-      self.render_message("Left: Map pad 1 - Esc: Quit - Right: Map pad 2")
       ev = pygame.event.poll()
 
       if ev.type == KEYDOWN:
-        if ev.key in [K_LEFT, K_KP4]: self.map_key(0)
-        elif ev.key in [K_RIGHT, K_KP6]: self.map_key(1)
+        if ev.key in [K_LEFT, K_KP4]: self.loc[0] -= 1
+        elif ev.key in [K_RIGHT, K_KP6]: self.loc[0] += 1
+        elif ev.key in [K_UP, K_KP8]: self.loc[1] -= 1
+        elif ev.key in [K_DOWN, K_KP2]: self.loc[1] += 1
+        elif ev.key in [K_RETURN, K_KP_ENTER]: self.map_key()
 
-      pygame.time.delay(10)
+      self.loc[0] %= 4
+      self.loc[1] %= 11
 
-  def map_key(self, pid):
-    pad.delete_events(pid)
+      clock.tick(30)
 
-    for i in PadConfig.directions:
-      self.render()
-      self.render_message("Key for "+NAMES[i]+" (Esc to skip)?")
+  def map_key(self):
+    dir = self.loc[1] + 2
+    keyb = self.loc[0] % 2 == 0
+    pid = self.loc[0] > 1
 
-      ev = pygame.event.poll()
-      while ev.type != KEYDOWN: ev = pygame.event.poll()
-      if ev.key != K_ESCAPE: pad.add_event(-1, ev.key, pid, i)
+    if keyb:
+      wanted_type = KEYDOWN
+      text = "Press a key for %s (escape to cancel)" % NAMES[dir]
+    else:
+      wanted_type = JOYBUTTONDOWN
+      text = "Press a button for %s (escape to cancel)" % NAMES[dir]
 
-      self.render()
-      self.render_message("Joystick button for "+NAMES[i]+" (Esc to skip)?")
+    img = FONTS[32].render(text, True, colors.BLACK)
+    r = img.get_rect()
+    r.midbottom = [320, 460]
+    self.screen.blit(img, r)
+    pygame.display.update()
 
-      while (ev.type != JOYBUTTONDOWN and
-             (ev.type != KEYDOWN or ev.key != K_ESCAPE)):
-        ev = pygame.event.poll()
-      if ev.type == JOYBUTTONDOWN:
-        pad.add_event(ev.joy, ev.button, pid, i)
+    ev = pygame.event.wait()
+    while (ev.type != wanted_type and
+           (ev.type != KEYDOWN or ev.key != K_ESCAPE)):
+      ev = pygame.event.wait()
+    if ev.key != K_ESCAPE:
+      if keyb: dev = -1
+      else: dev = ev.joy
+      pad.delete_event(pid, keyb, dir)
+      pad.add_event(dev, ev.key, pid, dir)
 
   def render(self):
-    self.screen.fill([0, 0, 0])
-    PadConfig.bg.set_alpha(192)
+    offset = 640 / 5
+    cent = offset / 2
+
     self.screen.blit(PadConfig.bg, [0, 0])
-    for i in range(2):
-      pgfx = pygame.Surface(PadConfig.pad.get_size())
-      pgfx.blit(PadConfig.pad, [0, 0])
 
-      for d in PadConfig.directions:
-        x, y = PadConfig.xys[d]
-        text = pad.device_key_for(True, i, d)
-        text += " / " + pad.device_key_for(False, i ,d)
-        tgfx = FONTS[16].render(text, 1, [0, 0, 0])
-        r = tgfx.get_rect()
-        r.center = [x, y]
-        pgfx.blit(tgfx, r)
+    text = ["Player 1", "Player 2"]
+    text2 = ["Keyboard", "Joystick"]
 
-      r = pgfx.get_rect()
-      r.center = [160 + 320 * i, 240]
-      self.screen.blit(pgfx, r)
+    for t in text:
+      img = FONTS[32].render(t, True, colors.BLACK)
+      r = img.get_rect()
+      r.midtop = [160 + 320 * text.index(t), 15]
+      self.screen.blit(img, r)
 
-  def render_message(self, text):
-    text = FONTS[32].render(text, 1, [255, 255, 255])
-    r = text.get_rect()
-    r.midtop = [320, 10]
-    self.screen.blit(text, r)
+      for t2 in text2:
+        img = FONTS[28].render(t2, True, colors.BLACK)
+        r = img.get_rect()
+        r.midtop = [cent + offset * text2.index(t2) +
+                    (offset * 3) * text.index(t), 50]
+        self.screen.blit(img, r)
+
+    
+    for dir in PadConfig.directions:
+      p1_key = pad.device_key_for(True, 0, dir)
+      p1_joy = pad.device_key_for(False, 0, dir)
+      p2_key = pad.device_key_for(True, 1, dir)
+      p2_joy = pad.device_key_for(False, 1, dir)
+
+      order = [p1_key, p1_joy, NAMES[dir], p2_key, p2_joy]
+      for i in range(len(order)):
+        if (dir == self.loc[1] + 2 and
+            ((i < 2 and i == self.loc[0]) or
+             (i > 2 and i == self.loc[0] + 1))):
+          img = FONTS[26].render(order[i], True, colors.WHITE)
+        else: img = FONTS[26].render(order[i], True, colors.BLACK)
+        r = img.get_rect()
+        r.center = [cent + offset * i, 60 + 26 * dir]
+        self.screen.blit(img, r)
+
     pygame.display.update()
