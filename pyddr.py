@@ -81,7 +81,7 @@ def emptyDictFromList(lst):
   for n in lst: d[n]=None
   return d
 
-DIFFICULTYLIST = ['BASIC','TRICK','MANIAC']
+DIFFICULTYLIST = ['BASIC','TRICK','MANIAC','ONI']
 DIFFICULTIES   = emptyDictFromList(DIFFICULTYLIST)
 MODELIST = ['SINGLE','DOUBLE']
 MODES = emptyDictFromList(MODELIST)
@@ -286,7 +286,7 @@ class Judge:
     self.times.sort()
     for k in range(24):
       j = curtick - k
-      if j in self.times and self.steps[j]:
+      if (j in self.times) and self.steps[j]:
         self.broke = 1
         self.combo = 0
         n = len(self.steps[j]) 
@@ -780,8 +780,11 @@ class Song:
     little = mainconfig["little"]
     coloringmod = 0
     self.totarrows = {}
-    self.holdinfo = [None,None,None]
-    self.holdref = [None,None,None]
+    self.holdinfo = []
+    self.holdref = []
+    for i in DIFFICULTYLIST:
+      self.holdinfo.append(None)
+      self.holdref.append(None)
     numholds = 1
     holdlist = []
     releaselist = []
@@ -1109,7 +1112,7 @@ class ArrowSprite(CloneSprite):
       self.sample.play()
       self.playedsound = 1
 
-    if curtime > self.timef + (0.002*(60000.0/curbpm)):
+    if curtime > self.timef + (0.004*(60000.0/curbpm)):
       self.kill()
       return
       
