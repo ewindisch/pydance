@@ -1,14 +1,8 @@
-Optimizations
- - clear one huge sprite group
-
 UI Fixes & Improvements
  - In-game help
  - Up/down indicators on menus (smaller menus => not needed?)
  - Menu and song select theming (including new songselect.pys)
  - Less ugly grading screen (bar chart, etc)
-
-Code Refactors & Cleanups
- - Judge refactor (for pluggable grading algorithms)
 
 Song Selector Improvements
  - Better graphics
@@ -27,7 +21,6 @@ Menus
 Gameplay
  - Disney-style versus
  - Modifiers: "solo" (needs animation in the first place...)
-  - Fix shrink/grow holds
 
 STUFF ANNOUNCER SHOULD SAY
 --------------------------
