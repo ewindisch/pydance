@@ -12,20 +12,26 @@ NOT_STEPS = ["D", "S", "L", "W", "B", "R"]
 
 STEP_MAPPINGS = {
   "SINGLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
-  "VERSUS": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
-  "DOUBLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
-  "COUPLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
   "5PANEL": [[0, 1, 2, 3, 4], [3, 4, 2, 0, 1], [4, 0, 2, 1, 3],
-             [1, 3, 2, 4, 5]],
-  "5VERSUS": [[0, 1, 2, 3, 4], [3, 4, 2, 0, 1], [4, 0, 2, 1, 3],
-             [1, 3, 2, 4, 5]],
-  "5COUPLE": [[0, 1, 2, 3, 4], [3, 4, 2, 0, 1], [4, 0, 2, 1, 3],
              [1, 3, 2, 4, 5]],
   "6PANEL": [[0, 1, 2, 3, 4, 5], [4, 5, 3, 2, 0, 1], [2, 0, 5, 1, 3, 4],
              [1, 3, 0, 4, 5, 2]],
   "8PANEL": [[0, 1, 2, 3, 4, 5, 6, 7], [5, 6, 7, 4, 3, 0, 1, 2],
              [3, 0, 1, 7, 2, 4, 5, 6], [1, 2, 4, 0, 5, 6, 7, 3]],
+  "9PANEL": [[0, 1, 2, 3, 4, 5, 6, 7, 8], [6, 7, 8, 5, 4, 3, 0, 1, 2],
+             [3, 0, 1, 8, 4, 2, 5, 6, 7], [1, 2, 5, 0, 4, 6, 7, 8, 3]],
   }
+
+MAP_EQUIVS = {
+  "SINGLE": ["DOUBLE", "COUPLE", "VERSUS"],
+  "5PANEL": ["5DOUBLE", "5COUPLE", "5VERSUS"],
+  "6PANEL": ["6DOUBLE", "6COUPLE", "6VERSUS"],
+  "8PANEL": ["8DOUBLE", "8COUPLE", "8VERSUS"],
+  "9PANEL": ["9DOUBLE", "9COUPLE", "9VERSUS"],
+  }
+
+for mode, equivs in MAP_EQUIVS.items():
+  for eq in equivs: STEP_MAPPINGS[eq] = STEP_MAPPINGS[mode]
 
 # Rotate the steps according the player's rotation mode
 # Random and shuffle aren't really rotations but... whatever.
