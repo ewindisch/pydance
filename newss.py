@@ -211,12 +211,14 @@ class BannerDisplay(pygame.sprite.Sprite):
     self._box = make_box(self._color, [350, 350])
     self.isfolder = False
     self._center = center
+    self._clip = None
     self.update(0)
 
   def set_song(self, song):
     self._title = song.info["title"]
     self._subtitle = song.info["subtitle"]
     self._artist = song.info["artist"]
+    self._clip = None
     if song.info["banner"]:
       banner = pygame.image.load(song.info["banner"])
       size = banner.get_rect().size
@@ -229,8 +231,10 @@ class BannerDisplay(pygame.sprite.Sprite):
         banner.set_colorkey(banner.get_at([0, 0]))
         self._banner = banner
       elif abs(size[0] - size[1]) < 3: # "Square", need to rotate.
-        banner.set_colorkey(banner.get_at([0, 0]))
-        self._banner = pygame.transform.rotozoom(banner, -45, 2.0)
+        banner = banner.convert()
+        banner.set_colorkey(banner.get_at([0, 0]), RLEACCEL)
+        self._banner = pygame.transform.rotozoom(banner, -45, 1.0)
+        self._clip = [51, 20, 256, 80]
       else: # 256x80, standard banner, I hope.
         banner = pygame.transform.scale(banner, [256, 80])
         self._banner = make_box([0, 0, 0], banner.get_size())
@@ -244,10 +248,12 @@ class BannerDisplay(pygame.sprite.Sprite):
     self.image = pygame.Surface(self._box.get_size(), SRCALPHA, 32)
     self.image.blit(self._box, [0, 0])
 
+    self.image.set_clip(self._clip)
     r_b = self._banner.get_rect()
-    r_b.centerx, r_b.top = self.image.get_rect().size[0] / 2, 10
+    r_b.center = (self.image.get_rect().size[0] / 2, 60)
     self.image.blit(self._banner, r_b)
-
+    self.image.set_clip(None)
+    
     c1, c2 = [255, 255, 255], [30, 30, 30]
 
     title = fontfx.shadow(self._title, pygame.font.Font(None, 36), 2, c1, c2)
@@ -442,7 +448,7 @@ class MainWindow(object):
                                     grade)
 
       self.update()
-      self._clock.tick(30)
+      self._clock.tick(60)
       pid, ev = ui.ui.poll()
 
   def update(self):
