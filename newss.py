@@ -65,7 +65,7 @@ def make_box(color = [111, 255, 148], size = [130, 40]):
 
 class SongItemDisplay(pygame.sprite.Sprite):
   no_banner = make_box(size = [256, 80])
-  no_banner.blit(pygame.image.load(NO_BANNER), [0, 0]
+  no_banner.blit(pygame.image.load(NO_BANNER), [0, 0])
   no_banner.set_colorkey(no_banner.get_at([4, 4]))
 
   def __init__(self, song): # A SongItem object
