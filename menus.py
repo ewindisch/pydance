@@ -133,7 +133,7 @@ class Menu:
   def display(self):
     screen = self.screen
     Menu.bgimage.image.set_alpha(256)
-    screen.blit(Menu.bgimage.image, TOPLEFT)
+    pygame.display.update(screen.blit(Menu.bgimage.image, TOPLEFT))
     curitem = 0
     topitem = 0
     toprotater = TextZoomer(self.text, FONTS[60], (640, 64),
@@ -180,14 +180,15 @@ class Menu:
 
       toprotater.iterate()
       screen.blit(Menu.bgimage.image, TOPLEFT)
-      screen.blit(toprotater.tempsurface, TOPLEFT)
+      r = [screen.blit(toprotater.tempsurface, TOPLEFT)]
       for i in range(DISPLAYED_ITEMS):
         if i + topitem < len(self.items):
-          screen.blit(self.items[i + topitem].image,
-                      (LEFT_OFFSET,
-                       TOP_OFFSET + i * (BUTTON_HEIGHT + BUTTON_PADDING)))
+          r.append(screen.blit(self.items[i + topitem].image,
+                               (LEFT_OFFSET,
+                                TOP_OFFSET + i * (BUTTON_HEIGHT +
+                                                  BUTTON_PADDING))))
 
-      pygame.display.flip()
+      pygame.display.update(r)
       pygame.time.wait(30)
 
     if ev == E_QUIT:

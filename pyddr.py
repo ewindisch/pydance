@@ -1662,15 +1662,14 @@ def main():
 
   pbar = fontfx.TextProgress(FONTS[60], "Found " + str(totalsongs) +
                              " files. Loading...", colors.WHITE, colors.BLACK)
+  r = pbar.render(0).get_rect()
+  r.center = (320, 240)
   for f in fileList:
     try: songs.append(fileparsers.SongItem(f))
     except:
       print "Error loading " + f
     img = pbar.render(parsedsongs / totalsongs)
-    r = img.get_rect()
-    r.center = (320, 240)
-    screen.blit(img, r)
-    pygame.display.flip()
+    pygame.display.update(screen.blit(img, r))
     parsedsongs += 100.0
 
   ev = event.poll()
