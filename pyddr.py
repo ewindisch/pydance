@@ -484,6 +484,13 @@ class GradingScreen:
 
     if totalsteps == 0: return None
 
+    # flash screen, whee
+    for i in range(16):
+      bg = pygame.Surface(screen.get_size())
+      bg.fill(((15-i)*16,(15-i)*16,(15-i)*16))
+      screen.blit(bg, (0,0))
+      pygame.display.flip()
+
     font = pygame.font.Font(None, 28)
 
     grading = fontfx.sinkblur("GRADING",64,4,(224,72),(64,64,255))
@@ -1553,7 +1560,9 @@ class Song:
       if self.crapout == 0 and actuallyplay:
         pygame.mixer.music.play(0, self.startsec)
     except TypeError:
-      raise QuitGame("Sorry, pyDDR needs at least pygame 1.4.9")
+      print "Sorry, pyDDR needs a more up to date Pygame or SDL than you have."
+      sys.exit()
+
     self.curtime = 0.0
     self.tickstart = pygame_time_get_ticks()
     self.head = self.fhead = self.modes[mode][difficulty]
@@ -2648,7 +2657,8 @@ def main():
     else:
       screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF, 16)
   except:
-    raise "Can't get a 16 bit display!" 
+    print "Can't get a 16 bit display!" 
+    sys.exit()
   pygame.display.set_caption('pyDDR')
   pygame.mouse.set_visible(0)
   eventManager = EventManager()
@@ -2664,7 +2674,8 @@ def main():
   try:
     pygame.mixer.music.play(4, 0.0)
   except TypeError:
-    raise QuitGame("Sorry, pyDDR needs at least pygame 1.4.9")
+    print "Sorry, pyDDR needs a more up to date Pygame or SDL than you have."
+    sys.exit()
 
   background = BlankSprite(screen.get_size())
 
@@ -2696,8 +2707,8 @@ def main():
   difWrap = 2*len(DIFFICULTIES)
 
   if totalsongs < 1:
-    raise QuitGame("No songs? Download one: http://clickass.org/~tgz/pyddr/")
-
+    print "You don't have any songs, and you need one. Go here: http://clickass.org/~tgz/pyddr/"
+    sys.exit()
 
   text_fadeon(screen, font, "Prerendering....", (320, 240))
   print 'Prerendering'
@@ -2740,8 +2751,9 @@ def playgame(ps, songs):
     print "stfile is ",stfile
     try:
       song, difficulty = songSelect(songs, stfile)
-    except QuitGame:
-      return
+    except:
+      print "er, there was possibly an exception in the songselector."
+      break
 
     try:
       stfile = song.fooblah
@@ -2749,8 +2761,9 @@ def playgame(ps, songs):
       pygame.mixer.quit()
       dance(song,players,difficulty)
       #blatantplug()
-    except QuitGame:
-      pass
+    except:
+      print "er, there was some exception in dance()."
+      break
     song = difficulty = None
     
 class TextSprite(BlankSprite):
@@ -3355,7 +3368,7 @@ def songSelect(songs, fooblah):
   oldhelp = CloneSprite(pygame.surface.Surface((1,1)))
   oldhelp.set_colorkey(oldhelp.get_at((0,0)))
   oldhelp.set_alpha(0)
-  curhelp = copy.copy(oldhelp)
+  curhelp = CloneSprite(oldhelp)
   helptime = pygame.time.get_ticks()
   fontdisp = dozoom = 1
   idir = -8
@@ -3428,7 +3441,8 @@ def songSelect(songs, fooblah):
       try:
         pygame.mixer.music.play(4, 0.0)
       except TypeError:
-        raise QuitGame("Sorry, pyDDR needs at least pygame 1.4.9")
+        print "Sorry, pyDDR needs a more up to date Pygame or SDL than you have."
+        sys.exit()
   
     event = eventManager.poll()
     if  event == E_QUIT:
@@ -3436,7 +3450,7 @@ def songSelect(songs, fooblah):
       pygame.mixer.music.load("menu.ogg")
       pygame.mixer.music.play(4, 0.0)
       pygame.mixer.music.set_volume(1.0)
-      raise QuitGame("Escape pressed")
+      break
     elif event < 0:                                  pass # key up
     elif event == E_PASS:                            pass
     elif event == E_FULLSCREEN:
@@ -3529,7 +3543,9 @@ def songSelect(songs, fooblah):
         background.draw(screen)
         pygame.display.flip()
         pygame.time.wait(1)
-        if (eventManager.poll() == E_QUIT): raise QuitGame("Quit right before playing?") # be nice..
+        if (eventManager.poll() == E_QUIT): 
+          print "song was cancelled!"
+          break
       background.set_alpha()
       screen.fill(BLACK)
       try:
@@ -3648,7 +3664,7 @@ def songSelect(songs, fooblah):
 
     if helptime+4000 < pygame.time.get_ticks():
       helptime = pygame.time.get_ticks()
-      oldhelp = copy.copy(curhelp)
+      oldhelp = CloneSprite(curhelp)
       curhelp = CloneSprite(pygame.image.load(os.path.join("menuhelp",helpfiles[0])).convert())
       helpfiles.append(helpfiles.pop(0))
       curhelp.rect.left = 128
@@ -4517,12 +4533,6 @@ def dance(song,players,difficulty):
 
 #    time.sleep(0.0066667)
 #    time.sleep(0.0096066)
-
-  for i in range(16):
-    bg = pygame.Surface(screen.get_size())
-    bg.fill(((15-i)*16,(15-i)*16,(15-i)*16))
-    screen.blit(bg, (0,0))
-    pygame.display.flip()
 
   # GRADES
   if int(mainconfig['grading']):
