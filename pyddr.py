@@ -1068,11 +1068,12 @@ class Song:
               for checkforholds in range(4):             # guess what this function does
                   didnothold = 1
                   if (feetstep[checkforholds] & 128) and (holding[checkforholds] == 0):
-                      holdtimes.insert(numholds,curTime)
-                      holdlist.insert(numholds,checkforholds)
-                      numholds += 1
-                      holding[checkforholds] = numholds-1  # set the holding status to what's being held
-                      didnothold = 0
+                    print feetstep, holding, checkforholds
+                    holdtimes.insert(numholds,curTime)
+                    holdlist.insert(numholds,checkforholds)
+                    numholds += 1
+                    holding[checkforholds] = numholds-1  # set the holding status to what's being held
+                    didnothold = 0
                   elif ((feetstep[checkforholds] & 128) or (feetstep[checkforholds] & 8)) and holding[checkforholds] and didnothold:
                       releasetimes.insert(holding[checkforholds],curTime)
                       releaselist.insert(holding[checkforholds],checkforholds)
@@ -1178,33 +1179,6 @@ class Song:
       for key,val in self.modeinfo[m]:
         self.modeinfodict[key]=val
 
-  def renderListText(self,totalsongs,j):
-    listimage = BlankSprite((640,48))
-    listimage.set_colorkey(listimage.get_at((0,0)),RLEACCEL)
-    stext = "%s - %s"%(self.group,self.song)
-    text = fontfx.shadefade(stext,28,3,(640,32),(63+j*(192/(totalsongs+1)),j*(240/(totalsongs+1)),240-(j*255/(totalsongs+1))))
-    text.set_colorkey(text.get_at((0,0)),RLEACCEL)
-    listimage.blit(text,(32,0))
-    stext = "BPM: %d"%int(round(self.bpm)) + "".join(map(lambda (n,d): "  %s %d"%(n,d),self.modeinfo[playmode])) + self.haslyrics
-    text = fontfx.embfade(stext,28,3,(640,32),(63+j*(192/(totalsongs+1)),j*(240/(totalsongs+1)),240-(j*255/(totalsongs+1))))
-    text.set_colorkey(text.get_at((0,0)),RLEACCEL)
-    listimage.blit(text,(64,24))
-    
-    titleimage = BlankSprite((640,90))
-    text = fontfx.shadefade(self.group,64,3,(640,68),(192,64,64))
-    titleimage.blit(text,(8,0))
-    text = fontfx.shadefade(self.song,48,3,(640,52),(192,64,192))
-    text.set_colorkey(text.get_at((0,0)),RLEACCEL)
-    titleimage.blit(text, (32,40))
-
-    self.listimage  = listimage
-    listimage.set_colorkey(listimage.get_at((0,0)),RLEACCEL)
-    self.titleimage = titleimage
-
-  def discardListText(self):
-    self.listimage = None
-    self.titleimage = None
-
   def cache (self):
     # open / read / close
     try:
@@ -1213,7 +1187,7 @@ class Song:
       print "file not found"
       self.crapout = 2
 #    print "cached"
-    
+     
   def init (self):
     try:
       pygame.mixer.music.load(self.osfile)
@@ -1223,7 +1197,7 @@ class Song:
     if self.startsec > 0.0:
       print "Skipping %f seconds" % self.startsec
 #      ss.skip(self.startsec)
-    
+
   def play(self,mode,difficulty,actuallyplay):
 #    self.ss.play()
     try:
@@ -1790,6 +1764,8 @@ def dance(song, players):
 
   pygame.mixer.init()
 
+  songFailed = False
+
   # render group, almost[?] every sprite that gets rendered
   rgroup = RenderLayered()
   # text group, EG. judgings and combos
@@ -1884,7 +1860,6 @@ def dance(song, players):
 
   screenshot=0
   
-  song.cache()
   if song.crapout == 0:
     song.init()
   
@@ -2056,8 +2031,7 @@ def dance(song, players):
           
           if ev.feet:
             for (dir,num) in zip(DIRECTIONS, ev.feet):
-              if num & 8:
-                if not (num & 128):
+              if num & 8 and not (num & 128):
                   ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr.pid).add([plr.arrow_group, rgroup])
 
               if num & 128:
@@ -2065,7 +2039,11 @@ def dance(song, players):
                   diffnum = song.modediff[playmode].index(plr.difficulty)
                   holdindex = song.holdref[diffnum].index((DIRECTIONS.index(dir),ev.when))
                   HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr.pid).add([plr.arrow_group, rgroup])
-                except: pass
+                except:
+                  print plr.difficulty
+                  print song.modediff[playmode]
+                  print song.holdref[diffnum]
+                  print DIRECTIONS.index(dir), ev.when, ev.feet
     if len(song.lastbpmchangetime) > 1:
       if (curtime >= song.lastbpmchangetime[1][0]):
         nbpm = song.lastbpmchangetime[1][1]
@@ -2149,7 +2127,6 @@ def dance(song, players):
   except:
     pass
     
-  print "songFailed is", songFailed
   return songFailed
 
 if __name__ == '__main__': main()
