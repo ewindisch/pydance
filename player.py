@@ -193,7 +193,7 @@ class OniLifeBarDisp(AbstractLifeBar):
       self.image.blit(self.failtext, (70, 2) )
 
 class HoldJudgeDisp(pygame.sprite.Sprite):
-  def __init__(self, player, game):
+  def __init__(self, pid, player, game):
     pygame.sprite.Sprite.__init__(self)
     self.game = game
 
@@ -212,7 +212,7 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
     elif player.scrollstyle == 1: self.rect.top = 400
     else: self.rect.top = 56
 
-    self.rect.centerx = game.sprite_center + player.pid * game.player_offset
+    self.rect.left = game.left_off(pid) + pid * game.player_offset
 
     self.slotnow = [''] * len(game.dirs)
     self.slotold = list(self.slotnow)
@@ -730,17 +730,18 @@ class Player:
     self.score = ScoringDisp(pid, "Player " + str(pid), game)
     self.lifebar = Player.lifebars[songconf["lifebar"]](pid, self.theme,
                                                         songconf, game)
-    self.holdtext = HoldJudgeDisp(self, game)
     self.judging_list = []
-    self.tempholding = [-1] * len(game.dirs)
+    self.holding = [-1] * len(game.dirs)
     self.combos = ComboDisp(pid, game)
     self.judge = None
     self.steps = None
+    self.holdtext = None
     self.game = game
 
   def set_song(self, steps):
     self.steps = steps
     arr, arrfx = self.theme.toparrows(self.steps.bpm, self.top, self.pid)
+    self.holdtext = HoldJudgeDisp(self.pid, self, self.game)
     self.toparr = arr
     self.toparrfx = arrfx
     self.judging_list = []
@@ -833,74 +834,77 @@ class Player:
       self.toparr[d].update(curtime + self.steps.offset * 1000)
       self.toparrfx[d].update(curtime, self.judge.combo)
 
-  def should_hold(self, direction, curtime):
-    l = self.steps.holdinfo
+  def should_hold(self, steps, direction, curtime):
+    l = steps.holdinfo
     for i in range(len(l)):
       if l[i][0] == self.game.dirs.index(direction):
-        if ((curtime - 15.0/self.steps.playingbpm > l[i][1])
+        if ((curtime - 15.0/steps.playingbpm > l[i][1])
             and (curtime < l[i][2])):
           return i
 
-  def check_holds(self, curtime):
+  def check_holds(self, curtime, steps, judge, toparrfx, holding, holdtext):
     # FIXME THis needs to go away
     keymap_kludge = ({"u": E_UP, "k": E_UPLEFT, "z": E_UPRIGHT,
                       "d": E_DOWN, "l": E_LEFT, "r": E_RIGHT,
                       "g": E_DOWNRIGHT, "w": E_DOWNLEFT} )
 
     for dir in self.game.dirs:
-      self.toparrfx[dir].holding(0)
-      current_hold = self.should_hold(dir, curtime)
+      toparrfx[dir].holding(0)
+      current_hold = self.should_hold(steps, dir, curtime)
       dir_idx = self.game.dirs.index(dir)
       if current_hold is not None:
         if event.states[(self.pid, keymap_kludge[dir])]:
-          if self.judge.holdsub[self.tempholding[dir_idx]] != -1:
-            self.toparrfx[dir].holding(1)
-          self.tempholding[dir_idx] = current_hold
+          if self.judge.holdsub[holding[dir_idx]] != -1:
+            toparrfx[dir].holding(1)
+          holding[dir_idx] = current_hold
         else:
-          self.judge.botchedhold(current_hold)
-          self.holdtext.fillin(curtime, dir_idx, "NG")
-          botchdir, timef1, timef2 = self.steps.holdinfo[current_hold]
+          judge.botchedhold(current_hold)
+          holdtext.fillin(curtime, dir_idx, "NG")
+          botchdir, timef1, timef2 = steps.holdinfo[current_hold]
+          # FIXME This will incorrectly break a hold in double mode
+          # if it is at the same time and in the same direction as a
+          # hold that is really broken.
+          # Also, it's slow.
           for spr in self.arrow_group.sprites():
-            # FIXME This is insanely slow
             try:
-              if spr.timef1 == timef1 and self.game.dirs.index(spr.dir) == dir_idx:
+              if (spr.timef1 == timef1 and
+                  self.game.dirs.index(spr.dir) == dir_idx):
                 spr.broken = True
                 break
             except: pass
       else:
-        if self.tempholding[dir_idx] > -1:
-          if self.judge.holdsub[self.tempholding[dir_idx]] != -1:
-            self.tempholding[dir_idx] = -1
-            self.holdtext.fillin(curtime, dir_idx, "OK")
+        if holding[dir_idx] > -1:
+          if judge.holdsub[holding[dir_idx]] != -1:
+            holding[dir_idx] = -1
+            holdtext.fillin(curtime, dir_idx, "OK")
 
   def handle_key(self, ev, time):
     if ev[1] in self.game.dirs:
       self.toparr[ev[1]].stepped(1, time + self.steps.soffset)
       self.fx_data.append(self.judge.handle_key(ev[1], time))
 
-  def check_bpm_change(self, time):
-    if len(self.steps.lastbpmchangetime) > 0:
-      if time >= self.steps.lastbpmchangetime[0][0]:
-        newbpm = self.steps.lastbpmchangetime[0][1]
+  def check_bpm_change(self, time, steps, judge, toparr, toparrfx):
+    if len(steps.lastbpmchangetime) > 0:
+      if time >= steps.lastbpmchangetime[0][0]:
+        newbpm = steps.lastbpmchangetime[0][1]
         if not self.dark:
-          for d in self.toparr:
-            self.toparr[d].tick = toRealTime(newbpm, 1)
-            self.toparrfx[d].tick = toRealTime(newbpm, 1)
-        self.judge.changebpm(newbpm)
-        self.steps.lastbpmchangetime.pop(0)
-
-  def update_sprites(self, screen):
-    rects = []
-    for g in self.sprite_groups: rects.extend(g.draw(screen))
-    return rects
+          for d in toparr:
+            toparr[d].tick = toRealTime(newbpm, 1)
+            toparrfx[d].tick = toRealTime(newbpm, 1)
+        judge.changebpm(newbpm)
+        steps.lastbpmchangetime.pop(0)
 
   def clear_sprites(self, screen, bg):
     for g in self.sprite_groups: g.clear(screen, bg)
 
-  def game_loop(self, curtime, screen):
-    self.check_holds(curtime)
-    self.check_bpm_change(curtime)
-    self.check_sprites(curtime)
-    self.combo_update(curtime)
-    return self.update_sprites(screen)
+  def game_loop(self, time, screen):
+    self.check_holds(time, self.steps, self.judge, self.toparrfx, self.holding,
+                     self.holdtext)
+    self.check_bpm_change(time, self.steps, self.judge, self.toparr,
+                          self.toparrfx)
+    self.check_sprites(time)
+    self.combo_update(time)
 
+    rects = []
+    for g in self.sprite_groups: rects.extend(g.draw(screen))
+    return rects

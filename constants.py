@@ -9,12 +9,6 @@ VERSION = "0.7.3"
 
 import sys, os, config, pygame
 
-try:
-  import psyco
-  print "Psyco optimizing compiler found. Using psyco.full()."
-  psyco.full()
-except ImportError: pass
-
 # Detect the name of the OS - MacOS X is not really UNIX.
 osname = None
 if os.name == "nt": osname = "win32"
@@ -92,7 +86,7 @@ mainconfig = config.Config({ # Wow we have a lot of options
   "keyboard": "qwerty",
   "ingamehelp": 1,
   "strobe": 0,
-  "usemad": 1
+  "usemad": 1, "usepsyco": 1,
   })
 
 player_config = {"spin": 0,

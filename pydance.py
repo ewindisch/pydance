@@ -30,6 +30,13 @@ def main():
   print "pydance, by theGREENzebra (tgz@clickass.org)"
   print "Initialising.."
 
+  if mainconfig["usepsyco"]:
+    try:
+      import psyco
+      print "Psyco optimizing compiler found. Using psyco.full()."
+      psyco.full()
+    except ImportError: print "Psyco optimizing compiler not found."
+
   # FIXME Debug mode has been broken for like, 4 releases, take it out
 
   # Search recursively for files

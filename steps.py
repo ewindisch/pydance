@@ -244,6 +244,8 @@ class SongData:
     for key in ("movie", "filename", "title", "artist", "startat", "endat"):
       self.__dict__[key] = song.info[key]
 
+    self.soffset = song.info["gap"] * 1000
+
     self.crapout = 0
 
     self.__dict__.update(config)

@@ -362,8 +362,8 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
     for plr in players: rectlist.extend(plr.game_loop(curtime, screen))
 
-    if strobe: extbox.update(curtime+(players[0].steps.soffset))
-    
+    if strobe: extbox.update(curtime + song.soffset)
+
     song.lyricdisplay.update(curtime)
 
     if backmovie.filename:
