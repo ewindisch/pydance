@@ -275,6 +275,14 @@ class DWIFile:
         elif parts[0] == "ARTIST": self.info["artist"] = ":".join(parts[1:])
         elif parts[0] == "MD5": self.info["md5sum"] = parts[1]
         elif parts[0] == "BPM": self.info["bpm"] = float(parts[1])
+        elif parts[0] == "SAMPLESTART":
+          if self.info.has_key("preview"):
+            self.info["preview"][0] = self.parse_time(parts[1])
+          else: self.info["preview"] = [self.parse_time(parts[1]), 10]
+        elif parts[0] == "SAMPLELENGTH":
+          if self.info.has_key("preview"):
+            self.info["preview"][1] = self.parse_time(parts[1])
+          else: self.info["preview"] = [45, self.parse_time(parts[1])]
         elif parts[0] == "CHANGEBPM":
           for change in parts[1].split(","):
             beat, bpm = change.split("=")
@@ -296,6 +304,8 @@ class DWIFile:
         self.info["filename"] = fullfile
       elif lfile[-3:] == "ogg":
         self.info["filename"] = fullfile
+      elif lfile[-3:] == "lrc":
+        self.parse_lyrics(fullfile)
       elif lfile[-3:] == "jpg" or lfile[-3:] == "png":
         size = os.stat(fullfile).st_size
         try:
@@ -343,6 +353,36 @@ class DWIFile:
       line = line[0:i]
     except ValueError: pass
     return line.strip()
+
+  # Fucking braindead file format
+  # Fucking braindead DWI writers
+  def parse_time(self, string):
+    offset = 0
+    time = 0
+    if string[0] == "+":
+      string = string[1:]
+      offset = self.info["gap"]
+    if ":" in string:
+      parts = string.split(":")
+      if len(parts) == 2: time = 60 * int(parts[0]) + float(parts[1])
+      elif len(parts) == 3:
+        time = int(parts[0]) + float(parts[1]) + float(parts[2]) / 100
+    elif "." in string: time = float(string)
+    else: time = int(string) / 1000.0
+    return offset + time
+
+  def parse_lyrics(self, filename):
+    f = open(filename)
+    offset = 0
+    for line in f:
+      line = line.strip()
+      if line[1:7] == "offset": offset = float(line[8:-1]) / 1000.0
+      if len(line) > 2 and line[1] in "0123456789":
+        time = self.parse_time(line[1:line.index("]")])
+        lyr = line[line.index("]") + 1:].split("|")
+        lyr.reverse()
+        for i in range(len(lyr)):
+          if lyr[i] is not "": self.lyrics.append((time, i, lyr[i]))
 
   # FIXME We share this with StepFile...
   def find_subtitle(self):

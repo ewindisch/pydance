@@ -64,6 +64,7 @@ def titlecase(title):
   letters = string.letters + "?!'" # Yeah, those aren't letters, but...
 
   parts = title.split()
+  if len(parts) == 0: return ""
 
   for i in range(len(parts)):
     nonletter = 0
@@ -76,6 +77,7 @@ def titlecase(title):
         parts[i] = parts[i].lower()
         if parts[i] not in uncapped:
           parts[i] = parts[i].capitalize()
+
 
   for i in (0, -1):
     if parts[i] != parts[i].lower() or parts[i] in uncapped:

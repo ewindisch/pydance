@@ -30,7 +30,7 @@ KEYCONFIG = {
 # 16 buttons, 4 axis
 # The EMSUSB2, one adapter, two joysticks - +16 to get p2, uses this too
 # Apparently, there are two possible start buttons, 9 and 11
-A4B16 = { 0: E_MARK, 1: E_PGUP, 3: E_PGDN, 8: E_SELECT, 9: E_START,
+A4B16 = { 0: E_MARK, 1: E_PGUP, 2: E_UNMARK, 3: E_PGDN, 8: E_SELECT, 9: E_START,
           15: E_LEFT, 13: E_RIGHT, 12: E_UP, 14: E_DOWN, 11: E_START }
 
 
