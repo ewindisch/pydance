@@ -10,7 +10,7 @@ import colors
 import records
 import menudriver
 
-from fileparses import SongItem
+from fileparsers import SongItem
 from courses import CRSFile
 from pygame.mixer import music
 from fontfx import TextProgress
