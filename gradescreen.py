@@ -23,15 +23,31 @@ class BannerFadeIn(pygame.sprite.Sprite):
     self.image.blit(image, r)
     self.rect = self.image.get_rect()
     self.rect.center = center
+    self._image = self.image.convert()
     self.image.set_alpha(0)
+    self._idir = 4
+    self._i = 128
+    self._last_update = pygame.time.get_ticks() - 200
 
   def update(self, time):
     if time > self._end:
-      self.image.set_alpha(256)
+      if time - self._last_update > 100:
+        self.image = self._image.convert()
+        if self._i < 4: self._idir = 4
+        elif self._i > 250: self._idir = -4
+        self._i += self._idir
+        c = [self._i, 192, 192]
+        txt = fontfx.shadow("Press Escape/Confirm/Start", 24, c)
+        txt_r = txt.get_rect()
+        txt_r.center = [123, 70]
+        self.image.blit(txt, txt_r)
+        self.rect = self.image.get_rect()
+        self.rect.center = self._center
+        self._last_update = time
+
     else:
       alp = int(256 * (1 - ((self._end - time) / 3000.0)))
       self.image.set_alpha(alp)
-
 
 # Display a rotating grade graphic.
 class GradeSprite(pygame.sprite.Sprite):
@@ -266,7 +282,7 @@ class GradingScreen(InterfaceWindow):
       # The first time we hit start, advance the time counter to stop
       # all the animations.
       elif (ev == ui.CONFIRM or ev == ui.START or
-            pygame.time.get_ticks() - start > 3333):
+            (pygame.time.get_ticks() - start > 3333 and not self._time_bonus)):
         exits.extend([ui.CONFIRM, ui.START])
         ev = ui.PASS
         self._time_bonus = 3333
