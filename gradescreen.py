@@ -15,7 +15,7 @@ class GradingScreen:
       if grade != "?":
         grades = {"AAA": (100, 95), "AA": (99, 93), "A": (92, 80),
                   "B": (79, 65), "C": (64, 45), "D": (45, 25), "E": (24, 0)}
-        announcer.Announcer(mainconfig["djtheme"]).say(grades[grade])
+        announcer.Announcer(mainconfig["djtheme"]).say("grade", grades[grade])
       totalsteps = (judge.marvelous + judge.perfect + judge.great +
                     judge.ok + judge.boo + judge.miss)
       steps = (grade, judge.diff, totalsteps, judge.bestcombo, judge.combo)
