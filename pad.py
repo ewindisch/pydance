@@ -135,13 +135,13 @@ class Pad(object):
       joy = pygame.joystick.Joystick(mat)
       but, axes = joy.get_numaxes(), joy.get_numbuttons()
       print "Initializing player 1 using js%d." % mat
-      self.merge_events(0, mat, MAT[(but, axes)])
+      self.merge_events(0, mat, MATS[(but, axes)])
 
       if mat2:
         joy = pygame.joystick.Joystick(mat2)
         but, axes = joy.get_numaxes(), joy.get_numbuttons()
         print "Initializing player 2 using js%d." % mat2
-        self.merge_events(1, mat2, MAT[(but, axes)])
+        self.merge_events(1, mat2, MATS[(but, axes)])
     elif totaljoy > 0:
       print "No known joysticks found! If you want to use yours,"
       print "you'll have to map its button manually once to use it."
