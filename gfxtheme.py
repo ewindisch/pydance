@@ -285,7 +285,7 @@ class ArrowFX(Listener, pygame.sprite.Sprite):
     self.tintimg.blit(self.baseimg, [0, 0])
 
     self.blackbox = pygame.surface.Surface([game.width] * 2)
-    self.blackbox.set_colorkey(0)
+    self.blackbox.set_colorkey(self.blackbox.get_at([0, 0]))
     self.image = self.blackbox
     self.rect = self.image.get_rect()
     self.displaying = 1
