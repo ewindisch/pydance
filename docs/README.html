@@ -358,6 +358,13 @@ dl.faq dt { font-weight: bold }
       nicely. The third possibility is to merge <a
       href="http://spacepants.org/src/pymad/">pymad</a> support into
       pyDDR, and send us the patches.</p></dd>
+      <dt>pyDDR keeps crashing with a "KeyError". How do I fix it?</dt>
+      <dd><p>The format of some options in pyddr.cfg changes
+      periodically. This should no longer be a problem after 0.6.2
+      because the file is kept to a minimum, and the changes are made
+      in the source itself. However, if you are upgrading from an
+      older version to 0.6.2, you may need to delete your
+      configuration file and have pyDDR recreate it.</p></dd>
       <dt>My soft mat sucks. Can I improve it?</dt>
       <dd><p>Yes, you can 'convert' a soft mat into a hard mat in a
       number of ways. One popular, simple, and fast way is to buy some
@@ -373,7 +380,9 @@ dl.faq dt { font-weight: bold }
       axes. This means that it can only read one of up/down or
       left/right at the same time (that is, jumps are impossible, and
       leaving your foot on an opposite arrow is also
-      impossible). Besides the recommended EMSUSB2 adapter, pyDDR
+      impossible). Besides the recommended <a
+      href="http://levelsix.com/products/pc/EMSUSB2.shtml">EMSUSB2</a>
+	  adapter, pyDDR
       should work on anything that maps the directional arrows to
       buttons. Make sure your adapter does that.</p></dd>
       <dt>Why do I get weird colors or graphic artifacts?</dt>
@@ -407,7 +416,7 @@ dl.faq dt { font-weight: bold }
       a high-powered processor with a bad video card will perform
       terribly.</li>
 	</ul></dd>
-      <dt>What about &lt;insert feature here&gt;?</dt>
+      <dt>What about adding &lt;insert feature here&gt;?</dt>
       <dd><p>If that feature is one of the following, you have
       incurred our wrath: OpenGL support, internet play. Otherwise, we
       almost certainly have it planned already. If you have some
