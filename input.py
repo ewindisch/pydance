@@ -205,6 +205,12 @@ class EventManager(object):
       if not self.states.has_key((player, events[key])):
         self.states[(player, events[key])] = 0
 
+  # Clear events for a player number given a type of input.
+  def delete_events(self, player, keyboard):
+    for key in self.events:
+      if (k[0] == -1 and keyboard) and self.events[key][0] == player:
+        del(self.events[key])
+
   # Clear waiting events and reset key states.
   # This could be bad, so don't call it.
   def clear(self):
