@@ -83,30 +83,30 @@ DVORAK_KEYS = {
 # Select: 8, start: 9
 # Left analog: 10, Right analog: 11
 
-A4B16 = { 0: E_MARK, 1: E_PGUP, 2: E_UNMARK, 3: E_PGDN, 8: E_SELECT, 9:
-          E_START, 15: E_LEFT, 13: E_RIGHT, 12: E_UP, 14: E_DOWN,
+A4B16 = { 0: E_MARK,   1: E_PGUP,  2: E_UNMARK, 3: E_PGDN, 8: E_SELECT,
+          9: E_START, 15: E_LEFT, 13: E_RIGHT, 12: E_UP,  14: E_DOWN,
           11: E_START, 5: E_CENTER }
 
 
 # 6 axis, 12 button joystick (BNS parallel adapter)
-A6B12 = { 1: E_PGUP, 3: E_PGDN, 8: E_SELECT, 4: E_LEFT, 5: E_RIGHT,
-          6: E_DOWN, 7: E_UP, 9: E_START }
+A6B12 = { 1: E_PGUP,  3: E_PGDN, 8: E_SELECT,  4: E_LEFT,  5: E_RIGHT,
+          6: E_DOWN,  7: E_UP,   9: E_START }
 
 # Gravis Gamepad Pro USB
 # 0: Square, 1: X, 2: O, 3: Triangle
 # 4: L1, 5: R1, 6: L2, 7: R2
 # 8: Select, 9: Start
-A2B10 = { 0: E_LEFT, 1: E_DOWN, 2: E_RIGHT, 3: E_UP,
-         5: E_PGUP, 7: E_PGDN, 8: E_SELECT, 9: E_START}
+A2B10 = { 0: E_LEFT,  1: E_DOWN,  2: E_RIGHT,   3: E_UP,
+          5: E_PGUP,  7: E_PGDN,  8: E_SELECT,  9: E_START}
   
 # This is some sort of natively USB mat, I guess...
-# FIXME: I don't think it works.
-A2B8 = { E_UP: 4, E_DOWN: 6, E_LEFT: 5, E_RIGHT: 7,
-         E_START: 2, E_MARK: 3, E_PGUP: 0, E_PGDN: 1 }
+# This should actually work now.
+A2B8 = { 4: E_UP,     6: E_DOWN,  5: E_LEFT,  7: E_RIGHT,
+         2: E_START,  3: E_MARK,  0: E_PGUP,  1: E_PGDN }
 
 # X-Box controller with X-Box Linux
-A14B10 = { E_UP: 4, E_DOWN: 0, E_LEFT: 3, E_RIGHT: 1, E_START: 6,
-           E_QUIT: 9, }
+A14B10 = { 4: E_UP,    0: E_DOWN,  3: E_LEFT,  1: E_RIGHT, 
+           6: E_START, 9: E_QUIT, }
 
 MATS = { (6, 12): A6B12,
          (14, 10): A14B10,
