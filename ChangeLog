@@ -6,6 +6,10 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
+0.6.5 - Boy, did I mess that up.				[2003.05.30]
++ Major graphics optimization patch (1.5x-2x increase in fps) from JZig.
+* Two player mode works again.
+
 0.6.4 - RTFM. RTFM. RTFM. That means Read the Fucking Manual.	[2003.05.29]
 + New step file parsers
   + Beginner and hardcore (smaniac/oni/challenge) difficulty.
