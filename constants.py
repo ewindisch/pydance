@@ -99,6 +99,7 @@ player_config = {"spin": 0,
                  "little": 0,
                  "dark": 0,
                  "jumps": 1,
+                 "holds": 1,
                  "colortype": 4,
                  "scrollstyle": 0 }
 
