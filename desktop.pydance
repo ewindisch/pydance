@@ -1,0 +1,10 @@
+# Originally named desktop.pydance to avoid tabcomp confusion.
+# This should be installed as pydance.desktop.
+Type=Application
+Version=0.9.4
+Encoding=UTF-8
+Name=pydance
+GenericName=Rhythm Game
+TryExec=pydance
+Exec=pydance
+Categories=Game;ArcadeGame;Music;
