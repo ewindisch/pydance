@@ -17,6 +17,8 @@ goals
 ----- - CURRENT
 0.6.0 - Stop! DDR TIME!
 + TWO PLAYER SUPPORT ("2" in song selector, or pick versus in menu)
+  + THE KEYS HAVE CHANGED - arrows are now player 2, IJKL is player 1
+  + if you have a dvorak keyboard, change qwerty to dvorak in pyddr.cfg
   + grading screen displays both grades nicely =]
 + don't have to edit pyddr.cfg if you have an EMSUSB2, now autodetected!
 + a little bit of MENUING
