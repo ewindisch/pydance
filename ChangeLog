@@ -6,7 +6,7 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
-0.7.3
+0.7.3 - In My Pants
 + 6 panel ("solo") and 8 panel support.
 * Song selector UI tweaks (faster animations, nicer folder opening).
 * Respace the arrows to be closer together in single/versus.
