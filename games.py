@@ -22,6 +22,9 @@ class GameType(object):
     # This also affects how the arrows are laid out.
     self.double = False
 
+    # 'theme' is used as a theme identifier, so people don't have to set
+    # a separate theme for each mode.
+
     self.__dict__.update(args)
 
     self.dirs = list(self.dirs)
@@ -53,26 +56,49 @@ class GameType(object):
     else: return self.left_offset * 2
 
 GAMES = {
-  "SINGLE": GameType(players = 1),
-  "VERSUS": GameType(players = 2),
-  "COUPLE": GameType(couple = True),
-  "DOUBLE": GameType(double = True, players = 1),
-  "5PANEL": GameType(players = 1, dirs = "wkczg", width = 56),
-  "5VERSUS": GameType(players = 2, dirs = "wkczg", width = 56),
-  "5COUPLE": GameType(players = 2, couple = True, dirs = "wkczg", width = 56),
-  "5DOUBLE": GameType(players = 1, double = True, dirs = "wkczg", width = 56),
-  "6PANEL": GameType(players = 1, dirs = "lkduzr"),
-  "6VERSUS": GameType(players = 2, dirs = "lkduzr", width = 48),
-  "6COUPLE": GameType(players = 2, couple = True, dirs = "lkduzr", width = 48),
-  "6DOUBLE": GameType(players = 1, double = True, dirs = "lkduzr", width = 48),
-  "8PANEL": GameType(players = 1, dirs = "wlkduzrg"),
-  "8VERSUS": GameType(players = 2, dirs = "wlkduzrg", width = 32),
-  "8COUPLE": GameType(players = 2, dirs = "wlkduzrg", width = 32, couple = True),
-  "8DOUBLE": GameType(players = 1, dirs = "wlkduzrg", width = 32, double = True),
-  "9PANEL": GameType(players = 1, dirs = "wlkdcuzrg"),
-  "9VERSUS": GameType(players = 2, dirs = "wlkdcuzrg", width = 32),
-  "9COUPLE": GameType(players = 2, dirs = "wlkdcuzrg", width = 32, couple = True),
-  "9DOUBLE": GameType(players = 1, dirs = "wlkdcuzrg", width = 32, double = True),
+  "SINGLE": GameType(players = 1, theme = "4p"),
+  "VERSUS": GameType(players = 2, theme = "4p"),
+  "COUPLE": GameType(couple = True, theme = "4p"),
+  "DOUBLE": GameType(double = True, players = 1, theme = "4p"),
+
+  "5PANEL": GameType(players = 1, dirs = "wkczg", width = 56, theme = "5p"),
+  "5VERSUS": GameType(players = 2, dirs = "wkczg", width = 56, theme = "5p"),
+  "5COUPLE": GameType(players = 2, couple = True, dirs = "wkczg",
+                      width = 56, theme = "5p"),
+  "5DOUBLE": GameType(players = 1, double = True, dirs = "wkczg",
+                      width = 56, theme = "5p"),
+
+  "6PANEL": GameType(players = 1, dirs = "lkduzr", theme = "6pl"),
+  "6VERSUS": GameType(players = 2, dirs = "lkduzr", width = 48, theme = "6ps"),
+  "6COUPLE": GameType(players = 2, couple = True, dirs = "lkduzr",
+                      width = 48, theme = "6ps"),
+  "6DOUBLE": GameType(players = 1, double = True, dirs = "lkduzr",
+                      width = 48, theme = "6ps"),
+
+  "8PANEL": GameType(players = 1, dirs = "wlkduzrg", theme = "8pl"),
+  "8VERSUS": GameType(players = 2, dirs = "wlkduzrg", width = 32,
+                      theme = "8ps"),
+  "8COUPLE": GameType(players = 2, dirs = "wlkduzrg", width = 32,
+                      couple = True, theme = "8ps"),
+  "8DOUBLE": GameType(players = 1, dirs = "wlkduzrg", width = 32,
+                      double = True, theme = "8ps"),
+
+  "9PANEL": GameType(players = 1, dirs = "wlkdcuzrg", theme = "9pl"),
+  "9VERSUS": GameType(players = 2, dirs = "wlkdcuzrg", width = 32,
+                      theme = "9ps"),
+  "9COUPLE": GameType(players = 2, dirs = "wlkdcuzrg", width = 32,
+                      couple = True, theme = "9ps"),
+  "9DOUBLE": GameType(players = 1, dirs = "wlkdcuzrg", width = 32,
+                      double = True, theme = "9ps"),
+
+  "PARAPARA": GameType(players = 1, dirs = "lkuzr", theme = "para"),
+  "PARAVERSUS": GameType(players = 2, dirs = "lkuzr", width = 48,
+                         theme = "para"),
+  "PARACOUPLE": GameType(players = 2, couple = True, dirs = "lkuzr",
+                      width = 48, theme = "para"),
+  "PARADOUBLE": GameType(players = 1, double = True, dirs = "lkuzr",
+                      width = 48, theme = "para"),
+
   }
 
 SINGLE = [mode for mode in GAMES if (GAMES[mode].players == 1 and

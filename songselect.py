@@ -24,6 +24,7 @@ difficulty_colors = { "BEGINNER": colors.color["white"],
                       "MEDIUM": colors.color["red"],
                       "DOUBLE": colors.color["red"],
                       "ANOTHER": colors.color["red"],
+                      "PARA": colors.color["red"], # This seems to be random
                       "NORMAL": colors.color["red"],
                       "MANIAC": colors.color["green"],
                       "HARD": colors.color["green"],
@@ -33,6 +34,7 @@ difficulty_colors = { "BEGINNER": colors.color["white"],
                       "S-MANIAC": colors.color["purple"], # Very common typo
                       "CHALLENGE": colors.color["purple"],
                       "CRAZY": colors.color["purple"],
+                      "EXPERT": colors.color["purple"]
                       }
 
 ITEM_SIZE = (344, 60)
@@ -99,6 +101,8 @@ class SongItemDisplay(object):
         if banner.get_rect().size == (300, 200): # KSF-style banner
           self.banner = pygame.transform.rotozoom(banner, 0, 0.4).convert()
           self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
+        if banner.get_rect().size == (93, 92): # Parapara-style banner
+          self.banner = pygame.transform.rotozoom(banner, 0, 0.87).convert()
         elif banner.get_rect().size[0] != banner.get_rect().size[1]:
           self.banner = pygame.transform.scale(banner, BANNER_SIZE)
         else:

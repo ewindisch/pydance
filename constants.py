@@ -93,7 +93,9 @@ default_conf = { # Wow we have a lot of options
   "usemad": 1, "usepsyco": 1,
   }
 
-for game in games.GAMES: default_conf["%s-theme" % game] = "default"
+for dummy, game in games.GAMES.items():
+  default_conf["%s-theme" % game.theme] = "default"
+
 mainconfig = config.Config(default_conf)
 
 player_config = {"spin": 0,

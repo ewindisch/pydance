@@ -125,20 +125,31 @@ def do(screen, songdata):
                 E_RIGHT: switch_tuple,
                 E_CREATE: get_tuple }
 
-  # FIXME We need to present these in a logical order.
-  # Ideally, we need to not have one preference for each game, but each
-  # game type.
-  themes = [[name.title(), rotate_opt, ("%s-theme" % name,
-                                        ThemeFile.list_themes(name))] for
-            name in games.GAMES]
-  themes = tuple(themes) # Python sucks Python sucks Python sucks
 
   m = (["Play Game", {E_START: wrap_ctr}, (GameSelect, songdata)],
        ("Game Options",
         ["Autofail", onoff_opt, ("autofail",)],
         ["Assist Mode", onoff_opt, ("assist",)],
         ["Announcer", rotate_opt, ('djtheme', Announcer.themes())],
-        ("Themes ...",) +  themes,
+        ("Themes ...", # FIXME: We can probably autogenerate this list somehow.
+         ["4 Panel", rotate_opt,
+          ("4p-theme", ThemeFile.list_themes("SINGLE"))],
+         ["5 Panel", rotate_opt,
+          ("5p-theme", ThemeFile.list_themes("5PANEL"))],
+         ["Large 6 Panel", rotate_opt,
+          ("6pl-theme", ThemeFile.list_themes("6PANEL"))],
+         ["Small 6 Panel", rotate_opt,
+          ("6ps-theme", ThemeFile.list_themes("6VERSUS"))],
+         ["Large 8 Panel", rotate_opt,
+          ("8pl-theme", ThemeFile.list_themes("8PANEL"))],
+         ["Small 8 Panel", rotate_opt,
+          ("8ps-theme", ThemeFile.list_themes("8VERSUS"))],
+         ["Large 9 Panel", rotate_opt,
+          ("9pl-theme", ThemeFile.list_themes("9PANEL"))],
+         ["Small 9 Panel", rotate_opt,
+          ("9ps-theme", ThemeFile.list_themes("9VERSUS"))],
+         ["Back", None, None]
+         ),
         ["Back", None, None]
         ),
        ("Graphic Options",

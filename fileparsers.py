@@ -553,8 +553,8 @@ class SMFile(MSDFile):
   gametypes = { "dance-single": "SINGLE", "dance-double": "DOUBLE",
                 "dance-couple": "COUPLE", "dance-solo": "6PANEL",
                 "pump-single": "5PANEL", "pump-couple": "5COUPLE",
-                "pump-double": "5DOUBLE" }
-  notecount = { "SINGLE": 4, "DOUBLE": 8, "COUPLE": 8,
+                "pump-double": "5DOUBLE", "para-single": "PARAPARA" }
+  notecount = { "SINGLE": 4, "DOUBLE": 8, "COUPLE": 8, "PARAPARA": 5,
                 "5PANEL": 5, "6PANEL": 6, "5COUPLE": 10, "5DOUBLE": 10 }
 
   step = [0, 1, 3, 1]
@@ -834,6 +834,7 @@ class SongItem(object):
              "6PANEL": "6VERSUS",
              "8PANEL": "8VERSUS",
              "9PANEL": "9VERSUS",
+             "PARAPARA": "PARAVERSUS",
              }
   
   def __init__(self, filename, need_steps = True):

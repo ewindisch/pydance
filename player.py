@@ -819,7 +819,8 @@ class Player(object):
   lifebars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp]
 
   def __init__(self, pid, config, songconf, game):
-    self.theme = GFXTheme(mainconfig["%s-theme" % game.name], pid, game)
+    self.theme = GFXTheme(mainconfig.get("%s-theme" % game.theme, "default"),
+                          pid, game)
     self.pid = pid
 
     self.__dict__.update(config)

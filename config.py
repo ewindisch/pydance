@@ -1,5 +1,7 @@
 # A generic configuration file parser
 
+# FIXME: We should make this subclass dict.
+
 import os
 
 # master vs user:
@@ -35,6 +37,11 @@ class Config(object):
   def __delitem__(self, key):
     if self.master.has_key(key): del(self.master[key])
     if self.user.has_key(key): del(self.user[key])
+
+  def get(self, key, value = None):
+    if self.user.has_key(key): return self.user[key]
+    elif self.master.has_key(key): return self.master[key]
+    else: return value
 
   # Update the config data with a 'key value' filename.
   # If shouldExist is true, raise exceptions if the file doesn't exist.

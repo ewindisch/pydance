@@ -175,7 +175,9 @@ class Steps(object):
     self.holdref = zip(holdlist, holdtimes)
 
     if self.ready == None:
-      self.ready = self.events[1].when - toRealTime(self.events[1].bpm, 16)
+      if len(self.events) > 1:
+        self.ready = self.events[1].when - toRealTime(self.events[1].bpm, 16)
+      else: self.ready = 0.0
 
   def play(self):
     self.curtime = 0.0

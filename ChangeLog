@@ -8,10 +8,12 @@ legend:
 ----- - CURRENT
 0.7.5 - That's the second largest ChangeLog I've ever seen!	[2003.XX.XX]
 + New options: "Wide" to add jumps, holds on/off.
-+ 5 panel (Pump It Up) and 9 panel support.
- + Support for KSF, SM, and .dance files with 5 panel steps.
++ 5 panel (Pump It Up), 9 panel, and parapara support.
+ + Support for KSF file for 5 panel steps.
+ + Support for SM files with 5 panel or PPP steps.
  - Actual PIU pads may or may not work; none were available for testing.
-+ Versus, couple, and double 5, 6, 8 and 9 panel modes.
+ - The PPP controller will not work.
++ Versus, couple, and double 5, 6, 8, 9 panel, and parapara modes.
 + New game type selector, so you can do e.g. Double/Endless.
 + A document on the KSF file format has been added in docs/.
 + The .dance specification has been updated with new modes and corrections.
