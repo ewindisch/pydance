@@ -107,6 +107,12 @@ pydance.cfg
           If this is turned off, the game will continue, even when your
           lifebars runs out.
 
+   autogen 1|0
+          Normally pydance generates steps automatically from the "base"
+          4 panel modes for other modes (like 6 or 8 panel), if they
+          aren't defined for that file. Turning this option off prevents
+          pydance from doing that. Generally this is a bad idea.
+
    grading 1|0
           pydance will normally display a grade at the end of every song.
           Turning this option off will bring you back to the song

@@ -1,6 +1,8 @@
 # Read in various file formats and translate them to the internal structure
 # that Steps and SongData want.
 
+from constants import *
+
 import os, stat, util, string, dircache, copy
 
 import games
@@ -879,21 +881,23 @@ class SongItem(object):
         self.difficulty[v] = self.difficulty[k]
         self.steps[v] = self.steps[k]
 
-    # Fill in non-defined game modes, if possible.
-    for game in games.GAMES:
-      if game in self.difficulty: continue # This mode is defined already.
 
-      elif game in games.SINGLE and "SINGLE" in self.difficulty:
-        self.difficulty[game] = copy.copy(self.difficulty["SINGLE"])
+    if mainconfig["autogen"]:
+      # Fill in non-defined game modes, if possible.
+      for game in games.GAMES:
+        if game in self.difficulty: continue # This mode is defined already.
+
+        elif game in games.SINGLE and "SINGLE" in self.difficulty:
+          self.difficulty[game] = copy.copy(self.difficulty["SINGLE"])
         
-      elif game in games.VERSUS and "VERSUS" in self.difficulty:
-        self.difficulty[game] = copy.copy(self.difficulty["VERSUS"])
+        elif game in games.VERSUS and "VERSUS" in self.difficulty:
+          self.difficulty[game] = copy.copy(self.difficulty["VERSUS"])
 
-      elif game in games.DOUBLE and "DOUBLE" in self.difficulty:
-        self.difficulty[game] = copy.copy(self.difficulty["DOUBLE"])
+        elif game in games.DOUBLE and "DOUBLE" in self.difficulty:
+          self.difficulty[game] = copy.copy(self.difficulty["DOUBLE"])
 
-      elif game in games.COUPLE and "COUPLE" in self.difficulty:
-        self.difficulty[game] = copy.copy(self.difficulty["COUPLE"])
+        elif game in games.COUPLE and "COUPLE" in self.difficulty:
+          self.difficulty[game] = copy.copy(self.difficulty["COUPLE"])
 
     self.diff_list = {}
     for key in self.difficulty:    

@@ -93,6 +93,7 @@ default_conf = { # Wow we have a lot of options
   "ingamehelp": 1,
   "strobe": 0,
   "usemad": 1, "usepsyco": 1,
+  "autogen": 1,
   }
 
 for dummy, game in games.GAMES.items():

@@ -265,7 +265,8 @@ class SongSelect(object):
                          ["You don't have any songs with steps",
                           "for the game mode (%s) that you" % gametype.lower(),
                           "selected.",
-                          " ", "Install more songs, or try a different mode."])
+                          " ", "Install more songs, try a different mode,",
+                          "or enable autogeneration of steps."])
       return
 
     # Save the list of all the songs available, since self.songs will be
