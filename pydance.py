@@ -123,10 +123,9 @@ def main():
 
   menudriver.do(screen, (songs, courses, screen))
   music.stop()
-  pygame.display.quit()
+  pygame.quit()
   mainconfig.write(os.path.join(rc_path, "pydance.cfg"))
-  if mainconfig["saveinput"]:
-    pad.write(os.path.join(rc_path, "input.cfg"))
+  if mainconfig["saveinput"]: pad.write(os.path.join(rc_path, "input.cfg"))
   records.write()
 
 if __name__ == '__main__': main()
