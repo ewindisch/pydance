@@ -1,0 +1,19 @@
+This is my (piman's) rough outline of where I want to be. Other people,
+add to it.
+
+0.6.2
+ - Make pyddr.py use constants.py, new input manager, new menus.
+ - Clean up the main select/dance/judge loop.
+ - A release we can safely use for demos, packages, etc.
+
+0.6.3
+ - Player-as-object patch (possible 0.6.2).
+ - Extend constants.py to cover themes directories.
+ - Make theme-finding use rscdir (rsc_path?) and pyddr_path.
+
+0.6.4
+ - Separate Song (makes arrow events out of patterns), and SongFile.
+   (loads file, gets metadata, creates Song given a difficulty)
+   - This should remove fastSong.
+   - Possible 0.6.3.
+ - DWI loader natively using the SOngFile interface.
