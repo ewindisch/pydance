@@ -741,8 +741,7 @@ def sorted_diff_list(difflist):
 # Encapsulates and abstracts the above classes
 class SongItem(object):
 
-  formats = ((".step", StepFile),
-             (".dance", DanceFile),
+  formats = ((".dance", DanceFile),
              (".dwi", DWIFile),
              (".sm", SMFile),
              ("song.ogg", KSFFile),
