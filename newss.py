@@ -256,12 +256,12 @@ class BannerDisplay(pygame.sprite.Sprite):
     
     c1, c2 = [255, 255, 255], [30, 30, 30]
 
-    title = fontfx.shadow(self._title, pygame.font.Font(None, 36), 2, c1, c2)
+    title = fontfx.shadow(self._title, pygame.font.Font(None, 32), 2, c1, c2)
     r_t = title.get_rect()
     r_t.center = [179, 240]
     self.image.blit(title, r_t)
 
-    artist = fontfx.shadow(self._artist, pygame.font.Font(None, 30), 2, c1, c2)
+    artist = fontfx.shadow(self._artist, pygame.font.Font(None, 26), 2, c1, c2)
     r_a = artist.get_rect()
     r_a.center = [179, 320]
     self.image.blit(artist, r_a)
