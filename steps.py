@@ -133,8 +133,7 @@ class Steps:
         self.lastbpmchangetime.append([cur_time, cur_bpm])
 
       elif words[0] == "S":
-        cur_time += words[1]
-        tail = tail.next
+        cur_time += float(words[1])
 
       elif words[0] == "L" and lyrics:
         lyrics.addlyric(cur_time - 0.4, words[2], words[1])
