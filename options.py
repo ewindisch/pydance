@@ -289,14 +289,14 @@ class OptionScreen(InterfaceWindow):
     self._displayers = [OptionSelect(names, [415, 40],
                                      index_of(val, OPTS[0]))]
     self._index = [0]
-    ActiveIndicator([5, 110]).add(self._sprites)
+    ActiveIndicator([5, 106], height = 25, width = 185).add(self._sprites)
     if self._players == 2:
       self._lists.append(ListBox(pygame.font.Font(None, 24), [255, 255, 255],
                                  25, 9, 176, [453, 246]))
       self._index.append(0)
       self._text.append(WrapTextDisplay(28, 430, [10, 275], centered = True,
                                         str = OPTIONS[OPTS[0]][DESCRIPTION]))
-      ActiveIndicator([448, 345]).add(self._sprites)
+      ActiveIndicator([448, 341], height = 25, width = 185).add(self._sprites)
       val = self._configs[1][OPTS[0]]
       desc = OPTIONS[OPTS[0]][VALUES][index_of(val, OPTS[0])][DESCRIPTION]
       self._text2.append(WrapTextDisplay(22, 430, [10, 350], centered = True,

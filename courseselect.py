@@ -220,7 +220,7 @@ class CourseSelector(InterfaceWindow):
     for i in range(players):
       self._configs.append(dict(player_config))
 
-    ActiveIndicator([368, 310]).add(self._sprites)
+    ActiveIndicator([368, 306], height = 32, width = 266).add(self._sprites)
     HelpText(CS_HELP, [255, 255, 255], [0, 0, 0], pygame.font.Font(None, 20),
              [186, 20]).add(self._sprites)
 

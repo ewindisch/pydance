@@ -251,7 +251,7 @@ class SongSelect(InterfaceWindow):
         d.set("None", [127, 127, 127], 0, "?")
       self._diff_widgets.append(d)
     
-    ActiveIndicator([405, 259]).add(self._sprites)
+    ActiveIndicator([405, 259], width = 230).add(self._sprites)
     self._banner = BannerDisplay([350, 300], [210, 230])
     self._banner.set_song(self._song)
     self._sprites.add(HelpText(SS_HELP, [255, 255, 255], [0, 0, 0],

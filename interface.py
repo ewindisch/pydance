@@ -246,14 +246,41 @@ class HelpText(pygame.sprite.Sprite):
 
 # Flashy indicator for showing current menu position.
 class ActiveIndicator(pygame.sprite.Sprite):
-  def __init__(self, topleft):
+  def __init__(self, topleft, width = 220, height = 26):
     pygame.sprite.Sprite.__init__(self)
-    self.image = pygame.image.load(os.path.join(image_path, "indicator.png"))
-    self.image.convert()
+    img = pygame.image.load(os.path.join(image_path, "indicator.png"))
+    img = img.convert()
+    img.set_colorkey(img.get_at([0, 0]))
+
+    left, mid, right = self._left_mid_right(img)
+    bar = pygame.Surface([width, left.get_height()])
+    bar.blit(left, [0, 0])
+    bar.blit(pygame.transform.scale(mid, [width - 10, bar.get_height()]),
+             [5, 0])
+    bar.blit(right, [width - 5, 0])
+    bar.set_colorkey(bar.get_at([0, 0]))
+
+    self.image = pygame.Surface([width, height + bar.get_height()])
+    self.image.blit(bar, [0, 0])
+    self.image.blit(pygame.transform.rotate(bar, 180), [0, height])
     self.image.set_colorkey(self.image.get_at([0, 0]))
+
     self.rect = self.image.get_rect()
     self.rect.topleft = topleft
 
+  # Extract the left 5px, right 5px, and middle parts of an image.
+  def _left_mid_right(self, img):
+    left = pygame.Surface([5, img.get_height()])
+    left.blit(img, [0, 0])
+
+    right = pygame.Surface([5, img.get_height()])
+    right.blit(img, [5 - img.get_width(), 0])
+
+    mid = pygame.Surface([img.get_width() - 10, img.get_height()])
+    mid.blit(img, [-5, 0])
+
+    return left, mid, right
+                         
   def move(self, pt): self.rect.topleft = pt
 
   def update(self, time):

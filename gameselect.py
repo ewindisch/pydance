@@ -125,7 +125,7 @@ class MainWindow(InterfaceWindow):
     self._selected.set_text("4 panel")
     self._description.set_text(DESCRIPTIONS["4 panel"])
     self._sprites.add([self._title, self._selected, self._description])
-    self._indicator = ActiveIndicator([405, 152])
+    self._indicator = ActiveIndicator([405, 152], width = 230)
     self._sprites.add(self._indicator)
     self._sprites.add(HelpText(GS_HELP, [255, 255, 255], [0, 0, 0],
                                Font(None, 22), [206, 20]))
