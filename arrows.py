@@ -258,7 +258,7 @@ class HoldArrowSprite(AbstractArrow):
     
     holdsize = abs(bottom - top)
     if holdsize < 0: holdsize = 0
-    image = pygame.Surface([self.width, holdsize + 64])
+    image = pygame.Surface([self.width, holdsize + self.width])
     h_img = pygame.transform.scale(self.center_image, [self.width, holdsize])
     image.blit(h_img, [0, self.width / 2])
     image.blit(self.top_image, [0, 0])
