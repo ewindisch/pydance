@@ -7,7 +7,7 @@ import os, sys
 def sanity_check():
   print "Checking for appropriate libraries."
   print "Checking Python version... ",
-  print sys.version[:6] + "."
+  print sys.version[:5] + "."
   if sys.version_info < (2, 2):
     print "Versions of Python less than 2.2 are not supported by pydance."
     print "Visit http://www.python.org to upgrade."
@@ -16,7 +16,7 @@ def sanity_check():
   try:
     print "Checking for Pygame... ",
     import pygame
-    print pygame.version.ver
+    print pygame.version.ver + "."
     if pygame.version.vernum < (1, 5, 5):
       print "You have pygame, but a version less than 1.5.5."
       print "Visit http://www.pygame.org to upgrade."
@@ -28,15 +28,15 @@ def sanity_check():
 def detect_real_os():
   print "Detecting your operating system... ",
   if os.name == "nt":
-    print "Windows"
+    print "Windows."
     return "win32"
   elif os.name == "posix":
     print "POSIX -",
     if os.path.islink("/System/Library/CoreServices/WindowServer"):
-      print "MacOS X"
+      print "MacOS X."
       return "macosx"
     elif os.environ.has_key("HOME") and os.path.isdir("/etc"):
-      print "UNIX-like"
+      print "UNIX-like."
       return "posix"
     else:
       print "Unknown!"
@@ -45,7 +45,7 @@ def detect_real_os():
       sys.exit(1)
   else:
     print "Unknown"
-    print "Your platform isn't supported at all by pydance (yet)."
+    print "Your platform isn't supported with this install system (yet)."
     sys.exit(1)
 
 sanity_check()
@@ -71,7 +71,7 @@ if osname == "win32":
   print "Configuration for Win32 systems complete. No installation is needed."
   print "Make sure your pydance.cfg file points to your song directory."
 elif osname == "macosx":
-  print "Please use the DMG file on http://www.icculus.org/pyddr/get.php."
+  print "You're on your own, for now."
 elif osname == "posix":
   print "Configuration for UNIX-like systems complete. 'make install' should"
   print "properly install pydance, by default into /usr/local. You can override"
