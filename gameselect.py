@@ -68,6 +68,8 @@ IMAGES = {
     "Versus": make_versus,
     "Double": make_double,
     "Couple": make_couple,
+    "Normal": "select-normal.png",
+    "Nonstop": "select-nonstop.png",
     "Endless": "select-endless.png",
     }
 

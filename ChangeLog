@@ -13,6 +13,7 @@ Legend:
 + Add an icon (pydance-icon.png).
 + Using a pydance.zip (containing the modules needed) works now. (This
   is mostly of interest to packagers).
+* Images added for all interface options.
 * Fix a possible divide-by-zero in FPS calculuation.
 
 0.9.1 - This release is dedicated to Gentoo bug #35890.		[2004.02.11]
