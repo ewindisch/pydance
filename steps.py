@@ -94,10 +94,11 @@ class Steps:
           # Check for jumps on this note
           arrowcount = 0
           for jump in range(len(feetstep)):
-            if (feetstep[jump] & 1 and arrowcount != 0 and
-                mainconfig['badknees'] and holding[jump] == 0):
-              feetstep[jump] == 0
-            arrowcount += 1
+            if (feetstep[jump] & 1):
+              if (arrowcount != 0 and mainconfig['badknees'] and
+                  holding[jump] == 0):
+                feetstep[jump] = 0
+              arrowcount += 1
 
           # Check for holds
           for hold in range(len(feetstep)):
