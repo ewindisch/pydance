@@ -38,6 +38,9 @@ if osname == "posix":
 else: pydance_path = os.path.split(os.path.abspath(pydance_path))[0]
 sys.path.append(pydance_path)
 
+if os.path.exists(os.path.join(pydance_path, "pydance.zip")):
+  sys.path.append(os.path.join(pydance_path, "pydance.zip"))
+
 # Set up some names for commonly referenced directories
 image_path = os.path.join(pydance_path, "images")
 sound_path = os.path.join(pydance_path, "sound")
