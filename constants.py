@@ -2,7 +2,7 @@
 # This file should be kept as small as possible, probably. (But I seem
 # to be failing at doing that.)
 
-VERSION = "0.8.4"
+VERSION = "0.8.5"
 
 import config
 import pygame
