@@ -90,37 +90,38 @@ default_conf = {
   "strobe": 0,
   "usepsyco": 1,
   "autogen": 1,
+
+  # Player config
+  "spin": 0,
+  "accel": 0,
+  "transform": 0,
+  "scale": 1,
+  "speed": 1.0,
+  "fade": 0,
+  "size": 0,
+  "dark": 0,
+  "jumps": 1,
+  "holds": 1,
+  "colortype": 4,
+  "scrollstyle": 0,
+
+  # Game options
+  "battle": 0,
+  "scoring": 0,
+  "combo": 0,
+  "grade": 0,
+  "judge": 0,
+  "judgescale": 1.0,
+  "life": 1.0,
+  "secret": 1,
+  "lifebar": 0,
+  "onilives": 3,
   }
 
 for game in games.GAMES.values():
   default_conf["%s-theme" % game.theme] = game.theme_default
 
 mainconfig = config.Config(default_conf)
-
-player_config = {"spin": 0,
-                 "accel": 0,
-                 "transform": 0,
-                 "scale": 1,
-                 "speed": 1.0,
-                 "fade": 0,
-                 "size": 0,
-                 "dark": 0,
-                 "jumps": 1,
-                 "holds": 1,
-                 "colortype": 4,
-                 "scrollstyle": 0 }
-
-game_config = {"battle": 0,
-               "scoring": 0,
-               "combo": 0,
-               "grade": 0,
-               "judge": 0,
-               "judgescale": 1.0,
-               "life": 1.0,
-               "secret": 1,
-               "lifebar": 0,
-               "onilives": 3,
-               }
 
 if osname == "posix":
   mainconfig.load("/etc/pydance.cfg", True)
@@ -130,6 +131,15 @@ elif osname == "macosx":
 mainconfig.load("pydance.cfg")
 mainconfig.load(os.path.join(rc_path, "pydance.cfg"))
 mainconfig["sortmode"] %= 4
+
+player_config = dict([(k, mainconfig[k]) for k in
+                      ["spin", "accel", "transform", "scale", "speed",
+                       "fade", "size", "dark", "jumps", "holds", "colortype",
+                       "scrollstyle"]])
+
+game_config = dict([(k, mainconfig[k]) for k in
+                    ["battle", "scoring", "combo", "grade", "judge",
+                     "judgescale", "life", "secret", "lifebar", "onilives"]])
 
 pygame.init()
 

@@ -29,7 +29,7 @@ class ErrorMessage(InterfaceWindow):
     screen.blit(text, textpos)
 
     pygame.display.update()
-    ui.ui.empty()
+    ui.ui.clear()
 
     pid, ev = (0, ui.PASS)
     while ev not in [ui.START, ui.CONFIRM, ui.QUIT]:
