@@ -18,7 +18,7 @@ legend:
 + A new README that actually documents all the options!
 * Once again, numerous cleanups and bugs fixed.
 
-0.6.1 - The second one
+0.6.1 - The second one						[2003.04.09]
 + Experimental install system
   + Currently only works on Windows (and doesn't do much) and UNIX.
   + Manual pages included with pyDDR now.
@@ -27,7 +27,7 @@ legend:
 + Initial support for Nonstop mode, use the 'm' key to tag songs.
 + Support multiple song directories, use : or ; to separate paths.
 
-0.6.0 - Stop! DDR TIME!
+0.6.0 - Stop! DDR TIME!						[2003.03.28]
 + TWO PLAYER SUPPORT ("2" in song selector, or pick versus in menu)
   + THE KEYS HAVE CHANGED - arrows are now player 2, IJKL is player 1
   + if you have a dvorak keyboard, change qwerty to dvorak in pyddr.cfg
@@ -72,7 +72,7 @@ legend:
   + pyDDR tries to figure out where it's run from and add it to the path
 + removed numeric dependency
   
-0.5.8 - Doth mine ears deceive me?
+0.5.8 - Doth mine ears deceive me?				[2002.12.26]
 + the game now forces 44khz stereo 16bit for misbehaving song files
 + if 'file' is not specified in the step file, it is searched for.
 + added pgup/pgdn support to song selector to jump 5 songs per press
@@ -92,7 +92,7 @@ legend:
   + included new utility, stepshrink, to shrink empty notes on stepfiles
 + DWI2STEP now doesn't care if .DWI is capitalised (thanks alex!)
 
-0.5.7 - Teculine Precision release (grin)
+0.5.7 - Teculine Precision release (grin)			[2002.12.16]
 + song selector doesn't take time between songs anymore (thanks Nuitari!)
 + new arrow positioning code (more accurate bpm changes!) 
   - hold arrows still misbehave some in bpm changes, well, okay, a lot
@@ -104,7 +104,7 @@ legend:
 + option 'fullscreen' to force fullscreen on startup
 + option 'vesacompat' for TVout users having trouble with flicker
 
-0.5.6 - Hold on tight, we're going for a ride!
+0.5.6 - Hold on tight, we're going for a ride!			[2002.10.17]
 + HOLD/FREEZE ARROWS (arrows you need to hold for a certain time)
   + OK/NG onscreen judging as well as grading (do holds affect the grade?)
   - they look a bit kludgy, but they're clean
@@ -119,7 +119,7 @@ legend:
 + removed more delays in ddrmat.c - the game should run faster with 
   parallel mats (I gained 10fps)
   
-0.5.5 - Fee, Fi, Foo, Fix
+0.5.5 - Fee, Fi, Foo, Fix					[2002.09.18]
 + big major happy framerate improvement, even with backgrounds enabled
 + arrow coloring is no longer off for TRICK/MANIAC if BASIC ends offbeat
 + new message for impatient people before song selector starts =]
@@ -135,7 +135,7 @@ legend:
   + also spruced it up a little (see if you can tell what's new?)
 + included pyDDR music (loading and menu songs) are now OGG Vorbis (smaller)
 
-0.5.4 - Sing, Sing, Sing, with a DDR thing
+0.5.4 - Sing, Sing, Sing, with a DDR thing			[2002.07.04]
 + LYRICS SUPPORT
   + Oy, the lyrics option has always been there but no code to display em.
   + pyDDR comes with a lyrics tagger (lyricstag.py) that processes a text 
@@ -163,7 +163,7 @@ legend:
 + 'none' announcer theme works again (sorry about that)
 * fixed a few more sprite priorities
 
-0.5.2 - I'm seeing things again
+0.5.2 - I'm seeing things again					[2002.06.23]
 + BACKGROUND SUPPORT
   + option 'bgbrightness' in pyddr.cfg can be set from 0-255
   + font fixes to make text look good on background
@@ -179,7 +179,7 @@ legend:
 * bugfix: arrow effects/explosions on top of arrows again
 * bugfix: screenshots work again (hit 's' in the game)
 
-0.5.1 - I can see ASS in my dance
+0.5.1 - I can see ASS in my dance				[2002.06.07]
 + the author can finally pass afronova and paranoia in basic mode
 + ddrmat module cleanup (doesn't create kernel taints)
 + pyjoy is a little more verbose in describing what's going on
@@ -202,7 +202,7 @@ legend:
 + at last, pyDDR timing works on mu's machine. New option 'mixerclock' in 
   config file to get song position from SDL_mixer instead of system.
 
-0.5.0 - WHAT?! They done shot the tires on my van!
+0.5.0 - WHAT?! They done shot the tires on my van!		[2002.05.18]
 + pyDDR now REQUIRES at least Pygame 1.4.9, please install it!
   + exception raised if pygame 1.4.9 is not found
 + new options:
