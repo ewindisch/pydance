@@ -7,9 +7,10 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
-0.8.5								[2004.01.xx]
+0.8.5 - Great Three-Toed Sloth of Ice Planet Hoth!		[2004.01.xx]
 + "Click only" assist tick.
 + New grading screen... with groove graph!
+ + Thanks to sjbrown for the grade graphics.
 + Player's best/worst CRS file support.
 + There are now some command line options.
 + Player's best/worst and random courses generated internally.
