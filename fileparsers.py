@@ -42,7 +42,7 @@ class DanceFile:
 
   def parse_metadata(self, line, data):
     parts = line.split()
-    line2 = line.replace(parts[0], '').strip()
+    line2 = line[len(parts[0]):].strip()
     self.info[parts[0]] = line2
     return DanceFile.METADATA
 
