@@ -34,7 +34,8 @@ class UI(object):
     self.handler = handler
     self.events = {}
     self.states = {}
-
+    self.last_press = ((None, None), None)
+    self.last_repeat = 0
     self.merge_events(-2, key_defaults)
     self.merge_events(0, pad_defaults)
     self.merge_events(1, pad_defaults)
@@ -54,12 +55,20 @@ class UI(object):
     pid, ev = self.handler.poll(True)
 
     nev = self.events.get(abs(ev), PASS)
-    
+
+    if (nev == PASS and self.last_press[0][1] and
+        self.last_press[1] + 500 < pygame.time.get_ticks() and
+        self.last_repeat + 30 < pygame.time.get_ticks() and
+        self.states[self.last_press[0]] == True):
+      self.last_repeat = pygame.time.get_ticks()
+      return self.last_press[0]
+
     if ev < 0:
       self.states[(pid, nev)] = False
       nev = -nev
-    else:
+    elif ev != PASS:
       self.states[(pid, nev)] = True
+      self.last_press = ((pid, nev), pygame.time.get_ticks())
 
     return (pid, nev)
 
