@@ -1,7 +1,9 @@
 Bugs:
 -----
 Random results in bad hold arrows.
-
+Some arrows occassionally "black square" rather than explode?
+Hold arrows don't have a grace period.
+Hold arrows are drawn poorly.
 
 General:
 --------
