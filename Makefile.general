@@ -12,5 +12,5 @@ distclean: clean
 cvsclean: distclean
 	rm -rf CVS */CVS */*/CVS */*/*/CVS */*/*/*/CVS menuhelp
 
-docs:
-	lynx -dump docs/README.html README
+doc:
+	lynx -dump docs/README.html > README

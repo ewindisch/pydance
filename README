@@ -112,7 +112,7 @@ pyddr.cfg
           scoring and judging).
 
    reversescroll 0|1
-          Normally arrows scroll from botton to top. If this is on, they
+          Normally arrows scroll from bottom to top. If this is on, they
           will scroll from top to bottom.
 
    scrollspeed [num] (default 1.0)
@@ -154,10 +154,6 @@ pyddr.cfg
    fpsdisplay 1|0
           If this is on pyDDR will display an FPS counter in the corner.
           See the FAQ for what to do if your FPS is very low.
-
-   fullscreen 0|1
-          If this is set to 1, pyDDR will start up in fullscreen mode. 
-          Otherwise, the game will open in a window.
 
    gfxtheme [themename]
           Sets your graphical theme (affecting the look of the arrows and
@@ -228,11 +224,11 @@ pyddr.cfg
           between the position in the song and the arrows displayed.
 
    onboardaudio 0|1
-          Some systems (especially laptops and motherboards with built-in 
-          sound) use sound cards that resample sound in really stupid 
-          ways, which may make pyDDR play songs such that they "drift" in 
-          relation to the steps. If you seem to be having drifting issues 
-          in all the songs you play, you should try turning this on.
+          Some systems (especially laptops) use sound cards that resample
+          sound in really stupid ways, which may make pyDDR play songs
+          such that they "drift" in relation to the steps. If you seem to
+          be having drifting issues in all the songs you play, you should
+          try turning this on.
 
    previewmusic 1|0
           If this is on, the song selection screen will play a brief
