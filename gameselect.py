@@ -1,182 +1,213 @@
-# Select the number of panels, game mode, and song selector.
-
 from constants import *
-from songselect import SongSelect
-from endless import Endless
-from courses import CourseSelector
-from newss import MainWindow
+from newss import ListBox, HelpText, ActiveIndicator, TextDisplay
+from pygame.font import Font
 
 import ui
+import newss, courses, endless, songselect
 
-import colors
-import games
+class WrapTextDisplay(pygame.sprite.Sprite):
+  def __init__(self, font, size, topleft, str = " "):
+    pygame.sprite.Sprite.__init__(self)
+    self._text = " "
+    self._font = font
+    self._size = size
+    self._topleft = topleft
+    self._render()
+
+  def _render(self):
+    self._needs_update = False
+    lines = []
+    words = self._text.split()
+    start = 0
+    for i in range(len(words)):
+      if self._font.size(" ".join(words[start:i + 1]))[0] > self._size[0]:
+        t = self._font.render(" ".join(words[start:i]), True, [255, 255, 255])
+        lines.append(t)
+        start = i
+    t = self._font.render(" ".join(words[start:]), True, [255, 255, 255])
+    lines.append(t)        
+
+    self.image = pygame.Surface(self._size, SRCALPHA, 32)
+    self.image.fill([0, 0, 0, 0])
+    for i in range(len(lines)):
+      self.image.blit(lines[i], [0, i * self._font.get_linesize()])
+    self.rect = self.image.get_rect()
+    self.rect.topleft = self._topleft
+
+  def set_text(self, text):
+    self._text = text
+    self._needs_update = True
+
+  def update(self, time):
+    if self._needs_update: self._render()
+
+GS_HELP = [
+  "Up / Down moves through list",
+  "Confirm / O / Up Right advances your choice",
+  "Escape / X / Up Left backs up or exits",
+  "F11 toggles fullscreen",
+  "Enjoy pydance 0.9.0!",
+  ]
+
+GAMES = ["4 panel", "5 panel", "6 panel", "8 panel", "9 panel",
+         "Parapara", "DMX"]
+TYPES = ["Single", "Versus", "Double", "Couple"]
+SS = ["Normal", "Nonstop", "Endless", "Testing"]
 
 SELECTORS = {
-  "Normal": SongSelect,
-  "Endless": Endless,
-  "Nonstop": CourseSelector,
-  "Testing": MainWindow,
+  "Normal": songselect.SongSelect,
+  "Endless": endless.Endless,
+  "Nonstop": courses.CourseSelector,
+  "Testing": newss.MainWindow,
   }
 
-# We can probably autogenerate this list somehow.
-# Maybe should also be in games?
 MODES = {
-  ("4P", "SINGLE"): "SINGLE",
-  ("4P", "VERSUS"): "VERSUS",
-  ("4P", "COUPLE"): "COUPLE",
-  ("4P", "DOUBLE"): "DOUBLE",
+  ("4 panel", "Single"): "SINGLE",
+  ("4 panel", "Versus"): "VERSUS",
+  ("4 panel", "Couple"): "COUPLE",
+  ("4 panel", "Double"): "DOUBLE",
 
-  ("5P", "SINGLE"): "5PANEL",
-  ("5P", "VERSUS"): "5VERSUS",
-  ("5P", "COUPLE"): "5COUPLE",
-  ("5P", "DOUBLE"): "5DOUBLE",
+  ("5 panel", "Single"): "5PANEL",
+  ("5 panel", "Versus"): "5VERSUS",
+  ("5 panel", "Couple"): "5COUPLE",
+  ("5 panel", "Double"): "5DOUBLE",
 
-  ("6P", "SINGLE"): "6PANEL",
-  ("6P", "VERSUS"): "6VERSUS",
-  ("6P", "COUPLE"): "6COUPLE",
-  ("6P", "DOUBLE"): "6DOUBLE",
+  ("6 panel", "Single"): "6PANEL",
+  ("6 panel", "Versus"): "6VERSUS",
+  ("6 panel", "Couple"): "6COUPLE",
+  ("6 panel", "Double"): "6DOUBLE",
 
-  ("8P", "SINGLE"): "8PANEL",
-  ("8P", "VERSUS"): "8VERSUS",
-  ("8P", "COUPLE"): "8COUPLE",
-  ("8P", "DOUBLE"): "8DOUBLE",
+  ("8 panel", "Single"): "8PANEL",
+  ("8 panel", "Versus"): "8VERSUS",
+  ("8 panel", "Couple"): "8COUPLE",
+  ("8 panel", "Double"): "8DOUBLE",
 
-  ("9P", "SINGLE"): "9PANEL",
-  ("9P", "VERSUS"): "9VERSUS",
-  ("9P", "COUPLE"): "9COUPLE",
-  ("9P", "DOUBLE"): "9DOUBLE",
+  ("9 panel", "Single"): "9PANEL",
+  ("9 panel", "Versus"): "9VERSUS",
+  ("9 panel", "Couple"): "9COUPLE",
+  ("9 panel", "Double"): "9DOUBLE",
 
-  ("PARA", "SINGLE"): "PARAPARA",
-  ("PARA", "VERSUS"): "PARAVERSUS",
-  ("PARA", "COUPLE"): "PARACOUPLE",
-  ("PARA", "DOUBLE"): "PARADOUBLE",
+  ("Parapara", "Single"): "PARAPARA",
+  ("Parapara", "Versus"): "PARAVERSUS",
+  ("Parapara", "Couple"): "PARACOUPLE",
+  ("Parapara", "Double"): "PARADOUBLE",
 
-  ("DMX", "SINGLE"): "DMX",
-  ("DMX", "VERSUS"): "DMXVERSUS",
-  ("DMX", "COUPLE"): "DMXCOUPLE",
-  ("DMX", "DOUBLE"): "DMXDOUBLE",
+  ("DMX", "Single"): "DMX",
+  ("DMX", "Versus"): "DMXVERSUS",
+  ("DMX", "Couple"): "DMXCOUPLE",
+  ("DMX", "Double"): "DMXDOUBLE",
   }
 
-# Descriptions to output on the screen for each mode.
 DESCRIPTIONS = {
-  "4P": "The standard up, down, left, and right arrows.",
-  "5P": "Diagonals and the center.",
-  "6P": "4 panel with a twist.",
-  "8P": "Dance around the whole pad.",
-  "9P": "Every button is used.",
-  "PARA": "Wave your arms (or feet) around.",
-  "DMX": "Crazy kung-fu action.",
+  "4 panel": "The standard up, down, left and right arrows (like Dance Dance Revolution)",
+  "5 panel": "Diagonal arrows and the center (like Pump It Up)",
+  "6 panel": "Four panel plus the upper diagonal arrows (like DDR Solo)",
+  "8 panel": "Everything but the center (like Technomotion)",
+  "9 panel": "Everything! (like Pop'n'Stage)",
+  "Parapara": "Wave your arms (or feet) around",
+  "DMX": "Crazy kung-fu action (like Dance ManiaX / Dance Freaks)",
 
-  "SINGLE": "Play by yourself.",
-  "VERSUS": "Challenge an opponent to the same steps.",
-  "COUPLE": "Two people dance complementary steps.",
-  "DOUBLE": "Try playing on both sides at once.",
+  "Single": "Play by yourself.",
+  "Versus": "Challenge an opponent to the same steps.",
+  "Couple": "Two people dance different steps to the same song.",
+  "Double": "Try playing on both sides at once.",
 
-  "Normal": "One song at a time, or set up a playlist.",
+  "Normal": "One song at a time.",
   "Endless": "Keep dancing until you fail.",
   "Nonstop": "Several songs in a row.",
   "Testing": "Try out the incomplete new song selector."
   }
 
-class GameSelect(object):
-  def __init__(self, songitems, courses, screen):
-    self.screen = screen
-    if len(courses): self.courses = True
-    else: self.courses = False
+class MainWindow(object):
+  def __init__(self, songs, courses, screen):
+    self._screen = screen
+    self._bg = pygame.image.load(os.path.join(image_path, "gameselect-bg.png"))
+    self._bg = self._bg.convert()
+    self._sprites = pygame.sprite.RenderUpdates()
+    self._songs = songs
+    self._courses = courses
+    self._indicator_y = [152, 322, 414]
+    self._message = ["Select a Game", "Select a Mode", "Select Type"]
+    if len(courses) == 0 and "Nonstop" in SS: SS.remove("Nonstop")
 
-    # Store previously selected images, to blit for each choice.
-    self.images = [None, None, None]
+    font = Font(None, 26)
+    self._lists = [ListBox(font, [255, 255, 255], 26, 8, 220, [408, 53]),
+                   ListBox(font, [255, 255, 255], 26, 4, 220, [408, 275]),
+                   ListBox(font, [255, 255, 255], 26, 3, 220, [408, 393])]
+    self._lists[0].set_items(GAMES)
+    self._lists[1].set_items(TYPES)
+    self._lists[2].set_items(SS)
 
-    # FIXME: This can be changed to something more attractive later.
-    self.bg = pygame.image.load(os.path.join(image_path, "bg.png"))
+    self._title = TextDisplay(24, [210, 28], [414, 26])
+    self._selected = TextDisplay(48, [400, 28], [15, 380])
+    self._description = WrapTextDisplay(Font(None, 30), [360, 340], [25, 396])
+    self._title.set_text(self._message[0])
+    self._selected.set_text("4 panel")
+    self._description.set_text(DESCRIPTIONS["4 panel"])
+    self._sprites.add([self._title, self._selected, self._description])
+    self._indicator = ActiveIndicator([405, 152])
+    self._sprites.add(self._indicator)
+    self._sprites.add(HelpText(GS_HELP, [255, 255, 255], [0, 0, 0],
+                               Font(None, 22), [206, 20]))
+    self._sprites.add(self._lists)
+    self._screen.blit(self._bg, [0, 0])
+    self._sprites.update(pygame.time.get_ticks())
+    self._sprites.draw(self._screen)
+    pygame.display.update()
+    self.loop()
 
-    # FIXME: We really need to do pretty animations and stuff.
+  def update(self):
+    self._sprites.update(pygame.time.get_ticks())
+    pygame.display.update(self._sprites.draw(self._screen))
+    self._sprites.clear(self._screen, self._bg)
 
-    # Track our current state so Esc takes us back to the previous choice,
-    # and not the menu.
-    states = [self.select_mode, self.select_submode, self.select_selector]
-    self.values = [None, None, None]
-    state = 0
-
-    while state != -1: # Esc pressed from first choice, return to menu
-      val = states[state]()
-      self.values[state] = val
-
-      if val is None: state -= 1
-      else: state += 1
-
-      if state == len(states): # All choices done, start the game
-        SELECTORS[self.values[2]](songitems, courses, screen,
-                                  MODES.get((self.values[0], self.values[1])))
-
-        # After playing, reset to the first choice.
-        # FIXME: Is going to the menu a better idea? Do more people exit the
-        # SS to change options, or to play a different game type?
-
-        self.values = [None, None, None]
-        self.images = [None, None, None]
-        state = 0
-
-  def select_mode(self):
-    return self.select_general(0, ["4P", "5P", "6P", "8P", "9P",
-                                   "PARA", "DMX"])
-
-  def select_submode(self):
-    return self.select_general(1, ["SINGLE", "VERSUS", "COUPLE", "DOUBLE"])
-
-  def select_selector(self):
-    s = ["Normal", "Endless", "Testing"]
-    if self.courses: s.append("Nonstop")
-    return self.select_general(2, s)
-
-  # idx is the index in self.images to modify with this choice.
-  def select_general(self, idx, choices):
+  def loop(self):
+    values = [GAMES, TYPES, SS]
+    active = 0
     clock = pygame.time.Clock()
-    images = {}
+    indices = [0, 0, 0]
+    pid, ev = ui.ui.poll()
+    
+    self._lists[0].set_index(0)
+    self._lists[1].set_index(0)
+    self._lists[2].set_index(0)
 
-    for i in choices:
-      images[i] = pygame.image.load(os.path.join(image_path,
-                                                 "select-%s.png" % i.lower()))
-      images[i].convert()
+    while not (ev == ui.CANCEL and active == 0):
 
-    if self.values[idx] != None: index = choices.index(self.values[idx])
-    else: index = 0
-
-    ev = ui.PASS
-    while ev != ui.QUIT:
-
-      # FIXME: If the player ID is > 0, limit the available game types
-      # to 2 player modes.
-      pid, ev = ui.ui.poll()
-
-      if ev == ui.LEFT: index -= 1
-      elif ev == ui.RIGHT: index += 1
-      elif ev == ui.START:
-        return choices[index]
+      if ev == ui.UP: indices[active] -= 1
+      elif ev == ui.DOWN: indices[active] += 1
 
       elif ev == ui.FULLSCREEN:
         mainconfig["fullscreen"] ^= 1
         pygame.display.toggle_fullscreen()
 
-      index %= len(choices)
-      self.images[idx] = images[choices[index]]
+      elif ev == ui.CANCEL:
+        active -= 1
+      elif ev == ui.CONFIRM:
+        if active == 2:
+          SELECTORS[SS[indices[2]]](self._songs, self._courses, self._screen,
+                                    MODES.get((values[0][indices[0]],
+                                               values[1][indices[1]])))
+          indices = [0, 0, 0]
+          active = 0
+          self._screen.blit(self._bg, [0, 0])
+          pygame.display.update()
+        else:
+          active += 1
 
-      # Update the screen
-      self.screen.blit(self.bg, [0, 0])
+      indices[active] %= len(values[active])
 
-      for i in range(len(self.images)):
-        if self.images[i] is not None:
-          r = self.images[i].get_rect()
-          r.center = [int(640.0 / (len(self.images) + 1) * (i + 1)), 240]
-          self.screen.blit(self.images[i], r)
+      if ev in [ui.UP, ui.DOWN]:
+        self._lists[active].set_index(indices[active])
+        self._selected.set_text(values[active][indices[active]])
+        self._description.set_text(DESCRIPTIONS[values[active][indices[active]]])
 
-      text = FONTS[28].render(DESCRIPTIONS[choices[index]], 1, colors.BLACK)
-      r = text.get_rect()
-      r.center = [320, 420]
-      self.screen.blit(text, r)
+      if ev in [ui.CONFIRM, ui.CANCEL]:
+        self._indicator.move([405, self._indicator_y[active]])
+        self._title.set_text(self._message[active])
+        self._selected.set_text(values[active][indices[active]])
+        self._description.set_text(DESCRIPTIONS[values[active][indices[active]]])
 
-      pygame.display.update()
-      clock.tick(10)
-
-    self.images[idx] = None
-    return None
+      clock.tick(60)
+      self.update()
+      pid, ev = ui.ui.poll()

@@ -251,6 +251,8 @@ class ActiveIndicator(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.topleft = topleft
 
+  def move(self, pt): self.rect.topleft = pt
+
   def update(self, time):
     self.image.set_alpha(int(255 * (0.3 + (math.sin(time / 720.0)**2 / 3.0))))
 
@@ -283,7 +285,7 @@ class DifficultyBox(pygame.sprite.Sprite):
 class ListBox(pygame.sprite.Sprite):
   def __init__(self, font, color, spacing, count, width, topleft):
     pygame.sprite.Sprite.__init__(self)
-    self._idx = self._oldidx = 0
+    self._idx = self._oldidx = -count / 2
     self._h = spacing
     self._count = count
     self._w = width
@@ -306,7 +308,7 @@ class ListBox(pygame.sprite.Sprite):
 
   def set_index(self, idx):
     self._oldidx = self._idx
-    self._idx = idx
+    self._idx = idx - self._count / 2
     self._needs_update = True
 
   def update(self, time):
@@ -502,7 +504,7 @@ class MainWindow(object):
     
     self._sprites.add(self._diff_widgets)
     self._sprites.add(self._list)
-    ActiveIndicator([405, 233]).add(self._sprites)
+    ActiveIndicator([405, 259]).add(self._sprites)
     self._banner = BannerDisplay([350, 300], [210, 230])
     self._banner.set_song(self._song)
     self._banner.add(self._sprites)
@@ -524,7 +526,7 @@ class MainWindow(object):
 
   def loop(self):
     pid, ev = ui.ui.poll()
-    self._list.set_index(self._index - 7)
+    self._list.set_index(self._index)
     self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
                                                          len(self._songs)))
     while not (ev == ui.CANCEL and (not self._folders or self._song.isfolder)):
@@ -600,7 +602,7 @@ class MainWindow(object):
         self._banner.set_song(self._song)
 
       if ev in [ui.CANCEL, ui.UP, ui.DOWN, ui.SELECT, ui.CONFIRM, ui.SORT]:
-        self._list.set_index(self._index - 7)
+        self._list.set_index(self._index)
         self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
                                                              len(self._songs)))
 

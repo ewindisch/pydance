@@ -4,7 +4,7 @@ import pygame, menus, os, sys, copy, colors, games, ui, pad
 from constants import *
 from announcer import Announcer
 from gfxtheme import ThemeFile
-from gameselect import GameSelect
+from gameselect import MainWindow as GameSelect
 
 # A simple on/off setting, 1 or 0
 def get_onoff(name):
