@@ -49,7 +49,7 @@ class MenuItem:
       self.alpha = TRANSPARENT
       self.render()
     elif self.callbacks == None:
-      if ev == E_START:
+      if ev == E_START or ev == E_RIGHT or ev == E_LEFT:
         return E_QUIT # This is a back button
       else: return ev # Shouldn't happen
     elif callable(self.callbacks.get(ev)):
@@ -116,7 +116,7 @@ class Menu:
     self.image.set_alpha(self.alpha)
 
   def activate(self, ev):
-    if ev == E_START:
+    if ev == E_START or ev == E_RIGHT:
       self.display()
     elif ev == E_SELECT:
       self.rgb = colors.WHITE
@@ -187,7 +187,6 @@ class Menu:
                        TOP_OFFSET + i * (BUTTON_HEIGHT + BUTTON_PADDING)))
 
       pygame.display.flip()
-      
       pygame.time.wait(30)
 
     if ev == E_QUIT:

@@ -73,14 +73,9 @@ if osname == "win32":
   print "Configuration for Win32 systems complete. No installation is needed."
   print "Make sure your pyddr.cfg file points to your song directory."
 elif osname == "macosx":
-  print "This OSs support is not yet integrated into this program."
-  print "Please use the DMG file on http://www.icculus.org/pyddr."
+  print "Please use the DMG file on http://www.icculus.org/pyddr/get.php."
 elif osname == "posix":
   print "Configuration for UNIX-like systems complete. 'make install' should"
   print "properly install pyDDR, by default into /usr/local. You can override"
   print "this by setting $PREFIX. You can also set $DESTDIR, which will be"
   print "prepended to all installation paths."
-
-  if os.path.exists("/vmlinuz"):
-    print "\nLinux users may wish to examine the joystick driver in ddrmat/, too."
-

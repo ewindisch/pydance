@@ -1,48 +1,42 @@
-This is my (piman's) rough outline of where I want to be. Other people,
-add to it.
-
-0.6.3
+Bug Fixes
  - FIX ARROW COUNTING BUG - at least as far back as 0.6.1
- - Have installer files for Mac OS X.
- - better help in game (sort of done)
- - Clean up the main select/dance/judge loop. (3/4th done)
- - Player-as-object patch (in progress)
-   - Removal of keykludge (yay!)
- - Separate Song (makes arrow events out of patterns), and SongFile.
-   (loads file, gets metadata, creates Song given a difficulty)
-   - Removes fastSong (done)
- - New song select (done)
- - Support A2B8 pads (need more info...)
+ - Support A2B8 pads, if they don't work.
 
-0.6.4
- - Removal of Song
-  - Replace with "Steps" object in the Player object
-   - Generated from SongItem
- - Standardization on the forthcoming ".dance" format.
-
-0.6.x
- - High score files (0.6.4?)
- - Savable courses (0.6.4?)
- - Endless (0.6.3?) - Yes
- - DWI loader natively using the SongItem interface
- - Sort by popularity (uses high score mechanism)
- - Refactor Judge & pluggable grading algorithms
- - Themable menus
- - Credits screen
- - MD5 checksums in files for the music they go with
-
-UI changes (doable at any time):
+UI Fixes & Improvements
+ - In-game help (menu context help, mostly).
  - Go faster after scrolling through a few songs
  - Up/down indicators on menus
-
-Far Future:
- - More game modes
  - Menu and song select theming (including new songselect.pys)
+ - Make quitting from the menus more difficult?
+ - Eat button double taps
+ - Per player themes
+ - "Ready? Go!" screen
 
-Ideas from pyddr.txt:
----------------------
-option for classic or new (pyddr/ddrmax) judging style on jumps
-jump to song (we *need* either this, or submenu song selects)
+Code Refactors & Cleanups
+ - Removal of Song
+ - Replace with "Steps" object in the Player object
+  - Generated from SongItem
+  - '.dance' format forthcoming.
+ - Player-as-object patch (in progress, needs a lot of work)
+ - Judge refactor (for pluggable grading algorithms)
+
+Song Selector Improvements
+ - Better graphics
+ - High scores
+ - Sort by popularity
+  - Weighted randomize
+ - Savable courses
+ - Folders
+
+Menus
+ - Credits screen
+ - Better organized options
+ - Player profiles
+
+Gameplay
+ - "Tug of war" lifebar in addition to the regular one.
+ - Disney-style versus
+ - Option for classic or Max/pyDDR style judging of jumps.
 
 STUFF ANNOUNCER SHOULD SAY
 --------------------------
@@ -67,6 +61,7 @@ NEAT STUFF
 NOTES ON THE SOURCE
 -------------------
 (We need to verify this and remove parts that aren't true anymore):
+
 res 640x480 (fullscreen adjustable?)
 
 arrows 64x64: 512W with 12Wx8 gaps: 608. 32W gap in center.
