@@ -7,9 +7,8 @@ import pygame, glob, colors
 from constants import *
 
 class SimpleSprite(pygame.sprite.Sprite):
-  def __init__ (self, file, zindex=DEFAULTZINDEX):
+  def __init__ (self, file):
     pygame.sprite.Sprite.__init__(self)
-    self.zindex=zindex
     image = pygame.image.load(file).convert()
     image.set_colorkey(image.get_at((0,0)))
     self.fn = file
@@ -36,9 +35,8 @@ class SimpleSprite(pygame.sprite.Sprite):
     return '<Sprite fn=%r rect=%r>'%(self.fn,self.rect)
 
 class BlankSprite(SimpleSprite):
-  def __init__ (self, res, fill=colors.BLACK,zindex=DEFAULTZINDEX):
+  def __init__ (self, res, fill=colors.BLACK):
     pygame.sprite.Sprite.__init__(self)
-    self.zindex=zindex
     image = pygame.Surface(res)
     if fill is not None: image.fill(fill)
     self.image = image
@@ -48,9 +46,8 @@ class BlankSprite(SimpleSprite):
     return '<Sprite rect=%r>'%(self.rect)
 
 class CloneSprite(BlankSprite):
-  def __init__ (self, spr,zindex=DEFAULTZINDEX):
+  def __init__ (self, spr):
     pygame.sprite.Sprite.__init__(self)
-    self.zindex=zindex
     self.image = spr.convert()
     try:
       self.rect = Rect(spr.rect)
@@ -62,9 +59,8 @@ class TransformSprite(BlankSprite):
   _rotate = pygame.transform.rotate
   _flip = pygame.transform.flip
   _scale = pygame.transform.scale
-  def __init__ (self, spr, scale=None, size=None, zindex=DEFAULTZINDEX,hflip=0,vflip=0,angle=None,filter=None):
+  def __init__ (self, spr, scale=None, size=None,hflip=0,vflip=0,angle=None,filter=None):
     pygame.sprite.Sprite.__init__(self)
-    self.zindex=zindex
     image = None
     try:
       image = spr.image
@@ -96,7 +92,7 @@ class TextSprite(BlankSprite):
 
 # acts like a subclass of Sprite
 class SimpleAnim:
-  def __init__ (self, path, prefix, separator, imgtype='png', frameNumbers=None, files=None, zindex=DEFAULTZINDEX):
+  def __init__ (self, path, prefix, separator, imgtype='png', frameNumbers=None, files=None):
     frames = []
     if files is None:
       if frameNumbers is None:
@@ -105,7 +101,7 @@ class SimpleAnim:
         files=[]
         for i in frameNumbers: 
           files.append(os.path.join(path,separator.join([prefix,"%d.%s"%(i,imgtype)])))
-    self.frames=map(lambda fn,SimpleSprite=SimpleSprite,zindex=zindex: SimpleSprite(fn,zindex=zindex), files)
+    self.frames=map(lambda fn,SimpleSprite=SimpleSprite: SimpleSprite(fn), files)
     self.curframe = 0
 
   def update(self):
@@ -145,38 +141,3 @@ class BGimage(pygame.sprite.Sprite):
       self.rect = self.image.get_rect()
       self.rect.top = 0
       self.rect.left = 0
-
-class RenderLayered(pygame.sprite.RenderClear):
-  def draw(self,surface):
-    spritedict = self.spritedict
-    surface_blit = surface.blit
-    dirty = self.lostsprites
-    dirty_append = dirty.append
-    self.lostsprites = []
-    sitems=spritedict.items()
-    sitems.sort(lambda a,b: cmp(a[0].zindex,b[0].zindex))
-    for s,r in sitems:
-      newrect = surface_blit(s.image,s.rect)
-      if r is 0:
-        dirty_append(newrect)
-      else:
-        dirty_append(newrect.union(r))
-      spritedict[s] = newrect
-    return dirty
-
-  # Override the add method so we can add lists of items
-  def add(self, sprite):
-    if type(sprite) == type((0,0)) or type(sprite) == type([]):
-      for spr in sprite: self.add(spr)
-    else: pygame.sprite.RenderClear.add(self, sprite)
-
-  def ordersprites(self):
-    " self.ordersprites() -> overlaplist, cleanlist"
-    dirty=[]
-    clean=[]
-    dirty_append=dirty.append
-    clean_append=clean.append
-    sprlist = self.sprites
-    while len(sprlist):
-      sprite1 = sprlist.pop(0)
-      spritecollide = sprite.rect.colliderect

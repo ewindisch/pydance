@@ -260,6 +260,7 @@ class SongSelect:
       # Player n+1 hit start, so add a new player
       elif ev[1] == E_START and ev[0] == len(self.player_diffs):
         self.player_diffs.append(0)
+        self.player_diff_names.append(self.current_song.diff_list[gametype][0])
         file = os.path.join(image_path, "player" + str(ev[0]) + ".png")
         self.player_image.append(pygame.image.load(file))
         self.diff_list = []

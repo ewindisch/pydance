@@ -17,6 +17,8 @@ from gfxtheme import GFXTheme
 from player import Player
 from spritelib import *
 
+from pygame.sprite import *
+
 import fontfx, menudriver, fileparsers, colors, gradescreen, steps
 
 import os, sys, random, operator, string, util
@@ -24,8 +26,6 @@ import os, sys, random, operator, string, util
 from stat import *
 
 os.chdir(pyddr_path)
-
-pygame.sprite.Sprite.zindex = DEFAULTZINDEX
 
 songdir = mainconfig['songdir']
 
@@ -268,8 +268,7 @@ class ComboDisp(pygame.sprite.Sprite):
     self.lowcombo = mainconfig['lowestcombo']
 
     self.trect = 296 + (mainconfig['totaljudgings'] * 24)
-    self.playernum = playernum
-    self.centerx = (320*self.playernum) + 160
+    self.centerx = (320*playernum) + 160
     
     fonts = []
     for x in range(11, 0, -1):
@@ -288,8 +287,9 @@ class ComboDisp(pygame.sprite.Sprite):
         img3.set_colorkey(img3.get_at((0, 0)))
         render.append(img3)
       self.words.append(render)
-
-    self.dirty = 0
+    self.space = pygame.surface.Surface((0,0)) #make a blank image
+    self.image = self.space
+    self.rect = Rect(0,0,0,0)
 
   def update(self, xcombo, steptimediff):
     if steptimediff < 0.36 or self.sticky:
@@ -297,15 +297,17 @@ class ComboDisp(pygame.sprite.Sprite):
       self.drawsize = min(int(steptimediff*50), len(self.words)-1)
     else:
       self.drawcount = 0
-
-  def draw(self, screen):
     if self.drawcount >= self.lowcombo:
       render = self.words[self.drawsize]
       width = render[-1].get_width()
+      thousands = self.drawcount /1000
       hundreds = self.drawcount / 100
       tens = self.drawcount / 10
       ones = self.drawcount % 10
       #get width
+      if thousands:
+        thousands = render[thousands%10]
+        width += thousands.get_width()      
       if hundreds:
         hundreds = render[hundreds%10]
         width += hundreds.get_width()
@@ -314,23 +316,29 @@ class ComboDisp(pygame.sprite.Sprite):
         width += tens.get_width()
       ones = render[ones]
       width += ones.get_width()
-      startleft = left = self.centerx - width / 2
+      height = render[-1].get_height()
+      self.image = pygame.surface.Surface((width,height))
+      self.image.set_colorkey(ones.get_at((0, 0)))
+      left = 0		      
       #render
+      if thousands:
+        self.image.blit(thousands, (left,0))
+        left+= thousands.get_width()
       if hundreds:
-        screen.blit(hundreds, (left, self.trect))
+        self.image.blit(hundreds, (left, 0))
         left += hundreds.get_width()
       if tens:
-        screen.blit(tens, (left, self.trect))
+        self.image.blit(tens, (left, 0))
         left += tens.get_width()
-      screen.blit(ones, (left, self.trect))
+      self.image.blit(ones, (left, 0))
       left += ones.get_width()
-      r = screen.blit(render[-1], (left, self.trect))
-      self.dirty = Rect(startleft, r.top, r.right - startleft, r.height)
-
-  def clear(self, screen, bgd):
-    if self.dirty:
-      screen.blit(bgd, self.dirty, self.dirty)
-      self.dirty = 0
+      r = self.image.blit(render[-1], (left, 0))
+      self.rect = self.image.get_rect()
+      self.rect.top=self.trect
+      self.rect.left=self.centerx - width/ 2
+    else :
+      self.image = self.space #display the blank image
+ 
 
 class HoldJudgeDisp(pygame.sprite.Sprite):
     def __init__(self, playernum):
@@ -536,7 +544,7 @@ class ArrowSprite(CloneSprite):
                                                  "assist-" + d + ".ogg"))
   
   def __init__ (self, spr, curtime, endtime, player):
-    CloneSprite.__init__(self, spr, ARROWZINDEX)
+    CloneSprite.__init__(self, spr)
     self.endtime = endtime
     self.life  = endtime - curtime
     self.curalpha = -1
@@ -647,7 +655,7 @@ class ArrowSprite(CloneSprite):
 
 class HoldArrowSprite(CloneSprite):
   def __init__ (self, spr, curtime, times, player):
-    CloneSprite.__init__(self, spr, zindex=ARROWZINDEX)
+    CloneSprite.__init__(self, spr)
     self.timef1 = times[1]
     self.timef2 = times[2]
     self.timef = times[2]
@@ -989,19 +997,19 @@ def dance(song, players, prevscr):
   pygame.mixer.init()
 
   # render group, almost[?] every sprite that gets rendered
-  rgroup = RenderLayered()
+  rgroup = RenderUpdates()
   # text group, EG. judgings and combos
-  tgroup = RenderLayered()  
+  tgroup =  RenderUpdates()  
   # special group for top arrows
-  sgroup = RenderLayered()
+  sgroup =  RenderUpdates()
   # special group for arrowfx
-  fgroup = RenderLayered()
+  fgroup =  RenderUpdates()
   
   # lyric display group
-  lgroup = RenderLayered()
+  lgroup = RenderUpdates()
 
   # background group
-  bgroup = RenderLayered()
+  bgroup = RenderUpdates()
 
   if song.movie != None:
     backmovie = BGmovie(song.movie)
@@ -1064,6 +1072,10 @@ def dance(song, players, prevscr):
     lgroup.add(song.lyricdisplay.channels.values())
 
   showcombo = mainconfig['showcombo']
+
+  if showcombo:
+    for plr in players:
+      tgroup.add(plr.combos)
   
   bg = pygame.Surface(screen.get_size())
   bg.fill(colors.BLACK)
@@ -1239,19 +1251,16 @@ def dance(song, players, prevscr):
       timewatch.update(curtime)
 
     # more than one display.update will cause flicker
-    sgroup.draw(screen)
+    rectlist = sgroup.draw(screen) #rectlist = list of changed rectangles
 
     for plr in players:
-      plr.arrow_group.draw(screen)
+      rectlist.extend( plr.arrow_group.draw(screen))
     
-    fgroup.draw(screen)
-    tgroup.draw(screen)
-    lgroup.draw(screen)
-    if showcombo:
-      for plr in players:
-        plr.combos.draw(screen)
+    rectlist.extend( fgroup.draw(screen))
+    rectlist.extend( tgroup.draw(screen))
+    rectlist.extend( lgroup.draw(screen))
     
-    pygame.display.update()
+    pygame.display.update(rectlist)
 
     if screenshot:
       pygame.image.save(pygame.transform.scale(screen, (640,480)),
@@ -1259,10 +1268,6 @@ def dance(song, players, prevscr):
       screenshot = 0
 
     if not backmovie.filename:
-      if showcombo:
-        for plr in players:
-          plr.combos.clear(screen, background.image)
-      
       lgroup.clear(screen,background.image)
       tgroup.clear(screen,background.image)
       fgroup.clear(screen,background.image)

@@ -18,7 +18,7 @@ class Player:
     else:
       self.lifebar = OniLifeBarDisp(pid, self.theme)
     self.holdtext = holdtext
-    self.arrow_group = spritelib.RenderLayered()
+    self.arrow_group = pygame.sprite.RenderUpdates()
     self.judging_list = []
     self.total_judgings = mainconfig['totaljudgings']
     self.tempholding = [-1, -1, -1, -1]
