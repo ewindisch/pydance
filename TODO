@@ -26,6 +26,7 @@ add to it.
  - Endless (0.6.3?) - Yes
  - DWI loader natively using the SongItem interface
  - Sort by popularity (uses high score mechanism)
+ - Refactor Judge & pluggable grading algorithms
  - Themable menus
  - Credits screen
  - MD5 checksums in files for the music they go with

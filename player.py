@@ -147,8 +147,7 @@ class LifeBarDisp(pygame.sprite.Sprite):
         self.pamt = 0.25
         self.gamt = 0
         self.oamt = -0.5
-        self.camt = -1
-        self.samt = -2
+        self.bamt = -2
         self.mamt = -4
         
         self.redbar = pygame.image.load(os.path.join(theme.path,
@@ -191,10 +190,11 @@ class LifeBarDisp(pygame.sprite.Sprite):
        
     def update(self, judges):
       if self.life >= 0: #If you failed, you failed. You can't gain more life afterwards
-        self.life = 25 + self.prevlife + (judges.marvelous * self.vamt) + (judges.perfect * self.pamt) + (judges.great * self.gamt) + (judges.ok * self.oamt) + (judges.crap * self.camt) + (judges.shit * self.samt) + (judges.miss * self.mamt)
+        self.life = 25 + self.prevlife + (judges.marvelous * self.vamt) + (judges.perfect * self.pamt) + (judges.great * self.gamt) + (judges.ok * self.oamt) + (judges.boo * self.bamt) + (judges.miss * self.mamt)
         
         if self.life <= 0: #FAILED but we don't do anything yet
           self.failed = 1
+          judges.failed_out = True
           self.life = 0
         elif self.life > 52:
           self.life = 52

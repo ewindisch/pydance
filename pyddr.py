@@ -127,19 +127,21 @@ class Judge:
     self.actualtimes = {}
     self.tick = toRealTime(bpm, 1)
     self.oldtick = toRealTime(bpm, 1)
-    self.marvelous = self.perfect = self.great = self.ok = self.crap = self.shit = self.miss = 0
+    self.marvelous = self.perfect = self.great = self.ok = self.boo = self.miss = 0
     self.combo = self.bestcombo = self.broke = 0
     self.steppedtime = -1000
     self.recentsteps = [' ',' ',' ']
     self.early = self.late = self.ontime = 0
     self.totalcombos = 1
     self.bpm = bpm
+    self.failed_out = False
     self.oldbpm = bpm
     self.diff = diff
     # DDR Extreme scoring
     scorecoeff = (1000000.0 * feet) / ((stepcount * (stepcount + 1.0)) / 2.0)
     self.score_coeff = int(scorecoeff) + 1
     self.score = 0
+    self.dance_score = 6 * holds
     self.badholds = 0
     self.arrow_count = 0
     self.announcer = Announcer(mainconfig["djtheme"])
@@ -152,14 +154,14 @@ class Judge:
     self.perfect   += anotherjudge.perfect
     self.great     += anotherjudge.great
     self.ok        += anotherjudge.ok
-    self.crap      += anotherjudge.crap
-    self.shit      += anotherjudge.shit
+    self.boo      += anotherjudge.boo
     self.miss      += anotherjudge.miss
 
     if self.bestcombo < anotherjudge.bestcombo:
       self.bestcombo = anotherjudge.bestcombo
     self.combo = anotherjudge.combo  
     self.totalcombos += anotherjudge.totalcombos
+    self.dance_score += anotherjudge.dance_score
 
     self.badholds += anotherjudge.badholds
     for i in anotherjudge.holdsub:
@@ -189,6 +191,7 @@ class Judge:
     if self.holdsub[whichone] != -1:
       self.holdsub[whichone] = -1
       self.badholds += 1
+      self.dance_score -= 6
     
   def handle_key(self, dir, curtime):
     times = self.steps.keys()
@@ -227,16 +230,19 @@ class Judge:
         if off <= 1:
           self.marvelous += 1
           self.score += 10 * self.score_coeff * self.arrow_count
+          self.dance_score += 2
           text = "MARVELOUS"
           anncrange = (80, 100)
         elif 1 < off <= 4:
           self.perfect += 1
           self.score += 9 * self.score_coeff * self.arrow_count
+          self.dance_score += 2
           text = "PERFECT"
           anncrange = (80, 100)
         else:
           self.great += 1
           self.score += 5 * self.score_coeff * self.arrow_count
+          self.dance_score += 1
           text = "GREAT"
           anncrange = (70, 94)
 
@@ -249,14 +255,11 @@ class Judge:
           self.ok += 1
           text = "OK"
           anncrange = (40, 69)
-        elif off < 11:
-          self.crap += 1
-          text = "CRAPPY"
-          anncrange = (20, 39)
         else:
-          self.shit += 1
-          text = "SHIT"
-          anncrange = (6, 30)
+          self.boo += 1
+          self.dance_score -= 4
+          text = "BOO"
+          anncrange = (20, 39)
 #      else:
 #        text = "woah"
 #        print "Ack! off is", off
@@ -285,8 +288,8 @@ class Judge:
         del self.steps[j]
         for i in range(n):
           self.miss += 1
-#          print "got a miss"
           self.recentsteps.insert(0, "MISS")
+          self.dance_score -= 8
           self.arrow_count += 1
           self.recentsteps.pop()
   
@@ -316,44 +319,18 @@ class Judge:
 
   def grade(self):
     totalsteps = (self.marvelous + self.perfect + self.great + self.ok +
-                  self.crap + self.shit + self.miss)
+                  self.boo + self.miss)
 
-    if totalsteps == 0: return "?"
+    max_score = 2.0 * totalsteps + 6.0 * self.numholds()
 
-    marvpct = self.marvelous * 100.0 / totalsteps
-    perfectpct = self.perfect * 100.0 / totalsteps
-    greatpct = self.great * 100.0 / totalsteps
-    okpct = self.ok * 100.0 / totalsteps
-    crappypct = self.crap * 100.0 / totalsteps
-    shitpct = self.shit * 100.0 / totalsteps
-    misspct = self.miss * 100.0 / totalsteps
-    mpg_count = self.marvelous + self.perfect + self.great
-
-    #pick a grade
-    if self.marvelous == totalsteps:
-      return '!!!'
-    elif self.marvelous + self.perfect == totalsteps:
-      return 'wow'
-    
-    elif mpg_count == totalsteps :
-      if marvpct + perfectpct >= 92:
-        return 'SSS'
-      elif self.marvelous + self.perfect >= self.great:
-        return 'SS'
-      else:
-        return 'S'
-    
-    elif ((mpg_count >= totalsteps*0.8) and (misspct <= 2) and (shitpct <= 4) and (crappypct <= 6) and (okpct <= 8)):
-      return 'A'
-    elif ((mpg_count >= totalsteps*0.6) and (misspct <= 4) and (shitpct <= 8) and (crappypct <= 12) and (okpct <= 16)):
-      return 'B'
-    elif ((mpg_count >= totalsteps*0.4) and (misspct <= 6) and (shitpct <= 12) and (crappypct <= 18) and (okpct <= 24)):
-      return 'C'
-    elif ((mpg_count >= totalsteps*0.2) and (misspct <= 8) and (shitpct <= 16) and (crappypct <= 24) and (okpct <= 32)):
-      return "D"
-    else:
-      return "doh!"
-
+    if self.failed_out == True: return "E"
+    elif totalsteps == 0: return "?"
+    elif self.dance_score / max_score >= 1.00: return "AAA"
+    elif self.dance_score / max_score >= 0.93: return "AA"
+    elif self.dance_score / max_score >= 0.80: return "A"
+    elif self.dance_score / max_score >= 0.65: return "B"
+    elif self.dance_score / max_score >= 0.45: return "C"
+    else: return "D"
 
 class GradingScreen:
   def __init__(self, judges):
@@ -364,24 +341,26 @@ class GradingScreen:
     
       grade = judge.grade()
       if grade != "?":
-        grades = {"!!!": (100, 90), "wow": (95, 85), "SSS": (90, 80),
-                  "SS": (90, 75), "S": (90, 70), "A": (80, 60),
-                  "B": (70, 50), "C": (60, 40), "D": (50, 30), "doh!": (40, 0)}
+        grades = {"AAA": (100, 95), "AA": (99, 93), "A": (92, 80),
+                  "B": (79, 65), "C": (64, 45), "D": (45, 25), "E": (24, 0)}
         Announcer(mainconfig["djtheme"]).say(grades[grade])
-      totalsteps = (judge.marvelous + judge.perfect + judge.great + judge.ok + judge.crap + judge.shit + judge.miss)
+      totalsteps = (judge.marvelous + judge.perfect + judge.great +
+                    judge.ok + judge.boo + judge.miss)
       steps = (grade, judge.diff, totalsteps, judge.bestcombo, judge.combo)
 
       numholds = judge.numholds()
       goodholds = numholds - judge.badholds
 
-      steptypes = (judge.marvelous, judge.perfect, judge.great, judge.ok, judge.crap, judge.shit, judge.miss, goodholds, numholds)
+      steptypes = (judge.marvelous, judge.perfect, judge.great, judge.ok,
+                   judge.boo, judge.miss, goodholds, numholds)
       print ("GRADE: %s (%s) - total steps: %d best combo" + " %d current combo: %d") % steps
-      print ("V: %d P: %d G: %d O: %d C: %d S: %d M: %d - %d/%d holds") % steptypes
+      print ("V: %d P: %d G: %d O: %d B: %d M: %d - %d/%d holds") % steptypes
       print
 
   def make_gradescreen(self, screen):
     judge = self.judges[0]
-    totalsteps = (judge.marvelous + judge.perfect + judge.great + judge.ok + judge.crap + judge.shit + judge.miss)
+    totalsteps = (judge.marvelous + judge.perfect + judge.great +
+                  judge.ok + judge.boo + judge.miss)
 
     if totalsteps == 0: return None
 
@@ -398,7 +377,7 @@ class GradingScreen:
     screen.blit(grading, (320-grading.get_rect().centerx,-8) )
     pygame.display.update()
 
-    rows = ["MARVELOUS", "PERFECT", "GREAT", "OK", "CRAPPY", "ACK",
+    rows = ["MARVELOUS", "PERFECT", "GREAT", "OK", "BOO",
             "MISS", "early", "late", "TOTAL", " ", "MAX COMBO",
             "HOLDS", " ", "SCORE"]
 
@@ -429,9 +408,9 @@ class GradingScreen:
         pygame.time.delay(48)
 
       totalsteps = (judge.marvelous + judge.perfect + judge.great + judge.ok +
-                    judge.crap + judge.shit + judge.miss)
+                    judge.boo + judge.miss)
       rows = [judge.marvelous, judge.perfect, judge.great, judge.ok,
-              judge.crap, judge.shit, judge.miss, judge.early, judge.late]
+              judge.boo, judge.miss, judge.early, judge.late]
 
       for j in range(4):
         for i in range(len(rows)):
@@ -885,10 +864,8 @@ class JudgingDisp(pygame.sprite.Sprite):
         self.great     = fontfx.shadefade("GREAT"    ,48,4,(tx,40),( 32,224, 32))
         tx = FONTS[48].size("OK")[0]+4
         self.ok        = fontfx.shadefade("OK"       ,48,4,(tx,40),( 32, 32,224))
-        tx = FONTS[48].size("CRAPPY")[0]+4
-        self.crappy    = fontfx.shadefade("CRAPPY"   ,48,4,(tx,40),(128, 32,128))
-        tx = FONTS[48].size("ACK")[0]+4
-        self.shit      = fontfx.shadefade("ACK"      ,48,4,(tx,40),( 96, 64, 32))
+        tx = FONTS[48].size("BOO")[0]+4
+        self.boo      = fontfx.shadefade("BOO"      ,48,4,(tx,40),( 96, 64, 32))
         tx = FONTS[48].size("MISS")[0]+4
         self.miss      = fontfx.shadefade("MISS"     ,48,4,(tx,40),(224, 32, 32))
         self.space     = FONTS[48].render( " ",       1, (  0,   0,   0) )
@@ -897,8 +874,7 @@ class JudgingDisp(pygame.sprite.Sprite):
         self.perfect.set_colorkey(self.perfect.get_at((0,0)),RLEACCEL)
         self.great.set_colorkey(self.great.get_at((0,0)),RLEACCEL)
         self.ok.set_colorkey(self.ok.get_at((0,0)),RLEACCEL)
-        self.crappy.set_colorkey(self.crappy.get_at((0,0)),RLEACCEL)
-        self.shit.set_colorkey(self.shit.get_at((0,0)),RLEACCEL)
+        self.boo.set_colorkey(self.boo.get_at((0,0)),RLEACCEL)
         self.miss.set_colorkey(self.miss.get_at((0,0)),RLEACCEL)
 
         self.image = self.space
@@ -909,8 +885,7 @@ class JudgingDisp(pygame.sprite.Sprite):
         elif judgetype == "PERFECT":         self.image = self.perfect
         elif judgetype == "GREAT":           self.image = self.great
         elif judgetype == "OK":              self.image = self.ok
-        elif judgetype == "CRAPPY":          self.image = self.crappy
-        elif judgetype == "SHIT":            self.image = self.shit
+        elif judgetype == "BOO":             self.image = self.boo
         elif judgetype == " ":               self.image = self.space
         elif judgetype == "MISS":            self.image = self.miss
 
