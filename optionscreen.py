@@ -29,10 +29,10 @@ def player_opt_driver(screen, configs):
     ("Holds", "holds", [(1, "On"), (0, "Off")]),
     ]
 
-  while (event.states[(0, E_START)] and
+  while ((event.states[(0, E_START)] or event.states[(1, E_START)]) and
          pygame.time.get_ticks() - start < 1500): ev = event.poll()
 
-  if event.states[(0, E_START)]:
+  if event.states[(0, E_START)] or event.states[(1, E_START)]:
     op = OptionScreen(configs, "Player Options", menu, clrs)
     return op.display(screen)
   else: return True
@@ -49,10 +49,10 @@ def game_opt_driver(screen, config):
     ]
   clrs = [colors.color["green"]]
 
-  while (event.states[(0, E_SELECT)] and
+  while ((event.states[(0, E_SELECT)] or event.states[(1, E_SELECT)]) and
          pygame.time.get_ticks() - start < 1500): ev = event.poll()
 
-  if event.states[(0, E_SELECT)]:
+  if event.states[(0, E_SELECT)] or event.states[(1, E_SELECT)]:
     op = OptionScreen([config], "Game Options", menu, clrs)
     op.display(screen)
     return False
