@@ -130,7 +130,7 @@ OPTIONS = {
                       "Window is 9/5 normal size.",
                       "Window is 8/5 normal size.",
                       "Window is 7/5 normal size.",
-                      "Window is 6/5 normal size.", ""
+                      "Window is 6/5 normal size.", "",
                       "Window is 4/5 normal size.",
                       "Window is 3/5 normal size.",
                       "Window is 2/5 normal size.",
@@ -189,41 +189,86 @@ def value_of(index, name):
 class OptionSelect(pygame.sprite.Sprite):
   def __init__(self, possible, center, index):
     pygame.sprite.Sprite.__init__(self)
-    self._index = index
+    self._index = self._oldindex = index
     self._possible = possible
     self._center = center
     self._end_time = pygame.time.get_ticks()
     self._needs_update = True
+    self._font = pygame.font.Font(None, 30)
     self._render(pygame.time.get_ticks())
 
   def update(self, time):
-    if self._needs_update: self._render(time)
+    if self._needs_update:
+      self._render((self._end_time - time) / 200.0)
 
-  def set_possible(self, possible, index = 0):
+  def set_possible(self, possible, index = -1):
     self._possible = possible
     self._oldindex = self._index = index
     self._end_time = pygame.time.get_ticks()
+
     self._needs_update = True
 
   def set_index(self, index):
     self._oldindex = self._index
     self._index = index
-    self._end_time = pygame.time.get_ticks()
+    if self._oldindex == -1: self._oldindex = self._index
+    self._end_time = pygame.time.get_ticks() + 200
     self._needs_update = True
 
-  def _render(self, time):
+  def _render(self, pct):
     self.image = pygame.Surface([430, 40], SRCALPHA, 32)
     self.image.fill([0, 0, 0, 0])
     self.rect = self.image.get_rect()
     self.rect.center = self._center
 
-    if time >= self._end_time:
+    if pct <= 0:
       self._needs_update = False
-      t = fontfx.shadow(self._possible[self._index],
+      offset = 0
+      pct = 1
+    elif self._oldindex != self._index:
+      offset = (self._font.size(self._possible[self._oldindex])[0]/2 +
+                self._font.size(self._possible[self._index])[0]/2 + 30)
+      offset = int(pct * offset)
+      if self._oldindex > self._index: offset = -offset
+    else: offset = 0
+
+    t = fontfx.shadow(self._possible[self._index],
+                      pygame.font.Font(None, 30), [255, 255, 255])
+    r = t.get_rect()
+    r.center = [215 + offset, 20]
+    self.image.blit(t, r)
+    old_r = Rect(r)
+    
+    idx = self._index - 1
+    while idx >= 0 and r.left > 0:
+      t = fontfx.shadow(self._possible[idx],
                         pygame.font.Font(None, 30), [255, 255, 255])
-      r = t.get_rect()
-      r.center = [self.image.get_width() / 2, self.image.get_height() / 2]
-      self.image.blit(t, r)
+      t2 = pygame.Surface(t.get_size())
+      t2.blit(t, [0, 0])
+      t2.set_colorkey(t2.get_at([0, 0]))
+      r2 = t2.get_rect()
+      r2.centery = 20
+      r2.right = r.left - 30
+      t2.set_alpha(int(256 * (r2.centerx / 215.0)))
+      self.image.blit(t2, r2)
+      idx -= 1
+      r = r2
+
+    idx = self._index + 1
+    r = old_r
+    while idx < len(self._possible) and r.right < 430:
+      t = fontfx.shadow(self._possible[idx],
+                        pygame.font.Font(None, 30), [255, 255, 255])
+      t2 = pygame.Surface(t.get_size())
+      t2.blit(t, [0, 0])
+      t2.set_colorkey(t2.get_at([0, 0]))
+      r2 = t2.get_rect()
+      r2.centery = 20
+      r2.left = r.right + 30
+      t2.set_alpha(int(256 * ((430 - r2.centerx) / 215.0)))
+      self.image.blit(t2, r2)
+      idx += 1
+      r = r2
 
 class OptionScreen(InterfaceWindow):
   def __init__(self, player_configs, game_config, screen):
