@@ -237,7 +237,8 @@ class SongData(object):
     if song.info["background"]: self.background = song.info["background"]
     else: self.background = os.path.join(image_path, "bg.png")
 
-    for key in ("movie", "filename", "title", "artist", "startat", "endat"):
+    for key in ["movie", "filename", "title", "artist", "startat", "endat",
+                "banner"]:
       self.__dict__[key] = song.info[key]
 
     self.soffset = song.info["gap"] * 1000

@@ -4,8 +4,29 @@ import colors
 import fontfx
 import ui
 
-from interface import InterfaceWindow
+from interface import *
 from constants import *
+
+class BannerFadeIn(pygame.sprite.Sprite):
+  def __init__(self, image, center):
+    pygame.sprite.Sprite.__init__(self)
+    self._center = center
+    self._end = pygame.time.get_ticks() + 3000
+    self.image = image.convert()
+    self.image = pygame.Surface([246, 80])
+    r = image.get_rect()
+    r.center = self.image.get_rect().center
+    self.image.blit(image, r)
+    self.rect = self.image.get_rect()
+    self.rect.center = center
+    self.image.set_alpha(0)
+
+  def update(self, time):
+    if time > self._end:
+      self.image.set_alpha(256)
+    else:
+      alp = int(256 * (1 - ((self._end - time) / 3000.0)))
+      self.image.set_alpha(alp)
 
 class TextSprite(pygame.sprite.Sprite):
   def __init__(self, center):
@@ -32,6 +53,7 @@ class GradeSprite(pygame.sprite.Sprite):
     pygame.sprite.Sprite.__init__(self)
     rating = rating.lower()
     if rating == "!!": rating = "ee"
+    if rating == "?": rating = "f"
     self._end = pygame.time.get_ticks() + 3000
     fn = os.path.join(image_path, "rating-%s.png" % rating)
     self._image = pygame.image.load(fn).convert()
@@ -98,7 +120,7 @@ class StatSprite(pygame.sprite.Sprite):
     self._pos = pos
     self._curcount = 0
     self._size = size
-    self._title = fontfx.shadow(title, 30, colors.WHITE)
+    self._title = fontfx.shadow(title, 28, colors.WHITE)
     self._render()
 
   def _render(self):
@@ -107,7 +129,7 @@ class StatSprite(pygame.sprite.Sprite):
     rt = self._title.get_rect()
     rt.midleft = [0, self._size[1] / 2]
     self.image.blit(self._title, rt)
-    cnt = fontfx.shadow(str(self._curcount), 30, colors.WHITE)
+    cnt = fontfx.shadow(str(self._curcount), 28, colors.WHITE)
     rc = cnt.get_rect()
     rc.midright = [self._size[0] - 1, self._size[1] / 2]
     self.image.blit(cnt, rc)
@@ -134,7 +156,7 @@ class HoldStatSprite(pygame.sprite.Sprite):
     self._curgood = 0
     self._curtotal = 0
     self._size = size
-    self._title = fontfx.shadow(title, 30, colors.WHITE)
+    self._title = fontfx.shadow(title, 28, colors.WHITE)
     self._render()
 
   def _render(self):
@@ -144,7 +166,7 @@ class HoldStatSprite(pygame.sprite.Sprite):
     rt.midleft = [0, self._size[1] / 2]
     self.image.blit(self._title, rt)
     s = "%d / %d" % (self._curgood, self._curtotal)
-    cnt = fontfx.shadow(s, 30, colors.WHITE)
+    cnt = fontfx.shadow(s, 28, colors.WHITE)
     rc = cnt.get_rect()
     rc.midright = [self._size[0] - 1, self._size[1] / 2]
     self.image.blit(cnt, rc)
@@ -164,7 +186,7 @@ class HoldStatSprite(pygame.sprite.Sprite):
       self._render()
 
 class GradingScreen(InterfaceWindow):
-  def __init__(self, screen, players):
+  def __init__(self, screen, players, banner_fn):
     self.players = players
     for p in players:
       if p == None: continue
@@ -183,26 +205,32 @@ class GradingScreen(InterfaceWindow):
     elif self.players[0].stats.arrow_count == 0: return None
     InterfaceWindow.__init__(self, screen, "grade-bg.png")
     pygame.display.update()
-    
-    self._sprites.add(TextSprite([320, 242]))
+
+    if banner_fn is None:
+      banner_fn = os.path.join(image_path, "no-banner.png")
+    banner, dummy_rect = load_banner(banner_fn, False)
+    banner = pygame.transform.rotozoom(banner, 0, (246.0 / banner.get_width()))
+    self._sprites.add(BannerFadeIn(banner, [320, 241]))
+
+    #self._sprites.add(TextSprite([320, 242]))
     plr = self.players[0]
 
     s = [180, 34]
     # FIXME: There is probably a shorter way to do this.
     self._sprites.add([
       StatSprite([200, 10], "MARVEL.:", plr.stats["V"], s, 0),
-      StatSprite([200, 44], "PERFECT:", plr.stats["P"], s, 333),
-      StatSprite([200, 78], "GREAT:", plr.stats["G"], s, 666),
-      StatSprite([200, 112], "OKAY:", plr.stats["O"], s, 1000),
-      StatSprite([200, 146], "BOO:", plr.stats["B"], s, 1333),
-      StatSprite([200, 180], "MISS:", plr.stats["M"], s, 1333),
+      StatSprite([200, 39], "PERFECT:", plr.stats["P"], s, 333),
+      StatSprite([200, 68], "GREAT:", plr.stats["G"], s, 666),
+      StatSprite([200, 97], "OKAY:", plr.stats["O"], s, 1000),
+      StatSprite([200, 126], "BOO:", plr.stats["B"], s, 1333),
+      StatSprite([200, 155], "MISS:", plr.stats["M"], s, 1333),
       StatSprite([400, 10], "Score:", int(plr.score.score), s, 666),
-      HoldStatSprite([400, 44], "Holds:", plr.stats.good_holds,
+      HoldStatSprite([400, 39], "Holds:", plr.stats.good_holds,
                      plr.stats.hold_count, s, 1000),
-      StatSprite([400, 78], "Max Combo:", plr.stats.maxcombo, s, 1333),
-      StatSprite([400, 112], "Early:", plr.stats.early, s, 1666),
-      StatSprite([400, 146], "Late:", plr.stats.late, s, 2000),
-      StatSprite([400, 180], "TOTAL:", plr.stats.arrow_count, s, 2333)
+      StatSprite([400, 68], "Max Combo:", plr.stats.maxcombo, s, 1333),
+      StatSprite([400, 97], "Early:", plr.stats.early, s, 1666),
+      StatSprite([400, 126], "Late:", plr.stats.late, s, 2000),
+      StatSprite([400, 155], "TOTAL:", plr.stats.arrow_count, s, 2333)
       ])
     self._sprites.add(GradeSprite([98, 183], plr.grade.grade(plr.failed)))
     self._sprites.add(GrooveGaugeSprite([10, 22], [176, 100],
@@ -211,19 +239,19 @@ class GradingScreen(InterfaceWindow):
     if len(self.players) == 2:
       plr = self.players[1]
       self._sprites.add([
-        StatSprite([15, 270], "MARVEL.:", plr.stats["V"], s, 0),
-        StatSprite([15, 304], "PERFECT:", plr.stats["P"], s, 333),
-        StatSprite([15, 338], "GREAT:", plr.stats["G"], s, 666),
-        StatSprite([15, 372], "OKAY:", plr.stats["O"], s, 1000),
+        StatSprite([15, 290], "MARVEL.:", plr.stats["V"], s, 0),
+        StatSprite([15, 319], "PERFECT:", plr.stats["P"], s, 333),
+        StatSprite([15, 348], "GREAT:", plr.stats["G"], s, 666),
+        StatSprite([15, 377], "OKAY:", plr.stats["O"], s, 1000),
         StatSprite([15, 406], "BOO:", plr.stats["B"], s, 1333),
-        StatSprite([15, 440], "MISS:", plr.stats["M"], s, 1666),
-        StatSprite([215, 270], "Score:", int(plr.score.score), s, 666),
-        HoldStatSprite([215, 304], "Holds:", plr.stats.good_holds,
+        StatSprite([15, 435], "MISS:", plr.stats["M"], s, 1666),
+        StatSprite([215, 290], "Score:", int(plr.score.score), s, 666),
+        HoldStatSprite([215, 319], "Holds:", plr.stats.good_holds,
                    plr.stats.hold_count, s, 1000),
-        StatSprite([215, 338], "Max Combo:", plr.stats.maxcombo, s, 1333),
-        StatSprite([215, 372], "Early:", plr.stats.early, s, 1666),
+        StatSprite([215, 348], "Max Combo:", plr.stats.maxcombo, s, 1333),
+        StatSprite([215, 377], "Early:", plr.stats.early, s, 1666),
         StatSprite([215, 406], "Late:", plr.stats.late, s, 2000),
-        StatSprite([215, 440], "TOTAL:", plr.stats.arrow_count, s, 2333),
+        StatSprite([215, 435], "TOTAL:", plr.stats.arrow_count, s, 2333),
         ])
       self._sprites.add(GradeSprite([541, 294], plr.grade.grade(plr.failed)))
       self._sprites.add(GrooveGaugeSprite([453, 370], [176, 100],
@@ -249,4 +277,9 @@ class GradingScreen(InterfaceWindow):
         self._time_bonus += 3333
 
       screenshot = self.update(screenshot)
-      pid, ev = ui.ui.poll()
+      if self._time_bonus:
+        pid, ev = ui.ui.poll()
+        pygame.time.delay(100)
+      else: pid, ev = ui.ui.poll()
+
+      self.update()

@@ -27,7 +27,7 @@ def folder_name(name, type):
   elif type == "bpm": return "%s BPM" % name
   else: return "%s: %s" % (type.capitalize(), name)
 
-def load_banner(filename):
+def load_banner(filename, box = True):
   banner = pygame.image.load(filename)
   size = banner.get_size()
   if size <= (100, 100): # Parapara-style... no idea what to do.
@@ -43,8 +43,10 @@ def load_banner(filename):
     return pygame.transform.rotozoom(banner, -45, 1.0), [51, 50, 256, 80]
   else: # 256x80, standard banner, I hope.
     if size != (256, 80): banner = pygame.transform.scale(banner, [256, 80])
-    b2 = make_box([0, 0, 0], [256, 80])
-    b2.blit(banner, [4, 4])
+    if box:
+      b2 = make_box([0, 0, 0], [256, 80])
+      b2.blit(banner, [4, 4])
+    else: b2 = banner
     return b2, None
 
 class TextDisplay(pygame.sprite.Sprite):

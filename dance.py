@@ -185,6 +185,8 @@ def play(screen, playlist, configs, songconf, playmode):
   # the song.
   first = True
 
+  songdata = None
+
   players = []
   for playerID in range(numplayers):
     plr = Player(playerID, configs[playerID], songconf, game)
@@ -215,8 +217,8 @@ def play(screen, playlist, configs, songconf, playmode):
       break # Failed
     first = False
 
-  if mainconfig['grading'] and not first:
-    grade = gradescreen.GradingScreen(screen, players)
+  if mainconfig['grading'] and not first and songdata:
+    grade = gradescreen.GradingScreen(screen, players, songdata.banner)
 
   # If we only play one song (all the way through), then it's safe to enter
   # a grade. This means course grades are going to get kind of messy,
