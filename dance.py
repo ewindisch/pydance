@@ -182,7 +182,6 @@ def play(screen, playlist, configs, songconf, playmode):
     plr = Player(playerID, configs[playerID], songconf, game)
     players.append(plr)
 
-  print playlist
   for songfn, diff in playlist:
     try: current_song = fileparsers.SongItem(songfn)
     except:
