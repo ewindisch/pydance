@@ -21,6 +21,7 @@ class Course(object):
     self.songs = []
     self.name = "A Course"
     self.mixname = " "
+    self.banner = None
     self.all_songs = all_songs
     self.recordkeys = recordkeys
 
@@ -41,8 +42,12 @@ class Course(object):
       else: return False
     elif isinstance(diff, list):
       possible = []
-      for name, rating in song.difficulty[self.gametype].items():
-        if rating in diff: possible.append(name)
+      if isinstance(diff[0], int):
+        for name, rating in song.difficulty[self.gametype].items():
+          if rating in diff: possible.append(name)
+      elif isinstance(diff[0], str):
+        for name in song.difficulty[self.gametype].keys():
+          if name in diff: possible.append(name)
       if len(possible) > 0: return random.choice(possible)
     return False
 
@@ -55,16 +60,24 @@ class Course(object):
     fullname = None
 
     a, b = 0, 0
-    if diff.find("..") != -1: a, b = map(int, diff.split(".."))
+    if isinstance(diff, list): pass
+    elif diff.find("..") != -1: a, b = map(int, diff.split(".."))
     elif len(diff) < 3: a, b = int(diff), int(diff)
     if a or b: diff = range(a, b + 1)
 
     if name[0] == "BEST":
       s = self.recordkeys.get(records.best(name[1], diff, self.gametype), None)
-      if s: fullname = s.filename
+      if s:
+        fullname = s.filename
+        if isinstance(diff, list):
+          diff = [d for d in diff if d in s.difficulty[self.gametype]][0]
     elif name[0] == "WORST":
       s = self.recordkeys.get(records.worst(name[1], diff, self.gametype), None)
-      if s: fullname = s.filename
+      if s:
+        fullname = s.filename
+        if isinstance(diff, list):
+          diff = [d for d in diff if d in s.difficulty[self.gametype]][0]
+
     elif name[-1] == "*": # A random song
       if "/" in name:
         folder, dummy = name.split("/")
@@ -148,6 +161,7 @@ class CRSFile(Course):
   def __init__(self, filename, all_songs, recordkeys):
     Course.__init__(self, all_songs, recordkeys)
     self.filename = filename
+    self.banner = filename[:-3] + "png"
     lines = []
     f = open(filename)
     for line in f:
@@ -188,3 +202,48 @@ class CRSFile(Course):
             mods[key] = value
         
         self.songs.append((name, diff, mods))
+
+# A course we can easily initialize manually.
+class CodedCourse(Course):
+  def __init__(self, all_songs, recordkeys, title, mix, songs):
+    Course.__init__(self, all_songs, recordkeys)
+    self.name = title
+    self.mixname = mix
+    self.songs = songs
+
+def make_players(all_songs, recordkeys):
+  courses = []
+  for start, end in [(1, 5), (5, 9), (1, 9)]:
+    for diff_name, diffs in [("(Easy)", ["BASIC", "LIGHT", "EASY"]),
+                             ("(Normal)", ["ANOTHER", "STANDARD", "NORMAL",
+                                           "TRICK", "MEDIUM"]),
+                             ("(Hard)", ["MANIAC", "HEAVY", "HARD"]),
+                             ("(Expert)", ["HARDCORE", "CRAZY", "SMANIAC",
+                                           "EXPERT"])]:
+      for name, type in (["Best", "BEST"],
+                         ["Worst", "WORST"],
+                         ["Likes", "LIKES"],
+                         ["Dislikes", "DISLIKES"]):
+        realname = "%s %d-%d %s" % (name, start, end - 1, diff_name)
+        songs = [((type, i), diffs, {}) for i in range(start, end)]
+        courses.append(CodedCourse(all_songs, recordkeys, realname,
+                                   "Player's Picks", songs))
+
+  for i in [4, 8, 12]:
+    for diff_name, diffs in [("(Easy)", ["BASIC", "LIGHT", "EASY"]),
+                             ("(Normal)", ["ANOTHER", "STANDARD", "NORMAL",
+                                           "TRICK", "MEDIUM"]),
+                             ("(Hard)", ["MANIAC", "HEAVY", "HARD"]),
+                             ("(Expert)", ["HARDCORE", "CRAZY", "SMANIAC",
+                                           "EXPERT"])]:
+      randname = "Random %d %s" % (i, diff_name)
+      randsongs = [("*", diffs, {})] * i
+      courses.append(CodedCourse(all_songs, recordkeys, randname,
+                                 "random.choose(songs)", randsongs))
+
+    randname = "All Random %d" % i
+    randsongs = [("*", "0..10", {})] * i
+    courses.append(CodedCourse(all_songs, recordkeys, randname,
+                               "random.choose(songs)", randsongs))
+
+  return courses

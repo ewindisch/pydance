@@ -90,7 +90,7 @@ class CourseDisplay(object):
   no_banner.set_colorkey(no_banner.get_at([0, 0]))
 
   def __init__(self, course, recordkeys, game): # A CRSFile object
-    self.filename = course.filename
+    self.banner_fn = course.banner
     self.course = course
     self.mixname = course.mixname
     self.name = course.name
@@ -174,7 +174,9 @@ class CourseDisplay(object):
         t3 = small_font.render(subtitle, color = [190, 190, 190],
                                indent = "    ")
 
-      t2 = fontfx.shadow(diff[0], 28, DIFF_COLORS.get(diff, colors.WHITE))
+      if isinstance(diff, list): d = diff[0]
+      else: d = diff
+      t2 = fontfx.shadow(d[0], 28, DIFF_COLORS.get(d, colors.WHITE))
 
       r1 = t1.get_rect()
       r2 = t2.get_rect()
@@ -193,9 +195,8 @@ class CourseDisplay(object):
         y_off += ls / 4
         self.image.blit(t3, r3)
 
-    banner_fn = self.filename[:-3] + "png"
-    if os.path.exists(banner_fn):
-      self.banner, self.clip = load_banner(banner_fn)
+    if self.banner_fn and os.path.exists(self.banner_fn):
+      self.banner, self.clip = load_banner(self.banner_fn)
     else: self.banner = CourseDisplay.no_banner
 
 class FolderDisplay(object):

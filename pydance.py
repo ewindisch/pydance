@@ -8,12 +8,12 @@ import games
 import dance
 from getopt import getopt
 import pygame
+import courses
 import colors
 import records
 import menudriver
 
 from fileparsers import SongItem
-from courses import CourseFile
 from pygame.mixer import music
 from fontfx import TextProgress
 from error import ErrorMessage
@@ -142,8 +142,10 @@ def main():
     song_dict[mix][title] = song
     record_dict[song.info["recordkey"]] = song
 
-  courses = load_files(screen, course_list, "courses", CourseFile,
-                       (song_dict, record_dict))
+  crs = load_files(screen, course_list, "courses", courses.CourseFile,
+                   (song_dict, record_dict))
+
+  crs += courses.make_players(song_dict, record_dict)
 
   records.verify(record_dict)
   # Let the GC clean these up if it needs to.
@@ -163,7 +165,7 @@ def main():
     print "You don't have any songs. Check http://icculus.org/pyddr/get.php."
     sys.exit(1)
 
-  menudriver.do(screen, (songs, courses, screen))
+  menudriver.do(screen, (songs, crs, screen))
   music.stop()
   pygame.quit()
   mainconfig.write(os.path.join(rc_path, "pydance.cfg"))
