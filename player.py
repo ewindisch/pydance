@@ -37,6 +37,7 @@ class Player:
     self.judging_list = []
     self.difficulty = steps.difficulty
     self.score.set_text(steps.difficulty)
+    self.evt = None
     
     holds = self.steps.holdref
     if holds: self.holds = len(holds)
