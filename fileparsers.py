@@ -17,7 +17,7 @@ class StepFile:
     f = open(filename)
     # parser states
     state = StepFile.METADATA
-    state_data = [None, None] # sec, diff
+    state_data = [None, None] # sec, diff, or time in lyric mode
     parsers = [self.parse_metadata, self.parse_gametype,
                self.parse_lyrics, self.parse_steps, self.parse_waiting]
 
@@ -45,7 +45,8 @@ class StepFile:
     self.info["title"] = self.info["song"]
     self.info["artist"] = self.info["group"]
     self.info["filename"] = self.info["file"]
-    self.info["gap"] = self.info["offset"]
+    self.info["gap"] = int(self.info.get("offset", 0))
+    self.info["bpm"] = float(self.info["bpm"])
     del(self.info["song"])
     del(self.info["group"])
     del(self.info["file"])
@@ -56,6 +57,7 @@ class StepFile:
       del(self.info["bg"])
 
     self.find_subtitle()
+    self.description = None
 
   def find_subtitle(self):
     if not self.info.has_key("subtitle"):
@@ -150,10 +152,6 @@ class SongItem:
       raise NotImplementedError()
     self.info = song.info
 
-    self.info["bpm"] = float(self.info["bpm"])
-    if self.info.has_key("gap"):  self.info["gap"] = int(self.info["gap"])
-    else: self.info['gap'] = 0
-
     # Sanity checks
     for k in ("bpm", "gap", "title", "artist", "filename"):
       if not self.info.has_key(k):
@@ -164,22 +162,24 @@ class SongItem:
                 "author", "reivison", "md5sum", "movie"):
       if not self.info.has_key(k): self.info[k] = None
 
-    for k, v in (("valid", 1), ("preview", (45.0, 10.0)),
-                 ("startat", 0.0), ("endat", 0.0), ("revision", "1970.01.01")):
+    for k, v in (("valid", 1), ("endat", 0.0), ("preview", (45.0, 10.0)),
+                 ("startat", 0.0), ("revision", "1970.01.01"), ("gap", 0)):
       if not self.info.has_key(k): self.info[k] = v
 
     for k in ("filename", "background", "banner"):
       if self.info[k] and not os.path.isfile(self.info[k]):
         raise RuntimeError
 
-    for k in ("startat", "endat", "gap"):
+    for k in ("startat", "endat", "gap", "bpm"):
       self.info[k] = float(self.info[k])
 
     self.steps = song.steps
-    self.lyrics = song.lyrics
+    if song.lyrics: self.lyrics = song.lyrics
+    else: self.lyrics = []
     self.difficulty = song.difficulty
     self.filename = filename
-
+    self.description = song.description
+  
     self.diff_list = {}
     for key in self.difficulty:    
       self.diff_list[key] = sorted_diff_list(self.difficulty[key])
