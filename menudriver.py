@@ -153,7 +153,8 @@ def do(screen, songdata):
         ["Scale Arrows", rotate_index_opt,
          ("arrowscale", ("shrink", "normal", "grow"))],
         ["Reverse", onoff_opt, ("reversescroll",)],
-        ["Arrow Speed", rotate_opt, ('scrollspeed', [0.5, 1, 1.5, 2, 4, 8])],
+        ["Arrow Speed", rotate_opt, ('scrollspeed', [1, 1.5,
+                                                     2, 4, 8])],
         ["Back", None, None]
         ),
        ("Graphic Options",
@@ -177,7 +178,7 @@ def do(screen, songdata):
         ["Announcer", rotate_opt, ('djtheme', Announcer.themes())],
         ["Song Previews", onoff_opt, ('previewmusic',)],
         ["Sort By", rotate_index_opt,
-         ("sortmode", ["file", "song", "group", "bpm", "difficulty", "mix"])],
+         ("sortmode", ["file", "title", "artist", "bpm", "mix"])],
         ["Timer Display", onoff_opt, ('fpsdisplay',)],
         ["Gratuitous Extras", onoff_opt, ('gratuitous',)],
         ["Display Help", onoff_opt, ("ingamehelp",)],

@@ -158,7 +158,7 @@ class SongSelect:
       pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
       pygame.mixer.music.play(4, 0.0)
 
-    self.songs.sort(SORTS[mainconfig["sortmode"]])
+    self.songs.sort(SORTS[mainconfig["sortmode"] & NUM_SORTS])
     self.update_help()
     self.render()
 
