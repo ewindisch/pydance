@@ -488,6 +488,7 @@ class GradingScreen:
 
     grading = fontfx.sinkblur("GRADING",64,4,(224,72),(64,64,255))
     screen.blit(grading, (320-grading.get_rect().centerx,-8) )
+    pygame.display.update()
 
     rows = ["MARVELOUS", "PERFECT", "GREAT", "OK", "CRAPPY", "ACK",
             "MISS", "early", "late", "TOTAL", " ", "MAX COMBO",
@@ -1768,8 +1769,8 @@ class fastSong:
   def renderListText(self,totalsongs,j):
     listimage = BlankSprite((560,48))
     if self.mixname:
-      text = fontfx.shadefade(self.mixname,48,2,(96,40),(48,48,48))
-      listimage.blit(text,(480,8))
+      text = fontfx.shadefade(self.mixname,32,2,(128,28),(80,80,80))
+      listimage.blit(text,(432,2))
       
 #    cmap = (63+j*(192/(totalsongs+1)),j*(240/(totalsongs+1)),240-(j*255/(totalsongs+1)))
     cmap = (224,224,224)
@@ -3434,6 +3435,7 @@ def songSelect(songs, fooblah):
       pygame.mixer.music.fadeout(1000)
       pygame.mixer.music.load("menu.ogg")
       pygame.mixer.music.play(4, 0.0)
+      pygame.mixer.music.set_volume(1.0)
       raise QuitGame("Escape pressed")
     elif event < 0:                                  pass # key up
     elif event == E_PASS:                            pass
