@@ -3,7 +3,68 @@ from util import toRealTime
 from gfxtheme import GFXTheme
 from judge import Judge
 
+from pygame.sprite import RenderUpdates, RenderClear
+
 import fontfx, colors, steps, random
+
+# This class keeps an ordered list of sprites in addition to the dict,
+# so we can draw in the order the sprites were added.
+class OrderedRenderUpdates(RenderClear):
+  def __init__(self, group = ()):
+    self.spritelist = []
+    RenderClear.__init__(self, group)
+
+  def sprites(self):
+    return list(self.spritelist)
+
+  # A patch has been sent to Pete in the hopes that we can avoid overriding
+  # this function, and only override add_internal (pygame 1.5.6)
+  def add(self, sprite):
+    has = self.spritedict.has_key
+    if hasattr(sprite, '_spritegroup'):
+      for sprite in sprite.sprites():
+        if not has(sprite):
+          self.add_internal(sprite)
+          sprite.add_internal(self) 
+    else:
+      try: len(sprite)
+      except (TypeError, AttributeError):
+        if not has(sprite):
+          self.add_internal(sprite)
+          sprite.add_internal(self) 
+      else:
+        for sprite in sprite:
+          if not has(sprite):
+            self.add_internal(sprite)
+            sprite.add_internal(self) 
+
+  def add_internal(self, sprite):
+    RenderClear.add_internal(self, sprite)
+    self.spritelist.append(sprite)
+
+  def remove_internal(self, sprite):
+    RenderClear.remove_internal(self, sprite)
+    self.spritelist.remove(sprite)
+
+  def draw(self, surface):
+    spritelist = self.spritelist
+    spritedict = self.spritedict
+    surface_blit = surface.blit
+    dirty = self.lostsprites
+    self.lostsprites = []
+    dirty_append = dirty.append
+    for s in spritelist:
+      r = spritedict[s]
+      newrect = surface_blit(s.image, s.rect)
+      if r is 0:
+        dirty_append(newrect)
+      else:
+        if newrect.colliderect(r):
+          dirty_append(newrect.union(r))
+        else:
+          dirty_append(newrect)
+      spritedict[s] = newrect
+    return dirty
 
 # Display the score overlaying the song difficulty
 class ScoringDisp(pygame.sprite.Sprite):
@@ -837,17 +898,17 @@ class Player(object):
     else: return self.judge
 
   def start_song(self):
-    self.toparr_group = pygame.sprite.RenderUpdates()
-    self.fx_group = pygame.sprite.RenderUpdates()
-    self.text_group = pygame.sprite.RenderUpdates()
+    self.toparr_group = RenderUpdates()
+    self.fx_group = RenderUpdates()
+    self.text_group = RenderUpdates()
     self.text_group.add([self.score, self.lifebar, self.judging_disp])
     self.text_group.add(self.holdtext)
 
     if mainconfig["showcombo"]: self.text_group.add(self.combos)
 
     if self.game.double:
-      self.arrow_group = [pygame.sprite.RenderUpdates(),
-                          pygame.sprite.RenderUpdates()]
+      self.arrow_group = [OrderedRenderUpdates(),
+                          OrderedRenderUpdates()]
 
       for i in range(2):
         self.steps[i].play()
@@ -860,7 +921,7 @@ class Player(object):
                             self.text_group]
     else:
       self.steps.play()
-      self.arrow_group = pygame.sprite.RenderUpdates()
+      self.arrow_group = OrderedRenderUpdates()
       for d in self.game.dirs:
         if mainconfig["explodestyle"] > -1: self.toparrfx[d].add(self.fx_group)
         if not self.dark: self.toparr[d].add(self.toparr_group)

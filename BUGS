@@ -1,4 +1,3 @@
 Our MP3 support is pretty bad. We need a way to set the volume in pyao.
 Hold arrows don't work with growing/shrinking.
-Songs with freqs not multiples of 11025 don't play right.
-Crashing loading Peanuts DWI from TM2.
+Songs with freqs not multiples of 11025 don't play right?

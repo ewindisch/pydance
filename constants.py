@@ -21,10 +21,6 @@ else:
   print "Your platform is not supported by pydance. We're going to call it"
   print "POSIX, and then just let it crash."
 
-if osname == 'posix': # We need to force stereo in many cases.
-  try: pygame.mixer.pre_init(44100,-16,2)
-  except: pygame.mixer.pre_init()
-
 # K_* constants, mostly
 from pygame.locals import *
 
