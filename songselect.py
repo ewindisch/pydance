@@ -6,6 +6,8 @@ from constants import *
 
 import announcer, colors, optionscreen, error, games, ui
 from pygame.mixer import music
+import records
+import grades
 
 # FIXME: this needs to be moved elsewhere if we want theming
 ITEM_BG = pygame.image.load(os.path.join(image_path, "ss-item-bg.png"))
@@ -561,12 +563,18 @@ class SongSelect(object):
       # Difficulty name
       text = d.lower()
 
+      # Letter grade
+      rank = records.get(self.songs[self.index].song.filename,
+                         d, self.gametype)[0]
+      grade = grades.grades[self.game_config["grade"]].grade_by_rank(rank)
+      if grade: text += " - " + grade
+
       color = colors.color["gray"]
-      if difficulty_colors.has_key(d):  color = difficulty_colors[d]
+      if difficulty_colors.has_key(d): color = difficulty_colors[d]
 
       if difficulty[d] >= 10: text += " - x" + str(difficulty[d])
 
-      text = FONTS[26].render(text.lower(), 1, colors.brighten(color, 64))
+      text = FONTS[26].render(text, 1, colors.brighten(color, 64))
       rec = text.get_rect()
       rec.center = (DIFF_LOCATION[0] + 92, DIFF_LOCATION[1] + 25 * i + 12)
       self.screen.blit(text, rec)

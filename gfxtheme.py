@@ -118,6 +118,9 @@ class ThemeFile(object):
     rotate = 0
     fn = "arr_%s_%s_%d.png" % (type, dir, num)
     realnum = num
+    if not self.has_image(fn) and num == 3:
+      fn = "arr_%s_%s_%d.png" % (type, dir, 1)
+      realnum = 1
     if not self.has_image(fn):
       fn = "arr_%s_%s_%d.png" % (type, dir, 0)
       realnum = 0
@@ -131,6 +134,11 @@ class ThemeFile(object):
             if self.has_image(fn):
                   realnum = num
                   break
+            if num == 3:
+              fn = "arr_%s_%s_%d.png" % (type, d, 1)
+              if self.has_image(fn):
+                realnum = 1
+                break
             fn = "arr_%s_%s_%d.png" % (type, d, 0)
             if self.has_image(fn):
               realnum = 0
@@ -178,9 +186,7 @@ class ArrowSet(object):
     for dir in game.dirs:
       left = base_left + game.width * game.dirs.index(dir)
       for cnum in range(4):
-        if cnum == 3: color = 1
-        else: color = cnum
-        arrows[dir+repr(cnum)] = Arrow(theme, "c", dir, color, left)
+        arrows[dir+repr(cnum)] = Arrow(theme, "c", dir, cnum, left)
 
     for n in arrows: self.__dict__[n] = arrows[n]
     self.arrows = arrows

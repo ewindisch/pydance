@@ -11,8 +11,9 @@ from pygame.sprite import RenderUpdates
 
 from pygame.mixer import music
 import fontfx, gradescreen, steps, fileparsers, games, error, colors
+import records
 
-import random, sys, os, copy
+import os
 
 class BGmovie(pygame.sprite.Sprite):
   def __init__ (self, filename):
@@ -173,6 +174,7 @@ def play(screen, playlist, configs, songconf, playmode):
 
   game = games.GAMES[playmode]
 
+  songs_played = 0
   first = True
 
   players = []
@@ -188,6 +190,7 @@ def play(screen, playlist, configs, songconf, playmode):
       first = True
       continue
       
+    songs_played += 1
     pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
     songdata = steps.SongData(current_song, songconf)
@@ -208,6 +211,13 @@ def play(screen, playlist, configs, songconf, playmode):
     background = pygame.transform.scale(screen, (640,480))
     if grade.make_gradescreen(screen, background):
       grade.make_waitscreen(screen)
+
+  # If we only play one song (all the way through), then it's safe to enter
+  # a grade. This means course grades are going to get kind of messy.
+  if songs_played == 1 and not players[0].escaped:
+    for p in players:
+      if not p.failed:
+        records.add(songfn, diff[p.pid], playmode, p.grade.rank(), " ")
 
 def dance(screen, song, players, prevscr, ready_go, game):
   songFailed = False
@@ -335,6 +345,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
     while ev[1] != pad.PASS:
       if ev[1] == pad.QUIT:
+        for p in players: p.escaped = True
         break
       elif ev[1] == pad.LEFT: key.append((ev[0], 'l'))
       elif ev[1] == pad.DOWNLEFT: key.append((ev[0], 'w'))

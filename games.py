@@ -130,5 +130,15 @@ ONLY_COUPLE = [mode for mode in GAMES if (GAMES[mode].couple and
                                           not GAMES[mode].double)]
 DOUBLE = [mode for mode in GAMES if GAMES[mode].double]
 
+# Convert versus modes to single modes, for grading.
+VERSUS2SINGLE = {
+  "VERSUS": "SINGLE",
+  "5VERSUS": "5PANEL",
+  "6VERSUS": "6PANEL",
+  "8VERSUS": "8PANEL",
+  "9VERSUS": "9PANEL",
+  "PARAVERSUS": "PARAPARA",
+  "DMXVERSUS": "DMX",
+}
 
 for game in GAMES: GAMES[game].name = game

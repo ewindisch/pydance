@@ -197,6 +197,7 @@ class Player(object):
                           pid, game)
     self.pid = pid
     self.failed = False
+    self.escaped = False
 
     self.__dict__.update(config)
 

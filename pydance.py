@@ -9,6 +9,7 @@ from pad import pad
 
 import fontfx, menudriver, fileparsers, colors
 from courses import CRSFile
+import records
 
 from pygame.mixer import music
 
@@ -126,5 +127,6 @@ def main():
   mainconfig.write(os.path.join(rc_path, "pydance.cfg"))
   if mainconfig["saveinput"]:
     pad.write(os.path.join(rc_path, "input.cfg"))
+  records.write()
 
 if __name__ == '__main__': main()
