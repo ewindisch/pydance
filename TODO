@@ -81,8 +81,26 @@ A Comprehensive List of Features for pydance 1.2
    390 lines of code are spent on the main menu, which is a million
    times simpler than any other UI in the game.
 
+* BMS parsing
+   The BMS file format sucks to parse. However, many DDR steps come
+   in it. We should be able to load it. Since its grammar is nothing
+   like any other format, it will be a whole new section in fileparsers.
+   We don't need keysounding support for 1.2.
+
+* Dynamic course creation
+   pydance used to let you make a course in the song selector and play
+   it. That's a good idea.
+
+* Configurable UI events
+   The directions of a pad are configurable, but the UI events should be
+   too (especially, at least, cancel and confirm).
+
+* MSD parsing
+   The MSD format is a lot like the DWI format I think. pyDDR had an
+   old msd2step.py.
+
 * Fix endless mode
-   The UI is so ugly.
+   The UI is so ugly, and there should be more selection criteria.
 
 * FIXME: There are a lot of FIXMEs in the code. Some of them get
   obsoleted over time, but most will still need fixing.

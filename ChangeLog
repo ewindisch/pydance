@@ -7,6 +7,9 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
+1.0.0 - 							[2004.03.XX]
++ The TODO file has been revised with plans for pydance 1.2.
+
 0.9.1 - This release is dedicated to Gentoo bug #35890.		[2004.02.11]
 + Display the average time off (in milliseconds) when grading.
 + Page up and page down work again; they are back left and back right
