@@ -133,6 +133,43 @@ class SongItemDisplay:
       grouptext = FONTS[20].render(st, 1, color)
       self.menuimage.blit(grouptext, (15, 36))
 
+class SongPreview:
+  def __init__(self):
+    self.playing = False
+    self.filename = None
+    self.end_time = self.start_time = 0
+    if not mainconfig["previewmusic"]:
+      audio.load(os.path.join(sound_path, "menu.ogg"))
+      audio.play(4, 0.0)
+
+  def preview(self, song):
+    if mainconfig["previewmusic"] and not song.isfolder:
+      start, length = song.song.info["preview"]
+      self.filename = song.song.info["filename"]
+      if self.playing: audio.fadeout(500)
+      self.playing = False
+      self.start_time = pygame.time.get_ticks() + 500
+      self.end_time = int(self.start_time + length * 1000)
+
+  def update(self, time):
+    if self.filename is None: pass
+    elif time < self.start_time: pass
+    elif not self.playing:
+      try:
+        audio.load(self.filename)
+        audio.set_volume(0.01)
+        audio.play(0, self.start_time)
+        self.playing = True
+      except: # Filename not found? Song is too short? SMPEG blows?
+        audio.stop()
+        self.playing = False
+    elif time < self.start_time + 1000:
+      audio.set_volume((time - self.start_time) / 1000.0)
+    elif time > self.end_time - 1000:
+      audio.fadeout(1000)
+      self.playing = False
+      self.filename = None
+
 class FolderDisplay:
   def __init__(self, name, type, numsongs):
     self.name = name
@@ -231,17 +268,10 @@ class SongSelect:
     pygame.display.update(self.screen.blit(self.bg, (0, 0)))
     
     not_changed_since = pygame.time.get_ticks()
-    is_playing = False
-    new_preview = True
     scroll_wait = pygame.time.get_ticks()
 
     self.index = 0
-    previews = mainconfig["previewmusic"]
-    preview_start = timesince = 0
-
-    if not previews:
-      audio.load(os.path.join(sound_path, "menu.ogg"))
-      audio.play(4, 0.0)
+    preview = SongPreview()
 
     self.game_config = copy.copy(game_config)
 
@@ -404,9 +434,7 @@ class SongSelect:
 
           audio.fadeout(500) # This is the just-played song
 
-          if not previews:
-            audio.load(os.path.join(sound_path, "menu.ogg"))
-            audio.play(4, 0.0)
+          preview = SongPreview()
 
           while ev[1] != E_PASS: ev = event.poll() # Empty the queue
           self.screen.blit(self.bg, (0, 0))
@@ -495,43 +523,13 @@ class SongSelect:
           name = self.player_diff_names[i]
           if name in self.current_song.diff_list[self.gametype]:
             self.player_diffs[i] = self.current_song.diff_list[self.gametype].index(name)
-        new_preview = True
         not_changed_since = current_time
-        audio.fadeout(500)
 
-      # Song preview support
-      if previews:
-        # Don't open the mixer until we "stop" (wait ~ 0.1-0.2 s) on an item.
-        if (new_preview == True and current_time - not_changed_since > 500):
-          new_preview = False
-          is_playing = True
-          try:
-            start_time = self.songs[self.index].song.info["preview"][0]
-            audio.stop()
-            preview_start = current_time
-            audio.load(self.songs[self.index].song.info["filename"])
-            audio.set_volume(0.01)
-            audio.play(0, start_time)
-          except: # The song was probably too short, or a folder
-            is_playing = False
-            preview_start = 0
-
-        # Fade in, then fade out
-        if is_playing:
-          if self.songs[self.index].isfolder:
-            audio.fadeout(1000)
-            is_playing = False
-          else:
-            length = self.songs[self.index].song.info["preview"][1]
-            timesince = (current_time - preview_start)/2000.0
-            if timesince <= 1.0:
-              audio.set_volume(timesince)
-            elif length - 1 <= timesince <= length:
-              audio.fadeout(1000)
-              is_playing = False
+      preview.update(current_time)
 
       if self.index != self.oldindex:
         not_changed_since = current_time
+        preview.preview(self.songs[self.index])
         changed = True
         if self.index == (self.oldindex + 1) % self.numsongs:
           self.scroll_down()
