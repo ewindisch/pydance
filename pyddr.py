@@ -847,7 +847,7 @@ def main():
   fileList = []
   for dir in songdir.split(os.pathsep):
     print "Searching", dir
-    fileList += util.find(dir, ('*.step', '*.dance')) # Python's matching SUCKS
+    fileList += util.find(dir, ('*.step', '*.dance', '*.dwi')) # Python's matching SUCKS
 
   totalsongs = len(fileList)
   parsedsongs = 0

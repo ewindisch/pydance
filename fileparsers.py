@@ -1,4 +1,4 @@
-import os
+import os, stat
 
 # FIXME: DanceFile and StepFile can easily share a parent class.
 
@@ -101,7 +101,7 @@ class StepFile:
     self.difficulty = {}
     self.info = {}
     self.lyrics = []
-    f = file(filename)
+    f = open(filename)
     # parser states
     state = StepFile.METADATA
     state_data = [None, None] # sec, diff, or time in lyric mode
@@ -223,8 +223,157 @@ class StepFile:
       if not self.difficulty.has_key(data[0]): self.difficulty[data[0]] = {}
       return StepFile.GAMETYPE, data
 
+class DWIFile:
+  modes = { "{": "x", "[": "f", "(": "s", ")": "e", "]": "e", "}": "e" }
+  times = { "x": 0.25, "f": 2.0/3.0, "s": 1.0, "e": 2.0 }
+  steps = {
+    "0": [0, 0, 0, 0],
+    "1": [1, 1, 0, 0],
+    "2": [0, 1, 0, 0],
+    "3": [0, 1, 0, 1],
+    "4": [1, 0, 0, 0],
+    "6": [0, 0, 0, 1],
+    "7": [1, 0, 1, 0],
+    "8": [0, 0, 1, 0],
+    "9": [0, 0, 1, 1],
+    "A": [0, 1, 1, 0],
+    "B": [1, 0, 0, 1]
+    }
+
+  def __init__(self, filename, need_steps):
+    self.filename = filename
+    self.description = None
+    self.lyrics = []
+    self.steps = {}
+    self.difficulty = {}
+    self.info = {}
+
+    self.bpms = []
+    self.freezes = []
+
+    f = open(filename)
+    tokens = "".join([self.strip_line(line) for line in f])
+    tokens = tokens.replace(";", "")
+    tokens = tokens.split("#")
+
+    for token in tokens:
+      if len(token) == 0: continue
+      parts = token.split(":")
+      if len(parts) == 4: # This is a step pattern
+        if not self.difficulty.has_key(parts[0]):
+          self.difficulty[parts[0]] = {}
+          self.steps[parts[0]] = {}
+        self.difficulty[parts[0]][parts[1]] = int(parts[2])
+        if need_steps: self.parse_steps(parts[0], parts[1], parts[3])
+        
+      else: # This is some sort of metadata key
+        # FIXME : Support samplestart and samplelength
+        # don't support filenames. They're useless cross-platform.
+        if parts[0] == "GAP": self.info["gap"] = -int(parts[1])
+        elif parts[0] == "TITLE": self.info["title"] = ":".join(parts[1:])
+        elif parts[0] == "ARTIST": self.info["artist"] = ":".join(parts[1:])
+        elif parts[0] == "MD5": self.info["md5sum"] = parts[1]
+        elif parts[0] == "BPM": self.info["bpm"] = float(parts[1])
+        elif parts[0] == "GENRE":
+          self.info["mix"] = ":".join(parts[1:]).split(",")[0]
+        elif parts[0] == "CHANGEBPM":
+          for change in parts[1].split(","):
+            beat, bpm = change.split("=")
+            self.bpms.append((float(beat), float(bpm)))
+        elif parts[0] == "FREEZE":
+          for change in parts[1].split(","):
+            beat, wait = change.split("=")
+            self.freezes.append((float(beat), float(wait)/1000.0))
+
+    dir, name = os.path.split(filename)
+    largefile = 10240 # Oh crap, I hate DWI. Shoot me now.
+    found_bg = False
+    for file in os.listdir(dir):
+      lfile = file.lower()
+      # SimWolf should be indicted for some sort of programming crime
+      # for making me write all the code below this.
+      fullfile = os.path.join(dir, file)
+      if lfile[-3:] == "mp3" and not self.info.has_key("filename"):
+        self.info["filename"] = fullfile
+      elif lfile[-3:] == "ogg":
+        self.info["filename"] = fullfile
+      elif lfile[-3:] == "jpg" or lfile[-3:] == "png":
+        size = os.stat(fullfile).st_size
+        try:
+          lfile.index("bg")
+          found_bg = True
+          largefile = max(largefile, size)
+          if self.info.has_key("background"):
+            self.info["banner"] = self.info["background"]
+          self.info["background"] = fullfile
+        except ValueError:
+          try:
+            lfile.index("ban")
+            largefile = max(largefile, size)
+            self.info["banner"] = fullfile
+          except ValueError:
+            if size > largefile and not found_bg:
+              largefile = size
+              if self.info.has_key("background"):
+                self.info["banner"] = self.info["background"]
+              self.info["background"] = fullfile
+            elif not self.info.has_key("banner"):
+              self.info["banner"] = fullfile
+
+      self.find_subtitle()
+
+  def strip_line(self, line):
+    try:
+      i = line.index("//")
+      line = line[0:i]
+    except ValueError: pass
+    return line.strip()
+
+  # FIXME We share this with StepFile...
+  def find_subtitle(self):
+    if not self.info.has_key("subtitle"):
+      for pair in (("[", "]"), ("(", ")"), ("~", "~")):
+        if pair[0] in self.info["title"] and pair[1] in self.info["title"]:
+          l = self.info["title"].index(pair[0])
+          r = self.info["title"].rindex(pair[1])
+          if l != 0 and r > l + 1:
+            self.info["subtitle"] = self.info["title"][l+1:r]
+            self.info["title"] = self.info["title"][:l]
+            break
+
+  def parse_steps(self, mode, diff, steps):
+    step_type = "e"
+    current_time = 0
+    bpmidx = 0
+    freezeidx = 0
+    self.steps[mode][diff] = []
+    steps = list(steps)
+    while len(steps) != 0:
+      if steps[0] in DWIFile.modes: step_type = DWIFile.modes[steps.pop(0)]
+      elif steps[0] in DWIFile.steps:
+        step = list(DWIFile.steps[steps.pop(0)])
+        if len(steps) > 0 and steps[0] == "!":
+          steps.pop(0)
+          holdstep = DWIFile.steps[steps.pop(0)]
+          for i in range(len(holdstep)):
+            if holdstep[i]: step[i] |= 2
+        self.steps[mode][diff].append([step_type] + step)
+        current_time += DWIFile.times[step_type]
+
+        for xyz in self.bpms[bpmidx:]:
+          if current_time >= xyz[0]:
+            self.steps[mode][diff].append(["B", float(xyz[1])])
+            bpmidx += 1
+        for xyz in self.freezes[freezeidx:]:
+          if current_time >= xyz[0]:
+            self.steps[mode][diff].append(["S", float(xyz[1])])
+            freezeidx += 1
+      elif steps[0] == " ": steps.pop(0)
+      else: print "Unknown token", steps.pop(0)
+
 formats = ((".step", StepFile),
-           (".dance", DanceFile))
+           (".dance", DanceFile),
+           (".dwi", DWIFile))
 
 DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "ANOTHER", "STANDARD", "TRICK",
                 "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI"]
