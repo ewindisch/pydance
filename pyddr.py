@@ -984,6 +984,7 @@ class Song:
     self.holdinfo = [None] * 4
     self.holdref = [None] * 4
     numholds = 1
+    difficulty = None
     holdlist = []
     releaselist = []
     holdtimes = []
@@ -1018,9 +1019,10 @@ class Song:
             coloringmod = 0
 
             # append the hold info for this mode
-            i = DIFFICULTYLIST.index(difficulty)
-            self.holdinfo[i] = zip(holdlist,holdtimes,releasetimes)
-            self.holdref[i] = zip(holdlist,holdtimes)
+            if difficulty != None:
+              i = DIFFICULTYLIST.index(difficulty)
+              self.holdinfo[i] = zip(holdlist,holdtimes,releasetimes)
+              self.holdref[i] = zip(holdlist,holdtimes)
 
             # reset all the hold arrow stuff and operate on next mode
             holdlist = []
