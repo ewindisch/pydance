@@ -24,6 +24,8 @@ class AbstractCourse(object):
     self.all_songs = all_songs
     self.recordkeys = recordkeys
 
+  # This course has been started. This means we need to set up some
+  # appropriate variables with values we can't get elsewhere.
   def setup(self, screen, player_configs, game_config, gametype):
     self.player_configs = player_configs
     self.game_config = game_config
@@ -31,11 +33,20 @@ class AbstractCourse(object):
     self.gametype = gametype
     self.screen = screen
 
+  # Done playing this course, GC the above.
   def done(self):
     self.screen = self.player_configs = self.game_config = None
 
+
+  # Sometimes we have a strange difficulty, like player's worst or a
+  # range, or totally random. This checks if the song contains the
+  # proper difficulty.
   def _find_difficulty(self, song, diff):
     if self.gametype not in song.difficulty: return False
+    # diffs can either be an individual string, representing a
+    # difficulty directly, a list of strings, representing possible
+    # difficulty names, or a list of integers, which is a range of
+    # possible ratings to choose.
     elif isinstance(diff, str):
       if diff in song.difficulty[self.gametype]: return diff
       else: return False
@@ -53,6 +64,7 @@ class AbstractCourse(object):
   def __iter__(self): return self
 
   def next(self):
+    # We're done.
     if self.index == len(self.songs): raise StopIteration
     
     name, diff, mods = self.songs[self.index]
@@ -64,6 +76,8 @@ class AbstractCourse(object):
     elif len(diff) < 3: a, b = int(diff), int(diff)
     if a or b: diff = range(a, b + 1)
 
+    # Check for player's best/worst/likes/dislikes. There are stored
+    # as a tuple of (type, number).
     if name[0] == "BEST":
       s = self.recordkeys.get(records.best(name[1], diff, self.gametype), None)
       if s:
@@ -71,14 +85,16 @@ class AbstractCourse(object):
         if isinstance(diff, list):
           diff = [d for d in diff if d in s.difficulty[self.gametype]][0]
     elif name[0] == "WORST":
-      s = self.recordkeys.get(records.worst(name[1], diff, self.gametype), None)
+      s = self.recordkeys.get(records.worst(name[1], diff, self.gametype),None)
       if s:
         fullname = s.filename
         if isinstance(diff, list):
           diff = [d for d in diff if d in s.difficulty[self.gametype]][0]
 
     elif name[-1] == "*": # A random song
+      # First pull out all the songs that we might be acceptable.
       if "/" in name:
+        # Random song from a specific mix.
         folder, dummy = name.split("/")
         folder = folder.lower()
         if folder in self.all_songs:
@@ -88,6 +104,7 @@ class AbstractCourse(object):
           raise StopIteration
 
       else:
+        # Any random song.
         songs = []
         for v in self.all_songs.values(): songs.extend(v.values())
 
@@ -100,7 +117,11 @@ class AbstractCourse(object):
         song = random.choice(songs)
         diff = self._find_difficulty(song, diff)
         fullname = song.filename
-        
+
+    # Let's try to find the damned song.
+    # Unfortunately, it can be given as just a title(+subtitle), or a
+    # mix with a title. Or a filename. That's why we need the
+    # all_songs hash.
     else:
       for path in mainconfig["songdir"].split(os.pathsep):
         fn = os.path.join(path, name)
@@ -131,6 +152,8 @@ def CourseFile(*args):
   else: raise RuntimeError(filename + " is an unsupported format.")
 
 # Like DWI and SM files, CRS files are a variant of the MSD format.
+# This is the DWI variant of .crs. Stepmania's (incompatible) course
+# file format is also called .crs.
 class CRSFile(AbstractCourse):
   # Map modifier names to internal pydance names.
   modifier_map = { "0.5x" : ("speed", 0.5),
@@ -161,6 +184,8 @@ class CRSFile(AbstractCourse):
   def __init__(self, filename, all_songs, recordkeys):
     AbstractCourse.__init__(self, all_songs, recordkeys)
     self.filename = filename
+    # I'm not really sure if this is guaranteed or not, but the DDRUK
+    # courses match it.
     self.banner = filename[:-3] + "png"
     lines = []
     f = open(filename)
@@ -195,6 +220,9 @@ class CRSFile(AbstractCourse):
         elif name[0:5] == "WORST": name = ("WORST", int(name[5:]))
         else: name = name.replace("\\", "/") # DWI uses Windows-style
 
+        # FIXME: This doesn't actually work yet. Modifier application
+        # is tricky because we don't have a way to 'reset' the
+        # player's objects to the new settings.
         mods = {}
         for mod in modifiers:
           if mod in CRSFile.modifier_map:
