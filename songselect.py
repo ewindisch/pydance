@@ -206,7 +206,7 @@ class FolderDisplay(object):
   # common for DWIs, mixdir/banner.png (for mixdir/songdir/song.dwi).
   def find_banner(self):
     name = self.name.encode("ascii", "ignore")
-    for path in (rc_path, pyddr_path):
+    for path in (rc_path, pydance_path):
       filename = os.path.join(path, "banners", self.type, name + ".png")
       if os.path.exists(filename):
         banner = pygame.image.load(filename).convert()

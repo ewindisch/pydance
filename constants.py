@@ -1,11 +1,11 @@
 # Event types.
-E_PASS,E_QUIT,E_FULLSCREEN,E_SCREENSHOT,E_PGUP,E_PGDN,E_SELECT,E_MARK,E_UP,E_DOWN,E_LEFT,E_RIGHT,E_START,E_CREATE,E_UNSELECT,E_CLEAR,E_UNMARK, E_CENTER = range(18)
+E_PASS,E_QUIT,E_FULLSCREEN,E_SCREENSHOT,E_UPRIGHT,E_DOWNRIGHT,E_SELECT,E_DOWNLEFT,E_UP,E_DOWN,E_LEFT,E_RIGHT,E_START,E_CREATE,E_UNSELECT,E_CLEAR,E_UPLEFT, E_CENTER = range(18)
 
 E_SORT = E_SCREENSHOT
 
-E_UPLEFT, E_UPRIGHT, E_DOWNLEFT, E_DOWNRIGHT = E_UNMARK, E_PGUP, E_MARK, E_PGDN
+E_UNMARK, E_PGUP, E_MARK, E_PGDN = E_UPLEFT, E_UPRIGHT, E_DOWNLEFT, E_DOWNRIGHT
 
-VERSION = "0.8.0"
+VERSION = "0.8.1"
 
 import sys, os, config, pygame
 import games
@@ -31,39 +31,29 @@ if osname == 'posix': # We need to force stereo in many cases.
 from pygame.locals import *
 
 # Find out our real directory - resolve symlinks, etc
-pyddr_path = sys.argv[0]
+pydance_path = sys.argv[0]
 if osname == "posix":
-  pyddr_path = os.path.split(os.path.realpath(pyddr_path))[0]
-else: pyddr_path = os.path.split(os.path.abspath(pyddr_path))[0]
-sys.path.append(pyddr_path)
+  pydance_path = os.path.split(os.path.realpath(pydance_path))[0]
+else: pydance_path = os.path.split(os.path.abspath(pydance_path))[0]
+sys.path.append(pydance_path)
 
 # Set up some bindings for common directories
-image_path = os.path.join(pyddr_path, "images")
-sound_path = os.path.join(pyddr_path, "sound")
+image_path = os.path.join(pydance_path, "images")
+sound_path = os.path.join(pydance_path, "sound")
 
 # Set a binding for our savable resource directory
 rc_path = None
 if osname == "posix":
-  old_rc_path = os.path.join(os.environ["HOME"], ".pyddr")
   rc_path = os.path.join(os.environ["HOME"], ".pydance")
 elif osname == "macosx":
-  old_rc_path = os.path.join(os.environ["HOME"], "Library",
-                             "Preferences", "pyDDR")
   rc_path = os.path.join(os.environ["HOME"], "Library",
                              "Preferences", "pydance")
-elif osname == "win32":
-  old_rc_path = rc_path = "."
-
-if os.path.isdir(old_rc_path) and not os.path.isdir(rc_path):
-  os.rename(old_rc_path, rc_path)
-
-if os.path.exists(os.path.join(rc_path, "pyddr.cfg")):
-  os.rename(os.path.join(rc_path, "pyddr.cfg"), os.path.join(rc_path, "pydance.cfg"))
+elif osname == "win32": rc_path = "."
 
 if not os.path.isdir(rc_path): os.mkdir(rc_path)
 
-search_paths = (pyddr_path, rc_path, old_rc_path)
-#if pyddr_path != "." and rc_path != ".":
+search_paths = (pydance_path, rc_path)
+#if pydance_path != "." and rc_path != ".":
 #  search_paths += (".",)
 
 if not sys.stdout.isatty():
@@ -93,7 +83,7 @@ default_conf = { # Wow we have a lot of options
   "autogen": 1,
   }
 
-for dummy, game in games.GAMES.items():
+for game in games.GAMES.values():
   default_conf["%s-theme" % game.theme] = game.theme_default
 
 mainconfig = config.Config(default_conf)
@@ -124,15 +114,11 @@ game_config = {"battle": 0,
                }
 
 if osname == "posix":
-  mainconfig.load("/etc/pyddr.cfg", True)
   mainconfig.load("/etc/pydance.cfg", True)
 elif osname == "macosx":
-  mainconfig.load("/Library/Preferences/pyDDR/pyddr.cfg", True)
   mainconfig.load("/Library/Preferences/pydance/pydance.cfg", True)
 
-mainconfig.load("pyddr.cfg")
 mainconfig.load("pydance.cfg")
-mainconfig.load(os.path.join(old_rc_path, "pyddr.cfg"))
 mainconfig.load(os.path.join(rc_path, "pydance.cfg"))
 mainconfig["sortmode"] %= 4
 

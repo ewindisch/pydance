@@ -127,8 +127,8 @@ class TimeDisp(pygame.sprite.Sprite):
 class ReadyGoSprite(pygame.sprite.Sprite):
   def __init__(self, time):
     pygame.sprite.Sprite.__init__(self)
-    ready = os.path.join(pyddr_path, "images", "ready.png")
-    go = os.path.join(pyddr_path, "images", "go.png")
+    ready = os.path.join(pydance_path, "images", "ready.png")
+    go = os.path.join(pydance_path, "images", "go.png")
     self.time = time
     self.ready = pygame.image.load(ready).convert()
     self.ready.set_colorkey(self.ready.get_at((0, 0)), RLEACCEL)

@@ -12,7 +12,7 @@ import fontfx, menudriver, fileparsers, audio, colors
 
 import os, sys, random, operator, error, util, getopt, math
 
-os.chdir(pyddr_path)
+os.chdir(pydance_path)
 
 def SetDisplayMode(mainconfig):
   try:

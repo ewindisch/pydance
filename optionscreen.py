@@ -70,7 +70,7 @@ def game_opt_driver(screen, config):
                     
 class OptionScreen(object):
 
-  bg = pygame.image.load(os.path.join(pyddr_path, "images", "option-bg.png"))
+  bg = pygame.image.load(os.path.join(pydance_path, "images", "option-bg.png"))
   bg.set_colorkey(bg.get_at([0, 0]))
   bg.set_alpha(220)
 
