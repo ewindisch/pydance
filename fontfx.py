@@ -146,3 +146,40 @@ class TextProgress:
         surf.blit(self.outline, (-1,-1))
         surf.set_colorkey(self.notcolor)
         return surf
+
+class zztext(pygame.sprite.Sprite):
+    def __init__(self, text, x, y):
+      pygame.sprite.Sprite.__init__(self)
+      self.cent = (x, y)
+      self.zoom = 0
+      self.baseimage = pygame.surface.Surface((320,24))
+      self.rect = self.baseimage.get_rect()
+      self.rect.center = self.cent
+
+      for i in (0, 1, 2, 3, 4, 5, 6, 7, 8, 15):
+        font = pygame.font.Font(None, 9+i)
+        gtext = font.render(text, 1, (i * 16,) * 3)
+        textpos = gtext.get_rect()
+        textpos.center = (160, 12)
+        self.baseimage.blit(gtext, textpos)
+
+      self.baseimage.set_colorkey(self.baseimage.get_at((0, 0)), RLEACCEL)
+      self.image = self.baseimage
+
+    def zin(self):
+      self.zoom = 1
+      self.zdir = 1
+      
+    def zout(self):
+      self.zoom = 31
+      self.zdir = -1
+      
+    def update(self):
+      if 32 > self.zoom > 0:
+        self.image = pygame.transform.rotozoom(self.baseimage, 0,
+                                               self.zoom/32.0)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.cent
+        self.zoom += self.zdir
+      else:
+        self.zdir = 0

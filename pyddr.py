@@ -112,7 +112,6 @@ class Judge:
     self.ontime += anotherjudge.ontime
         
   def changebpm(self, bpm):
-    self.oldtick = self.tick
     self.tick = toRealTime(bpm, 1)
     self.bpm = bpm
         
@@ -261,51 +260,6 @@ class Judge:
     elif self.dance_score / max_score >= 0.65: return "B"
     elif self.dance_score / max_score >= 0.45: return "C"
     else: return "D"
-
-class zztext(pygame.sprite.Sprite):
-    def __init__(self,text,x,y):
-      pygame.sprite.Sprite.__init__(self)
-      self.x = x
-      self.y = y
-      self.zoom = 0
-      self.baseimage = pygame.surface.Surface((320,24))
-      self.rect = self.baseimage.get_rect()
-      self.rect.centerx = self.x
-      self.rect.centery = self.y
-
-      for i in (0, 1, 2, 3, 4, 5, 6, 7, 8, 15):
-        font = pygame.font.Font(None, 9+i)
-        stextred = (i*16)
-        stextblu = (i*16)
-        stextgrn = (i*16)
-        gtext = font.render(text, 1, (stextred, stextblu, stextgrn))
-        textpos = gtext.get_rect()
-        textpos.centerx = 160
-        textpos.centery = 12
-        self.baseimage.blit(gtext, textpos)
-
-      self.baseimage.set_colorkey(self.baseimage.get_at((0,0)),RLEACCEL)
-      self.image = self.baseimage
-
-    def zin(self):
-      self.zoom = 1
-      self.zdir = 1
-      
-    def zout(self):
-      self.zoom = 31
-      self.zdir = -1
-      
-    def update(self):
-      if 32 > self.zoom > 0:
-        self.image = pygame.transform.rotozoom(self.baseimage, 0, self.zoom/32.0)
-
-        self.rect = self.image.get_rect()
-        self.rect.centerx = self.x
-        self.rect.centery = self.y
-        
-        self.zoom += self.zdir
-      else:
-        self.zdir = 0
 
 class ComboDisp(pygame.sprite.Sprite):
   def __init__(self,playernum):
@@ -896,7 +850,7 @@ def main():
 
   SetDisplayMode(mainconfig)
   
-  pygame.display.set_caption('pyDDR')
+  pygame.display.set_caption('pyDDR ' + VERSION)
   pygame.mouse.set_visible(0)
 
   pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
@@ -1113,17 +1067,15 @@ def dance(song, players, prevscr):
   showcombo = mainconfig['showcombo']
   
   bg = pygame.Surface(screen.get_size())
-  bg.fill((0,0,0))
+  bg.fill(colors.BLACK)
 
-  songtext = zztext(song.title, 480,12)
-  grptext = zztext(song.artist, 160,12)
+  songtext = fontfx.zztext(song.title, 480,12)
+  grptext = fontfx.zztext(song.artist, 160,12)
 
   songtext.zin()
   grptext.zin()
 
-  tgroup.add(songtext)
-  tgroup.add(grptext)
-  tgroup.add(timewatch)
+  tgroup.add((songtext, grptext))
 
   screenshot=0
 

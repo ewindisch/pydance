@@ -10,6 +10,8 @@ DEFAULTZINDEX,PADZINDEX,ARROWZINDEX,XANIMZINDEX,BARSZINDEX = range(5)
 DIRECTIONS = ['l', 'd', 'u', 'r']
 MAXPLAYERS = 2
 
+VERSION = "0.6.4"
+
 import sys, os, config, pygame
 
 # Detect the name of the OS - MacOS X is not really UNIX.

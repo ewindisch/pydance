@@ -108,8 +108,8 @@ class StepFile:
           try: parts[i] = float(p)
           except ValueError: pass
       i += 1
-    if parts[0] == "lyric": parts = ["L", 1, " ".join(parts[1:])]
-    elif parts[0] == "trans": parts = ["L", 0, " ".join(parts[1:])]
+    if parts[0] == "lyric": parts = ["L", 1, " ".join([str(i) for i in parts[1:]])]
+    elif parts[0] == "trans": parts = ["L", 0, " ".join([str(i) for i in parts[1:]])]
     self.steps[data[0]][data[1]].append(parts)
     return StepFile.STEPS, data
 

@@ -143,7 +143,7 @@ class Steps:
         self.lastbpmchangetime.append([cur_time, cur_bpm])
 
       elif words[0] == "L" and lyrics:
-        lyrics.addlyric(cur_time - 0.4, words[2], words[1])
+        lyrics.addlyric(cur_time - 0.4, words[1], words[2])
 
     self.length = cur_time + toRealTime(cur_bpm, BEATS['h'])
 
