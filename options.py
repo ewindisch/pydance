@@ -99,7 +99,7 @@ OPTIONS = {
            ON_OFF),
   "colortype": (True, "Colors",
                 "Use colors of arrows to indicate the beat.",
-                zip([0, 4],
+                zip([1, 4],
                     ["Flat", "Normal"],
                     ["All arrows are the same.",
                      "Different arrows have different colors."])
