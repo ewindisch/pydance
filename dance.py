@@ -765,9 +765,11 @@ def dance(screen, song, players, prevscr, ready_go, game):
       elif ev[1] == E_SCREENSHOT:
         screenshot = 1
       elif ev[1] == E_LEFT: key.append((ev[0], 'l'))
+      elif ev[1] == E_MARK: key.append((ev[0], 'w'))
       elif ev[1] == E_UNMARK: key.append((ev[0], 'k'))
       elif ev[1] == E_RIGHT: key.append((ev[0], 'r'))
       elif ev[1] == E_PGUP: key.append((ev[0], 'z'))
+      elif ev[1] == E_PGDN: key.append((ev[0], 'g'))
       elif ev[1] == E_UP: key.append((ev[0], 'u'))
       elif ev[1] == E_DOWN: key.append((ev[0], 'd'))
 
@@ -785,7 +787,8 @@ def dance(screen, song, players, prevscr, ready_go, game):
     # This maps the old holdkey system to the new event ID one
     # We should phase this out
     keymap_kludge = ({"u": E_UP, "k": E_UNMARK, "z": E_PGUP,
-                      "d": E_DOWN, "l": E_LEFT, "r": E_RIGHT})
+                      "d": E_DOWN, "l": E_LEFT, "r": E_RIGHT,
+                      "g": E_PGDN, "w": E_PGUP} )
 
     for plr in players:
       for checkhold in game.dirs:

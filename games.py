@@ -15,6 +15,7 @@ GAMES = {
   "SINGLE": GameType(),
   "COUPLE": GameType(couple = True),
   "6PANEL": GameType(players = 1, dirs = ["l", "k", "d", "u", "z", "r"]),
+  "8PANEL": GameType(players = 1, dirs = ["w", "l", "k", "d", "u", "z", "r", "g"]),
   }
 
 COUPLE = [mode for mode in GAMES if GAMES[mode].couple]
