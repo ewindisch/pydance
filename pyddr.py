@@ -2844,9 +2844,6 @@ def songSelect(songs, players):
           for sorti in songs:
             newlist.append(sorti.mixname)
 
-        if mainconfig["sortpersist"] == 1:
-          mainconfig["sortmode"] = sortmode
-
         print sortbytext
 
         blah = zip(newlist,songs)

@@ -9,6 +9,8 @@ legend:
 0.6.2 - No More Ugly-Ass Buttons
 - Fullscreen switching during the game doesn't work on MacOS X.
   - Use the configuration file instead, for now.
+- The pN_keys option is gone in favor of 'keyboard'.
+- The sortpersist option was removed.
 + New game menu display.
 + Better theme detection and configuration support.
 + The 'badknees' option will remove jumps.

@@ -74,7 +74,7 @@ mainconfig = config.Config({ # Wow we have a lot of options
   "reversescroll": 0, "scrollspeed": 1,
   "explodestyle": 3, "arrowspin": 0, "arrowscale" : 1,
   "vesacompat": 0, "fullscreen": 0,
-  "sortmode": 0, "sortpersist": 1,
+  "sortmode": 0,
   "previewmusic": 1,
   "showbackground": 1, "bgbrightness": 127,
   "sudden": 0, "hidden": 0, "little": 0, "assist": 0, "badknees": 0,
