@@ -93,7 +93,9 @@ player_config = {"spin": 0,
                  "colortype": 4,
                  "scrollstyle": 0 }
 
-game_config = {"battle": 0
+game_config = {"battle": 0,
+               "lifebar": "normal",
+               "onilives": 3,
                }
 
 if osname == "posix":

@@ -6,7 +6,7 @@ import fontfx, spritelib, colors
 
 class Player:
 
-  def __init__(self, pid, combos, config, mode = "SINGLE"):
+  def __init__(self, pid, combos, config, songconf):
     self.theme = GFXTheme(mainconfig["gfxtheme"])
     self.pid = pid
 
@@ -17,10 +17,10 @@ class Player:
     else: self.top = 64
     
     self.score = ScoringDisp(pid, "Player " + str(pid))
-    if mainconfig["maxonilife"] == 0:
+    if songconf["lifebar"] == "normal":
       self.lifebar = LifeBarDisp(pid, self.theme)
-    else:
-      self.lifebar = OniLifeBarDisp(pid, self.theme)
+    elif songconf["lifebar"] == "oni":
+      self.lifebar = OniLifeBarDisp(pid, self.theme, songconf["onilives"])
     self.holdtext = HoldJudgeDisp(self)
     self.judging_list = []
     self.total_judgings = mainconfig['totaljudgings']
@@ -30,7 +30,6 @@ class Player:
     self.steps = None
     self.holds = None
     self.evt = None
-    self.mode = mode
 
   def set_song(self, steps, Judge): # FIXME factor these out
     self.steps = steps
@@ -217,10 +216,10 @@ class OniLifeBarDisp(AbstractLifeBar):
 
   lose_sound = pygame.mixer.Sound(os.path.join(sound_path, "loselife.ogg"))
 
-  def __init__(self, playernum, theme):
-    AbstractLifeBar.__init__(self, playernum, mainconfig["maxonilife"])
+  def __init__(self, playernum, theme, onilives):
+    AbstractLifeBar.__init__(self, playernum, onilives)
 
-    self.life = mainconfig["maxonilife"]
+    self.life = onilives
 
     self.deltas = { "O": -1, "B": -1, "M": -1}
     self.empty = pygame.image.load(os.path.join(theme.path, 'oni-empty.png'))

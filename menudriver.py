@@ -130,10 +130,6 @@ def do(screen, songdata):
         ["Single/Versus", {E_START: wrap_ctr}, (SongSelect, songdata + ("SINGLE",))],
         ["Couple", {E_START: wrap_ctr}, (SongSelect, songdata + ("COUPLE",))],
         ["Endless", {E_START: wrap_ctr}, (Endless, songdata + ("SINGLE",))],
-        ["Oni Mode", tuple_opt, ('maxonilife',
-                                 [(0, 'off'), (3, 'three lives'),
-                                  (4, 'four lives'), (5, 'five lives'),
-                                  (7, 'seven lives'), (9, 'nine lives')])],
         ["Back", None, None]
         ),
        ("Game Options",

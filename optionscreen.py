@@ -23,6 +23,8 @@ MENUS = {
   ],
   E_SELECT: [
   ("Battle", "battle", [(0, "Off"), (1, "On")]),
+  ("Lifebar", "lifebar", [("normal", "Normal"), ("oni", "Oni")]),
+  ("Oni Life", "onilives", [(1, "1"), (3, "3"), (5, "5"), (9, "9")]),
   ]
   }
 
@@ -84,7 +86,7 @@ class OptionScreen:
     
     ev = E_PASS
     
-    while not (ev == E_START or ev == E_QUIT):
+    while not (ev == E_START or ev == E_QUIT or ev == E_MARK):
       self.render(screen)
       
       pid, ev = event.wait()
@@ -152,7 +154,7 @@ class OptionScreen:
         if not color: color = colors.WHITE
 
         text = FONTS[32].render(values[k][1], 1, color)
-        blankimage.blit(text, (100 + width * k, 70 + 35 * i))
+        blankimage.blit(text, (120 + width * k, 70 + 35 * i))
 
     faketext = " / ".join([str(i+1) for i in range(len(self.current))])
     faketext = "Players: " + faketext

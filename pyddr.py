@@ -956,7 +956,7 @@ def playSequence(playlist, configs, songconf, playmode):
 
   players = []
   for playerID in range(numplayers):
-    plr = Player(playerID, ComboDisp(playerID), configs[playerID])
+    plr = Player(playerID, ComboDisp(playerID), configs[playerID], songconf)
     players.append(plr)
 
   for songfn, diff in playlist:

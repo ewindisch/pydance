@@ -110,7 +110,8 @@ class Endless:
       # Start game
       if ev[0] == 0 and ev[1] == E_START:
 
-        if self.optionscreen(screen):
+        if optionscreen.driver(screen, E_START,
+                               self.player_configs, "Endless"):
           playSequence(FakePlaylist(songitems, self.constraints,
                                     screen, gametype),
                        self.player_configs, self.game_config, gametype)
@@ -119,6 +120,9 @@ class Endless:
         audio.play(4, 0.0)
 
         while ev[1] != E_PASS: ev = event.poll()
+
+      if ev[0] == 0 and ev[1] == E_SELECT:
+        optionscreen.driver(screen, E_SELECT, [self.game_config], "Endless")
 
       # Player 2 on
       elif ev[0] == len(self.constraints) and ev[1] == E_START:
@@ -195,16 +199,3 @@ class Endless:
       self.screen.blit(vtext, vtext_r)
 
     pygame.display.flip()
-
-  def optionscreen(self, screen):
-    ev = (0, E_QUIT)
-    start = pygame.time.get_ticks()
-
-    while (event.states[(0, E_START)] and
-           pygame.time.get_ticks() - start < 1500):
-      ev = event.poll()
-
-    if event.states[(0, E_START)]:
-      op = optionscreen.OptionScreen(self.player_configs, "Endless")
-      return op.display(screen)
-    else: return True
