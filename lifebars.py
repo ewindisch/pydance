@@ -23,9 +23,6 @@ class AbstractLifeBar(Listener, pygame.sprite.Sprite):
     self.rect.top = 30
     self.rect.centerx = game.sprite_center + playernum * game.player_offset
 
-  def failed(self):
-    return self.gameover
-
   def stepped(self, pid, dir, curtime, rating, combo):
     if self.life >= 0:
       self.life += self.deltas.get(rating, 0)
