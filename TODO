@@ -54,38 +54,3 @@ NEAT STUFF
 
 <ShredWheat> img_array = pygame.surfarray.pixels3d(img)
 <ShredWheat> img_array[...,0] = img_array[...,2] = img_array[...,1]
-
-NOTES ON THE SOURCE
--------------------
-(We need to verify this and remove parts that aren't true anymore):
-
-res 640x480 (fullscreen adjustable?)
-
-arrows 64x64: 512W with 12Wx8 gaps: 608. 32W gap in center.
-
-arrow gfx filenaming convention:
-arr_X_TYPE_FRAME, where TYPE is direction (L,D,U,R) and X is
-  N: normal
-  S: stepped on
-  C: colored
-
-FRAME is 0123 for normal/stepped for arrow pulsing, or 012 for colors
-
-status of arrows:
-
-arrstat(x,y,z) = status where status is:
-  0 = no status / not initialised
-  1 = is shown (if game is in "sudden" or something, this will help)
-  2 = has pulse (to beat)
-  4 = has step (they hit this arrow)
-
-  8 = is an arrow (blue 4ths, red 8ths, green 16ths - autocalc'ed)
- 16 =
- 32 =
- 64 = hold end
-128 = hold begin
-
-x = 0,1,2,3 = l,d,u,r
-y = row position (0 = top)
-z = player (1 left, 2 right)
-toparrows are still in arrstat (y=0)
