@@ -240,19 +240,28 @@ class RemoveSecret(Transform):
     return s
 
 class RemoveJumps(Transform):
-  def __init__(self): self._side = 0
+  def __init__(self):
+    self._side = 0
+    self._holds = []
 
   def _transform(self, s):
     if s[0] not in NOT_STEPS:
       step = s[1:]
+      for i in range(len(step)):
+        if step[i] & 2 and i not in self._holds: self._holds.append(i)
+
       if step.count(0) < len(step) - 1:
-        if self._side: step.reverse()
+        if self._side and not self._holds: step.reverse()
         for i in range(len(step)):
           if step[i]:
             step[i] = 0
             break
-        if self._side: step.reverse()
+        if self._side and not self._holds: step.reverse()
         self._side ^= 1
+
+      for i in range(len(step)):
+        if step[i] & 1 and not step[i] & 2 and i in self._holds:
+          self._holds.remove(i)
 
       return [s[0]] + step
     else: return s[:]
