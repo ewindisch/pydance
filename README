@@ -83,6 +83,10 @@ pyddr.cfg
           hit an arrow. It's useful if you can't see the screen, or need
           help getting on beat in a particular song.
 
+   autofail 1|0
+          If this is turned off, the game will continue, even when your
+          lifebar runs out.
+
    badknees 0|1
           If you have trouble with jumps (two arrows at once), you can
           turn this option on to change jumps to one regular arrow.
@@ -96,10 +100,6 @@ pyddr.cfg
           This makes arrows fade out when they are a certain number of
           beats before the top arrows. You do, however, still have to hit
           them. :)
-
-   autofail 1|0
-          If this is turned off, the game will continue, even when your
-          lifebar runs out.
 
    little 0|1|2|3 (default 0)
           If you want to try a harder song but want simpler steps, you
@@ -237,6 +237,13 @@ pyddr.cfg
 
   Interface Options
 
+   keyboard qwerty|rqwerty|dvorak|rdvorak
+          Your keyboard type. 'ijkl', while convenient on qwerty
+          (standard) keyboards, doesn't work at all on dvorak ones.
+          Setting this option to dvorak will redefine your keys to
+          'chtn'. The "r" variants swap controls (so player 1 uses the
+          arrows, and player 2 uses the letters).
+
    sortmode 0|1|2|3|4|5 (default 0)
           This sets the sorting mode for the song select screen. 0 sorts
           by filename, 1 by song name, 2 by artist name, 3 by BPM, 4 by
@@ -246,13 +253,6 @@ pyddr.cfg
           screen.
 
   System Options
-
-   keyboard qwerty|rqwerty|dvorak|rdvorak
-          Your keyboard type. 'ijkl', while convenient on qwerty
-          (standard) keyboards, doesn't work at all on dvorak ones.
-          Setting this option to dvorak will redefine your keys to
-          'chtn'. The "r" variants swap controls (so player 1 uses the
-          arrows, and player 2 uses the letters).
 
    songdir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)
           This is a list of directories where pyDDR should look for songs

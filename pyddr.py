@@ -1092,7 +1092,7 @@ class LifeBarDisp(pygame.sprite.Sprite):
         #self.life += judges.combo*8 / tstmp
         #self.life += judges.bestcombo*8 / tstmp
       
-      if self.life > 0: #If you failed, you failed. You can't gain more life afterwards
+      if self.life >= 0: #If you failed, you failed. You can't gain more life afterwards
         self.life = 25 + self.prevlife + (judges.marvelous * self.vamt) + (judges.perfect * self.pamt) + (judges.great * self.gamt) + (judges.ok * self.oamt) + (judges.crap * self.camt) + (judges.shit * self.samt) + (judges.miss * self.mamt)
         
         if self.life <= 0: #FAILED but we don't do anything yet
@@ -3121,7 +3121,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
       for plr in playerContents:
         if plr['lifebar'].failed == 0:
           songFailed = 0
-          break;
+          break
       if songFailed:
         song.kill()
     

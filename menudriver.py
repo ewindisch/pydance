@@ -15,6 +15,15 @@ def switch_onoff(name):
   mainconfig[name] ^= 1
   return get_onoff(name)
 
+# A simple on/off setting, 1 or 0 :)
+def get_offon(name):
+  if mainconfig[name]: return None, "off"
+  else: return None, "on"
+
+def switch_offon(name):
+  mainconfig[name] ^= 1
+  return get_offon(name)
+
 # Rotate through a list of option strings
 def get_rotate(name, list):
   return None, mainconfig[name]
@@ -65,7 +74,7 @@ def switch_tuple(name, list):
       break
     elif item[0] == mainconfig[name]:
       next = True
-  if next: mainconfig[name] == list[0][0]
+  if next: mainconfig[name] = list[0][0]
   return get_tuple(name, list)
 
 def switch_tuple_back(name, list):
@@ -76,6 +85,7 @@ def switch_tuple_back(name, list):
 def do(screen, songselect, songdata):
 
   onoff_opt = { E_START: switch_onoff, E_CREATE: get_onoff }
+  offon_opt = { E_START: switch_offon, E_CREATE: get_offon }
   rotate_opt = { E_START: switch_rotate,
                  E_LEFT: switch_rotate_back,
                  E_RIGHT: switch_rotate,
@@ -92,12 +102,12 @@ def do(screen, songselect, songdata):
   m = (["Play Game", {E_START: songselect}, songdata],
        ("Game Options",
         ["Autofail", onoff_opt, ("autofail",)],
-        ["Announcer", rotate_opt, ("djtheme", Announcer.themes())],
-        ["Reverse", onoff_opt, ("reversescroll",)],
-        ["Speed", rotate_opt, ('scrollspeed', [0.5, 1, 1.5, 2, 4, 8])],
+        ["Arrow Colors", tuple_opt, ('arrowcolors', [(0, 'flat'), (4, 'normal')])],
+        ["Assist Mode", onoff_opt, ("assist",)],
+        ["Jumps", offon_opt, ("badknees",)],
         ["Little", rotate_index_opt,
          ("little", ("show all", "no 16ths", "no 8ths",
-                             "no 8ths or 16ths"))],
+                     "no 8ths or 16ths"))],
         ["Hidden", rotate_index_opt,
          ("hidden", ("off", "hide one","hide two","hide three"))],
         ["Sudden", rotate_index_opt,
@@ -105,29 +115,35 @@ def do(screen, songselect, songdata):
         ["Top Arrows", onoff_opt, ("showtoparrows",)],
         ["Scale Arrows", rotate_index_opt,
          ("arrowscale", ("shrink", "normal", "grow"))],
-        ["Spin Arrows", onoff_opt, ("arrowspin",)],
+        ["Reverse", onoff_opt, ("reversescroll",)],
+        ["Arrow Speed", rotate_opt, ('scrollspeed', [0.5, 1, 1.5, 2, 4, 8])],
         ["Back", None, None]
         ),
        ("Graphic Options",
-        ["Graphics", rotate_opt, ('gfxtheme', GFXTheme.themes())],
-        ["Exploding", rotate_index_opt,
+        ["Theme", rotate_opt, ('gfxtheme', GFXTheme.themes())],
+        ["Effects", rotate_index_opt,
          ('explodestyle', ('none', 'rotate', 'scale', 'rotate & scale'))],
+        ["Spin Arrows", onoff_opt, ("arrowspin",)],
         ["Backgrounds", onoff_opt, ('showbackground',)],
         ["Brightness", tuple_opt, ('bgbrightness',
-                                              [(32, 'very dark'),
-                                               (64, 'dark'),
-                                               (127, 'normal'),
-                                               (192, 'bright'),
-                                               (255, 'very bright')])],
+                                   [(32, 'very dark'),
+                                    (64, 'dark'),
+                                    (127, 'normal'),
+                                    (192, 'bright'),
+                                    (255, 'very bright')])],
         ["Lyrics", onoff_opt, ("showlyrics",)],
         ["Main Lyrics", rotate_opt, ("lyriccolor", lyric_colors.keys())],
         ["Other Lyrics", rotate_opt, ("transcolor", lyric_colors.keys())],
-        ["LPS Counter", onoff_opt, ('fpsdisplay',)],
+        ["FPS Display", onoff_opt, ('fpsdisplay',)],
+        ["Back", None, None]
+        ),
+       ("Sound Options",
+        ["Announcer", rotate_opt, ('djtheme', Announcer.themes())],
+        ["Song Previews", onoff_opt, ('previewmusic',)],
         ["Back", None, None]
         ),
        ["Sort By", rotate_index_opt,
-        ("sortmode", ["file", "song", "group", "bpm",
-                              "difficulty", "mix"])],
+        ("sortmode", ["file", "song", "group", "bpm", "difficulty", "mix"])],
        ["Quit", None, None]
        )
 

@@ -82,6 +82,10 @@
       screen, or need help getting on beat in a particular
       song.</p></dd>
 
+      <dt>autofail 1|0</dt>
+      <dd><p>If this is turned off, the game will continue, even when
+      your lifebar runs out.</p></dd>
+
       <dt>badknees 0|1</dt>
       <dd><p>If you have trouble with jumps (two arrows at once), you
       can turn this option on to change jumps to one regular
@@ -96,10 +100,6 @@
       <dd><p>This makes arrows fade out when they are a certain
       number of beats before the top arrows. You do, however, still
       have to hit them. :)</p></dd>
-
-      <dt>autofail 1|0</dt>
-      <dd><p>If this is turned off, the game will continue, even when
-      your lifebar runs out.</p></dd>
 
       <dt>little 0|1|2|3 (default 0)</dt>
       <dd><p>If you want to try a harder song but want simpler steps,
@@ -241,6 +241,13 @@
     </dl>
     <h3>Interface Options</h3>
     <dl>
+      <dt>keyboard qwerty|rqwerty|dvorak|rdvorak</dt>
+      <dd><p>Your keyboard type. 'ijkl', while convenient on qwerty
+      (standard) keyboards, doesn't work at all on dvorak
+      ones. Setting this option to dvorak will redefine your keys to
+      'chtn'. The "r" variants swap controls (so player 1 uses the
+      arrows, and player 2 uses the letters).</p></dd>
+
       <dt>sortmode 0|1|2|3|4|5 (default 0)</dt>
       <dd><p>This sets the sorting mode for the song select screen. 0
       sorts by filename, 1 by song name, 2 by artist name, 3 by BPM, 4
@@ -250,13 +257,6 @@
     </dl>
     <h3>System Options</h3>
     <dl>
-      <dt>keyboard qwerty|rqwerty|dvorak|rdvorak</dt>
-      <dd><p>Your keyboard type. 'ijkl', while convenient on qwerty
-      (standard) keyboards, doesn't work at all on dvorak
-      ones. Setting this option to dvorak will redefine your keys to
-      'chtn'. The "r" variants swap controls (so player 1 uses the
-      arrows, and player 2 uses the letters).</p></dd>
-
       <dt>songdir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)</dt>
       <dd><p>This is a list of directories where pyDDR should look for
       songs (.step files, backgrounds and banners, and the audio
