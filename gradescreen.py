@@ -83,7 +83,7 @@ class GradingScreen(object):
 
       totalsteps = judge.arrow_count()
 
-      rows = [judge.stats[k] for k in ["M", "V", "G", "O", "B", "M"]]
+      rows = [judge.stats[k] for k in ["V", "P", "G", "O", "B", "M"]]
       rows += [judge.early, judge.late]
 
       for j in range(4):

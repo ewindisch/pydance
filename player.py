@@ -6,7 +6,7 @@ from judge import Judge
 from pygame.sprite import RenderUpdates, RenderClear
 
 import fontfx, colors, steps, random
-import lifebars
+import lifebars, scores
 
 # This class keeps an ordered list of sprites in addition to the dict,
 # so we can draw in the order the sprites were added.
@@ -66,34 +66,6 @@ class OrderedRenderUpdates(RenderClear):
           dirty_append(newrect)
       spritedict[s] = newrect
     return dirty
-
-# Display the score overlaying the song difficulty
-class ScoringDisp(pygame.sprite.Sprite):
-  def __init__(self, playernum, text, game):
-    pygame.sprite.Sprite.__init__(self)
-    self.score = 0
-    self.set_text(text)
-    self.image = pygame.surface.Surface((160, 48))
-    self.rect = self.image.get_rect()
-    self.rect.bottom = 484
-    self.rect.centerx = game.sprite_center + playernum * game.player_offset
-
-  def set_text(self, text):
-    tx = FONTS[28].size(text)[0] + 2
-    txt = fontfx.embfade(text, 28, 2, (tx, 24), colors.color["gray"])
-    basemode = pygame.transform.scale(txt, (tx, 48))
-    self.baseimage = pygame.surface.Surface((128, 48))
-    self.baseimage.blit(basemode, (64 - (tx / 2), 0))
-    self.oldscore = -1 # Force a refresh
-
-  def update(self):
-    if self.score != self.oldscore:
-      self.image.blit(self.baseimage, (0,0))
-      scoretext = FONTS[28].render(str(int(self.score)), 1, (192,192,192))
-      self.image.blit(scoretext, (64 - (scoretext.get_rect().size[0] / 2),
-                                    13))
-      self.image.set_colorkey(self.image.get_at((0, 0)), RLEACCEL)
-      self.oldscore = self.score
 
 class HoldJudgeDisp(pygame.sprite.Sprite):
   def __init__(self, pid, player, game):
@@ -670,7 +642,7 @@ class Player(object):
     elif self.scrollstyle == 1: self.top = 384
     else: self.top = 64
     
-    self.score = ScoringDisp(pid, "Player " + str(pid), game)
+    self.score = scores.scores[songconf["scoring"]](pid, "NONE", game)
     self.judging_disp = JudgingDisp(self.pid, game)
     Lifebar = lifebars.bars[songconf["lifebar"]]
     self.lifebar = Lifebar(pid, self.theme, songconf, game)
@@ -684,7 +656,6 @@ class Player(object):
 
   def set_song(self, song, diff, lyrics):
     self.difficulty = diff
-    self.score.set_text(diff)
 
     if self.game.double:
       self.holding = [[-1] * len(self.game.dirs), [-1] * len(self.game.dirs)]
@@ -716,12 +687,16 @@ class Player(object):
       self.holdtext = [HoldJudgeDisp(self.pid * 2, self, self.game),
                        HoldJudgeDisp(self.pid * 2 + 1, self, self.game)]
 
+      self.score.set_song(
+        diff,
+        self.steps[0].totalarrows + self.steps[1].totalarrows,
+        self.steps[0].feet)
+
       for i in range(2):
         if self.steps[i].holdref: holds = len(self.steps[i].holdref)
         else: holds = 0
         j = Judge(self.steps[i].bpm, holds, self.combos, self.score,
-                  self.judging_disp, self.steps[i].feet,
-                  self.steps[i].totalarrows, self.difficulty, self.lifebar)
+                  self.judging_disp, self.difficulty, self.lifebar)
         if self.judge[i] != None: j.munch(self.judge[i])
         self.judge[i] = j
 
@@ -739,9 +714,11 @@ class Player(object):
 
       if self.steps.holdref: holds = len(self.steps.holdref)
       else: holds = 0
+
+      self.score.set_song(diff, self.steps.totalarrows, self.steps.feet)
+
       j = Judge(self.steps.bpm, holds, self.combos, self.score,
-                self.judging_disp, self.steps.feet, self.steps.totalarrows,
-                self.difficulty, self.lifebar)
+                self.judging_disp, self.difficulty, self.lifebar)
       if self.judge != None: j.munch(self.judge)
       self.judge = j
 

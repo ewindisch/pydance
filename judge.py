@@ -5,8 +5,7 @@ from announcer import Announcer
 import random
 
 class Judge(object):
-  def __init__ (self, bpm, holds, combos, score, display, feet,
-                stepcount, diff, lifebar):
+  def __init__ (self, bpm, holds, combos, score, display, diff, lifebar):
     self.steps = {}
     self.stats = { "V": 0, "P": 0, "G": 0, "O": 0, "B": 0, "M": 0 }
     self.combos = combos
@@ -17,7 +16,7 @@ class Judge(object):
     self.failed = False
     self.lifebar = lifebar
     self.diff = diff
-    self.score = Score(stepcount, score)
+    self.score = score
     self.grade = Grade()
     self.numholds = 0
     self.badholds = 0
@@ -29,7 +28,6 @@ class Judge(object):
     self.holdsub = [0] * holds
 
   def munch(self, anotherjudge):
-    self.score.munch(anotherjudge.score)
     self.grade.munch(anotherjudge.grade)
 
     self.stats = anotherjudge.stats
@@ -108,28 +106,6 @@ class Judge(object):
   def handle_arrow(self, key, etime):
     if etime in self.steps: self.steps[etime] += key
     else: self.steps[etime] = key
-
-class Score(object):
-  def __init__(self, count, sprite):
-    if count == 0: count = 1 # Don't crash on empty songs.
-
-    self.sprite = sprite
-    self.score = 0
-    score_coeff = 10000000.0 / count
-    self.combo_coeff = 10000000.0 / (count * (count + 1) / 2.0)
-    self.inc = { "V": 4 * score_coeff, "P": 3.5 * score_coeff,
-                 "G": 2.5 * score_coeff, "O": 0.5 * score_coeff }
-
-  def stepped(self, cur_time, rating, combo):
-    self.score += self.inc.get(rating, 0)
-    self.score += combo * self.combo_coeff
-    self.sprite.score = self.score
-
-  def broke_hold(self): pass
-
-  def ok_hold(self): pass
-
-  def munch(self, ascore): self.score += ascore.score
 
 # This is the "dance points" system found in DDR 8rd mix.
 class Grade(object):

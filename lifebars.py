@@ -210,4 +210,5 @@ class OniLifeBarDisp(AbstractLifeBar):
 bars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp,
         TugLifeBarDisp]
 
-NORMAL, ONI, DROP, SUCK, TUG = range(5)
+lifebar_opt = [(0, "Normal"), (1, "Battery"), (2, "Drop"), (3, "Suck"),
+                (4, "Tug")]
