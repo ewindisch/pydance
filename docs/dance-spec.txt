@@ -1,10 +1,5 @@
-== THIS IS A DRAFT VERSION OF THE .DANCE FORMAT ==
-
 The "Dance" Format
 ------------------
-This format is designed to supercede step, by removing extraneous
-information.
-
 The goals of this format are easy parsability, easy human readability,
 brevity, and disambiguity.
 
@@ -288,13 +283,16 @@ DOUBLE - Doubles, one player on both pads.
 
 6PANEL, 6VERSUS, 6DOUBLE, 6COUPLE: Up left, up right, up, down, left,
                                    and right.
-
-8PANEL, 8VERSUS, 8COUPLE, 8DOUBLE: All directions except center.
-
-3*: Up left, down, and up right.
+8PANEL, etc: All directions except center.
+9PANEL, etc: All directions including center.
+3PANEL, etc: Up left, down, and up right.
 
 Changes:
 --------
+2004.03.01
+ - Version 1.2, released with pydance 1.0.
+ - Add 9 panel game mode.
+
 2004.01.16
  - Include comments in the example.
 
