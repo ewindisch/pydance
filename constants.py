@@ -8,6 +8,7 @@ DIRECTIONS = ['l', 'd', 'u', 'r']
 VERSION = "0.7.5"
 
 import sys, os, config, pygame
+import games
 
 # Detect the name of the OS - MacOS X is not really UNIX.
 osname = None
@@ -56,15 +57,18 @@ if os.path.exists(os.path.join(rc_path, "pyddr.cfg")):
 
 if not os.path.isdir(rc_path): os.mkdir(rc_path)
 
+print pyddr_path
 search_paths = (pyddr_path, rc_path, old_rc_path)
+#if pyddr_path != "." and rc_path != ".":
+#  search_paths += (".",)
 
 if not sys.stdout.isatty():
   sys.stdout = open(os.path.join(rc_path, "pydance.log"), "w")
   sys.stderr = sys.stdout
 
 # Set up the configuration file
-mainconfig = config.Config({ # Wow we have a lot of options
-  "djtheme": "none", "songdir": ".", "gfxtheme": "classic",
+default_conf = { # Wow we have a lot of options
+  "djtheme": "none", "songdir": ".",
   "stickycombo": 1,  "lowestcombo": 4, "stickyjudge": 1,
   "lyriccolor": "cyan/aqua",
   "onboardaudio": 0, "masteroffset": 0,
@@ -83,7 +87,10 @@ mainconfig = config.Config({ # Wow we have a lot of options
   "ingamehelp": 1,
   "strobe": 0,
   "usemad": 1, "usepsyco": 1,
-  })
+  }
+
+for game in games.GAMES: default_conf["%s-theme" % game] = "default"
+mainconfig = config.Config(default_conf)
 
 player_config = {"spin": 0,
                  "accel": 0,

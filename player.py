@@ -149,11 +149,9 @@ class LifeBarDisp(AbstractLifeBar):
     self.displayed_life = self.life
 
     self.deltas = {"V": 0.8, "P": 0.5, "G": 0.0,
-                       "O": -1.0, "B": -4.0, "M": -8.0}
-    self.empty = pygame.image.load(os.path.join(theme.path,
-                                                'lifebar-empty.png'))
-    self.full = pygame.image.load(os.path.join(theme.path,
-                                               'lifebar-full.png'))
+                   "O": -1.0, "B": -4.0, "M": -8.0}
+    self.empty = theme.theme_data.get_image('lifebar-empty.png')
+    self.full = theme.theme_data.get_image('lifebar-full.png')
 
   def update(self, judges):
     if self.displayed_life < self.life:  self.displayed_life += 1
@@ -226,8 +224,8 @@ class OniLifeBarDisp(AbstractLifeBar):
     self.life = onilives
 
     self.deltas = { "O": -1, "B": -1, "M": -1}
-    self.empty = pygame.image.load(os.path.join(theme.path, 'oni-empty.png'))
-    self.bar = pygame.image.load(os.path.join(theme.path, 'oni-bar.png'))
+    self.empty = theme.theme_data.get_image('oni-empty.png')
+    self.bar = theme.theme_data.get_image('oni-bar.png')
 
     self.width = 192 / self.maxlife
     self.bar = pygame.transform.scale(self.bar, (self.width, 20))
@@ -813,7 +811,7 @@ class Player(object):
   lifebars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp]
 
   def __init__(self, pid, config, songconf, game):
-    self.theme = GFXTheme(mainconfig["gfxtheme"], pid, game)
+    self.theme = GFXTheme(mainconfig["%s-theme" % game.name], pid, game)
     self.pid = pid
 
     self.__dict__.update(config)

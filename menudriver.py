@@ -1,10 +1,10 @@
 # Code to construct pydance's menus
 
-import pygame, menus, os, sys, copy, colors
+import pygame, menus, os, sys, copy, colors, games
 
 from constants import *
 from announcer import Announcer
-from gfxtheme import GFXTheme
+from gfxtheme import ThemeFile
 from songselect import SongSelect
 from endless import Endless
 
@@ -126,6 +126,14 @@ def do(screen, songdata):
                 E_RIGHT: switch_tuple,
                 E_CREATE: get_tuple }
 
+  # FIXME We need to present these in a logical order.
+  # Ideally, we need to not have one preference for each game, but each
+  # game type.
+  themes = [[name.title(), rotate_opt, ("%s-theme" % name,
+                                        ThemeFile.list_themes(name))] for
+            name in games.GAMES]
+  themes = tuple(themes) # Python sucks Python sucks Python sucks
+
   m = (("Play Game",
         ["Single/Versus", {E_START: wrap_ctr}, (SongSelect, songdata + ("SINGLE",))],
         ["Couple", {E_START: wrap_ctr}, (SongSelect, songdata + ("COUPLE",))],
@@ -142,7 +150,7 @@ def do(screen, songdata):
         ["Autofail", onoff_opt, ("autofail",)],
         ["Assist Mode", onoff_opt, ("assist",)],
         ["Announcer", rotate_opt, ('djtheme', Announcer.themes())],
-        ["Theme", rotate_opt, ('gfxtheme', GFXTheme.themes())],
+        ("Themes ...",) +  themes,
         ["Back", None, None]
         ),
        ("Graphic Options",
@@ -169,8 +177,7 @@ def do(screen, songdata):
         ["Gratuitous Extras", onoff_opt, ('gratuitous',)],
         ["Display Help", onoff_opt, ("ingamehelp",)],
         ["Back", None, None]
-        ),
-       ["Quit", None, None]
+        )
        )
 
   me = menus.Menu("Main Menu", m, screen)

@@ -51,7 +51,6 @@ class GameType(object):
     if not self.double: return self.left_offset
     elif pid & 1: return 0
     else: return self.left_offset * 2
-      
 
 GAMES = {
   "SINGLE": GameType(),

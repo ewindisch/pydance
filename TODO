@@ -5,7 +5,6 @@ UI Fixes & Improvements
  - In-game help (menu context help, mostly)
  - Up/down indicators on menus (smaller menus => not needed?)
  - Menu and song select theming (including new songselect.pys)
- - Make quitting from the menus more difficult (make esc not exit last menu)
  - Less ugly grading screen (bar chart, etc)
 
 Code Refactors & Cleanups

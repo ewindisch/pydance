@@ -1,23 +1,79 @@
 # GFXTheme and associated classes.
 # These handle loading the various graphics themes for pydance.
 
+# In general, this is wrapped in what's probably way too many layers of
+# abstraction. We should be able to remove some of these classes, or at
+# least many of the accessor functions.
+
 import dircache, os, games
 
 from constants import *
 from util import toRealTime
 
-class GFXTheme(object):
-  def themes(cls):
+# Wrapper classes for loading files from themes.
+# Eventually, we can use ZipFile + StringIO to make it load from zip files.
+class ThemeFile(object):
+
+  # List all themes available for a game type (given as a string)
+  def list_themes(cls, gametype):
+    w = games.GAMES[gametype].width
+    size = "%dx%d" % (w, w)
     theme_list = []
     for path in search_paths:
-      checkpath = os.path.join(path, "themes", "gfx")
-      if os.path.isdir(checkpath):
-        for name in dircache.listdir(checkpath):
-          if os.path.isfile(os.path.join(checkpath, name, "is-theme")):
+      check = os.path.join(path, "themes", "gfx", size)
+      if os.path.isdir(check):
+        for name in dircache.listdir(check):
+          if cls.is_theme(os.path.join(check, name), games.GAMES[gametype]):
             theme_list.append(name)
     return theme_list
 
-  themes = classmethod(themes)
+  list_themes = classmethod(list_themes)
+
+  # Test whether a particular theme will work for a particular game type.
+  # Also, whether it's a theme at all, or just some random file.
+  def is_theme(cls, filename, game):
+    if not os.path.isdir(filename):
+      return False
+    elif not os.path.exists(os.path.join(filename, "is-theme")):
+      return False
+    elif (os.path.split(os.path.split(filename)[0])[1] !=
+          "%dx%d" % (game.width, game.width)):
+      return False
+    else:
+      for dir in game.dirs:
+        possible = os.path.join(filename, "arr_%s_%s_0.png" % ("%s", dir))
+        if not (os.path.exists(possible % "c") and
+                os.path.exists(possible % "n")):
+          return False
+    return True
+
+  is_theme = classmethod(is_theme)
+
+  def __init__(self, filename):
+    self.path = filename
+
+  # Get an image from the theme.
+  def get_image(self, image_name):
+    try:
+      return pygame.image.load(os.path.join(self.path, image_name))
+    except:
+      raise RuntimeError("E: %s was missing from your theme." % image_name)
+
+  # Check to see if an image is in the theme.
+  def has_image(self, image_name):
+    return os.path.exists(os.path.join(self.path, image_name))
+
+  # Get an arrow based on its type/direction/color.
+  # If the desired arrow coloring wasn't found, fall back to the default
+  # coloring (which is_theme makes sure we have).
+  def get_arrow(self, type, dir, num):
+    fn = "arr_%s_%s_%d.png" % (type, dir, num)
+    if not self.has_image(fn): fn = "arr_%s_%s_%d.png" % (type, dir, 0)
+    return self.get_image(fn)
+
+# An even higher-level interface than ThemeFile, that sets up the sprites
+# for many of the images.
+class GFXTheme(object):
 
   def __init__(self, name, pid, game):
     self.name = name
@@ -26,84 +82,99 @@ class GFXTheme(object):
     self.pid = pid
     size = "%dx%d" % (game.width, game.width)
     for path in search_paths:
-      if os.path.isdir(os.path.join(path, "themes", "gfx", name)):
-        self.path = os.path.join(path, "themes", "gfx", name)
+      if os.path.exists(os.path.join(path, "themes", "gfx", size, name)):
+        self.path = os.path.join(path, "themes", "gfx", size, name)
+
     if self.path == None:
-      print "Error: Cannot load graphics theme '%s'." % name
-      sys.exit(1)
+      raise RuntimeError("E: Cannot load theme '%s/%s'." % (size, name))
 
-    self.fullpath = os.path.join(self.path, size)
+    self.theme_data = ThemeFile(self.path)
 
+  # FIXME: Can probably be moved to __init__ and stored as members.
   def arrows(self, pid):
-    return ArrowSet(self.fullpath, self.game, pid)
+    return ArrowSet(self.theme_data, self.game, pid)
 
+  # FIXME: Can probably be moved to __init__ and stored as members.
   def toparrows(self, bpm, ypos, pid):
     arrs = {}
     arrfx = {}
     for d in self.game.dirs:
-      arrs[d] = TopArrow(bpm, d, ypos, pid, self.fullpath, self.game)
-      arrfx[d] = ArrowFX(bpm, d, ypos, pid, self.fullpath, self.game)
+      arrs[d] = TopArrow(bpm, d, ypos, pid, self.theme_data, self.game)
+      arrfx[d] = ArrowFX(bpm, d, ypos, pid, self.theme_data, self.game)
     return arrs, arrfx
 
-  def __repr__(self):
-    return ('<GFXTheme name=%r>' % self.name)
-
+# The scrolling arrows for this game mode.
 class ArrowSet(object):
-  def __init__ (self, path, game, pid):
+  def __init__ (self, theme, game, pid):
     arrows = {}
+    base_left = game.left_off(pid) + pid * game.player_offset
     for dir in game.dirs:
-      left = game.left_off(pid) + game.width * game.dirs.index(dir) + pid * game.player_offset
+      left = base_left + game.width * game.dirs.index(dir)
       for cnum in range(4):
         if cnum == 3: color = 1
         else: color = cnum
-        arrows[dir+repr(cnum)] = ScrollingArrow(path, dir, str(color), left)
+        arrows[dir+repr(cnum)] = ScrollingArrow(theme, dir, color, left)
+
     # allow access by instance.l or instance.arrows['l']
     for n in arrows: self.__dict__[n] = arrows[n] 
     self.arrows = arrows
+
+  # allow access by instance['l']
   def __getitem__ (self,item):
-    # allow access by instance['l']
     return getattr(self,item)
 
+# Preload images/left offset for each arrow. 
+class ScrollingArrow(object):
+  def __init__ (self, theme, dir, color, left):
+    self.dir = dir
+    self.left = left
+    self.image = theme.get_arrow("c", dir, color).convert()
+    self.image.set_colorkey(self.image.get_at([0, 0]), RLEACCEL)
+
+# FIXME: What follows probably doesn't belong here, but elsewhere. There's
+# too much logic for it to be just theming data.
+
+# Sprites for the top flashing arrows.
 class TopArrow(pygame.sprite.Sprite):
 
-  def __init__ (self, bpm, direction, ypos, pid, path, game):
+  def __init__ (self, bpm, direction, ypos, pid, theme, game):
     pygame.sprite.Sprite.__init__(self)
-    self.presstime = -1
+    self.endpresstime = -1
     self.tick = toRealTime(bpm, 1);
     self.frame = 0
     self.oldframe = -1
-    self.state = 'n'
-    self.filepref = 'arr_'
     self.adder = 0
     self.direction = direction
     self.topimg = []
-    self.ypos = ypos
 
-    for i in range(8):
-      if i < 4:        ftemp = 'n_'
-      else:            ftemp = 's_'
-      fn = os.path.join(path,
-                        'arr_'+ftemp+self.direction+'_'+repr(i)+'.png')
-      self.topimg.append(pygame.image.load(fn).convert())
+    # The 'n' state is the normal state for the top arrows. After being
+    # pressed, they change to the 's' state images for a short time.
+    for i in range(4):
+      self.topimg.append(theme.get_arrow("n", self.direction, i).convert())
+      self.topimg[i].set_colorkey(self.topimg[i].get_at((0, 0)), RLEACCEL)
+    for i in range(4, 8):
+      self.topimg.append(theme.get_arrow("s", self.direction, i).convert())
       self.topimg[i].set_colorkey(self.topimg[i].get_at((0, 0)), RLEACCEL)
 
-      self.image = self.topimg[0]
-      self.rect = self.image.get_rect()
-      self.rect.top = self.ypos
-      self.rect.left = game.left_off(pid) + (game.dirs.index(direction) *
-                                             game.width)
-      self.rect.left += game.player_offset * pid
+    # FIXME: These used to be indented one more level - if stuff breaks,
+    # that's why. FIXME
+    self.image = self.topimg[0]
+    self.rect = self.image.get_rect()
+    self.rect.top = ypos
+    self.rect.left = (game.left_off(pid) + game.player_offset * pid +
+                      game.dirs.index(direction) * game.width)
 
+  # The arrow was pressed, so we have to change it for some time (s state).
   def stepped(self, modifier, time):
-    if modifier:    self.adder = 4
-    else:           self.adder = 0
-    self.presstime = time
+    if modifier: self.adder = 4
+    else: self.adder = 0
+    self.endpresstime = time + 0.2 # Number of seconds to change it.
 
-  def update(self,time):
-    if time > (self.presstime+0.2):        self.adder = 0
+  def update(self, time):
+    if time > self.endpresstime: self.adder = 0
 
     self.keyf = int(time / (self.tick / 2)) % 8
-    if self.keyf > 3:        self.keyf = 3
+    if self.keyf > 3: self.keyf = 3
     self.frame = self.adder + self.keyf
 
     if self.frame != self.oldframe:
@@ -111,7 +182,7 @@ class TopArrow(pygame.sprite.Sprite):
       self.oldframe = self.frame
 
 class ArrowFX(pygame.sprite.Sprite):
-  def __init__ (self, bpm, direction, ypos, pid, path, game):
+  def __init__ (self, bpm, direction, ypos, pid, theme, game):
     pygame.sprite.Sprite.__init__(self)
     self.presstime = -1000000
     self.tick = toRealTime(bpm, 1);
@@ -119,9 +190,8 @@ class ArrowFX(pygame.sprite.Sprite):
     self.centerx = (game.left_off(pid) +
                     game.dirs.index(direction) * game.width + game.width / 2)
     self.pid = pid
-    
-    fn = os.path.join(path, 'arr_n_' + direction + '_3.png')
-    self.baseimg = pygame.image.load(fn).convert(16)
+
+    self.baseimg = theme.get_arrow("n", direction, 3).convert()
     self.tintimg = pygame.Surface(self.baseimg.get_size())
 
     self.blackbox = pygame.surface.Surface([game.width] * 2)
@@ -133,7 +203,7 @@ class ArrowFX(pygame.sprite.Sprite):
     self.holdtype = 0
 
     style = mainconfig['explodestyle']
-    self.rotating, self.scaling = {3:(1,1), 2:(0,1), 1:(1,0), 0:(0,0)}[style]
+    self.rotating, self.scaling = style & 1, style & 2
     
   def holding(self, yesorno):
     self.holdtype = yesorno
@@ -185,13 +255,3 @@ class ArrowFX(pygame.sprite.Sprite):
       self.rect.center = self.centerx, self.centery
 
       self.rect.left += (320 * self.pid)
-
-class ScrollingArrow(object):
-  def __init__ (self, path, dir, color, left):
-    self.dir = dir
-    self.left = left
-    fn = "_".join(["arr", "c", dir, color]) + ".png"
-    if not os.path.exists(os.path.join(path, fn)):
-      fn = "_".join(["arr", "c", dir, "0"]) + ".png"
-    self.image = pygame.image.load(os.path.join(path, fn)).convert()
-    self.image.set_colorkey(self.image.get_at([0, 0]), RLEACCEL)
