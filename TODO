@@ -13,6 +13,9 @@ A Comprehensive List of Features for pydance 1.2
    animation/fading/etc. This is kind of a vague goal, but I
    think at this point the UI should be developed iteratively.
 
+* Records in courses
+   Your record in a course should be stored (best and "best passed").
+
 * MP3 Support
    Pyxine, pymad, or waiting for libavcodec support in Pygame are
    all options here. Note that Pyxine doesn't give enough timing
