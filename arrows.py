@@ -2,26 +2,28 @@ import os, pygame
 
 from constants import *
 
-class ArrowSprite(pygame.sprite.Sprite):
+class AbstractArrow(pygame.sprite.Sprite):
 
   # Assist mode sound samples
   samples = {}
   for d in ["u", "d", "l", "r"]:
     samples[d] = pygame.mixer.Sound(os.path.join(sound_path,
                                                  "assist-" + d + ".ogg"))
-  
-  def __init__ (self, arrow, curtime, endtime, player, song):
+
+  def __init__(self, arrow, curtime, player, song):
     pygame.sprite.Sprite.__init__(self)
-    self.hold = False
-    self.endtime = endtime
-    self.life  = endtime - curtime
-    self.curalpha = -1
+    
     self.dir = arrow.dir
+
+    # NB - Making a new surface, then blitting the image in place, is 20%
+    # slower than calling image.convert() (and is longer to type).
     self.image = arrow.image.convert()
+
     self.width = player.game.width
     self.battle = song.battle
-    self.rect = arrow.image.get_rect()
+    self.rect = self.image.get_rect()
     self.rect.left = arrow.left
+
     if mainconfig['assist'] and self.dir in ArrowSprite.samples:
       self.sample = ArrowSprite.samples[self.dir]
     else: self.sample = None
@@ -46,13 +48,14 @@ class ArrowSprite(pygame.sprite.Sprite):
       self.suddenzone = 480 - int(64.0 * player.sudden)
       self.hiddenzone = 64 + int(64.0 * player.hidden)
 
-    self.diff = self.top - self.bottom
-
-    self.bimage = self.image
-    self.arrowspin = player.spin
-    self.arrowscale = player.scale
+    self.spin = player.spin
+    self.scale = player.scale
     self.speed = player.speed
     self.accel = player.accel
+    self.battle = song.battle
+
+    self.diff = self.top - self.bottom
+    self.baseimage = self.image
 
     self.goalcenterx = self.rect.centerx
     if self.battle:
@@ -61,6 +64,17 @@ class ArrowSprite(pygame.sprite.Sprite):
                                   player.game.dirs.index(self.dir)))
       self.origcenterx = self.centerx = self.rect.centerx
     else: self.centerx = self.rect.centerx = self.goalcenterx
+
+  def kill(self):
+    pygame.sprite.Sprite.kill(self)
+    if self.sample: self.sample.play()
+
+class ArrowSprite(AbstractArrow):
+  def __init__ (self, arrow, curtime, endtime, player, song):
+    AbstractArrow.__init__(self, arrow, curtime, player, song)
+    self.hold = False
+    self.endtime = endtime
+    self.life  = endtime - curtime
 
   def update (self, curtime, curbpm, lbct):
     if (self.sample) and (curtime >= self.endtime -0.0125):
@@ -108,7 +122,7 @@ class ArrowSprite(pygame.sprite.Sprite):
 
     top = top - int(beatsleft / 8.0 * speed * self.diff)
 
-    self.cimage = self.bimage
+    self.cimage = self.baseimage
     
     self.rect = self.image.get_rect()
     if top > 480: top = 480
@@ -124,15 +138,15 @@ class ArrowSprite(pygame.sprite.Sprite):
       else: self.rect.centerx = self.goalcenterx
     else: self.rect.centerx = self.centerx
 
-    if self.arrowscale != 1:
+    if self.scale != 1:
       arrscale = int(pct * self.width)
       arrscale = min(self.width, max(0, arrscale))
-      if self.arrowscale > 1: # grow
+      if self.scale > 1: # grow
       	arrscale = self.width - arrscale
-      self.cimage = pygame.transform.scale(self.bimage, (arrscale, arrscale))
+      self.cimage = pygame.transform.scale(self.baseimage, (arrscale, arrscale))
     
-    if self.arrowspin:
-      self.image = pygame.transform.rotate(self.cimage,(self.rect.top-64)/self.arrowspin)
+    if self.spin:
+      self.image = pygame.transform.rotate(self.cimage,(self.rect.top-64)/self.spin)
     else:
       self.image = self.cimage
 
@@ -151,49 +165,17 @@ class ArrowSprite(pygame.sprite.Sprite):
     if alp > 256: alp = 256
     elif alp < 0: alp = 0
 
-    if alp != self.image.get_alpha(): self.image.set_alpha(alp)
+    self.image.set_alpha(alp)
 
-class HoldArrowSprite(pygame.sprite.Sprite):
+class HoldArrowSprite(AbstractArrow):
   def __init__ (self, arrow, curtime, times, player, song):
-    pygame.sprite.Sprite.__init__(self)
+    AbstractArrow.__init__(self, arrow, curtime, player, song)
     self.timef1 = self.endtime = times[1]
     self.hold = True
     self.timef2 = times[2]
     if self.timef2 is None: self.timef2 = self.timef1
-    self.image = arrow.image.convert()
-    self.rect = arrow.image.get_rect()
-    self.rect.left = arrow.left
     self.life  = self.timef2 - curtime
-    self.battle = song.battle
-    self.width = player.game.width
-    if player.scrollstyle == 2:
-      self.top = 236
-      self.bottom = random.choice((748, -276))
-      if self.top < self.bottom:
-        self.suddenzone = 480 - int(64.0 * player.sudden)
-        self.hiddenzone = 236 + int(64.0 * player.hidden)
-      else:
-        self.suddenzone = 64 + int(64.0 * player.sudden) 
-        self.hiddenzone = 300 - int(64.0 * player.hidden)
-    elif player.scrollstyle == 1:
-      self.top = 384
-      self.bottom = -128
-      self.suddenzone = 64 + int(64.0 * player.sudden)
-      self.hiddenzone = 448 - int(64.0 * player.hidden)
-    else:
-      self.top = 64
-      self.bottom = 576
-      self.suddenzone = 480 - int(64.0 * player.sudden)
-      self.hiddenzone = 64 + int(64.0 * player.hidden)
 
-    self.diff = self.top - self.bottom
-    self.curalpha = -1
-    self.dir = arrow.dir
-    self.playedsound = None
-    if mainconfig['assist'] and self.dir in ArrowSprite.samples:
-      self.sample = ArrowSprite.samples[self.dir]
-    else:
-      self.playedsound = 1
     self.r = 0
     self.broken = 1
     self.oimage = pygame.surface.Surface((self.width, self.width / 2))
@@ -202,31 +184,18 @@ class HoldArrowSprite(pygame.sprite.Sprite):
     self.oimage2 = pygame.surface.Surface((self.width, self.width / 2))
     self.oimage2.blit(self.image, (0,0))
     self.oimage2.set_colorkey(self.oimage.get_at((0,0)), RLEACCEL)
-    self.bimage = pygame.surface.Surface((self.width, 1))
-    self.bimage.blit(self.image,(0,-self.width / 2 + 1))
-
-    self.arrowspin = player.spin
-    self.arrowscale = player.scale
-    self.speed = player.speed
-    self.accel = player.accel
-    
-    self.goalcenterx = self.rect.centerx
-    if self.battle:
-      self.rect.left = 320 - int(player.game.width *
-                                 (len(player.game.dirs) / 2.0 -
-                                  player.game.dirs.index(self.dir)))
-      self.origcenterx = self.centerx = self.rect.centerx
-    else: self.centerx = self.rect.centerx = self.goalcenterx
+    self.baseimage = pygame.surface.Surface((self.width, 1))
+    self.baseimage.blit(self.image,(0,-self.width / 2 + 1))
 
   def update(self,curtime,curbpm,lbct):
-    if (self.playedsound is None) and (curtime >= self.timef1 -0.0125):
+    if self.sample and (curtime >= self.timef1 -0.0125):
       self.sample.play()
-      self.playedsound = 1
+      self.sample = None
 
     if curtime > self.timef2:
       self.kill()
       return
-      
+
     if curbpm < 0.0001: return # We're stopped
 
     top = self.top
@@ -302,7 +271,7 @@ class HoldArrowSprite(pygame.sprite.Sprite):
       holdsize = 0
     self.cimage = pygame.surface.Surface((self.width, holdsize + self.width))
     self.cimage.set_colorkey(self.cimage.get_at((0, 0)), RLEACCEL)
-    self.cimage.blit(pygame.transform.scale(self.bimage,
+    self.cimage.blit(pygame.transform.scale(self.baseimage,
                                             (self.width, holdsize)),
                      (0, self.width / 2))
     self.cimage.blit(self.oimage2,(0,0))
@@ -322,15 +291,15 @@ class HoldArrowSprite(pygame.sprite.Sprite):
       else: self.rect.centerx = self.goalcenterx
     else: self.rect.centerx = self.centerx
 
-    if self.arrowscale != 1:
+    if self.scale != 1:
       arrscale = int(pct * self.width)
-      if self.arrowscale > 1: # grow
+      if self.scale > 1: # grow
       	arrscale = self.width - arrscale
       arrscale = min(self.width, max(0, arrscale))
-      self.cimage = pygame.transform.scale(self.bimage, (arrscale, arrscale))
+      self.cimage = pygame.transform.scale(self.baseimage, (arrscale, arrscale))
     
-    if self.arrowspin:
-      self.image = pygame.transform.rotate(self.cimage,(self.rect.top - 64)/self.arrowspin)
+    if self.spin:
+      self.image = pygame.transform.rotate(self.cimage,(self.rect.top - 64)/self.spin)
     else:
       self.image = self.cimage
 
@@ -352,4 +321,4 @@ class HoldArrowSprite(pygame.sprite.Sprite):
     if self.broken and (curtime > self.timef1+(0.00025*(60000.0/curbpm))):
       alp /= 2
 
-    if alp != self.image.get_alpha(): self.image.set_alpha(alp)
+    self.image.set_alpha(alp)

@@ -5,8 +5,6 @@ E_SORT = E_SCREENSHOT
 
 E_UPLEFT, E_UPRIGHT, E_DOWNLEFT, E_DOWNRIGHT = E_UNMARK, E_PGUP, E_MARK, E_PGDN
 
-DIRECTIONS = ['l', 'd', 'u', 'r']
-
 VERSION = "0.8.0"
 
 import sys, os, config, pygame
