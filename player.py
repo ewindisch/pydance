@@ -994,8 +994,7 @@ class Player(object):
           except: pass
           toparrfx[dir].stepped(curtime, text)
 
-    for spr in arrows.sprites():
-      spr.update(curtime, judge.bpm, steps.lastbpmchangetime)
+    arrows.update(curtime, judge.bpm, steps.lastbpmchangetime)
     for d in self.game.dirs:
       toparr[d].update(curtime + steps.offset * 1000)
       toparrfx[d].update(curtime, judge.combos.combo)
