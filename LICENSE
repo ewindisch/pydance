@@ -1,9 +1,9 @@
-There are two licenses in this file. The old license is not active 
+There are two licenses in this file. The old license is not active
 anymore, but remains for clarification on my original intentions.
 
-If you didn't notice, my new license is the "MIT" or X11 license. I would 
-still very much like to know if you use pyDance in any constructive way or 
-put it on any sort of game disc, but it's not required. 
+If you didn't notice, my new license is the "MIT" or X11 license. I would
+still very much like to know if you use pyDance in any constructive way or
+put it on any sort of game disc, but it's not required.
 
 The file "clicked.ogg" in the sounds/ directory was taken from the GNOME
 audio package, and is in the public domain.
@@ -13,14 +13,14 @@ The TextProgress object is by Pete Shinners, and is in the public domain.
 ----NEW LICENSE----
 Copyright (c) 2001 Brendan Becker
 
-Permission is hereby granted, free of charge, to any person obtaining a 
-copy of this software and associated documentation files (the "Software"), 
-to deal in the Software without restriction, including without limitation 
-the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-and/or sell copies of the Software, and to permit persons to whom the 
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
 Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in 
+The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
@@ -34,18 +34,18 @@ DEALINGS IN THE SOFTWARE.
 ----OLD LICENSE----
 My license for pyDDR is simple.
 
-I did not write or come up with DDR. DDR is owned by Konami. I did, 
-however, write all of the code in here and come up with the fileformat 
-for the STEP files. I really don't care if anyone wants to scour my code 
-for ideas, or learn from it, or improve on it. My art sucks, but if you 
-really want to use it for something, be my guest. 
+I did not write or come up with DDR. DDR is owned by Konami. I did,
+however, write all of the code in here and come up with the fileformat
+for the STEP files. I really don't care if anyone wants to scour my code
+for ideas, or learn from it, or improve on it. My art sucks, but if you
+really want to use it for something, be my guest.
 
-My own original music is included with pyDDR. Obviously, since my music is 
-distributed with pyDDR and pyDDR is free, so is my music. I don't grant 
-any permission for people to claim my music as their own, but I'd love to 
-hear from you if you like the songs. I don't charge for my music, I just 
+My own original music is included with pyDDR. Obviously, since my music is
+distributed with pyDDR and pyDDR is free, so is my music. I don't grant
+any permission for people to claim my music as their own, but I'd love to
+hear from you if you like the songs. I don't charge for my music, I just
 want people to know I wrote it and it's mine.
 
-Although not required, I humbly ask that you let me know if my project is 
-included with anyone's compilation or on another website, or whatever. If 
+Although not required, I humbly ask that you let me know if my project is
+included with anyone's compilation or on another website, or whatever. If
 anything is unclear, I am contactable at tgz at orotech dot net
