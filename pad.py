@@ -122,7 +122,8 @@ class Pad(object):
         for ev in self.events.values(): self.states[ev] = False
         loaded_input = True
       except:
-        print "E: Unable to load input configuration file."
+        print "W: Unable to load input configuration file."
+        loaded_input = False
 
     if loaded_input:
       print "Loaded input configuration."
