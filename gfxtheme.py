@@ -197,7 +197,7 @@ class ScrollingArrow:
     for state in ("c",):
       filename = os.path.join(path,
                               "_".join(("arr", state, dir, color))+"."+imgtype)
-      states[state] = SimpleSprite(filename)
+      states[state] = SimpleSprite(file=filename)
       states[state].rect.left = left
     # allow access by instance.n or instance.states['n']
     for n in states: self.__dict__[n] = states[n]

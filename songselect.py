@@ -60,7 +60,6 @@ SORTS = {
 SORT_NAMES = ["mix", "title", "artist", "bpm"]
 
 NUM_SORTS = len(SORT_NAMES)
-BY_MIX,BY_NAME,BY_GROUP,BY_BPM = range(NUM_SORTS)
 
 # Make a box of a specific color - these are used for difficulty ratings
 def make_box(color):
@@ -106,7 +105,7 @@ class SongItemDisplay:
         self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
       self.banner_rect = self.banner.get_rect()
       self.banner_rect.center = BANNER_CENTER
-    if self.menuimage == None:
+
       rcolors = ["green", "orange", "yellow", "red", "purple", "aqua"]
       # Start with a random color, but...
       color = colors.color[rcolors[random.randint(0, len(rcolors) - 1)]]
@@ -255,12 +254,13 @@ class SongSelect:
 
     locked = games.GAMES[gametype].locked
 
+    pygame.key.set_repeat(500, 30)
+
     self.diff_list = []
     self.song_list = []
     self.title_list = []
     self.screen = screen
-    last_event_was_expose = False # hackery for Focus Follows Mouse
-
+ 
     audio.fadeout(500)
 
     self.helpfiles = ["menuhelp-" + str(i) + ".png" for i in range(1, 6)]
@@ -268,9 +268,6 @@ class SongSelect:
 
     pygame.display.update(self.screen.blit(self.bg, (0, 0)))
     
-    not_changed_since = pygame.time.get_ticks()
-    scroll_wait = pygame.time.get_ticks()
-
     self.index = 0
     preview = SongPreview()
 
@@ -298,13 +295,7 @@ class SongSelect:
       changed = False
       current_time = pygame.time.get_ticks()
 
-      if last_event_was_expose:
-        changed = True
-
       ev = event.poll()
-
-      if ev[1] != E_PASS:
-        last_event_was_expose = False # Workaround for focus-follows-mouse
 
       # We keep a constant and mod it by the length of the list, so
       # unless up/down is pressed, you will always be the same difficulty
@@ -317,22 +308,9 @@ class SongSelect:
       # Scroll up the menu list
       if ev[1] == E_LEFT:
         self.index = (self.index - 1) % self.numsongs
-        scroll_wait = current_time
-        MOVE_SOUND.play()
-
-      elif ((event.states[(0, E_LEFT)] or event.states[(1, E_LEFT)]) and
-            current_time - scroll_wait > 1000):
-        self.index = (self.index - 1) % self.numsongs
         MOVE_SOUND.play()
 
       elif ev[1] == E_PGUP:
-        MOVE_SOUND.play()
-        self.scroll_out(self.index)
-        self.index = (self.index - 7) % self.numsongs
-        scroll_wait = current_time
-
-      elif (event.states[(0, E_PGUP)] and
-            current_time - scroll_wait > 1000):
         MOVE_SOUND.play()
         self.scroll_out(self.index)
         self.index = (self.index - 7) % self.numsongs
@@ -340,22 +318,9 @@ class SongSelect:
       # Down the menu list
       elif ev[1] == E_RIGHT:
         self.index = (self.index + 1) % self.numsongs
-        scroll_wait = current_time
         MOVE_SOUND.play()
   
-      elif ((event.states[(0, E_RIGHT)] or event.states[(1, E_RIGHT)]) and
-            current_time - scroll_wait > 1000):
-        self.index = (self.index + 1) % self.numsongs
-        MOVE_SOUND.play()
-
       elif ev[1] == E_PGDN:
-        MOVE_SOUND.play()
-        self.scroll_out(self.index)
-        self.index = (self.index + 7) % self.numsongs
-        scroll_wait = current_time
-
-      elif (event.states[(0, E_PGDN)] and
-            current_time - scroll_wait > 1000):
         MOVE_SOUND.play()
         self.scroll_out(self.index)
         self.index = (self.index + 7) % self.numsongs
@@ -418,7 +383,7 @@ class SongSelect:
         # If we added the current song with E_MARK earlier, don't readd it
         try: self.title_list[-1].index(self.current_song.info["title"])
         except: self.add_current_song()
-        background = spritelib.CloneSprite(pygame.transform.scale(self.screen,
+        background = spritelib.SimpleSprite(spr = pygame.transform.scale(self.screen,
                                                                   (640,480)))
         ann = announcer.Announcer(mainconfig["djtheme"])
         ann.say("menu")
@@ -428,6 +393,7 @@ class SongSelect:
         except: pass
 
         if optionscreen.player_opt_driver(screen, self.player_configs):
+          pygame.key.set_repeat()
           audio.fadeout(500)
 
           playSequence(zip(self.song_list, self.diff_list),
@@ -439,6 +405,7 @@ class SongSelect:
 
           while ev[1] != E_PASS: ev = event.poll() # Empty the queue
           self.screen.blit(self.bg, (0, 0))
+          pygame.key.set_repeat(500, 30)
           pygame.display.flip()
 
         changed = True
@@ -505,9 +472,6 @@ class SongSelect:
         mainconfig["fullscreen"] ^= 1
         changed = True
 
-      elif ev[1] == E_EXPOSE:
-        last_event_was_expose = True
-
       # This has to be after events, otherwise we do stuff to the
       # wrong song.
       if not self.songs[self.index].isfolder:
@@ -528,7 +492,6 @@ class SongSelect:
       preview.update(current_time)
 
       if self.index != self.oldindex:
-        not_changed_since = current_time
         preview.preview(self.songs[self.index])
         changed = True
         if self.index == (self.oldindex + 1) % self.numsongs:
@@ -549,96 +512,93 @@ class SongSelect:
     audio.load(os.path.join(sound_path, "menu.ogg"))
     audio.set_volume(1.0)
     audio.play(4, 0.0)
+    pygame.key.set_repeat()
 
   def render(self, changed):
-    r = []
-    
-    bg_r = self.screen.blit(self.bg, (0,0))
-    if changed: r.append(bg_r)
+    self.screen.blit(self.bg, (0,0))
 
     # Difficulty list rendering
     if not self.songs[self.index].isfolder:
       difficulty = self.songs[self.index].song.difficulty[self.gametype]
       diff_list = self.songs[self.index].song.diff_list[self.gametype]
-    else:
-      diff_list = []
+    else: diff_list = []
 
-    if changed: # We need to rerender everything
-      # The song list
-      for i in range(-4, 5):
-        idx = (self.index + i) % self.numsongs
-        self.songs[idx].render()
-        x = ITEM_X[abs(i)]
-        y = 210 + i * 60
-        img = self.songs[idx].menuimage
-        img.set_alpha(226 - (40 * abs(i)))
-        self.screen.blit(self.songs[idx].menuimage, (x,y))
+    # The song list
+    for i in range(-4, 5):
+      idx = (self.index + i) % self.numsongs
+      self.songs[idx].render()
+      x = ITEM_X[abs(i)]
+      y = 210 + i * 60
+      img = self.songs[idx].menuimage
+      img.set_alpha(226 - (40 * abs(i)))
+      self.screen.blit(self.songs[idx].menuimage, (x,y))
         
-      # The banner
-      self.screen.blit(self.songs[self.index].banner,
+    # The banner
+    self.screen.blit(self.songs[self.index].banner,
                        self.songs[self.index].banner_rect)
 
-      # Render this in "reverse" order, from bottom to top
-      temp_list = copy.copy(self.title_list)
-      temp_list.reverse()
+    # Render this in "reverse" order, from bottom to top
+    temp_list = copy.copy(self.title_list)
+    temp_list.reverse()
 
-      for i in range(len(temp_list)):
-        txt = FONTS[14].render(temp_list[i], 1, colors.WHITE)
-        self.screen.blit(txt, (10, 480 - (FONTS[14].size("I")[1] - 2) *
+    for i in range(len(temp_list)):
+      txt = FONTS[14].render(temp_list[i], 1, colors.WHITE)
+      self.screen.blit(txt, (10, 480 - (FONTS[14].size("I")[1] - 2) *
                                (i + 2)))
 
-      # Sort mode
-      stxt = FONTS[20].render("sort by " + SORT_NAMES[mainconfig["sortmode"]],
+    # Sort mode
+    stxt = FONTS[20].render("sort by " + SORT_NAMES[mainconfig["sortmode"]],
                               1, colors.WHITE)
-      rec = stxt.get_rect()
-      rec.center = (DIFF_LOCATION[0] + 90, DIFF_LOCATION[1] - 10)
-      self.screen.blit(stxt, rec)
+    rec = stxt.get_rect()
+    rec.center = (DIFF_LOCATION[0] + 90, DIFF_LOCATION[1] - 10)
+    self.screen.blit(stxt, rec)
   
-      i = 0
-      for d in diff_list:
-        # Difficulty name
-        text = d.lower()
+    i = 0
+    for d in diff_list:
+      # Difficulty name
+      text = d.lower()
 
-        color = colors.color["gray"]
-        if difficulty_colors.has_key(d):  color = difficulty_colors[d]
+      color = colors.color["gray"]
+      if difficulty_colors.has_key(d):  color = difficulty_colors[d]
 
-        if difficulty[d] >= 10: text += " - x" + str(difficulty[d])
+      if difficulty[d] >= 10: text += " - x" + str(difficulty[d])
 
-        text = FONTS[26].render(text.lower(), 1, colors.brighten(color, 64))
-        rec = text.get_rect()
-        rec.center = (DIFF_LOCATION[0] + 92, DIFF_LOCATION[1] + 25 * i + 12)
-        self.screen.blit(text, rec)
+      text = FONTS[26].render(text.lower(), 1, colors.brighten(color, 64))
+      rec = text.get_rect()
+      rec.center = (DIFF_LOCATION[0] + 92, DIFF_LOCATION[1] + 25 * i + 12)
+      self.screen.blit(text, rec)
 
-        # Difficulty boxes
-        if difficulty[d] < 10:
-          box = make_box(colors.brighten(color, 32))
-          box.set_alpha(140)
+      # Difficulty boxes
+      if difficulty[d] < 10:
+        box = make_box(colors.brighten(color, 32))
+        box.set_alpha(140)
 
-          # Active boxes
-          for j in range(int(difficulty[d])):
-            self.screen.blit(box, (DIFF_LOCATION[0] + 25 + 15 * j,
+        # Active boxes
+        for j in range(int(difficulty[d])):
+          self.screen.blit(box, (DIFF_LOCATION[0] + 25 + 15 * j,
                                    DIFF_LOCATION[1] + 25 * i))
-          # Inactive boxes
-          box.set_alpha(64)
-          for j in range(int(difficulty[d]), 9):
-            self.screen.blit(box, (DIFF_LOCATION[0] + 25 + 15 * j,
+        # Inactive boxes
+        box.set_alpha(64)
+        for j in range(int(difficulty[d]), 9):
+          self.screen.blit(box, (DIFF_LOCATION[0] + 25 + 15 * j,
                                    DIFF_LOCATION[1] + 25 * i))
             
-        # Player selection icons
-        for j in range(len(self.player_diffs)):
-          if diff_list.index(d) == (self.player_diffs[j] % len(diff_list)):
-            self.screen.blit(self.player_image[j],
-                             (DIFF_LOCATION[0] + 10 + 140 * j,
-                              DIFF_LOCATION[1] + 25 * i))
-        i += 1
+      # Player selection icons
+      for j in range(len(self.player_diffs)):
+        if diff_list.index(d) == (self.player_diffs[j] % len(diff_list)):
+          self.screen.blit(self.player_image[j],
+                           (DIFF_LOCATION[0] + 10 + 140 * j,
+                            DIFF_LOCATION[1] + 25 * i))
+      i += 1
 
     # Key help display
     if mainconfig["ingamehelp"]:
       self.update_help()
-      r.append(self.screen.blit(self.helpimage,
-                                (5, DIFF_LOCATION[1] + len(diff_list) * 26)))
+      r = [self.screen.blit(self.helpimage,
+                            (5, DIFF_LOCATION[1] + len(diff_list) * 26))]
 
-    pygame.display.update(r)
+    if changed: pygame.display.update()
+    else: pygame.display.update(r)
 
   def scroll_up(self):
     if not mainconfig["gratuitous"]: return

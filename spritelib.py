@@ -7,14 +7,27 @@ import pygame, glob, colors
 from constants import *
 
 class SimpleSprite(pygame.sprite.Sprite):
-  def __init__ (self, file):
+  def __init__ (self, file=None,spr = None, res = None, fill = colors.BLACK ):
     pygame.sprite.Sprite.__init__(self)
-    image = pygame.image.load(file).convert()
-    image.set_colorkey(image.get_at((0,0)))
-    self.fn = file
+    if file:
+      image = pygame.image.load(file).convert()
+      image.set_colorkey(image.get_at((0,0)))
+      self.fn = file
+      rect = image.get_rect()
+    elif spr:
+      try:
+        image = spr.image.convert()
+        rect = Rect(spr.rect)
+      except:
+        image = spr.convert()
+        rect = image.get_rect()
+    elif res:
+      image = pygame.Surface(res)
+      if fill is not None: image.fill(fill)
+      rect = image.get_rect()
     self.image = image
-    self.rect = image.get_rect()
-
+    self.rect = rect
+  		
   def draw(self,surf,pos=None,rect=None):
     if rect and pos:
       return surf.blit(self.image,pos,rect)
@@ -27,41 +40,17 @@ class SimpleSprite(pygame.sprite.Sprite):
 
   def update(self):
     pass
-
-  def __getattr__(self,attr):
-    return getattr(self.image,attr)
     
   def __repr__(self):
-    return '<Sprite fn=%r rect=%r>'%(self.fn,self.rect)
+    return '<Sprite rect=%r>'%(self.fn,self.rect)
 
-class BlankSprite(SimpleSprite):
-  def __init__ (self, res, fill=colors.BLACK):
-    pygame.sprite.Sprite.__init__(self)
-    image = pygame.Surface(res)
-    if fill is not None: image.fill(fill)
-    self.image = image
-    self.rect = image.get_rect()
-
-  def __repr__(self):
-    return '<Sprite rect=%r>'%(self.rect)
-
-class CloneSprite(BlankSprite):
-  def __init__ (self, spr):
-    pygame.sprite.Sprite.__init__(self)
-    self.image = spr.convert()
-    try:
-      self.rect = Rect(spr.rect)
-    except:
-      self.rect = spr.get_rect()
-
-class TransformSprite(BlankSprite):
+class TransformSprite(SimpleSprite):
   _rotozoom = pygame.transform.rotozoom
   _rotate = pygame.transform.rotate
   _flip = pygame.transform.flip
   _scale = pygame.transform.scale
   def __init__ (self, spr, scale=None, size=None,hflip=0,vflip=0,angle=None,filter=None):
     pygame.sprite.Sprite.__init__(self)
-    image = None
     try:
       image = spr.image
     except:
@@ -74,7 +63,7 @@ class TransformSprite(BlankSprite):
     self.image = image
     self.rect = self.image.get_rect()
 
-class TextSprite(BlankSprite):
+class TextSprite(SimpleSprite):
   def __init__(self, font=None, size=32, text='', color=colors.WHITE, bold=None, italic=None, underline=None, antialias=1, bkgcolor=None):
     pygame.sprite.Sprite.__init__(self)
     surf = None
@@ -91,7 +80,7 @@ class TextSprite(BlankSprite):
     self.rect = surf.get_rect()
 
 # acts like a subclass of Sprite
-class SimpleAnim:
+class SimpleAnim(SimpleSprite):
   def __init__ (self, path, prefix, separator, imgtype='png', frameNumbers=None, files=None):
     frames = []
     if files is None:
@@ -118,15 +107,11 @@ class SimpleAnim:
     frames[oldspr].kill()
     self.curframe = curframe
 
-  def __getattr__(self,attr):
-    """pretend we are a Sprite by overloading getattr with frames[curframe]"""
-    return getattr(self.frames[self.curframe],attr)
+#  def __getattr__(self,attr):
+#    """pretend we are a Sprite by overloading getattr with frames[curframe]"""
+ #   return getattr(self.frames[self.curframe],attr)
 
-#  def __setattr__(self,attr,val):
-#    if attr=='rect': setattr(self.frames[self.curframe],attr,val)
-#    else: self.__dict__[attr]=val 
-
-class BGimage(pygame.sprite.Sprite):
+class BGimage(SimpleSprite):
   def __init__ (self, filename):
     pygame.sprite.Sprite.__init__(self)
     self.image = pygame.transform.scale(pygame.image.load(filename),(640,480)).convert()

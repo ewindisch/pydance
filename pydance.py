@@ -469,7 +469,7 @@ class TimeDisp(pygame.sprite.Sprite):
       else:
         self.blahmod += 1
 
-class ArrowSprite(CloneSprite):
+class ArrowSprite(SimpleSprite):
 
   # Assist mode sound samples
   samples = {}
@@ -478,7 +478,7 @@ class ArrowSprite(CloneSprite):
                                                  "assist-" + d + ".ogg"))
   
   def __init__ (self, spr, curtime, endtime, player, song):
-    CloneSprite.__init__(self, spr)
+    SimpleSprite.__init__(self, spr=spr)
     self.endtime = endtime
     self.life  = endtime - curtime
     self.curalpha = -1
@@ -607,9 +607,9 @@ class ArrowSprite(CloneSprite):
 
     if alp != self.image.get_alpha():  self.image.set_alpha(alp)
 
-class HoldArrowSprite(CloneSprite):
+class HoldArrowSprite(SimpleSprite):
   def __init__ (self, spr, curtime, times, player, song):
-    CloneSprite.__init__(self, spr)
+    SimpleSprite.__init__(self, spr = spr)
     self.timef1 = times[1]
     self.timef2 = times[2]
     self.timef = times[2]
@@ -839,7 +839,7 @@ class ReadyGoSprite(pygame.sprite.Sprite):
 def SetDisplayMode(mainconfig):
   try:
     flags = HWSURFACE | DOUBLEBUF
-    if osname == "macosx": flags = 0
+#    if osname == "macosx": flags = 0
     if mainconfig["vesacompat"]: flags = 0
     elif mainconfig["fullscreen"]: flags |= FULLSCREEN
     screen = pygame.display.set_mode((640, 480), flags, 16)
@@ -874,7 +874,7 @@ def main():
   audio.load(os.path.join(sound_path, "menu.ogg"))
   audio.play(4, 0.0)
 
-  background = BlankSprite(screen.get_size())
+  background = SimpleSprite(res = screen.get_size())
 
   pbar = fontfx.TextProgress(FONTS[60], "Found " + str(totalsongs) +
                              " files. Loading...", colors.WHITE, colors.BLACK)
@@ -951,7 +951,7 @@ def dance(song, players, prevscr, ready_go):
 
   songFailed = False
 
-  background = BlankSprite(screen.get_size())
+  background = SimpleSprite(res= screen.get_size())
 
   pygame.mixer.init()
 
