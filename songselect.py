@@ -784,7 +784,7 @@ class SongSelect:
     songlist = self.folders[sort][selected_folder]
     folderlist = self.folders[sort].keys()
 
-    folderlist.sort()
+    folderlist.sort(lambda x, y: cmp(x.lower(), y.lower()))
     songlist.sort(SORTS[sort])
 
     new_songs = []
