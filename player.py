@@ -810,7 +810,6 @@ class Player(object):
     self.fx_group.update(time)
     self.text_group.update(time)
     if self.lifebar.gameover == lifebars.FAILED and not self.failed:
-      print "I failed."
       self.failed = True
 
     rects = []
