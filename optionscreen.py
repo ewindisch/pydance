@@ -170,6 +170,8 @@ class OptionScreen(object):
 
       item = self.menu[i]
       name, opt, values = item
+      text = FONTS[24].render(name, 1, colors.BLACK)
+      blankimage.blit(text, [11, 71 + 28 * i])
       text = FONTS[24].render(name, 1, color)
       blankimage.blit(text, [10, 70 + 28 * i])
       for k in range(len(values)):
@@ -183,20 +185,36 @@ class OptionScreen(object):
             y = 70 + 28 * i
 
             if i == self.current[plr]: FONTS[24].set_underline(True)
+
+            text = FONTS[24].render(values[k][1], 1, colors.BLACK)
+            r = text.get_rect()
+            r.midtop = [x + 1, y + 1]
+            blankimage.blit(text, r)
+
             text = FONTS[24].render(values[k][1], 1, color)
             FONTS[24].set_underline(False)
             r = text.get_rect()
             r.midtop = [x, y]
-
             blankimage.blit(text, r)
 
             if k != 0:
+              left = FONTS[24].render("< ", 1, colors.BLACK)
+              r = left.get_rect()
+              r.topright = [x - text.get_size()[0] / 2 + 1, y + 1]
+              blankimage.blit(left, r)
+
               left = FONTS[24].render("< ", 1, color)
               r = left.get_rect()
               r.topright = [x - text.get_size()[0] / 2, y]
               blankimage.blit(left, r)
             if k != len(values) - 1:
+              right = FONTS[24].render(" >", 1, colors.BLACK)
+              r = right.get_rect()
+              r.topleft = [x + text.get_size()[0] / 2 + 1, y + 1]
+              blankimage.blit(right, r)
+
               right = FONTS[24].render(" >", 1, color)
+              r = right.get_rect()
               r.topleft = [x + text.get_size()[0] / 2, y]
               blankimage.blit(right, r)
 
@@ -222,6 +240,8 @@ class OptionScreen(object):
       blankimage.blit(textimage, r)
 
 
+    text = FONTS[40].render(self.title, 1, colors.BLACK)
+    blankimage.blit(text, (47, 66-text.get_height()))
     text = FONTS[40].render(self.title, 1, colors.WHITE)
     blankimage.blit(text, [45, 64 - text.get_height()])
 
