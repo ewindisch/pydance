@@ -28,6 +28,10 @@ key_defaults = {
   100 * K_BACKSPACE: SORT,
   100 * K_TAB: SELECT,
   100 * K_s: SORT,
+  100 * K_PAGEUP: PGUP,
+  100 * K_PAGEDOWN: PGDN,
+  100 * K_INSERT: MARK,
+  100 * K_DELETE: UNMARK,
   }
 
 # This class wraps pad and maps pad events to UI events.
