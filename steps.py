@@ -154,11 +154,11 @@ class Steps:
               self.totalarrows += 1
 
         if words[0] in BEATS: beat = BEATS[words[0]]
-        else: beat = words[0]
+        else: beat = 16.0 / words[0]
 
-        cur_time += toRealTime(cur_bpm, BEATS[words[0]])
-        cur_beat += BEATS[words[0]]
-        coloring_mod += BEATS[words[0]]
+        cur_time += toRealTime(cur_bpm, beat)
+        cur_beat += beat
+        coloring_mod += beat
 
         if int(coloring_mod + 0.0001) > int(coloring_mod):
           coloring_mod = float(int(coloring_mod + 0.0001))
