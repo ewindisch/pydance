@@ -342,13 +342,13 @@ class ComboDisp(pygame.sprite.Sprite):
     self.image = self.space
 
   def broke(self, time):
-    if self.combo > self.bestcombo: self.bestcombo = self.combo
     self.laststep = time
     self.combo = 0
 
   def addcombo(self, time):
     self.laststep = time
     self.combo += 1
+    if self.combo > self.bestcombo: self.bestcombo = self.combo
 
   def update(self, curtime):
     self.laststep = min(curtime, self.laststep)
