@@ -5,7 +5,9 @@
 # abstraction. We should be able to remove some of these classes, or at
 # least many of the accessor functions.
 
-import dircache, os, games
+import dircache, os, games, zipfile
+
+from StringIO import StringIO
 
 from constants import *
 from util import toRealTime
@@ -33,7 +35,7 @@ class ThemeFile(object):
   # Also, whether it's a theme at all, or just some random file.
   def is_theme(cls, filename, game):
     if not os.path.isdir(filename):
-      return False
+      return cls.is_zip_theme(filename, game)
     elif not os.path.exists(os.path.join(filename, "is-theme")):
       return False
     elif (os.path.split(os.path.split(filename)[0])[1] !=
@@ -49,19 +51,45 @@ class ThemeFile(object):
 
   is_theme = classmethod(is_theme)
 
+  # Check if a zip file is a theme for a mode.
+  def is_zip_theme(cls, filename, game):
+    if filename[-3:].lower() != "zip": return False
+    else:
+      zip = zipfile.ZipFile(filename, "r")
+      if zip.testzip():
+        zip.close()
+        return False
+      files = zip.namelist()
+      zip.close()
+      if "is-theme" not in files: return False
+      for dir in game.dirs:
+        possible = "arr_%s_%s_0.png" % ("%s", dir)
+        if not (possible % "c" in files and possible % "n" in files):
+          return False
+      return True
+
+  is_zip_theme = classmethod(is_zip_theme)
+
   def __init__(self, filename):
     self.path = filename
+    self.zip = None
+    if not os.path.isdir(filename):
+      self.zip = zipfile.ZipFile(filename)
 
   # Get an image from the theme.
   def get_image(self, image_name):
     try:
-      return pygame.image.load(os.path.join(self.path, image_name))
+      if self.zip:
+        return pygame.image.load(StringIO(self.zip.read(image_name)))
+      else:
+        return pygame.image.load(os.path.join(self.path, image_name))
     except:
       raise RuntimeError("E: %s was missing from your theme." % image_name)
 
   # Check to see if an image is in the theme.
   def has_image(self, image_name):
-    return os.path.exists(os.path.join(self.path, image_name))
+    if self.zip: return image_name in self.zip.namelist()
+    else: return os.path.exists(os.path.join(self.path, image_name))
 
   # Get an arrow based on its type/direction/color.
   # If the desired arrow coloring wasn't found, fall back to the default

@@ -19,6 +19,7 @@ legend:
 + The .dance specification has been updated with new modes and corrections.
 + A new centered display for single player modes.
 + New theming code.
+ + Load themes from .zip files if possible.
  + Brings back oldschool and bryan themes.
  + New default arrow graphics for all modes by xsdg.
  + DDR-like arrow themes by piman and JZig for 48x48 and 32x32 modes.
