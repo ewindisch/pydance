@@ -8,6 +8,7 @@ import records
 import grades
 import dance
 import random
+import options
 
 from constants import *
 from interface import *
@@ -67,7 +68,6 @@ SS_HELP = [
   "Select / Tab takes you to a random song",
   "Start / Enter switches between screens",
   "F11 toggles fullscreen - S changes the sort mode.",
-  "Enjoy pydance 0.9.0!",
   ]
 
 def folder_name(name, type):
@@ -201,13 +201,12 @@ class SongPreview(object):
       self._playing = False
       self._filename = None
 
-class MainWindow(InterfaceWindow):
+class SongSelect(InterfaceWindow):
   def __init__(self, songs, courses, screen, game):
     InterfaceWindow.__init__(self, screen, "newss-bg.png")
     songs = [s for s in songs if s.difficulty.has_key(game)]
     self._songs = [SongItemDisplay(s) for s in songs]
     self._index = 0
-    self._clock = pygame.time.Clock()
     self._game = game
     self._config = dict(game_config)
     self._all_songs = self._songs
@@ -300,6 +299,12 @@ class MainWindow(InterfaceWindow):
 
       elif ev == ui.SELECT:
         self._index = random.randrange(len(self._songs))
+
+      elif ev == ui.START:
+        options.OptionScreen(self._configs, self._config, self._screen)
+        self._screen.blit(self._bg, [0, 0])
+        self.update()
+        pygame.display.update()
 
       elif ev == ui.SORT:
         s = self._songs[self._index]

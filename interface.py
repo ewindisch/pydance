@@ -449,6 +449,7 @@ class InterfaceWindow(object):
     self._sprites = pygame.sprite.RenderUpdates()
     self._screen.blit(self._bg, [0, 0])
     self._callbacks = {} #FIXME: TODO
+    self._clock = pygame.time.Clock()
 
   def update(self):
     self._sprites.update(pygame.time.get_ticks())

@@ -37,7 +37,7 @@ SELECTORS = {
   "Normal": songselect.SongSelect,
   "Endless": endless.Endless,
   "Nonstop": courseselect.CourseSelector,
-  "Testing": newss.MainWindow,
+  "Testing": newss.SongSelect,
   }
 
 MODES = {
@@ -144,7 +144,6 @@ class MainWindow(InterfaceWindow):
 
   def loop(self):
     active = 0
-    clock = pygame.time.Clock()
     indices = [0, 0, 0]
     pid, ev = ui.ui.poll()
     
@@ -159,7 +158,7 @@ class MainWindow(InterfaceWindow):
 
       elif ev == ui.CANCEL:
         active -= 1
-      elif ev == ui.CONFIRM:
+      elif ev in [ui.CONFIRM, ui.START]:
         if active == 2:
           SELECTORS[SS[indices[2]]](self._songs, self._courses, self._screen,
                                     MODES.get((VALUES[0][indices[0]],
@@ -182,7 +181,7 @@ class MainWindow(InterfaceWindow):
         self._description.set_text(DESCRIPTIONS[text])
         self._image.set_image(IMAGES.get(text))
 
-      if ev in [ui.CONFIRM, ui.CANCEL]:
+      if ev in [ui.CONFIRM, ui.START, ui.CANCEL]:
         self._indicator.move([405, self._indicator_y[active]])
         self._title.set_text(self._message[active])
         text = VALUES[active][indices[active]]
@@ -190,6 +189,6 @@ class MainWindow(InterfaceWindow):
         self._description.set_text(DESCRIPTIONS[text])
         self._image.set_image(IMAGES.get(text))
 
-      clock.tick(45)
+      self._clock.tick(45)
       self.update()
       pid, ev = ui.ui.poll()
