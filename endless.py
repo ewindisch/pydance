@@ -154,6 +154,10 @@ class Endless(object):
           newmin = min(self.constraints[ev[0]].value[0] + 1, 9)
           self.constraints[ev[0]].value = [newmin, newmin + 2]
 
+      elif ev[1] == E_FULLSCREEN:
+        pygame.display.toggle_fullscreen()
+        mainconfig["fullscreen"] ^= 1
+
       self.render()
 
     mainconfig["autofail"] = oldaf
