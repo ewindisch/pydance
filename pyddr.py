@@ -981,8 +981,8 @@ class Song:
     little = mainconfig["little"]
     coloringmod = 0
     self.totarrows = {}
-    self.holdinfo = []
-    self.holdref = []
+    self.holdinfo = [None] * 4
+    self.holdref = [None] * 4
     numholds = 1
     holdlist = []
     releaselist = []
@@ -1018,8 +1018,9 @@ class Song:
             coloringmod = 0
 
             # append the hold info for this mode
-            self.holdinfo.append( zip(holdlist,holdtimes,releasetimes) )
-            self.holdref.append( zip(holdlist,holdtimes) )
+            i = DIFFICULTYLIST.index(difficulty)
+            self.holdinfo[i] = zip(holdlist,holdtimes,releasetimes)
+            self.holdref[i] = zip(holdlist,holdtimes)
 
             # reset all the hold arrow stuff and operate on next mode
             holdlist = []
@@ -1068,7 +1069,6 @@ class Song:
               for checkforholds in range(4):             # guess what this function does
                   didnothold = 1
                   if (feetstep[checkforholds] & 128) and (holding[checkforholds] == 0):
-                    print feetstep, holding, checkforholds
                     holdtimes.insert(numholds,curTime)
                     holdlist.insert(numholds,checkforholds)
                     numholds += 1
@@ -2035,15 +2035,9 @@ def dance(song, players):
                   ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr.pid).add([plr.arrow_group, rgroup])
 
               if num & 128:
-                try:
-                  diffnum = song.modediff[playmode].index(plr.difficulty)
-                  holdindex = song.holdref[diffnum].index((DIRECTIONS.index(dir),ev.when))
-                  HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr.pid).add([plr.arrow_group, rgroup])
-                except:
-                  print plr.difficulty
-                  print song.modediff[playmode]
-                  print song.holdref[diffnum]
-                  print DIRECTIONS.index(dir), ev.when, ev.feet
+                diffnum = song.modediff[playmode].index(plr.difficulty)
+                holdindex = song.holdref[diffnum].index((DIRECTIONS.index(dir),ev.when))
+                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr.pid).add([plr.arrow_group, rgroup])
     if len(song.lastbpmchangetime) > 1:
       if (curtime >= song.lastbpmchangetime[1][0]):
         nbpm = song.lastbpmchangetime[1][1]
