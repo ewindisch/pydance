@@ -56,6 +56,8 @@ def compress(steps):
     else: # Empty event
       beat_count += s[0]
 
+  if last_event is not None: new_steps.append([beat_count] + last_event)
+
   return new_steps
 
 # Rotate the steps according the player's rotation mode
