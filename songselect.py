@@ -151,8 +151,8 @@ class SongSelect:
     self.player_image = [pygame.image.load(os.path.join(image_path,
                                                         "player0.png"))]
 
-    if gametype in LOCKED_MODES: self.locked = True
-    else: self.locked = False
+    if gametype in LOCKED_MODES: locked = True
+    else: locked = False
 
     self.diff_list = []
     self.song_list = []
@@ -380,7 +380,7 @@ class SongSelect:
       # wrong song.
       self.current_song = self.songs[self.index].song
 
-      if self.locked and ev[1] in [E_UP, E_DOWN]:
+      if locked and ev[1] in [E_UP, E_DOWN] and ev[0] < len(self.player_diffs):
         for i in range(len(self.player_diffs)):
           self.player_diffs[i] = self.player_diffs[ev[0]]
           self.player_diff_names[i] = self.player_diff_names[ev[0]]
