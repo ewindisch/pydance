@@ -184,6 +184,7 @@ def play(screen, playlist, configs, songconf, playmode):
     except:
       error.ErrorMessage(screen, ["There was an error loading",
                                   os.path.split(songfn)[1]])
+      first = True
       continue
       
     pygame.mixer.quit()
@@ -196,16 +197,11 @@ def play(screen, playlist, configs, songconf, playmode):
     print "Playing", songfn
     print songdata.title.encode("ascii", "replace"), "by", songdata.artist.encode("ascii", "replace")
 
-    try:
-      if dance(screen, songdata, players, prevscr, first, game):
-        break # Failed
-      first = False
-    except None:
-      error.ErrorMessage(screen, ["There was an error playing",
-                                  os.path.split(songfn)[0]])
-      first = True
+    if dance(screen, songdata, players, prevscr, first, game):
+      break # Failed
+    first = False
 
-  if mainconfig['grading']:
+  if mainconfig['grading'] and not first:
     grade = gradescreen.GradingScreen(players)
     background = pygame.transform.scale(screen, (640,480))
     if grade.make_gradescreen(screen, background):
