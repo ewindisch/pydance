@@ -38,7 +38,8 @@ class WrapFont(object):
   def size(self, text, indent = ""):
     return [self._width, self.lines(text, indent) * self._ls + self._ds]
 
-  def render(self, text, color = [255, 255, 255], shdw = True, indent = ""):
+  def render(self, text, color = [255, 255, 255], shdw = True, indent = "",
+             centered = False):
     lines = []
     words = text.split()
     start = 0
@@ -62,7 +63,13 @@ class WrapFont(object):
                            SRCALPHA, 32)
     image.fill([0, 0, 0, 0])
     for i in range(len(lines)):
-      image.blit(lines[i], [0, i * self._font.get_linesize()])
+      if centered:
+        r = lines[i].get_rect()
+        r.centerx = self._width / 2
+        r.y = i * self._font.get_linesize()
+        image.blit(lines[i], r)
+      else:
+        image.blit(lines[i], [0, i * self._font.get_linesize()])
     return image
 
 # SINKBLUR - sinking "motion blur" effect (middle is brightest)

@@ -423,15 +423,18 @@ class BannerDisplay(pygame.sprite.Sprite):
     self._render()
 
 class WrapTextDisplay(pygame.sprite.Sprite):
-  def __init__(self, font, width, topleft, str = " "):
+  def __init__(self, font, width, topleft, str = " ", centered = False):
     pygame.sprite.Sprite.__init__(self)
-    self._text = " "
+    self._text = str
+    self._centered = centered
+    self._needs_update = False
     self._font = fontfx.WrapFont(font, width)
     self._topleft = topleft
     self._render()
 
   def _render(self):
-    self.image = self._font.render(self._text, shdw = False)
+    self.image = self._font.render(self._text, shdw = False,
+                                   centered = self._centered)
     self.rect = self.image.get_rect()
     self.rect.topleft = self._topleft
 

@@ -249,7 +249,7 @@ class OptionSelect(pygame.sprite.Sprite):
       r2 = t2.get_rect()
       r2.centery = 20
       r2.right = r.left - 30
-      t2.set_alpha(int(256 * (r2.centerx / 215.0)))
+      t2.set_alpha(int(200 * (r2.centerx / 215.0)))
       self.image.blit(t2, r2)
       idx -= 1
       r = r2
@@ -265,7 +265,7 @@ class OptionSelect(pygame.sprite.Sprite):
       r2 = t2.get_rect()
       r2.centery = 20
       r2.left = r.right + 30
-      t2.set_alpha(int(256 * ((430 - r2.centerx) / 215.0)))
+      t2.set_alpha(int(200 * ((430 - r2.centerx) / 215.0)))
       self.image.blit(t2, r2)
       idx += 1
       r = r2
@@ -279,8 +279,13 @@ class OptionScreen(InterfaceWindow):
 
     self._lists = [ListBox(pygame.font.Font(None, 24), [255, 255, 255],
                            25, 9, 176, [10, 10])]
+    self._text = [WrapTextDisplay(28, 430, [198, 165], centered = True,
+                                  str = OPTIONS[OPTS[0]][DESCRIPTION])]
     val = self._configs[0][OPTS[0]]
     names = [v[NAME] for v in OPTIONS[OPTS[0]][VALUES]]
+    desc = OPTIONS[OPTS[0]][VALUES][index_of(val, OPTS[0])][DESCRIPTION]
+    self._text2 = [WrapTextDisplay(22, 430, [198, 105], centered = True,
+                                  str = desc)]
     self._displayers = [OptionSelect(names, [415, 40],
                                      index_of(val, OPTS[0]))]
     self._index = [0]
@@ -289,14 +294,20 @@ class OptionScreen(InterfaceWindow):
       self._lists.append(ListBox(pygame.font.Font(None, 24), [255, 255, 255],
                                  25, 9, 176, [453, 246]))
       self._index.append(0)
+      self._text.append(WrapTextDisplay(28, 430, [10, 275], centered = True,
+                                        str = OPTIONS[OPTS[0]][DESCRIPTION]))
       ActiveIndicator([448, 345]).add(self._sprites)
       val = self._configs[1][OPTS[0]]
+      desc = OPTIONS[OPTS[0]][VALUES][index_of(val, OPTS[0])][DESCRIPTION]
+      self._text2.append(WrapTextDisplay(22, 430, [10, 350], centered = True,
+                                         str = desc))
       self._displayers.append(OptionSelect(names, [220, 440],
                                            index_of(val, OPTS[0])))
 
     HelpText(O_HELP, [255, 255, 255], [0, 0, 0],
              pygame.font.Font(None, 22), [320, 241]).add(self._sprites)
-    self._sprites.add(self._lists + self._displayers)
+    self._sprites.add(self._lists + self._displayers + self._text +
+                      self._text2)
 
     for l in self._lists: l.set_items([OPTIONS[k][1] for k in OPTS])
     self._screen.blit(self._bg, [0, 0])
@@ -344,20 +355,27 @@ class OptionScreen(InterfaceWindow):
         values = OPTIONS[OPTS[self._index[pid]]][VALUES]
         names = [v[NAME] for v in values]
         self._displayers[pid].set_possible(names)
+        self._text[pid].set_text(OPTIONS[OPTS[self._index[pid]]][DESCRIPTION])
 
       if ev in [ui.LEFT, ui.RIGHT, ui.UP, ui.DOWN]:
         opt = OPTS[self._index[pid]]
         if OPTIONS[opt][PP]:
           val = self._configs[pid][opt]
+          idx = index_of(val, opt)
           self._displayers[pid].set_index(index_of(val, opt))
+          self._text2[pid].set_text(OPTIONS[opt][VALUES][idx][DESCRIPTION])
         elif self._players > 1 and self._index[0] == self._index[1]:
           # If both players have the same non-per-player option
           # selected, we need to update both displayers.
           val = self._config[opt]
+          idx = index_of(val, opt)
           for i in range(self._players):
-            self._displayers[i].set_index(index_of(val, opt))
+            self._displayers[i].set_index(idx)
+            self._text2[pid].set_text(OPTIONS[opt][VALUES][idx][DESCRIPTION])
         else:
           val = self._config[opt]
-          self._displayers[pid].set_index(index_of(val, opt))
+          idx = index_of(val, opt)
+          self._displayers[pid].set_index(idx)
+          self._text2[pid].set_text(OPTIONS[opt][VALUES][idx][DESCRIPTION])
       self.update()
       pid, ev = ui.ui.poll()
