@@ -1765,18 +1765,26 @@ class fastSong:
     # note that I'm only copying DIFFICULTIES because it's the right size..
     self.haslyrics = ''
     self.fooblah = fn
+
     try:
       try:
-        print "trying full banner",fn[:-5]+'-full.png'
+        print fn[:-5]+'-full.png?',
         self.lilbanner = pygame.image.load(fn[:-5]+'-full.png').convert()
+        print "yes"
       except:
-        print "nogo, trying rotated banner",fn[:-5]+'.png'
-        self.lilbanner = pygame.transform.rotate(pygame.image.load(fn[:-5]+'.png').convert(),-45)
-        self.lilbanner.set_colorkey(self.lilbanner.get_at((0,0)))
+        print fn[:-5]+'.png?',
+        self.lilbanner = pygame.image.load(fn[:-5]+'.png').convert()
+        if (self.lilbanner.get_rect().size[0] / 2) > self.lilbanner.get_rect().size[1]:
+          print "yes, rotated banner was fullsize"
+        else:
+          self.lilbanner = pygame.transform.rotate(self.lilbanner,-45)
+          self.lilbanner.set_colorkey(self.lilbanner.get_at((0,0)))
+          print "yes"
     except:
       print "settling for blank banner for",fn
       self.lilbanner = pygame.surface.Surface((1,1))
       self.lilbanner.set_colorkey(self.lilbanner.get_at((0,0)))
+ 
     self.bannercreationtime = pygame.time.get_ticks()
     self.rrrr = self.lilbanner.get_rect()
     self.rrrr.center = (320,300)
