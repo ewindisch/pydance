@@ -1220,6 +1220,7 @@ class HoldArrowSprite(CloneSprite):
     else:
       self.playedsound = 1
     self.r = 0
+    self.broken = 1
     self.oimage = pygame.surface.Surface((64,32))
     self.oimage.blit(self.image,(0,-32))
     self.oimage.set_colorkey(self.oimage.get_at((0,0)))
@@ -1253,8 +1254,9 @@ class HoldArrowSprite(CloneSprite):
     if len(lbct)<2: # single run (I hope)
       onebeat = float(60000.0/curbpm)/1000
       doomtime = self.timef1 - curtime
-      if doomtime < 0:
-        doomtime = 0
+      if self.broken == 0:
+        if doomtime < 0:
+          doomtime = 0
       beatsleft = float(doomtime / onebeat)
       self.top = self.top - int( (beatsleft/8.0)*self.pos['diff'] )
       doomtime = self.timef2 - curtime
@@ -1293,16 +1295,20 @@ class HoldArrowSprite(CloneSprite):
 
     if self.bottom > 480:
       self.bottom = 480
-    if self.bottom < 64:
-      if self.pos['top'] < self.pos['bot']:
+    if self.pos['top'] < self.pos['bot']:
+      if self.bottom < 64 and (self.broken == 0):
         self.bottom = 64
+      elif self.bottom < 32 and (self.broken):
+        self.bottom = 32
     self.rect.bottom = self.bottom
  
     if self.top > 480:
       self.top = 480
-    if self.top < 64:
-      if self.pos['top'] < self.pos['bot']:
+    if self.pos['top'] < self.pos['bot']:
+      if self.top < 64 and (self.broken == 0):
         self.top = 64
+      elif self.top < 32 and (self.broken):
+        self.top = 32
 
     if self.pos['top'] < self.pos['bot']:
       self.rect.top = self.top
@@ -1610,7 +1616,6 @@ def dance(song, players, ARROWPOS, prevscr):
       bgkludge = pygame.image.load(bifn).convert()
       bgkrect = bgkludge.get_rect()
       if (bgkrect.size[0] == 320) and (bgkrect.size[1] == 240):
-        print "attempting to smooth background a little bit"
         bgkludge = pygame.transform.scale2x(bgkludge)
       else:
         bgkludge = pygame.transform.scale(bgkludge,(640,480))
@@ -1819,6 +1824,11 @@ def dance(song, players, ARROWPOS, prevscr):
           else:
             plr.judge.botchedhold(currenthold)
             plr.holdtext.fillin(curtime, dirID, "NG")
+            botchdir, timef1, timef2 = song.holdinfo[diffnum][currenthold]
+            for spr in plr.arrow_group.sprites():
+              try:
+                if (spr.timef1 == timef1) and (DIRECTIONS.index(spr.dir) == dirID): spr.broken = 1
+              except: pass
         else:
           if plr.tempholding[dirID] > -1:
             if plr.judge.holdsub[plr.tempholding[dirID]] != -1:

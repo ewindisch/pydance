@@ -78,8 +78,11 @@ class Player:
     for text, dir, time in self.fx_data:
       if (text == "MARVELOUS" or text == "PERFECT" or text == "GREAT"):
         for spr in self.arrow_group.sprites():
-          try:
+          try:     # kill normal arrowsprites
             if (spr.timef == time) and (spr.dir == dir): spr.kill()
+          except: pass
+          try:     # unbreak hold arrows.
+            if (spr.timef1 == time) and (spr.dir == dir): spr.broken = 0
           except: pass
         self.toparrfx[dir].stepped(curtime, text)
 
