@@ -54,6 +54,13 @@ class GenericFile(object):
           self.info[t] = os.path.join(dir, self.info[t])
           if not os.path.isfile(self.info[t]): del(self.info[t])
 
+    if "cdtitle" in self.info and not os.path.isfile(self.info["cdtitle"]):
+      for path in search_paths + (dir,):
+        p = os.path.join(path, "cdtitles", self.info["cdtitle"])
+        if os.path.isfile(p):
+          self.info["cdtitle"] = p
+          break
+
   # DWI has an insane number of time formats.
   def parse_time(self, string):
     offset = 0
@@ -389,9 +396,9 @@ class MSDFile(GenericFile):
     if len(lyrics) > 0: self.parse_lyrics(lyrics[0])
 
   def find_cdtitle(self, name):
+    # I FUCKING HATE YOU WINDOWS AND YOUR FUCKING FILENAMES, GO TO HELL
     if "\\" in name: name = name.replace("\\", "/")
     fn = os.path.split(name)[-1]
-    # I FUCKING HATE YOU WINDOWS AND YOUR FUCKING FILENAMES, GO TO HELL
     for dir in [os.path.join(p, "cdtitles") for p in search_paths]:
       if os.path.isdir(dir):
         for f in os.listdir(dir):

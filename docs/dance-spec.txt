@@ -39,7 +39,7 @@ Metadata Storage:
 <Metadata> ::= (<Comment> | <MetadataLine>)+ <EndToken>
 <MetadataLine> ::= (<Filename> | <Title> | <Subtitle> | <Artist> | <Mix> |
                     <BPM> | <Offset> | <BG> | <Banner> | <Preview> |
-                    <Checksum> | <StartAt> | <EndAt> | <Author> |
+                    <Checksum> | <StartAt> | <EndAt> | <Author> | <CDTitle> |
 		    <RevisionDate> | <Valid> | <Movie>) <Newline>
 <Filename> ::= "filename" <Whitespace> <LongString>
 <Title> ::= "title" <Whitespace> <LongString>
@@ -52,6 +52,7 @@ Metadata Storage:
 <EndAt> ::= "endat" <Whitespace> <Float>
 <BG> ::= "background" <Whitespace> <LongString>
 <Banner> ::= "banner" <Whitespace> <LongString>
+<Banner> ::= "cdtitle" <Whitespace> <LongString>
 <Preview> :: "preview" <Whitespace> <Float> <Whitespace> <Float>
 <Checksum> ::= "md5sum" <Whitespace> <String>
 <Author> ::= "author" <Whitespace> <LongString>
@@ -135,6 +136,10 @@ important data about the file. An explanation of the keys follow:
               Default none.
 
 'banner': A banner for the song (to display in the song select). Default none.
+
+'cdtitle': A small (64x40) image to use as a CD title. Default none. This
+           path should either be relative to a special CD title directory,
+           or to the directory the file is in.
 
 'preview': An offset to seconds to start a song preview at, and a length to
            play the preview. Default 45.0 and 10.0.
@@ -276,8 +281,13 @@ DOUBLE - Doubles, one player on both pads.
 
 8PANEL, 8VERSUS, 8COUPLE, 8DOUBLE: All directions except center.
 
+3*: Up left, down, and up right.
+
 Changes:
 --------
+2003.12.22
+ - 'cdtitle' metadata line.
+
 2003.08.15
  - Specify note types more exactly.
  - Fix the broken DESCRIPTION in the example.
