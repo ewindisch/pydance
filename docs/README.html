@@ -1,8 +1,18 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
-<html>
-  <head>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+ "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head>
     <title>pyDDR Documentation</title>
-    <meta name="author" content="Joe Wreschnig &lt;piman@debian.org&gt;">
+    <meta name="author" content="Joe Wreschnig &lt;piman@debian.org&gt;" />
+      <style type="text/css">
+
+h1 { border-bottom: solid 2px } 
+h2 { border-bottom: solid 1px; margin-right: 15% } 
+h3 { text-decoration: underline }
+
+dl.options dt { font-family: monospace }
+dl.faq dt { font-weight: bold }
+      </style>
   </head>
   <body>
     <h1>About pyDDR</h1>
@@ -18,14 +28,13 @@
       pad, and given that you hit it on time with the beat, you score
       points. The idea is that the game is supposed to either teach you
       to dance, or simulate dancing. It works to a degree. =]</p>
-    <p>However, if you're just hearing about this game (or cheap), you
+    <p>However, if you're just hearing about this game (or you're broke), you
       don't actually <em>need</em> a mat to play pyDDR (although it
       definitely makes it more fun). You can use a keyboard or regular
       joystick instead.</p>
     <p>This document assumes you've managed to install pyDDR already.
       If not, you might want to look at the INSTALL file included with
       the source.</p>
-    <!-- FIXME - we should have install documentation in here -->
     <h1>Playing pyDDR</h1>
     <p>To play the game, just select "Play Game" from the menu and select
       a song. Press j and l to change your difficulty setting
@@ -37,7 +46,7 @@
     direction of the arrow on your pad. If you're using the keyboard,
     you can just IJKL for up/down/left/right.</p>
     <p>If you want to play a versus game, just hit start on the second
-    player's joystick (or '2' on the keyboard). The second player uses
+    player's dance mat, or '2' on the keyboard; The second player uses
     the arrow keys.</p>
     <p>If you need to exit the game or back out of menus, just press
     escape.</p>
@@ -68,7 +77,7 @@
     confusing names. A complete (as of sometime between 0.6.1 and
     0.6.2) list follows.</p>
     <h3>Gameplay Options</h3>
-    <dl>
+    <dl class="options">
       <dt>arrowcolors 1|2|3|4</dt>
       <dd><p>Normally there are three colors of arrows; one for
       on-beat (quarter notes), one for exactly off-beat (eighth
@@ -130,7 +139,7 @@
       number of beats up the screen. It's the opposite of hidden.</p></dd>
     </dl>
     <h3>Graphical Options</h3>
-    <dl>
+    <dl class="options">
       <dt>arrowspin 0|1</dt>
       <dd><p>If this option is on, the arrows will spin around in
       circles as they go up the screen.</p></dd>
@@ -201,7 +210,7 @@
       lyriccolor option.</p></dd>
     </dl>
     <h3>Sound Options</h3>
-    <dl>
+    <dl class="options">
       <dt>djtheme [themename]</dt>
       <dd><p>Sets your announcer theme. By default pyDDR comes with
       the 'none' theme (no announcer). Copies from the official
@@ -240,7 +249,7 @@
       selector over it.</p></dd>
     </dl>
     <h3>Interface Options</h3>
-    <dl>
+    <dl class="options">
       <dt>keyboard qwerty|rqwerty|dvorak|rdvorak</dt>
       <dd><p>Your keyboard type. 'ijkl', while convenient on qwerty
       (standard) keyboards, doesn't work at all on dvorak
@@ -253,10 +262,10 @@
       sorts by filename, 1 by song name, 2 by artist name, 3 by BPM, 4
       by difficulty, and 5 by mix.</p>
       <p>This can also be changed by pressing 's' on the song select
-      screen.</dd>
+      screen.</p></dd>
     </dl>
     <h3>System Options</h3>
-    <dl>
+    <dl class="options">
       <dt>songdir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)</dt>
       <dd><p>This is a list of directories where pyDDR should look for
       songs (.step files, backgrounds and banners, and the audio
@@ -265,7 +274,7 @@
       and a local one in your home directory.</p></dd>
     </dl>
     <h3>Obscure Options</h3>
-    <dl>
+    <dl class="options">
       <dt>strobe 0|1</dt>
       <dd><p>Turning this on results in a little blinking light in the
       bottom right corner of the screen. With various light detection
@@ -290,7 +299,8 @@
     kernel). Once compiled, just run <tt>insmod ddrmat gc=0,7</tt>
     (where 7 is the IRQ of your parallel port, which is probably
     7). Note that your <tt>lp</tt> (parallel printer) module cannot be
-    loaded at the same time.</p>
+    loaded at the same time. The normal gamecon.o module may work too,
+    although you may have to rotate your pad 45 degrees.</p>
     <p>USB drivers are much easier. If your kernel has USB joystick
     support, just plug it in and it should work. If it doesn't, make
     sure the input, hid, and joydev modules are loaded (the first two
@@ -331,12 +341,12 @@
     need to open up the step file and delete the LYRICS section if you
     want to add new lyrics.</p>
     <h1>FAQ</h1>
-      <p>The official FAQ is currently at <a
+      <p>The old FAQ is currently at <a
     href="http://www.icculus.org/pyddr/faq.php">http://www.icculus.org/pyddr/faq.php</a>. Eventually that will be replaced with this one.</p>
-    <dl>
+    <dl class="faq">
       <dt>My MP3 fails to load.</dt>
-      <dd>pyDDR's MP3 support comes via the SMPEG, which is
-      suboptimial, but integrates with SDL's mixer library
+      <dd><p>pyDDR's MP3 support comes via the SMPEG, which is
+      suboptimal, but integrates with SDL's mixer library
       easily. You have three options. The first is to try stripping
       ID3 tags from your MP3 files; you can do this with <a
       href="http://www.dakotacom.net/~donut/programs/id3ed.html">id3ed</a>
@@ -347,7 +357,56 @@
       href="http://faceprint.com/code/">mp32ogg</a> can do this
       nicely. The third possibility is to merge <a
       href="http://spacepants.org/src/pymad/">pymad</a> support into
-      pyDDR, and send us the patches.</dd>
+      pyDDR, and send us the patches.</p></dd>
+      <dt>My soft mat sucks. Can I improve it?</dt>
+      <dd><p>Yes, you can 'convert' a soft mat into a hard mat in a
+      number of ways. One popular, simple, and fast way is to buy some
+      plywood and staple-gun some vinyl hardwood-floor covering to the
+      board over your DDR mat. Another thing you can do is take your
+      soft mat apart and reenforce it with extra foam, wood, and
+      sheet metal. One of the pyDDR developers has written a <a
+      href="http://clickass.org/~tgz/pyddr/hardmat/">guide on doing
+      this</a>.</p></dd>
+      <dt>I bought this adapter from Radio Shack, and...</dt>
+      <dd><p>Take it back, now. The Radio Shack adapter works by
+      mapping the up/down/left/right button to the X and Y joystick
+      axes. This means that it can only read one of up/down or
+      left/right at the same time (that is, jumps are impossible, and
+      leaving your foot on an opposite arrow is also
+      impossible). Besides the recommended EMSUSB2 adapter, pyDDR
+      should work on anything that maps the directional arrows to
+      buttons. Make sure your adapter does that.</p></dd>
+      <dt>Why do I get weird colors or graphic artifacts?</dt>
+      <dd><p>You may be running 8 or 24 bit color. pyDDR shouldn't
+      actually run at 8 bit color at all, and it's not supported. The
+      issues with 24 bit color should be fixed; contact the developers
+      with a bug report if they're not.</p></dd>
+      <dt>Why doesn't pyDDR use DWI files?</dt>
+      <dd><p>Because it's not called Dance With Intensity. :) More
+      realistically, it's because it was easier to write a new file
+      format than support DWI's (whose documentation is lacking)
+      initially. Also, since pyDDR has no step editor yet, it was
+      necessary to have a format that was human readable.</p>
+	<p>Right now, you can use <tt>dwi2step</tt> to convert DWIs to
+      pyDDR's .step format. In a future version, pyDDR will be able to
+      read from DWI files without conversion.</p></dd>
+      <dt>While I was building SMPEG, I got undefined symbol problems.</dt>
+      <dd><p>If you're using gcc 3.2, you may need to add these
+      <kbd>-lgcc_s and -lsupc++</kbd> to the compilation
+      options.</p></dd>
+      <dt>pyDDR is way, way too slow.</dt>
+      <dd><p>There's no "answer" to this - the program needs
+      work. However, there are a couple of things you can try.</p>
+	<ul><li>Turn off backgrounds, and arrow explosions. These
+      often make the biggest difference performance-wise.</li>
+	  <li>Switch from 24 bit to 16 bit color. This greatly
+      increases the frame rate on many computers.</li>
+	  <li>Run pyDDR in fullscreen mode. It has to deal with less
+      refresh events in such a case.</li>
+	  <li>Upgrade your video card. pyDDR is very video-intensive;
+      a high-powered processor with a bad video card will perform
+      terribly.</li>
+	</ul></dd>
     </dl>
     <h1>Contacts</h1>
     <p>There are several different ways to get in touch with the pyDDR
@@ -364,7 +423,7 @@
     &lt;tgz@orotech.net&gt;</a>, or show up on the IRC channel.</p>
     <h2>IRC</h2>
     <p>If you need a bit more real-time help than email offers, pyDDR
-      has an <acronym title="Internet Relayed Chat">IRC</a> channel on
+      has an <acronym title="Internet Relayed Chat">IRC</acronym> channel on
 	the <a href="http://www.freenode.net">Freenode IRC
 	  network</a>. Surprisingly, the channel is named
 	<tt>#pyddr</tt>. The main developers are often in the channel as

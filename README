@@ -14,9 +14,9 @@
    to either teach you to dance, or simulate dancing. It works to a
    degree. =]
 
-   However, if you're just hearing about this game (or cheap), you don't
-   actually need a mat to play pyDDR (although it definitely makes it
-   more fun). You can use a keyboard or regular joystick instead.
+   However, if you're just hearing about this game (or you're broke), you
+   don't actually need a mat to play pyDDR (although it definitely makes
+   it more fun). You can use a keyboard or regular joystick instead.
 
    This document assumes you've managed to install pyDDR already. If not,
    you might want to look at the INSTALL file included with the source.
@@ -35,7 +35,7 @@
    for up/down/left/right.
 
    If you want to play a versus game, just hit start on the second
-   player's joystick (or '2' on the keyboard). The second player uses the
+   player's dance mat, or '2' on the keyboard; The second player uses the
    arrow keys.
 
    If you need to exit the game or back out of menus, just press escape.
@@ -287,7 +287,9 @@ GNU/Linux
    pyDDR (which is a modified gamecon.o from the 2.4 kernel). Once
    compiled, just run insmod ddrmat gc=0,7 (where 7 is the IRQ of your
    parallel port, which is probably 7). Note that your lp (parallel
-   printer) module cannot be loaded at the same time.
+   printer) module cannot be loaded at the same time. The normal
+   gamecon.o module may work too, although you may have to rotate your
+   pad 45 degrees.
 
    USB drivers are much easier. If your kernel has USB joystick support,
    just plug it in and it should work. If it doesn't, make sure the
@@ -344,8 +346,72 @@ lyrictag
 
                                       FAQ
 
-   The official FAQ is currently at
-   [4]http://www.icculus.org/pyddr/faq.php.
+   The old FAQ is currently at [4]http://www.icculus.org/pyddr/faq.php.
+   Eventually that will be replaced with this one.
+
+   My MP3 fails to load.
+          pyDDR's MP3 support comes via the SMPEG, which is suboptimal,
+          but integrates with SDL's mixer library easily. You have three
+          options. The first is to try stripping ID3 tags from your MP3
+          files; you can do this with [5]id3ed for regular ID3 tags, or
+          [6]v2strip for ID3v2 tags. Secondly, you can convert them to
+          the [7]Ogg Vorbis format. [8]mp32ogg can do this nicely. The
+          third possibility is to merge [9]pymad support into pyDDR, and
+          send us the patches.
+
+   My soft mat sucks. Can I improve it?
+          Yes, you can 'convert' a soft mat into a hard mat in a number
+          of ways. One popular, simple, and fast way is to buy some
+          plywood and staple-gun some vinyl hardwood-floor covering to
+          the board over your DDR mat. Another thing you can do is take
+          your soft mat apart and reenforce it with extra foam, wood, and
+          sheet metal. One of the pyDDR developers has written a
+          [10]guide on doing this.
+
+   I bought this adapter from Radio Shack, and...
+          Take it back, now. The Radio Shack adapter works by mapping the
+          up/down/left/right button to the X and Y joystick axes. This
+          means that it can only read one of up/down or left/right at the
+          same time (that is, jumps are impossible, and leaving your foot
+          on an opposite arrow is also impossible). Besides the
+          recommended EMSUSB2 adapter, pyDDR should work on anything that
+          maps the directional arrows to buttons. Make sure your adapter
+          does that.
+
+   Why do I get weird colors or graphic artifacts?
+          You may be running 8 or 24 bit color. pyDDR shouldn't actually
+          run at 8 bit color at all, and it's not supported. The issues
+          with 24 bit color should be fixed; contact the developers with
+          a bug report if they're not.
+
+   Why doesn't pyDDR use DWI files?
+          Because it's not called Dance With Intensity. :) More
+          realistically, it's because it was easier to write a new file
+          format than support DWI's (whose documentation is lacking)
+          initially. Also, since pyDDR has no step editor yet, it was
+          necessary to have a format that was human readable.
+
+          Right now, you can use dwi2step to convert DWIs to pyDDR's
+          .step format. In a future version, pyDDR will be able to read
+          from DWI files without conversion.
+
+   While I was building SMPEG, I got undefined symbol problems.
+          If you're using gcc 3.2, you may need to add these -lgcc_s and
+          -lsupc++ to the compilation options.
+
+   pyDDR is way, way too slow.
+          There's no "answer" to this - the program needs work. However,
+          there are a couple of things you can try.
+
+          + Turn off backgrounds, and arrow explosions. These often make
+            the biggest difference performance-wise.
+          + Switch from 24 bit to 16 bit color. This greatly increases
+            the frame rate on many computers.
+          + Run pyDDR in fullscreen mode. It has to deal with less
+            refresh events in such a case.
+          + Upgrade your video card. pyDDR is very video-intensive; a
+            high-powered processor with a bad video card will perform
+            terribly.
 
                                    Contacts
 
@@ -356,15 +422,15 @@ Email
 
    The primary email address is the pyddr-discuss mailing list on
    icculus.org. To subscribe, email
-   [5]pyddr-discuss-subscribe@icculus.org. You can then send email to
-   [6]pyddr-discuss@icculus.org to talk about pyDDR. If you want to see
-   about having pyDDR at a convention or show, contact [7]Brendan Becker
+   [11]pyddr-discuss-subscribe@icculus.org. You can then send email to
+   [12]pyddr-discuss@icculus.org to talk about pyDDR. If you want to see
+   about having pyDDR at a convention or show, contact [13]Brendan Becker
    <tgz@orotech.net>, or show up on the IRC channel.
 
 IRC
 
    If you need a bit more real-time help than email offers, pyDDR has an
-   IRC channel on the [8]Freenode IRC network. Surprisingly, the channel
+   IRC channel on the [14]Freenode IRC network. Surprisingly, the channel
    is named #pyddr. The main developers are often in the channel as P2E
    (Brendan) and piman (Joe). Jerub and DShadow may also be able to
    answer questions about bugs.
@@ -375,7 +441,13 @@ References
    2. http://www.buynshop.com/
    3. http://www.pygame.org/
    4. http://www.icculus.org/pyddr/faq.php
-   5. mailto:pyddr-discuss-subscribe@icculus.org
-   6. mailto:pyddr-discuss@icculus.org
-   7. mailto:tgz@orotech.net
-   8. http://www.freenode.net/
+   5. http://www.dakotacom.net/~donut/programs/id3ed.html
+   6. http://www.geocities.com/matsp888/unix/
+   7. http://www.vorbis.com/
+   8. http://faceprint.com/code/
+   9. http://spacepants.org/src/pymad/
+  10. http://clickass.org/~tgz/pyddr/hardmat/
+  11. mailto:pyddr-discuss-subscribe@icculus.org
+  12. mailto:pyddr-discuss@icculus.org
+  13. mailto:tgz@orotech.net
+  14. http://www.freenode.net/
