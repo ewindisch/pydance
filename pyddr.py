@@ -1351,38 +1351,6 @@ class HoldArrowSprite(CloneSprite):
   
 #    print "alpha ",alp
 
-def text_fadeon(screen, font, message, center, fadetime=500):
-    start = pygame.time.get_ticks()
-    ticktime = fadetime / 30
-    for i in range(31):
-      color = 8*i, 8*i, 8*i
-      text = font.render(message, 1, color, (0,0,0))
-      trect = text.get_rect()
-      trect.center = center
-      r = screen.blit(text, trect)
-      update_screen(r)
-      pygame.time.delay(ticktime*i - (pygame.time.get_ticks() - start))
-def text_fadeoff(screen, font, message, center, fadetime=300):
-    start = pygame.time.get_ticks()
-    ticktime = fadetime / 30
-    for i in range(31):
-      color = 8*(30-i), 8*(30-i), 8*(30-i)
-      text = font.render(message, 1, color, (0,0,0))
-      trect = text.get_rect()
-      trect.center = center
-      r = screen.blit(text, trect)
-      update_screen(r)
-      pygame.time.delay(ticktime*i - (pygame.time.get_ticks() - start))
-
-
-def update_screen_hardware(dirty=None):
-    pass
-def update_screen_doublebuffer(dirty=None):
-    pygame.display.flip()
-def update_screen_software(dirty=None):
-    pygame.display.update(dirty)
-update_screen = update_screen_software
-
 def SetDisplayMode(mainconfig):
   global screen
   
@@ -1403,7 +1371,7 @@ def SetDisplayMode(mainconfig):
     sys.exit()
 
 def main():
-  global screen, background, playmode
+  global screen
   print "pyDDR, by theGREENzebra (tgz@clickass.org)"
   print "Initialising.."
 
@@ -1433,13 +1401,6 @@ def main():
   pygame.display.set_caption('pyDDR')
   pygame.mouse.set_visible(0)
 
-  global update_screen
-  if (screen.get_flags()&DOUBLEBUF == DOUBLEBUF):
-      update_screen = update_screen_doublebuffer
-  elif screen.get_flags()&HWSURFACE:
-      update_screen = update_display_hardware
-  #else it defaults to software update rect
-
   pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
   try:
     pygame.mixer.music.play(4, 0.0)
@@ -1449,8 +1410,6 @@ def main():
 
   background = BlankSprite(screen.get_size())
 
-  playmode = 'SINGLE'
-  
   if debugmode:
     print "Entering debug mode. Not loading the song list."
     totalsongs = 1
@@ -1601,9 +1560,11 @@ def playSequence(numplayers, playlist):
   return judges
 
 def dance(song, players, ARROWPOS):
-  global screen,background,playmode
+  global screen
 
   songFailed = False
+
+  background = BlankSprite(screen.get_size())
 
   pygame.mixer.init()
 
