@@ -3,16 +3,15 @@
 The "Dance" Format
 ------------------
 This format is designed to supercede step, by removing extraneous
-information. pydance would use the dance format internally, and file
-parsers should normalize to it.
+information.
 
 The goals of this format are easy parsability, easy human readability,
 brevity, and disambiguity.
 
 Generic Information
 -------------------
-All strings are case-sensitive. Filenames are case sensitive. The
-directory separator is / regardless of the platform. All text
+All strings are case-sensitive. Filenames are case-sensitive. The
+directory separator is '/' regardless of the platform. All text
 is encoded in UTF-8.
 
 Enhanced Backus-Naur Form (ENBF) Specification
@@ -103,8 +102,8 @@ subtitle Crazy Mix
 artist Someone
 end
 DESCRIPTION
-This is an example song.
-It's pretty uninteresting.
+ This is an example song.
+ It's pretty uninteresting.
 end
 SINGLE
 BASIC 0
@@ -197,17 +196,17 @@ Then, until the "end" token, there are lines describing the steps. These
 may be either a command, or a set of buttons to press. The "base" is 'q',
 the quarter note, which represents one beat in the song.
 
-o   Whole note
-h   Half note
-q   Quarter note
-e   Eighth note
-w   12th note
-s   16th note
-f   24th note
-t   32nd note
-u   48th note (not recommended, here for SM conversion)
-x   64th note
-n   192nd note (not recommended, only here because DWI uses it)
+o   Whole note (4 on-beat arrows)
+h   1/2 note
+q   1/4 note
+e   1/8 note
+w   1/12 note
+s   1/16 note
+f   1/24 note
+t   1/32 note
+u   1/48 note
+x   1/64 note
+n   1/192 note
 
 After the note comes a string of buttons. All these strings should be
 the same length across game modes. Example strings might "1001" or "0030".
@@ -217,7 +216,7 @@ the same length across game modes. Example strings might "1001" or "0030".
 2   This button must be held down, but not necessarily pressed, until a 1
 3   This button must be pressed here and held down until a 1 is encounted
 
-(Note - w/ bitwise &, num & 1 => pressed here, num & 2 => hold here)
+(Note - With bitwise &, num & 1 => pressed here, and num & 2 => hold here.)
 
 Possible commands are:
 
@@ -226,7 +225,7 @@ R		  "Ready? Go!" graphics/sound, if any.
 W <Float>	  Wait this many seconds before the next event.
 S <Float>	  Stop scrolling for this many seconds before the next event.
 D <Float>	  The same as a sequence of 0 note strings for this many beats.
-L <PosInt> <LongString>	   Display some lyrics at this point
+L <PosInt> <LongString>	   Display some lyrics at this point.
 
 Failing Gracefully
 ------------------
@@ -257,13 +256,28 @@ single characters in the song section.
 
 Standard Game Modes
 -------------------
-SINGLE - Normal single player DDR, or versus mode
-COUPLE - Two players with different steps (up/down/left/right)
-DOUBLE - Doubles DDR
-6PANEL - 6 panels (upleft and upright)
+SINGLE - Normal single player with up, down, left, and right, or versus
+         mode, if no VERSUS is found.
+VERSUS - Two players, both with the same steps.
+COUPLE - Two players with different steps.
+DOUBLE - Doubles, one player on both pads.
+
+5PANEL - Diagonal directions, and the center, for one player.
+5VERSUS, 5COUPLE, 5DOUBLE - Similar to the 4 panel relationships.
+
+6PANEL, 6VERSUS, 6DOUBLE, 6COUPLE: Up left, up right, up, down, left,
+                                   and right.
+
+8PANEL, 8VERSUS, 8COUPLE, 8DOUBLE: All directions except center.
 
 Changes:
 --------
+2003.08.15
+ - Specify note types more exactly.
+ - Fix the broken DESCRIPTION in the example.
+ - Remove obsolete notes about the pydance implementation.
+ - Add more game modes to the list (especially of note is VERSUS).
+
 2003.07.30
  - Fix example of 'gap' attribute (-300 instead of 300).
  - Fix nonsensical hold arrow example.
