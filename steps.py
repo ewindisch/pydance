@@ -132,6 +132,11 @@ class Steps(object):
             if arrowadder & 1:
               self.totalarrows += 1
 
+        # Even if there are no steps in the event, we don't want to
+        # propogate the freeze.
+        else: last_event_was_freeze = False
+
+
         beat = words[0]
 
         cur_time += toRealTime(cur_bpm, beat)
