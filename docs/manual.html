@@ -423,7 +423,9 @@ lyrics.</dd>
 forget about them. Turning this off makes it forget them.</dd>
 	  <dt>Song Previews</dt>
 	  <dd>Turning this off disables the song clips that are played
-      in the song selector.</dd>
+in the song selector. Selecting "Safe" means that Ogg Vorbis files
+will be previewed, but MP3s won't. If you're having trouble with
+pydance crashing while previewing MP3s, set this to Safe.</dd>
 	  <dt>Folders</dt>
 	  <dd>If you have over 60 songs or courses, folders will be
       displayed in the song and course selector for your
@@ -825,9 +827,9 @@ href="http://bitconjurer.org/BitTorrent/">BitTorrent</a>. However,
 downloading any of these songs may be copyright infringement.</dd>
       <dt>Why does pydance crash with a segmentation fault, or
 "parachute error"?</dt>
-      <dd>You are trying to play MP3s of a type that is not
-supported by SDL_mixer; usually these are MP3s with ID3v2 metadata
-tags. Try converting your songs to Ogg, or removing the tags
+      <dd>You are trying to play MP3s of a type that is not supported
+by SDL_mixer. Change your song preview mode to "Safe". If that doesn't
+work, try converting your songs to Ogg, or removing the tags
 (instructions on how to do this are available in the <a
 href="http://icculus.org/pyddr/faq.php">official pydance FAQ</a>.</dd>
     </dl>

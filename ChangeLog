@@ -22,6 +22,9 @@ Legend:
   (Thanks to Pavel).
 + A comprehensive new manual is available in docs/manual.html!
 * Movies work again (thanks to Jon Åslund).
+* A new "safe" preview mode that won't preview MP3s; this seems to stop
+  most MP3-related crashes on Windows and SMP Unix systems. This is now
+  the default mode on Windows.
 ! Start + Select now exits to the grading screen always, by popular demand.
 ! .step support removed.
 ! All your records will be deleted upon running this.

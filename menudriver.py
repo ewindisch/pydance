@@ -250,7 +250,8 @@ def do(screen, songdata):
         ),
        ("Interface Options",
         ["Save Input", onoff_opt, ('saveinput',)],
-        ["Song Previews", onoff_opt, ('previewmusic',)],
+        ["Song Previews", tuple_opt, ('previewmusic',
+                                      [(0, "Off"), (1, "On"), (2, "Safe")])],
         ["Folders", onoff_opt, ("folders",)],
         ["Timer Display", onoff_opt, ('fpsdisplay',)],
         ["Back", None, None]

@@ -119,6 +119,11 @@ class SongPreview(object):
  
   def preview(self, song):
     if mainconfig["previewmusic"] and not song.isfolder:
+      if (song.info["filename"].lower().endswith("mp3") and
+          mainconfig["previewmusic"] == 2):
+        music.stop()
+        self._playing = False
+        return
       if len(song.info["preview"]) == 2:
         # A DWI/SM/dance-style preview, an offset in the song and a length
         # to play starting at the offset.
@@ -139,6 +144,7 @@ class SongPreview(object):
     elif time < self._start_time: pass
     elif not self._playing:
       try:
+        music.stop()
         music.load(self._filename)
         music.set_volume(0.01) # 0.0 stops pygame.mixer.music.
         music.play(0, self._start)
