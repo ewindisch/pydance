@@ -145,6 +145,13 @@ class Pad(object):
       print "No known joysticks found! If you want to use yours,"
       print "you'll have to map its button manually once to use it."
 
+  def reinit_pads(self):
+    pygame.joystick.init()
+    try: totaljoy = pygame.joystick.get_count()
+    except: totaljoy = 0
+    print totaljoy, "joystick(s) found."
+    for i in range(totaljoy): pygame.joystick.Joystick(i).init()
+
   def add_event(self, device, key, pid, event):
     self.events[(device, key)] = (pid, event)
     self.states[(pid, event)] = False
@@ -234,6 +241,7 @@ class PadConfig(object):
 
   def __init__(self, screen):
     self.screen = screen
+    pad.reinit_pads()
     clock = pygame.time.Clock()
     self.loc = [0, 0]
     self.width = [4, 11]

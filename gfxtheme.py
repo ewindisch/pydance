@@ -51,14 +51,16 @@ class ThemeFile(object):
       return False
     else:
       for dir in game.dirs:
+        found = False
         for dirset in ThemeFile.rotate:
           if dir in dirset:
             for d in dirset:
               possible = "arr_%s_%s_0.png" % ("%s", d)
               if (os.path.exists(os.path.join(filename, possible % "c")) and
                   os.path.exists(os.path.join(filename, possible % "n"))):
-                return True
-    return False
+                found = True
+        if not found: return False
+    return True
 
   is_theme = classmethod(is_theme)
 
@@ -74,13 +76,15 @@ class ThemeFile(object):
       zip.close()
       if "is-theme" not in files: return False
       for dir in game.dirs:
+        found = False
         for dirset in ThemeFile.rotate:
           if dir in dirset:
             for d in dirset:
               possible = "arr_%s_%s_0.png" % ("%s", d)
               if  (possible % "c" in files and possible % "n" in files):
-                return True
-      return False
+                found = True
+        if not found: return False
+      return True
 
   is_zip_theme = classmethod(is_zip_theme)
 

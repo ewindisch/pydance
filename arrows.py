@@ -202,7 +202,7 @@ class HoldArrowSprite(AbstractArrow):
     self.broken = True
 
   def update(self, curtime, curbpm, beat, lbct):
-    AbstractArrow.update(self, curtime, curbpm, beat, lbct)
+    AbstractArrow.update(self, curtime, curbpm, 0, lbct)
 
     if beat > self.endbeat2:
       self.kill()
