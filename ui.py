@@ -32,6 +32,7 @@ key_defaults = {
   100 * K_PAGEDOWN: PGDN,
   100 * K_INSERT: MARK,
   100 * K_DELETE: UNMARK,
+  100 * K_F11: FULLSCREEN,
   }
 
 # This class wraps pad and maps pad events to UI events.
