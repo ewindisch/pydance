@@ -93,8 +93,12 @@ class SongItemDisplay(object):
     if self.banner == None:
       if info["banner"]:
         # A postcondition of file parsers is that this is a valid filename
+        banner = pygame
         banner = pygame.image.load(info["banner"]).convert()
-        if banner.get_rect().size[0] != banner.get_rect().size[1]:
+        if banner.get_rect().size == (300, 200): # KSF-style banner
+          self.banner = pygame.transform.rotozoom(banner, 0, 0.4).convert()
+          self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
+        elif banner.get_rect().size[0] != banner.get_rect().size[1]:
           self.banner = pygame.transform.scale(banner, BANNER_SIZE)
         else:
           # One of the older banners that we need to rotate
