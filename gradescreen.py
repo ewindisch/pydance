@@ -15,7 +15,8 @@ class GradingScreen:
       grade = judge.grade()
       totalsteps = (judge.marvelous + judge.perfect + judge.great +
                     judge.ok + judge.boo + judge.miss)
-      steps = (grade, judge.diff, totalsteps, judge.bestcombo, judge.combo)
+      steps = (grade, judge.diff, totalsteps,
+               judge.combos.bestcombo, judge.combos.combo)
 
       numholds = judge.numholds()
       goodholds = numholds - judge.badholds
@@ -118,7 +119,7 @@ class GradingScreen:
 
       # Combo
       for j in range(4):
-        text = "%d (%d%%)" % (judge.bestcombo, judge.bestcombo * 100 / totalsteps)
+        text = "%d (%d%%)" % (judge.combos.bestcombo, judge.combos.bestcombo * 100 / totalsteps)
         gradetext = fontfx.shadefade(text,28,j,(FONTS[28].size(text)[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()

@@ -46,7 +46,7 @@ class GameType:
 GAMES = {
   "SINGLE": GameType(),
   "COUPLE": GameType(couple = True),
-  "DOUBLE": GameType(couple = True, double = True),
+  "DOUBLE": GameType(couple = True, double = True, players = 1),
   "6PANEL": GameType(players = 1, dirs = ["l", "k", "d", "u", "z", "r"]),
   "8PANEL": GameType(players = 1, dirs = ["w", "l", "k", "d", "u", "z", "r", "g"]),
   }

@@ -193,8 +193,8 @@ def play(screen, playlist, configs, songconf, playmode):
     songdata = steps.SongData(current_song, songconf)
 
     for pid in range(len(players)):
-      players[pid].set_song(steps.Steps(current_song, diff[pid], players[pid],
-                                        songdata.lyricdisplay, playmode))
+      players[pid].set_song(current_song, diff[pid], songdata.lyricdisplay,
+                            playmode)
 
     print "Playing", songfn
     print songdata.title, "by", songdata.artist
@@ -203,7 +203,7 @@ def play(screen, playlist, configs, songconf, playmode):
       break # Failed
     first = False
 
-  judges = [player.judge for player in players]
+  judges = [player.get_judge() for player in players]
 
   if mainconfig['grading']:
     grade = gradescreen.GradingScreen(judges)

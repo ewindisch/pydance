@@ -3,7 +3,7 @@ from util import toRealTime
 from gfxtheme import GFXTheme
 from judge import Judge
 
-import fontfx, colors
+import fontfx, colors, steps
 
 # Display the score overlaying the song difficulty
 class ScoringDisp(pygame.sprite.Sprite):
@@ -64,8 +64,6 @@ class AbstractLifeBar(pygame.sprite.Sprite):
     pass
       
   def update(self, judges):
-    if self.failed: return False
-    
     if self.life <= 0:
       self.failed = 1
       judges.failed_out = True
@@ -73,6 +71,8 @@ class AbstractLifeBar(pygame.sprite.Sprite):
     elif self.life > self.maxlife:
       self.life = self.maxlife
         
+    if self.failed: return False
+    
     if self.life == self.oldlife: return False
 
     self.oldlife = self.life
@@ -305,7 +305,8 @@ class ComboDisp(pygame.sprite.Sprite):
     pygame.sprite.Sprite.__init__(self,)
     self.sticky = mainconfig['stickycombo']
     self.lowcombo = mainconfig['lowestcombo']
-
+    self.combo = 0
+    self.bestcombo = 0
     self.centerx = game.sprite_center + (game.player_offset * playernum)
     self.top = 320
     
@@ -329,9 +330,15 @@ class ComboDisp(pygame.sprite.Sprite):
     self.space = pygame.surface.Surface((0,0)) #make a blank image
     self.image = self.space
 
-  def update(self, xcombo, steptimediff):
+  def broke(self):
+    if self.combo > self.bestcombo: self.bestcombo = self.combo
+    self.combo = 0
+
+  def update(self, steptimediff):
+    if self.combo > self.bestcombo: self.bestcombo = self.combo
+
     if steptimediff < 0.36 or self.sticky:
-      self.drawcount = xcombo
+      self.drawcount = self.combo
       drawsize = min(int(steptimediff*50), len(self.words)-1)
       if drawsize < 0: drawsize = 0
     else:
@@ -738,19 +745,20 @@ class Player:
     self.holdtext = None
     self.game = game
 
-  def set_song(self, steps):
-    self.steps = steps
+  def set_song(self, song, diff, lyrics, playmode):
+    self.steps = steps.Steps(song, diff, self, lyrics, playmode)
     arr, arrfx = self.theme.toparrows(self.steps.bpm, self.top, self.pid)
     self.holdtext = HoldJudgeDisp(self.pid, self, self.game)
     self.toparr = arr
     self.toparrfx = arrfx
     self.judging_list = []
-    self.difficulty = steps.difficulty
-    self.score.set_text(steps.difficulty)
-    
+    self.difficulty = diff
+    self.score.set_text(diff)
+
     if self.steps.holdref: holds = len(self.steps.holdref)
     else: holds = 0
     j = Judge(self.steps.bpm, holds,
+              self.combos,
               self.steps.feet,
               self.steps.totalarrows,
               self.difficulty,
@@ -758,6 +766,9 @@ class Player:
     self.lifebar.next_song()
     if self.judge != None: j.munch(self.judge)
     self.judge = j
+
+  def get_judge(self):
+    return self.judge
 
   def start_song(self):
     self.steps.play()
@@ -778,13 +789,17 @@ class Player:
                           self.fx_group, self.text_group]
 
   def get_next_events(self, song):
-    evt = self.steps.get_events()
+    self._get_next_events(song, self.steps, self.judge, self.theme)
+    self.fx_data = []
+
+  def _get_next_events(self, song, steps, judge, theme):
+    evt = steps.get_events()
     if evt is not None:
       events, nevents, time, bpm = evt
       for ev in events:
         if ev.feet:
           for (dir, num) in zip(self.game.dirs, ev.feet):
-            if num & 1: self.judge.handle_arrow(dir, ev.when)
+            if num & 1: judge.handle_arrow(dir, ev.when)
 
       newsprites = []
       for ev in nevents:
@@ -792,32 +807,29 @@ class Player:
           for (dir, num) in zip(self.game.dirs, ev.feet):
             dirstr = dir + repr(int(ev.color) % self.colortype)
             if num & 1 and not (num & 2 and self.holds):
-              ns = ArrowSprite(self.theme.arrows[dirstr], time,
-                               ev.when, self, song)
+              ns = ArrowSprite(theme.arrows[dirstr], time, ev.when, self, song)
               newsprites.append(ns)
             elif num & 2 and self.holds:
-              holdindex = self.steps.holdref.index((self.game.dirs.index(dir),
-                                                    ev.when))
-              ns = HoldArrowSprite(self.theme.arrows[dirstr], time,
-                                   self.steps.holdinfo[holdindex], self, song)
+              holdindex = steps.holdref.index((self.game.dirs.index(dir),
+                                               ev.when))
+              ns = HoldArrowSprite(theme.arrows[dirstr], time,
+                                   steps.holdinfo[holdindex], self, song)
               newsprites.append(ns)
       self.arrow_group.add(newsprites)
 
-    self.fx_data = []
-
-  def combo_update(self, curtime):
-    self.combos.update(self.judge.combo, curtime - self.judge.steppedtime)
-    self.score.update(self.judge.score)
+  def csl_update(self, curtime, judge, holdtext):
+    self.combos.update(curtime - judge.steppedtime)
+    self.score.update(judge.score)
     i = 0
     for j in self.judging_list:
-      j.update(curtime - self.judge.steppedtime, self.judge.recentsteps[i])
+      j.update(curtime - judge.steppedtime, judge.recentsteps[i])
       i += 1
-    self.lifebar.update(self.judge)
-    self.holdtext.update(curtime)
+    self.lifebar.update(judge)
+    holdtext.update(curtime)
     
-  def check_sprites(self, curtime):
-    self.judge.expire_arrows(curtime)
-    for text, dir, time in self.fx_data:
+  def check_sprites(self, curtime, steps, fx_data, toparr, toparrfx, judge):
+    judge.expire_arrows(curtime)
+    for text, dir, time in fx_data:
       if (text == "MARVELOUS" or text == "PERFECT" or text == "GREAT"):
         for spr in self.arrow_group.sprites():
           try:     # kill normal arrowsprites
@@ -826,13 +838,13 @@ class Player:
           try:     # unbreak hold arrows.
             if (spr.timef1 == time) and (spr.dir == dir): spr.broken = 0
           except: pass
-        self.toparrfx[dir].stepped(curtime, text)
+          toparrfx[dir].stepped(curtime, text)
 
     for spr in self.arrow_group.sprites():
-      spr.update(curtime, self.judge.bpm, self.steps.lastbpmchangetime)
+      spr.update(curtime, judge.bpm, steps.lastbpmchangetime)
     for d in self.game.dirs:
-      self.toparr[d].update(curtime + self.steps.offset * 1000)
-      self.toparrfx[d].update(curtime, self.judge.combo)
+      self.toparr[d].update(curtime + steps.offset * 1000)
+      self.toparrfx[d].update(curtime, judge.combos.combo)
 
   def should_hold(self, steps, direction, curtime):
     l = steps.holdinfo
@@ -902,8 +914,9 @@ class Player:
                      self.holdtext)
     self.check_bpm_change(time, self.steps, self.judge, self.toparr,
                           self.toparrfx)
-    self.check_sprites(time)
-    self.combo_update(time)
+    self.check_sprites(time, self.steps, self.fx_data, self.toparr,
+                       self.toparrfx, self.judge)
+    self.csl_update(time, self.judge, self.holdtext)
 
     rects = []
     for g in self.sprite_groups: rects.extend(g.draw(screen))

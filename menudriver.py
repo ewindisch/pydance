@@ -129,6 +129,7 @@ def do(screen, songdata):
   m = (("Play Game",
         ["Single/Versus", {E_START: wrap_ctr}, (SongSelect, songdata + ("SINGLE",))],
         ["Couple", {E_START: wrap_ctr}, (SongSelect, songdata + ("COUPLE",))],
+        ["Double", {E_START: wrap_ctr}, (SongSelect, songdata + ("DOUBLE",))],
         ["6 Panel", {E_START: wrap_ctr}, (SongSelect, songdata + ("6PANEL",))],
         ["8 Panel", {E_START: wrap_ctr}, (SongSelect, songdata + ("8PANEL",))],
         ["Endless", {E_START: wrap_ctr}, (Endless, songdata + ("SINGLE",))],
