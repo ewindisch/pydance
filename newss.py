@@ -63,10 +63,11 @@ def make_box(color = [111, 255, 148], size = [130, 40]):
     r.left += 1
   return s
 
-class SongItemDisplay(pygame.sprite.Sprite):
+class SongItemDisplay(object):
   no_banner = make_box(size = [256, 80])
-  no_banner.blit(pygame.image.load(NO_BANNER), [0, 0])
-  no_banner.set_colorkey(no_banner.get_at([4, 4]))
+  tmp = pygame.image.load(NO_BANNER)
+  tmp.set_colorkey(tmp.get_at([0, 0]))
+  no_banner.blit(tmp, [4, 4])
 
   def __init__(self, song): # A SongItem object
     self._song = song
@@ -77,31 +78,34 @@ class SongItemDisplay(pygame.sprite.Sprite):
     self.banner = None
     self.menuimage = None
     self.isfolder = False
-    self.isfolder = {}
+    self.folder = {}
+    self.banner = None
+    self.clip = None
 
   def render(self):
+    if self.banner: return
+    
     if self._song.info["banner"]:
       banner = pygame.image.load(self._song.info["banner"])
       size = banner.get_rect().size
       if size <= (100, 100): # Parapara-style
-        self._banner = banner
+        self.banner = banner
       elif size == (177, 135): # KSF-style 1
-        self._banner = banner
+        self.banner = banner
       elif size == (300, 200): # KSF-style 2
         banner = banner.convert()
         banner.set_colorkey(banner.get_at([0, 0]))
-        self._banner = banner
+        self.banner = banner
       elif abs(size[0] - size[1]) < 3: # "Square", need to rotate.
         banner = banner.convert()
         banner.set_colorkey(banner.get_at([0, 0]), RLEACCEL)
-        self._banner = pygame.transform.rotozoom(banner, -45, 1.0)
-        self._clip = [51, 20, 256, 80]
+        self.banner = pygame.transform.rotozoom(banner, -45, 1.0)
+        self.clip = [51, 50, 256, 80]
       else: # 256x80, standard banner, I hope.
         banner = pygame.transform.scale(banner, [256, 80])
-        self._banner = make_box([0, 0, 0], banner.get_size())
-        self._banner.blit(banner, [4, 4])
-    else: self._banner = SongItemDisplay.no_banner
-    self._render()
+        self.banner = make_box([0, 0, 0], banner.get_size())
+        self.banner.blit(banner, [4, 4])
+    else: self.banner = SongItemDisplay.no_banner
 
 # Crossfading help text along the top of the screen.
 class HelpText(pygame.sprite.Sprite):
@@ -243,18 +247,20 @@ class BannerDisplay(pygame.sprite.Sprite):
     self.update(0)
 
   def set_song(self, song):
+    song.render()
     self._title = song.info["title"]
     self._subtitle = song.info["subtitle"]
     self._artist = song.info["artist"]
-    self._clip = None
+    self._clip = song.clip
+    self._banner = song.banner
+    self._render()
 
   def _render(self):
     self.image = pygame.Surface(self._box.get_size(), SRCALPHA, 32)
     self.image.blit(self._box, [0, 0])
-
     self.image.set_clip(self._clip)
     r_b = self._banner.get_rect()
-    r_b.center = (self.image.get_rect().size[0] / 2, 80)
+    r_b.center = (self.image.get_rect().size[0] / 2, 100)
     self.image.blit(self._banner, r_b)
     self.image.set_clip(None)
     
