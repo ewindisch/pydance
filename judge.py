@@ -6,6 +6,9 @@ import random
 
 class Judge(object):
   def __init__ (self, bpm, holds, combos, score, display, feet, stepcount, diff, lifebar):
+
+    if stepcount == 0: stepcount = 1 # Don't crash on empty songs.
+
     self.steps = {}
     self.combos = combos
     self.display = display
