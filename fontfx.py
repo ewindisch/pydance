@@ -70,49 +70,54 @@ def shadefade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
 class TextZoomer:
   def __init__(self,text,r,g,b):
     self.zf = pygame.font.Font(None,60)
-    self.zoomsurface = pygame.surface.Surface((640,64))
     self.tempsurface = pygame.surface.Surface((640,64))
-    self.r = r
-    self.g = g
-    self.b = b
+    self.r = random.randint(64, r)
+    self.g = random.randint(64, g)
+    self.b = random.randint(64, b)
+    self.cycles_left = 0
 
-    self.zoomtext = text
     self.reset()
-
-  def changetext(self,text):
-    if text:
-      self.zoomtext = text
-      self.textrendered = 0
+    self.zoomtext = text
+    self.textrendered = 0
 
   def reset(self):
     self.mrangle = 0
     self.textrendered = 0
+    self.cycles_left = 0
 
   def iterate(self):
-    colortochange = random.randint(0,333) % 4
-    colordiff = (random.random()*8) - 4
-    if colortochange == 0:
-      if 255 > (self.r + colordiff) > 0:
-        self.r += colordiff
-    if colortochange == 1:
-      if 255 > (self.g + colordiff) > 0:
-        self.g += colordiff
-    if colortochange == 2:
-      if 255 > (self.b + colordiff) > 0:
-        self.b += colordiff
+    if self.cycles_left == 0:
+      self.cycles_left = random.randint(20, 50)
+      self.colortochange = random.randint(0,3)
+      self.colordiff = random.randint(-2, 2)
 
-    self.mrangle += 1
+    if self.colortochange == 0:
+      if self.r == 64 or self.r == 128: self.colordiff *= -1
+      self.r += self.colordiff
+      self.r = min(128, max(self.r, 64))
+    elif self.colortochange == 1:
+      if self.g == 64 or self.g == 128: self.colordiff *= -1
+      self.g += self.colordiff
+      self.g = min(128, max(self.g, 64))
+    elif self.colortochange == 2:
+      if self.b == 64 or self.b == 128: self.colordiff *= -1
+      self.b += self.colordiff
+      self.b = min(128, max(self.b, 64))
 
-    self.zoomsurface = pygame.transform.scale(self.tempsurface,(656,72))
-    self.zoomsurface = pygame.transform.rotate(self.zoomsurface,self.mrangle)
-    self.zoomsurface.set_alpha(48)
-    zsrect = self.zoomsurface.get_rect()
+    opposite = (127 + self.r, 127 + self.g, 127 + self.b)
+
+    self.mrangle += 2
+    self.cycles_left -= 1
+
+    zoomsurface = pygame.transform.scale(self.tempsurface,(656,72))
+    zoomsurface = pygame.transform.rotate(self.tempsurface,self.mrangle)
+    zoomsurface.set_alpha(120)
+    zsrect = zoomsurface.get_rect()
     zsrect.centerx = 320
     zsrect.centery = 32
-    self.tempsurface.blit(self.zoomsurface,zsrect)
-    self.textrendered = 0
-    if not self.textrendered:
-      self.text = self.zf.render(self.zoomtext,1,(self.r,self.g,self.b))
-      self.trect = self.text.get_rect()
-      self.textrendered = 1
-    self.tempsurface.blit(self.text,(320-(self.trect.size[0]/2),32-(self.trect.size[1]/2)))
+    self.tempsurface.fill(opposite)
+    self.tempsurface.blit(zoomsurface, zsrect)
+    text = self.zf.render(self.zoomtext,1,(self.r,self.g,self.b))
+    trect = text.get_rect()
+    self.tempsurface.blit(text, (320-(trect.size[0]/2),
+                                      32-(trect.size[1]/2)))

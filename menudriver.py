@@ -8,8 +8,8 @@ from gfxtheme import GFXTheme
 
 # A simple on/off setting, 0 or 1
 def get_onoff(name):
-  if mainconfig[name]: return None, "on", None
-  else: return None, "off", None
+  if mainconfig[name]: return None, "on"
+  else: return None, "off"
 
 def switch_onoff(name):
   mainconfig[name] ^= 1
@@ -17,7 +17,7 @@ def switch_onoff(name):
 
 # Rotate through a list of option strings
 def get_rotate(name, list):
-  return None, mainconfig[name], None
+  return None, mainconfig[name]
 
 def switch_rotate(name, list):
   try:
@@ -35,7 +35,7 @@ def switch_rotate_back(name, list):
 
 # Rotate through a list of option strings, but use the index as the value.
 def get_rotate_index(name, list):
-  return None, list[mainconfig[name]], None
+  return None, list[mainconfig[name]]
 
 def switch_rotate_index(name, list):
   mainconfig[name] = (mainconfig[name] + 1) % len(list)
@@ -45,52 +45,27 @@ def switch_rotate_index_back(name, list):
   mainconfig[name] = (mainconfig[name] - 1) % len(list)
   return get_rotate_index(name, list)
 
-# Lyric color switching, does fun things
-def get_color_text(name, colors):
-  val = mainconfig[name]
-  for color in colors:
-    if color[0] == val:
-      return None, color[0], color[1]
-  return None, "unknown", (255, 255, 255)
-
-def switch_color_text(name, colors):
-  is_next = False
-  val = mainconfig[name]
-  for color in colors:
-    if color[0] == val:
-      is_next = True
-    elif is_next:
-      mainconfig[name] = color[0]
-      return None, color[0], color[1]
-  mainconfig[name] = colors[0][0]
-  return None, colors[0][0], colors[0][1]
-
 # Write out the config file
 def config_write(path):
   mainconfig.write(path)
-  return None, None, None
+  return None, None
   
 def fullscreen_toggle(dummy):
   mainconfig["fullscreen"] ^= 1
   pygame.display.toggle_fullscreen()
-  return None, None, None
+  return None, None
 
 def do(screen, songselect, songdata):
 
-  onoff_opt = { E_START: switch_onoff, "initial": get_onoff }
+  onoff_opt = { E_START: switch_onoff, E_CREATE: get_onoff }
   rotate_opt = { E_START: switch_rotate,
                  E_LEFT: switch_rotate_back,
                  E_RIGHT: switch_rotate,
-                 "initial": get_rotate }
+                 E_CREATE: get_rotate }
   rotate_index_opt = { E_START: switch_rotate_index,
                        E_LEFT: switch_rotate_index_back,
                        E_RIGHT: switch_rotate_index,
-                       "initial": get_rotate_index }
-
-  color_opt = { E_START: switch_color_text,
-                E_LEFT: switch_color_text,
-                E_RIGHT: switch_color_text,
-                "initial": get_color_text }
+                       E_CREATE: get_rotate_index }
 
   m = (["Play Game", {E_START: songselect}, songdata],
        ("Game Options",
@@ -117,8 +92,8 @@ def do(screen, songselect, songdata):
          ('explodestyle', ('none', 'rotate', 'scale', 'rotate & scale'))],
         ["Backgrounds", onoff_opt, ('showbackground',)],
         ["Lyrics", onoff_opt, ("showlyrics",)],
-        ["Main Lyrics", color_opt, ("lyriccolor", lyric_colors)],
-        ["Other Lyrics", color_opt, ("transcolor", lyric_colors)],
+        ["Main Lyrics", rotate_opt, ("lyriccolor", lyric_colors.keys())],
+        ["Other Lyrics", rotate_opt, ("transcolor", lyric_colors.keys())],
         ["LPS Counter", onoff_opt, ('fpsdisplay',)],
         ["Back", None, None]
         ),
@@ -131,5 +106,5 @@ def do(screen, songselect, songdata):
        ["Quit", None, None]
        )
 
-  me = menus.Menu("Main Menu", m)
-  me.display(screen)
+  me = menus.Menu("Main Menu", m, screen)
+  me.display()

@@ -1,19 +1,14 @@
 import pygame
 from constants import *
 from fontfx import TextZoomer
+from spritelib import BGimage, SimpleSprite
 
-DARK_GRAY = (244, 244, 244)
-BUTTON_SIZE = (192, 40)
+LIGHT_GRAY = (128, 128, 128)
+BUTTON_SIZE = (192, 48)
 
-# Default button style - gray gradient with a light outline
-button_bg = pygame.surface.Surface(BUTTON_SIZE)
-for i in range(192):
-  pygame.draw.line(button_bg, (192-i, 192-i, 192-i), (i, 0), (i, 47))
-  pygame.draw.line(button_bg, (i, i, i), (i, 0), (i, 1))
-  pygame.draw.line(button_bg, (i, i, i), (i, 46), (i, 47))
-for i in range(2):
-  pygame.draw.line(button_bg, (192, 192, 192), (190+i, 0), (190+i, 47))
-  pygame.draw.line(button_bg, (0, 0, 0), (i, 0), (i, 47))
+
+
+button_bg = pygame.image.load(os.path.join(image_path, "button.png"))
 
 # Commonly used fonts
 pygame.font.init()
@@ -34,11 +29,11 @@ class MenuItem:
     self.callbacks = callbacks
     self.args = args
     self.bg = button_bg
-    self.rgb = DARK_GRAY
+    self.rgb = LIGHT_GRAY
     self.subtext = None
+    self.alpha = 96
     self.text = text
     self.render()
-    self.activate("initial")
 
   # Call an appropriate callback function, for the event given.
   # The function can return up to three arguments - the new
@@ -46,15 +41,22 @@ class MenuItem:
   # the RGB value of the text.
 
   def activate(self, ev): # Note - event ID, not an event tuple
-    if self.callbacks == None:
+    if ev == E_SELECT:
+      self.rgb = WHITE
+      self.alpha = 255
+      self.render()
+    elif ev == E_UNSELECT:
+      self.rgb = LIGHT_GRAY
+      self.alpha = 96
+      self.render()
+    elif self.callbacks == None:
       if ev == E_START:
         return E_QUIT # This is a back button
       else: return ev # Shouldn't happen
-    if callable(self.callbacks.get(ev)):
-      text, subtext, rgb = self.callbacks[ev](*self.args)
+    elif callable(self.callbacks.get(ev)):
+      text, subtext = self.callbacks[ev](*self.args)
       if text: self.text = text
       if subtext: self.subtext = subtext
-      if rgb: self.rgb = rgb
       self.render()
       return ev
     else: return ev
@@ -71,43 +73,67 @@ class MenuItem:
       subtext = font20.render(self.subtext, 1, self.rgb)
       self.image.blit(text, (96 - (font26.size(self.text)[0] / 2), 4))
       self.image.blit(subtext, (96 - (font20.size(self.subtext)[0] / 2), 22))
+    self.image.set_alpha(self.alpha)
 
 class Menu:
+
+  bgimage = None
+  click_sound = pygame.mixer.Sound(os.path.join(sound_path, "clicked.wav"))
+  move_sound = pygame.mixer.Sound(os.path.join(sound_path, "move.wav"))
+  move_sound.set_volume(0.5)
 
   # Menus are defined based on a tree of tuples (submenus) ending
   # in a list (the final item). The first item of the tuple is
   # a string of text which gets displayed.
-  def __init__(self, name, itemlist):
+  def __init__(self, name, itemlist, screen):
     self.items = []
     self.text = name
-    self.rgb = DARK_GRAY
+    self.rgb = LIGHT_GRAY
     self.bg = button_bg
+    self.alpha = 128
+    self.screen = screen
     self.render()
     for i in itemlist:
       if type(i) == type([]): # Menuitems are lists
         self.items.append(MenuItem(i[0], i[1], i[2]))
-        self.items[-1].activate("initial")
+        self.items[-1].activate(E_CREATE)
       elif type(i) == type((0,0)): # New submenus are tuples
-        self.items.append(Menu(i[0], i[1:]))
+        self.items.append(Menu(i[0], i[1:], screen))
+
+    if Menu.bgimage == None: # First time we make a menu, do this
+      Menu.bgimage = BGimage(os.path.join(image_path, "menu-bg.png"))
 
   # Menu rendering is tons easier, since it never changes.
   def render(self):
-    self.image = pygame.surface.Surface((192, 40))
+    self.image = pygame.surface.Surface((192, 48))
     self.image.blit(self.bg, (0,0))
     text = font32.render(self.text, 1, self.rgb)
     self.image.blit(text, (96 - (font32.size(self.text)[0] / 2), 8))
+    self.image.set_alpha(self.alpha)
+
+  def activate(self, ev):
+    if ev == E_START:
+      self.display()
+    elif ev == E_SELECT:
+      self.rgb = WHITE
+      self.alpha = 255
+      self.render()
+    elif ev == E_UNSELECT:
+      self.rgb = LIGHT_GRAY
+      self.alpha = 96
+      self.render()
 
   # Render and start navigating the menu.
   # Postcondition: Screen buffer is in an unknown state!
-  def display(self, screen):
-    screen.fill((0,0,0))
-    top_offset = 80
+  def display(self):
+    screen = self.screen
+    screen.blit(Menu.bgimage.image, (0, 0))
+    top_offset = 100
     curitem = 0
     topitem = 0
-    toprotater = TextZoomer(self.text, 127, 63, 255)
-    zoom = 8
-    zoomdelta = - 1
-    time_to_zoom = 0
+    toprotater = TextZoomer(self.text, 128, 96, 64)
+
+    self.items[curitem].activate(E_SELECT)
 
     ev = E_PASS
     while ev != E_QUIT:
@@ -117,57 +143,42 @@ class Menu:
 
       # Scroll down through the menu
       elif ev == E_DOWN:
-        try: ev = self.items[curitem].activate("deselect")
-        except AttributeError: pass
+        Menu.move_sound.play()
+        ev = self.items[curitem].activate(E_UNSELECT)
         curitem += 1
         if curitem == len(self.items): # Loop at the bottom
           curitem = 0
           topitem = 0
-        elif curitem >= topitem + 7: # Advance the menu if necessary
+        elif curitem >= topitem + 6: # Advance the menu if necessary
           topitem += 1
-        try: ev = self.items[curitem].activate("select")
-        except AttributeError: pass
+        ev = self.items[curitem].activate(E_SELECT)
 
       # Same as above, but up
       elif ev == E_UP:
-        try: ev = self.items[curitem].activate("deselect")
-        except AttributeError: pass
+        Menu.move_sound.play()
+        ev = self.items[curitem].activate(E_UNSELECT)
         curitem -= 1
         if curitem < 0:
           curitem = len(self.items) - 1
-          topitem = max(0, curitem - 6)
+          topitem = max(0, curitem - 5)
         elif curitem < topitem:
           topitem = curitem
-        try: ev = self.items[curitem].activate("select")
-        except AttributeError: pass
+        ev = self.items[curitem].activate(E_SELECT)
 
       # Otherwise, if the event actually happened, pass it on to the button.
       elif ev != E_PASS and ev != E_QUIT:
-        try:
-          ev = self.items[curitem].activate(ev)
-        except AttributeError:
-          if ev == E_START:
-            # Except if we're not a button and the event was START, go to
-            # the new menu.
-            self.items[curitem].display(screen)
-            screen.fill((0,0,0)) # Reset buffer.
+        if ev == E_START: Menu.click_sound.play()
+        ev = self.items[curitem].activate(ev)
 
-      zoom += zoomdelta
-      if zoom > 12 or zoom < 0: zoomdelta *= -1
-
-      # Draw the buttons to the screen
-      screen.fill((0,0,0))
       toprotater.iterate()
+      screen.blit(Menu.bgimage.image, (0, 0))
       screen.blit(toprotater.tempsurface, (0,0))
-      for i in range(7):
+      for i in range(6):
         if i + topitem < len(self.items):
-          img = self.items[topitem + i].image
-          if i + topitem == curitem:
-            screen.blit(pygame.transform.scale(img, (200-zoom, 48-zoom/2)),
-                        (220 + zoom/2, 76 + zoom/4 + i*48))
-          else:
-            screen.blit(img, (224, top_offset+i*48))
+          screen.blit(self.items[i + topitem].image, (364, top_offset+i*56))
 
       pygame.display.flip()
       
-      pygame.time.wait(20)
+      pygame.time.wait(30)
+
+    if ev == E_START: Menu.click_sound.play()

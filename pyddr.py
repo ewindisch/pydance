@@ -100,22 +100,6 @@ def toRealTime(bpm,steps):
   else:
     return steps*0.25*60.0/146
 
-class BGimage(pygame.sprite.Sprite):
-  def __init__ (self, filename):
-    pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
-    self.image = pygame.transform.scale(pygame.image.load(filename),(640,480)).convert()
-    self.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
-    self.rect = self.image.get_rect()
-    self.rect.top = 0
-    self.rect.left = 0
-    self.needsupdate = 0
-
-  def update(self):
-    if self.needsupdate:
-      self.rect = self.image.get_rect()
-      self.rect.top = 0
-      self.rect.left = 0
-
 class BGmovie(pygame.sprite.Sprite):
   def __init__ (self, filename):
     pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
@@ -1305,9 +1289,9 @@ class Song:
     self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
     self.mixerclock = mainconfig['mixerclock']
     self.lyricdisplay = LyricDispKludge(400,
-                                        color_hash[mainconfig['lyriccolor']])
+                                        lyric_colors[mainconfig['lyriccolor']])
     self.transdisplay = LyricDispKludge(428,
-                                        color_hash[mainconfig['transcolor']])
+                                        lyric_colors[mainconfig['transcolor']])
     little = mainconfig["little"]
     coloringmod = 0
     self.totarrows = {}
@@ -2484,7 +2468,7 @@ def songSelect(songs, players):
       pygame.mixer.music.play(4, 0.0)
       pygame.mixer.music.set_volume(1.0)
       fooblah = currentSong.fooblah
-      return None, None, None
+      return None, None
     elif ev < 0:                                  pass # key up
     elif ev[1] == E_PASS:                            pass
     elif ev[1] == E_FULLSCREEN:

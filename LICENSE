@@ -5,6 +5,11 @@ If you didn't notice, my new license is the "MIT" or X11 license. I would
 still very much like to know if you use pyDDR in any constructive way or 
 put it on any sort of game disc, but it's not required. 
 
+The file "clicked.wav" in the sounds/ directory was taken from the GNOME
+audio package, and is in the public domain. "change.wav" was originally
+"launch.wav", Copyright (c) Guillaume Cottenceau, from Frozen Bubble,
+released under the GNU GPL v2.
+
 ----NEW LICENSE----
 Copyright (c) 2001 Brendan Becker
 

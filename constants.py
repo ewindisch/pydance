@@ -2,7 +2,7 @@
 # It needs to have pygame.event (and therefore display, too) ready.
 
 # Event types.
-E_PASS,E_QUIT,E_FULLSCREEN,E_SCREENSHOT,E_PGUP,E_PGDN,E_SELECT,E_MARK,E_UP,E_DOWN,E_LEFT,E_RIGHT,E_START = range(13)
+E_PASS,E_QUIT,E_FULLSCREEN,E_SCREENSHOT,E_PGUP,E_PGDN,E_SELECT,E_MARK,E_UP,E_DOWN,E_LEFT,E_RIGHT,E_START,E_CREATE,E_SELECT,E_UNSELECT = range(16)
 
 # Z index constants
 DEFAULTZINDEX,PADZINDEX,ARROWZINDEX,XANIMZINDEX,BARSZINDEX = range(5)
@@ -25,7 +25,7 @@ elif os.name == "posix":
   elif os.environ.has_key("HOME"):
     osname = "posix"
 else:
-  print "Your platform is not supported by pyDDR. We're going to call it"#'
+  print "Your platform is not supported by pyDDR. We're going to call it"
   print "POSIX, and then just let it crash."
 
 # Find out our real directory - resolve symlinks, etc
@@ -52,17 +52,14 @@ if not os.path.isdir(rc_path): os.mkdir(rc_path)
 
 search_paths = (pyddr_path, rc_path)
 
-lyric_colors = (('cyan', (0, 244, 244)),
-                ('aqua', (0, 244, 122)),
-                ('yellow', (244, 244, 122)),
-                ('white', (244, 244, 244)),
-                ('black', (0, 0, 0)),
-                ('red', (244, 122, 122)),
-                ('purple', (244, 122, 244)),
-                ('orange', (244, 170, 0)))
-# The above, as a hash
-color_hash = {}
-for color in lyric_colors: color_hash[color[0]] = color[1]
+lyric_colors = {'cyan':(0, 244, 244),
+                'aqua': (0, 244, 122),
+                'yellow': (244, 244, 122),
+                'white': (244, 244, 244),
+                'black': (0, 0, 0),
+                'red': (244, 122, 122),
+                'purple': (244, 122, 244),
+                'orange': (244, 170, 0)}
 
 # Set up the configuration file
 mainconfig = config.Config({ # Wow we have a lot of options
