@@ -10,6 +10,7 @@
 
 
 from announcer import Announcer
+from config import Config
 import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
 import os, sys, glob, random, fnmatch, types, operator, copy, string
 import pygame.transform
@@ -18,6 +19,9 @@ import pygame.transform
 pyddr_path = os.path.split(os.path.abspath(sys.argv[0]))[0]
 sys.path.append(pyddr_path)
 os.chdir(pyddr_path)
+
+rscdir = os.path.join(os.environ["HOME"], ".pyddr")
+if not os.path.isdir(rscdir): os.mkdir(rscdir)
 
 import fontfx
 from pygame.locals import *
@@ -74,64 +78,38 @@ class QuitGame:
 #  narray*=array(color).astype(Float32)
 #  _blit_array(surf,narray.astype(Int8))
 
-class ConfigFile:
-  def __init__(self, filename, autoupdate = 1):
-    self.filename = filename
-    self.config = {}
-    self.cursec = "__main__"
-    self.autoupdate = autoupdate
-    csec = "__main__"
-    self.config[csec] = {}
-    f = open(filename,"r")
-    l = f.readlines()
-    f.close()
-    for cl in l:
-      if cl[0] == '[':
-        csec = cl[1:cl.find(']')]
-        self.config[csec] = {}
-        if self.cursec == "__main__": self.cursec = csec
-      elif cl.isspace() or len(cl) == 0 or cl[0] == '#': pass
-      else:
-        self.config[csec][cl[0:cl.find(' ')]] = cl[cl.find(' ')+1:].strip()
-  def get_section(self, section):
-    return self.config[section]
-  def get_sections(self):
-    return self.config.keys()
-  def get_keys(self, section):
-    return self.config[section].keys()
-  def get_value(self, key, section = None, default = None):
-    if section == None: section = self.cursec
-    try:
-      return self.config[section][key]
-    except KeyError:
-      return default
-  def set_value(self, key, value, section=None):
-    if section == None: section = self.cursec
-    self.config[section][key] = value
-    if self.autoupdate: self.write()
-    return value
-  def select_section(self, section):
-    self.cursec = section
-    try:
-      self.config.keys().index(section)
-    except ValueError:
-      self.config[section] = {}
-  def write(self):
-    f = open(self.filename, "w")
-    for k in self.config.keys():
-      f.write("[%s]\n" % k)
-      for k2 in self.config[k].keys():
-        f.write("%s %s" % (k2, self.config[k][k2]))
-      f.write("\n")
-    f.close()
-
 #MAIN CONFIG FILE
-mainconfig = ConfigFile('pyddr.cfg')
+#mainconfig = ConfigFile('pyddr.cfg')
+mainconfig = Config({ # Wow we have a lot of options
+  "gfxtheme": "classic", "djtheme": "none", "songdir": ".",
+  "stickycombo": 1,  "lowestcombo": 4,  "totaljudgings": 1,  "stickyjudge": 1,
+  "lyriccolor": "0,244,244",  "transcolor": "0,244,122",
+  "mixerclock": 0, "onboardaudio": 0, "masteroffset": 0,
+  "reversescrolls": 0, "scrollspeed": 1,
+  "explodestyle": 3, "arrowspin": 0, "arrowshrink": 0, "arrowgrow": 0,
+  "joy_left": 4, "joy_right": 5, "joy_up": 7, "joy_down": 6,
+  "joy_start": 9, "joy_select": 8, "joy_pgup": 1, "joy_pgdown": 3,
+  "mat_buttons": 12, "mat_axes": 6,
+  "vesacompat": 0, "fullscreen": 0,
+  "sortmode": 0, "sortpersist": 1,
+  "previewmusic": 1,
+  "showbackground": 1, "bgbrightness": 127,
+  "sudden": 0, "hidden": 0, "little": 0, "assist": 0,
+  "arrowcolors": 4, "fpsdisplay": 1, "showlyrics": 1,
+  "showcombo": 1, "showtoparrows": 1,
+  "killsongonfail": 0,
+  "grading": 1
+  })
+
+if os.path.isfile("/etc/pyddr.cfg"): mainconfig.load("/etc/pyddr.cfg", True)
+if os.path.isfile(os.path.join(rscdir, "pyddr.cfg")):
+  mainconfig.load(os.path.join(rscdir, "pyddr.cfg"))
+if os.path.isfile("pyddr.cfg"): mainconfig.load("pyddr.cfg")
 
 DefaultThemeDir = os.path.join('themes','gfx')
-theme = mainconfig.get_value('gfxtheme',default='bryan')
-songdir = mainconfig.get_value('songdir',default='.')
-anncname = mainconfig.get_value('djtheme',default='none')
+theme = mainconfig['gfxtheme']
+songdir = mainconfig['songdir']
+anncname = mainconfig['djtheme']
 annc = Announcer(os.path.join('themes','dj',anncname,'djtheme.cfg'))
 
 """
@@ -206,7 +184,7 @@ class BGimage(pygame.sprite.Sprite):
   def __init__ (self, filename):
     pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
     self.image = pygame.transform.scale(pygame.image.load(filename),(640,480)).convert()
-    self.image.set_alpha(int(mainconfig.get_value('bgbrightness',default='127')), RLEACCEL)
+    self.image.set_alpha(int(mainconfig['bgbrightness']), RLEACCEL)
     self.rect = self.image.get_rect()
     self.rect.top = 0
     self.rect.left = 0
@@ -690,135 +668,14 @@ class DancerAnim(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.top = 240-(self.y/2)
     self.rect.left = 480-(self.x/2)
-"""
-class ComboDisp(pygame.sprite.Sprite):
-    def __init__(self,topnum,progx,progy,playernum):
-        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-        self.trect = 296+(int(mainconfig.get_value('totaljudgings',default=1))*24)
-        self.sticky = int(mainconfig.get_value('stickycombo',default=1))
-        self.lowcombo = int(mainconfig.get_value('lowestcombo',default=4))
-
-        self.space = pygame.surface.Surface((1,1))
-        self.space.fill((0,0,0))
-
-        self.baseimage = self.space
-        self.image = self.baseimage
-        self.font = pygame.font.Font(None,48)
-
-        self.rect = self.image.get_rect()
-        self.image.set_colorkey(self.image.get_at((0,0)))
-        self.rect.top = self.trect
-        self.rect.centerx = 160
-        self.playernum = playernum - 1
-        pixelbar = pygame.surface.Surface((1,3))
-        pixelbar.fill((192,192,192))
-        
-        self.prerender = []
-
-        for i in range(topnum):
-          if (i % 5) == 0:
-            screen.blit(pixelbar, (progx+(i/5),progy))
-            pygame.display.update()
-          text = repr(i) + "x COMBO"
-          image1 = self.font.render(text,1,(16,16,16))
-          image2 = self.font.render(text,1,(224,224,224))
-          self.rimage = self.font.render(text,1,(224,224,224))
-          self.rimage.blit(image1,(-2,2))
-          self.rimage.blit(image1,(2,-2))
-          self.rimage.blit(image2,(0,0))
-          self.rimage.set_colorkey(self.rimage.get_at((0,0)))
-
-          self.prerender.append(self.rimage)
-
-    def update(self, xcombo, steptimediff):
-      if (steptimediff < 0.36) or self.sticky:
-        if (xcombo >= self.lowcombo):
-          self.baseimage = self.prerender[xcombo]
-        else:
-          self.baseimage = self.space
-
-        if steptimediff > 0.2:                steptimediff = 0.2
-        self.image = pygame.transform.rotozoom(self.baseimage, 0, 1-(steptimediff*2))
-
-        self.rect = self.image.get_rect()
-        self.rect.top = self.trect
-        self.rect.centerx = 160 + (self.playernum*320)
 
 class ComboDisp(pygame.sprite.Sprite):
   def __init__(self,playernum):
     pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-    self.sticky = int(mainconfig.get_value('stickycombo',default=1))
-    self.lowcombo = int(mainconfig.get_value('lowestcombo',default=4))
+    self.sticky = int(mainconfig['stickycombo'])
+    self.lowcombo = int(mainconfig['lowestcombo'])
 
-    self.trect = 296+(int(mainconfig.get_value('totaljudgings',default=1))*24)
-    self.playernum = playernum - 1
-    self.centerx = (320*self.playernum) + 160
-    
-    fonts = []
-    for x in range(5):
-      fonts.append(pygame.font.Font(None, 32+x*3))
-
-    self.words = []
-    for f in fonts:
-      render = []
-      for w in ('0','1','2','3','4','5','6','7','8','9','x COMBO'):
-        img1 = f.render(w, 1, (16, 16, 16))
-        img2 = f.render(w, 1, (224, 224, 224))
-        img3 = pygame.Surface(img1.get_size())
-        img3.blit(img1, (-2, 2))
-        img3.blit(img1, (2, -2))
-        img3.blit(img2, (0, 0))
-        img3.set_colorkey(img3.get_at((0, 0)))
-        render.append(img3)
-      self.words.append(render)
-
-    self.dirty = 0
-
-  def update(self, xcombo, steptimediff):
-    if steptimediff < 0.36 or self.sticky:
-      self.drawcount = xcombo
-      self.drawsize = min(int(0.2*5), len(self.words))
-    else:
-      self.drawcount = 0
-
-  def draw(self, screen):
-    if self.drawcount >= self.lowcombo:
-      render = self.words[self.drawsize]
-      width = render[-1].get_width()
-      hundreds = self.drawcount / 100
-      tens = self.drawcount / 10
-      ones = self.drawcount % 10
-      #get width
-      if hundreds:
-        width += render[hundreds].get_width()
-      if tens:
-        width += render[tens].get_width()
-      width += render[ones].get_width()
-      startleft = left = self.centerx - width / 2
-      #render
-      if hundreds:
-        screen.blit(render[hundreds], (left, self.trect))
-        left += render[hundreds].get_width()
-      if tens:
-        screen.blit(render[tens], (left, self.trect))
-        left += render[tens].get_width()
-      screen.blit(render[ones], (left, self.trect))
-      left += render[ones].get_width()
-      r = screen.blit(render[-1], (left, self.trect))
-      self.dirty = Rect(startleft, r.top, r.right - startleft, r.height)
-
-  def clear(self, screen, bgd):
-    if self.dirty:
-      screen.blit(bgd, self.dirty, self.dirty)
-      self.dirty = 0
-"""
-class ComboDisp(pygame.sprite.Sprite):
-  def __init__(self,playernum):
-    pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-    self.sticky = int(mainconfig.get_value('stickycombo',default=1))
-    self.lowcombo = int(mainconfig.get_value('lowestcombo',default=4))
-
-    self.trect = 296+(int(mainconfig.get_value('totaljudgings',default=1))*24)
+    self.trect = 296+(int(mainconfig['totaljudgings'])*24)
     self.playernum = playernum - 1
     self.centerx = (320*self.playernum) + 160
     
@@ -1132,7 +989,7 @@ class ArrowFX(pygame.sprite.Sprite):
     self.direction = 1
     self.holdtype = 0
 
-    style = int(mainconfig.get_value('explodestyle', default='3'))
+    style = int(mainconfig['explodestyle'])
     self.rotating, self.scaling = {3:(1,1), 2:(0,1), 1:(1,0), 0:(0,0)}[style]
     
   def holding(self, yesorno):
@@ -1296,8 +1153,8 @@ class JudgingDisp(pygame.sprite.Sprite):
     def __init__(self,playernum):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
 
-        self.total = int(mainconfig.get_value('totaljudgings',default=1))
-        self.sticky = int(mainconfig.get_value('stickyjudge',default=1))
+        self.total = int(mainconfig['totaljudgings'])
+        self.sticky = int(mainconfig['stickyjudge'])
         self.needsupdate = 1
         self.playernum = playernum-1
         self.stepped = 0
@@ -1451,10 +1308,10 @@ class Song:
     self.moviefile = ' '
     self.mixname = 'unspecified mix'
     self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
-    self.mixerclock = int(mainconfig.get_value('mixerclock',default='0'))
-    self.lyricdisplay = LyricDispKludge(400, map((lambda x: int(x)), mainconfig.get_value('lyriccolor',default='0,224,244').split(',')))
-    self.transdisplay = LyricDispKludge(428, map((lambda x: int(x)), mainconfig.get_value('transcolor',default='0,224,122').split(',')))
-    little = int(mainconfig.get_value('little',default='0'))
+    self.mixerclock = int(mainconfig['mixerclock'])
+    self.lyricdisplay = LyricDispKludge(400, map((lambda x: int(x)), mainconfig['lyriccolor'].split(',')))
+    self.transdisplay = LyricDispKludge(428, map((lambda x: int(x)), mainconfig['transcolor'].split(',')))
+    little = int(mainconfig["little"])
     coloringmod = 0
     self.totarrows = {}
     self.holdinfo = []
@@ -1589,7 +1446,7 @@ class Song:
       elif firstword == 'group':       self.group = " ".join(rest)
       elif firstword == 'bpm':
         self.bpm = float(nextword) 
-        if int(mainconfig.get_value('onboardaudio',default='0')):
+        if int(mainconfig['onboardaudio']):
           self.bpm = self.bpm * float(48000/44128.0)
         self.playingbpm = copy.copy(self.bpm)
       elif firstword in modes.keys():  chompNext=(modes[firstword],)
@@ -1599,8 +1456,8 @@ class Song:
       elif firstword == 'startat':     self.startsec = float(nextword)
       elif firstword == 'endat':       self.endsec = float(nextword)
       elif firstword == 'offset':      
-        self.offset = float(-int(nextword)-int(mainconfig.get_value('masteroffset',default='0')))/1000.0
-        if int(mainconfig.get_value('onboardaudio',default='0')):
+        self.offset = float(-int(nextword)-int(mainconfig['masteroffset']))/1000.0
+        if int(mainconfig['onboardaudio']):
           self.offset = self.offset * float(48000/44128.0)
       elif firstword == 'version':     self.version = float(nextword)
     for mkey,mval in modes.items():
@@ -1829,10 +1686,10 @@ class fastSong:
     self.bgfile = ' '
     self.mixname = '---'
     self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
-    self.mixerclock = int(mainconfig.get_value('mixerclock',default='0'))
+    self.mixerclock = int(mainconfig['mixerclock'])
 #    self.lyricdisplay = LyricDispKludge(400)
 #    self.transdisplay = LyricDispKludge(428)
-    little = int(mainconfig.get_value('little',default='0'))
+    little = int(mainconfig['little'])
     self.totarrows = 0
     chompNext = None
     self.variablecreationtime = pygame.time.get_ticks()
@@ -2072,12 +1929,12 @@ class TransformSprite(BlankSprite):
     self.rect = self.image.get_rect()
 
 #DCY: Bottom of 640 gives lots of "update rejecting"    
-if int(mainconfig.get_value('reversescroll',default='0')):
+if int(mainconfig['reversescroll']):
   ARROWTOP  = 408
-  ARROWBOT  = int(-64 - (float(mainconfig.get_value('scrollspeed',default='1'))-1)*576)
+  ARROWBOT  = int(-64 - (float(mainconfig['scrollspeed'])-1)*576)
 else:
   ARROWTOP  = 64
-  ARROWBOT  = int(576 * float(mainconfig.get_value('scrollspeed',default='1')))
+  ARROWBOT  = int(576 * float(mainconfig['scrollspeed']))
 
 ARROWDIFF = float(ARROWTOP-ARROWBOT)
 
@@ -2090,7 +1947,7 @@ class ArrowSprite(CloneSprite):
     self.bpm = bpm
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
-    if int(mainconfig.get_value('assist',default='0')):
+    if int(mainconfig['assist']):
       self.playedsound = None
       if self.dir == 'u':
         self.sample = pygame.mixer.Sound("assist-u.wav")
@@ -2105,9 +1962,9 @@ class ArrowSprite(CloneSprite):
     self.r = 0
     self.playernum = playernum-1
     self.bimage = self.image
-    self.arrowspin = float(mainconfig.get_value("arrowspin",default="0"))
-    self.arrowshrink = float(mainconfig.get_value("arrowshrink",default="0"))
-    self.arrowgrow = float(mainconfig.get_value("arrowgrow",default="0"))
+    self.arrowspin = float(mainconfig["arrowspin"])
+    self.arrowshrink = float(mainconfig["arrowshrink"])
+    self.arrowgrow = float(mainconfig["arrowgrow"])
     self.centerx = copy.copy(self.rect.centerx)+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
@@ -2200,7 +2057,7 @@ class HoldArrowSprite(CloneSprite):
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
     self.playedsound = None
-    if int(mainconfig.get_value('assist',default='0')):
+    if int(mainconfig['assist']):
       if self.dir == 'u':
         self.sample = pygame.mixer.Sound("assist-u.wav")
       elif self.dir == 'd':
@@ -2220,9 +2077,9 @@ class HoldArrowSprite(CloneSprite):
     self.oimage2.set_colorkey(self.oimage.get_at((0,0)))
     self.bimage = pygame.surface.Surface((64,1))
     self.bimage.blit(self.image,(0,-31))
-    self.arrowspin = float(mainconfig.get_value("arrowspin",default="0"))
-    self.arrowshrink = float(mainconfig.get_value("arrowshrink",default="0"))
-    self.arrowgrow = float(mainconfig.get_value("arrowgrow",default="0"))
+    self.arrowspin = float(mainconfig["arrowspin"])
+    self.arrowshrink = float(mainconfig["arrowshrink"])
+    self.arrowgrow = float(mainconfig["arrowgrow"])
     self.centerx = copy.copy(self.rect.centerx)+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
@@ -2412,19 +2269,19 @@ EMS2CONFIG= { E_QUIT:       [],
               E_START2:     [joyEvent( button=25)],
               E_SELECT:     [joyEvent( button=8 )],
             }
-J2CONFIG  = { E_LEFT2:      [joyEvent( button=int(mainconfig.get_value('joy_left',default='4')) )],
-              E_RIGHT2:     [joyEvent( button=int(mainconfig.get_value('joy_right',default='5')) )],
-              E_UP2:        [joyEvent( button=int(mainconfig.get_value('joy_up',default='7')) )],
-              E_DOWN2:      [joyEvent( button=int(mainconfig.get_value('joy_down',default='6')) )],
+J2CONFIG  = { E_LEFT2:      [joyEvent( button=int(mainconfig["joy_left"]))],
+              E_RIGHT2:     [joyEvent( button=int(mainconfig['joy_right']))],
+              E_UP2:        [joyEvent( button=int(mainconfig['joy_up']))],
+              E_DOWN2:      [joyEvent( button=int(mainconfig['joy_down']))],
             }
-JOYCONFIG = { E_LEFT:       [joyEvent( button=int(mainconfig.get_value('joy_left',default='4')) )],
-              E_RIGHT:      [joyEvent( button=int(mainconfig.get_value('joy_right',default='5')) )],
-              E_UP:         [joyEvent( button=int(mainconfig.get_value('joy_up',default='7')) )],
-              E_DOWN:       [joyEvent( button=int(mainconfig.get_value('joy_down',default='6')) )],
-              E_SELECT:     [joyEvent( button=int(mainconfig.get_value('joy_select',default='8')) )],
-              E_START:      [joyEvent( button=int(mainconfig.get_value('joy_start',default='9')) )],
-              E_PGUP:       [joyEvent( button=int(mainconfig.get_value('joy_pgup',default='1')) )],
-              E_PGDN:       [joyEvent( button=int(mainconfig.get_value('joy_pgdn',default='3')) )],
+JOYCONFIG = { E_LEFT:       [joyEvent( button=int(mainconfig['joy_left']))],
+              E_RIGHT:      [joyEvent( button=int(mainconfig['joy_right']))],
+              E_UP:         [joyEvent( button=int(mainconfig['joy_up']))],
+              E_DOWN:       [joyEvent( button=int(mainconfig['joy_down']))],
+              E_SELECT:     [joyEvent( button=int(mainconfig['joy_select']))],
+              E_START:      [joyEvent( button=int(mainconfig['joy_start']))],
+              E_PGUP:       [joyEvent( button=int(mainconfig['joy_pgup']))],
+              E_PGDN:       [joyEvent( button=int(mainconfig['joy_pgdn']))],
             }
 
 class EventManager:
@@ -2444,8 +2301,8 @@ class EventManager:
     for i in range(totaljoy):
       ddrmat = pygame.joystick.Joystick(i)
       ddrmat.init()
-      matbuttons = int(mainconfig.get_value('mat_buttons',default='12'))
-      mataxes = int(mainconfig.get_value('mat_axes',default='6'))
+      matbuttons = int(mainconfig['mat_buttons'])
+      mataxes = int(mainconfig['mat_axes'])
       if ddrmat.get_numbuttons() == 32 and ((ddrmat.get_numaxes() == 11) or (ddrmat.get_numaxes() == 8)):
         emsusb2 = copy.copy(i)
       elif ddrmat.get_numbuttons() == matbuttons and ddrmat.get_numaxes() == mataxes:
@@ -2782,9 +2639,9 @@ def main():
       difficulty = ['BASIC']
 
   try:
-    if int(mainconfig.get_value("vesacompat",default='0')):
+    if int(mainconfig["vesacompat"]):
       screen = pygame.display.set_mode((640, 480), 16)
-    elif int(mainconfig.get_value("fullscreen",default='0')):
+    elif int(mainconfig["fullscreen"]):
       screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF|FULLSCREEN, 16)
     else:
       screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF, 16)
@@ -2870,7 +2727,7 @@ def main():
 #  pygame.time.delay(500)
 
   stfile = ' '
-  sortmode = int(mainconfig.get_value("sortmode",default='0'))-1
+  sortmode = int(mainconfig["sortmode"])-1
 
   print "pyDDR ready. Entering song selector...."
 
@@ -2918,16 +2775,16 @@ def domenu():
       option_name = self.extras["option_name"]
       options = self.extras["options"]
       if not initial:
-        current_val = config.get_value(option_name)
+        current_val = config[option_name]
         new_val = None
         if current_val == None:
           new_val = options[0]
         else:
           new_val = options[(options.index(current_val) + 1) % len(options)]
-        config.set_value(option_name, new_val)
+        config[option_name] = new_val
         return new_val
       else:
-        return config.get_value(option_name)
+        return config[option_name]
 
     # Slightly more advanced option switcher -
     # the displayed text is the list value, but the option value is
@@ -2936,15 +2793,15 @@ def domenu():
       option_name = self.extras["option_name"]
       options = self.extras["options"]
       if not initial:
-        current_val = config.get_value(option_name)
+        current_val = config[option_name]
         new_val = None
         if current_val == None: new_val = 0
         else:
           new_val = str((int(current_val) + 1) % len(options))
-          config.set_value(option_name, new_val)
+          config[option_name] = new_val
         return options[int(new_val)]
       else:
-        return options[int(config.get_value(option_name))]
+        return options[int(config[option_name])]
 
     # For settings with a range of values - divide into 25 discrete values,
     # cycle through them
@@ -2960,18 +2817,18 @@ def domenu():
           else:
             delta /= (sign * min(delta, 20))
           try:
-            val = int(config.get_value(option_name)) + delta
+            val = int(config[option_name]) + delta
           except ValueError:
-            val = float(config.get_value(option_name)) + delta
+            val = float(config[option_name]) + delta
           val = str(max(self.extras["min"], min(self.extras["max"], val)))
-          config.set_value(option_name, val) 
+          config[option_name] = val
           self.add_text = val
           self.render()
           return val
         except KeyError:
-          return config.get_value(option_name)
+          return config[option_name]
       else:
-        return config.get_value(option_name)
+        return config[option_name]
 
     # This is used for lyric & trans colors - it changes the text color
     # of the object and the data value
@@ -2980,24 +2837,24 @@ def domenu():
       option_name = self.extras["option_name"]
       if not initial:
         is_next = False
-        current_val = config.get_value(option_name)
+        current_val = config[option_name]
         for colors in options:
           if colors[0] == current_val:
             print colors[0], "is current_val"
             is_next = True
           elif is_next:
             print colors[0], "was found next"
-            config.set_value(option_name, colors[0])
+            config[option_name] = colors[0]
             self.add_text = colors[1]
             self.rgb = map((lambda x: int(x)), colors[0].split(","))
             is_next = False
             break
         if is_next: # we were at the end of the list
-            config.set_value(option_name, options[0][0])
+            config[option_name] = options[0][0]
             self.add_text = options[0][1]
             self.rgb = map((lambda x: int(x)), options[0][0].split(","))
       else:
-        colorval = config.get_value(option_name)
+        colorval = config[option_name]
         for colors in options:
           if colors[0] == colorval:
             self.add_text = colors[1]
@@ -3493,10 +3350,10 @@ def songSelect(songs,fooblah):
   idir = -8
   i = 192
   # do we have a default sorting mode? should it persist?
-  if int(mainconfig.get_value("sortpersist",default='1')):
+  if int(mainconfig["sortpersist"]):
     print "keeping persistent sortmode"
   else:
-    sortmode = int(mainconfig.get_value("sortmode",default='0'))-1
+    sortmode = int(mainconfig["sortmode"])-1
   s = 1
   # filter out songs that don't support the current mode (e.g. 'SINGLE')
   songs = filter(lambda song,mode=playmode: song.modes.has_key(mode),songs)
@@ -3521,7 +3378,7 @@ def songSelect(songs,fooblah):
   arrowTextMax      = TextSprite(size=32*2, bkgcolor=BLACK, text='>')
   songSelectTextMax = TextSprite(size=47*2, bkgcolor=BLACK, text='SONG SELECT')
   prevsong = songs[0]
-  previewMusic = int(mainconfig.get_value('previewmusic', default='1'))
+  previewMusic = int(mainconfig['previewmusic'])
   songChanged = 1
   while 1:
     boink = 0
@@ -3989,10 +3846,10 @@ def dance(song,players,difficulty):
       bifn = 'bg.png'
       backimage = BGimage('bg.png')
 
-  if int(mainconfig.get_value('showbackground',default='1')) > 0:
+  if int(mainconfig['showbackground']) > 0:
     if song.moviefile == ' ':
       bgkludge = pygame.transform.scale(pygame.image.load(bifn),(640,480)).convert()
-      bgkludge.set_alpha(int(mainconfig.get_value('bgbrightness',default='127')), RLEACCEL)
+      bgkludge.set_alpha(int(mainconfig['bgbrightness']), RLEACCEL)
       background.image = pygame.surface.Surface((640,480))
       background.image.blit(bgkludge,(0,0))
       backimage.add(bgroup)
@@ -4002,12 +3859,12 @@ def dance(song,players,difficulty):
   else:
     background.fill(BLACK)
 
-  suddenval = float(mainconfig.get_value('sudden',default='0'))
+  suddenval = float(mainconfig['sudden'])
 
-  if int(64.0*float(mainconfig.get_value('hidden',default='0'))):    hidden = 1
-  else:                                                              hidden = 0
+  if int(64.0*float(mainconfig['hidden'])): hidden = 1
+  else: hidden = 0
   
-  hiddenval = float(mainconfig.get_value('hidden',default='0'))
+  hiddenval = float(mainconfig['hidden'])
   
   # so the current combos get displayed
   global p1combo
@@ -4040,31 +3897,31 @@ def dance(song,players,difficulty):
 #  dancer = DancerAnim(200,400)
 #  dancer.add(dgroup)
   
-  colortype = int(mainconfig.get_value('arrowcolors',default=4))
+  colortype = int(mainconfig['arrowcolors'])
   if colortype == 0:
     colortype = 1
 
-  if int(mainconfig.get_value('fpsdisplay',default=1)):
+  if int(mainconfig['fpsdisplay']):
     fpstext.add(tgroup)
-  if int(mainconfig.get_value('showlyrics',default=1)):
+  if int(mainconfig['showlyrics']):
     song.lyricdisplay.add(lgroup)
     song.transdisplay.add(lgroup)
 
-  showcombo = int(mainconfig.get_value('showcombo',default=1))
+  showcombo = int(mainconfig['showcombo'])
 
-  if int(mainconfig.get_value('totaljudgings',default='1')) > 0:
+  if int(mainconfig['totaljudgings']) > 0:
     p1list0.add(tgroup)
-  if int(mainconfig.get_value('totaljudgings',default='1')) > 1:
+  if int(mainconfig['totaljudgings']) > 1:
     p1list1.add(tgroup)
-  if int(mainconfig.get_value('totaljudgings',default='1')) > 2:
+  if int(mainconfig['totaljudgings']) > 2:
     p1list2.add(tgroup)
 
   if players == 2:
-    if int(mainconfig.get_value('totaljudgings',default='1')) > 0:
+    if int(mainconfig['totaljudgings']) > 0:
       p2list0.add(tgroup)
-    if int(mainconfig.get_value('totaljudgings',default='1')) > 1:
+    if int(mainconfig['totaljudgings']) > 1:
       p2list1.add(tgroup)
-    if int(mainconfig.get_value('totaljudgings',default='1')) > 2:
+    if int(mainconfig['totaljudgings']) > 2:
       p2list2.add(tgroup)
 
   bg = pygame.Surface(screen.get_size())
@@ -4173,7 +4030,7 @@ def dance(song,players,difficulty):
   if players == 2:
     song2.play(playmode, difficulty[1],0)
 
-  if int(mainconfig.get_value('assist',default='0')):
+  if int(mainconfig['assist']):
     pygame.mixer.music.set_volume(0.6)
   else:
     pygame.mixer.music.set_volume(1.0)
@@ -4214,7 +4071,7 @@ def dance(song,players,difficulty):
     toparrfx2_u = ArrowFX(song.bpm,'u',ARROWTOP,2)
     toparrfx2_r = ArrowFX(song.bpm,'r',ARROWTOP,2)
 
-  if int(mainconfig.get_value('explodestyle',default='3'))>-1:
+  if int(mainconfig['explodestyle']) > -1:
     toparrfx1_l.add(fgroup)
     toparrfx1_d.add(fgroup)
     toparrfx1_u.add(fgroup)
@@ -4226,7 +4083,7 @@ def dance(song,players,difficulty):
       toparrfx2_u.add(fgroup)
       toparrfx2_r.add(fgroup)
 
-  if int(mainconfig.get_value('showtoparrows',default='1')):
+  if int(mainconfig['showtoparrows']):
     toparr1_l.add(sgroup)
     toparr1_d.add(sgroup)
     toparr1_u.add(sgroup)
@@ -4245,7 +4102,7 @@ def dance(song,players,difficulty):
   while 1:
     #grab an event
     ee = song.get_events()
-    if int(mainconfig.get_value('killsongonfail',default='0')) and lifebar.failed:
+    if int(mainconfig['killsongonfail']) and lifebar.failed:
       song.kill()
     if ee is not None: 
 #      print ee
@@ -4455,7 +4312,7 @@ def dance(song,players,difficulty):
         nbpm = song.lastbpmchangetime[1][1]
         print "BPM tried to change from ",oldbpm, " to ", nbpm, " at ",curtime,"..",
         if song.lastbpmchangetime[1][1] is not None:
-          if int(mainconfig.get_value('showtoparrows',default='1')):
+          if int(mainconfig['showtoparrows']):
             toparr1_l.remove(sgroup)
             toparr1_d.remove(sgroup)
             toparr1_u.remove(sgroup)
@@ -4466,7 +4323,7 @@ def dance(song,players,difficulty):
           toparr1_u = TopArrow(nbpm,'u',ARROWTOP,1)
           toparr1_r = TopArrow(nbpm,'r',ARROWTOP,1)
 
-          if int(mainconfig.get_value('showtoparrows',default='1')):
+          if int(mainconfig['showtoparrows']):
             toparr1_l.add(sgroup)
             toparr1_d.add(sgroup)
             toparr1_u.add(sgroup)
@@ -4474,7 +4331,7 @@ def dance(song,players,difficulty):
 
           # PLAYER 2
           if players == 2:
-            if int(mainconfig.get_value('showtoparrows',default='1')):
+            if int(mainconfig['showtoparrows']):
               toparr2_l.remove(sgroup)
               toparr2_d.remove(sgroup)
               toparr2_u.remove(sgroup)
@@ -4485,7 +4342,7 @@ def dance(song,players,difficulty):
             toparr2_u = TopArrow(nbpm,'u',ARROWTOP,2)
             toparr2_r = TopArrow(nbpm,'r',ARROWTOP,2)
 
-            if int(mainconfig.get_value('showtoparrows',default='1')):
+            if int(mainconfig['showtoparrows']):
               toparr2_l.add(sgroup)
               toparr2_d.add(sgroup)
               toparr2_u.add(sgroup)
@@ -4598,7 +4455,7 @@ def dance(song,players,difficulty):
     if backmovie.filename:
       if backmovie.changed or (fpstext.fpsavg > 30):
         backmovie.resetchange()
-        backmovie.image.set_alpha(int(mainconfig.get_value('bgbrightness',default='127')), RLEACCEL)
+        backmovie.image.set_alpha(int(mainconfig['bgbrightness']), RLEACCEL)
         background.fill(BLACK)
         screen.blit(background.image,(0,0))
         screen.blit(backmovie.image,(0,0))
@@ -4653,7 +4510,7 @@ def dance(song,players,difficulty):
     pygame.display.flip()
 
   # GRADES
-  if int(mainconfig.get_value('grading',default='1')):
+  if int(mainconfig['grading']):
 
     grade = None
     if players == 2:
