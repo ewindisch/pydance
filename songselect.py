@@ -327,7 +327,7 @@ class SongSelect:
             pygame.mixer.music.stop()
             preview_start = pygame.time.get_ticks()
             pygame.mixer.music.load(self.songs[self.index].song.info["file"])
-            pygame.mixer.music.set_volume(0.0)
+            pygame.mixer.music.set_volume(0.01)
             pygame.mixer.music.play(0, 45)
           except pygame.error: # The song was probably too short
             is_playing = False
