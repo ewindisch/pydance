@@ -95,9 +95,28 @@ A Comprehensive List of Features for pydance 1.2
    The directions of a pad are configurable, but the UI events should be
    too (especially, at least, cancel and confirm).
 
+* Use a rational number for beat counting
+   We should use rational numbers (i.e. (num, denom)) when generating
+   Step objects, for accuracy.
+
 * MSD parsing
    The MSD format is a lot like the DWI format I think. pyDDR had an
    old msd2step.py.
+
+* Song installer
+   We should have a song package format that pydance should either be
+   able to load directly, or have an install-dance-package.sh that
+   does it. Similar things could exist for (trickier to install) DWI
+   or SM files.
+
+* Metadata from songs
+   The title, subtitle (VERSION), and artist can be gotten from the
+   audio file itself. It might also be possible to embed a DWI-like
+   syntax into an Ogg comment directly, and load that.
+
+* File format convertor
+   There should be something to convert DWI and SM files to .dance, and
+   maybe the other way around.
 
 * Fix endless mode
    The UI is so ugly, and there should be more selection criteria.
