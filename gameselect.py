@@ -1,45 +1,9 @@
 from constants import *
-from newss import ListBox, HelpText, ActiveIndicator, TextDisplay
+from interface import *
 from pygame.font import Font
 
 import ui
 import newss, courses, endless, songselect
-
-class WrapTextDisplay(pygame.sprite.Sprite):
-  def __init__(self, font, size, topleft, str = " "):
-    pygame.sprite.Sprite.__init__(self)
-    self._text = " "
-    self._font = font
-    self._size = size
-    self._topleft = topleft
-    self._render()
-
-  def _render(self):
-    self._needs_update = False
-    lines = []
-    words = self._text.split()
-    start = 0
-    for i in range(len(words)):
-      if self._font.size(" ".join(words[start:i + 1]))[0] > self._size[0]:
-        t = self._font.render(" ".join(words[start:i]), True, [255, 255, 255])
-        lines.append(t)
-        start = i
-    t = self._font.render(" ".join(words[start:]), True, [255, 255, 255])
-    lines.append(t)        
-
-    self.image = pygame.Surface(self._size, SRCALPHA, 32)
-    self.image.fill([0, 0, 0, 0])
-    for i in range(len(lines)):
-      self.image.blit(lines[i], [0, i * self._font.get_linesize()])
-    self.rect = self.image.get_rect()
-    self.rect.topleft = self._topleft
-
-  def set_text(self, text):
-    self._text = text
-    self._needs_update = True
-
-  def update(self, time):
-    if self._needs_update: self._render()
 
 GS_HELP = [
   "Up / Down moves through list",
@@ -118,12 +82,9 @@ DESCRIPTIONS = {
   "Testing": "Try out the incomplete new song selector."
   }
 
-class MainWindow(object):
+class MainWindow(InterfaceWindow):
   def __init__(self, songs, courses, screen):
-    self._screen = screen
-    self._bg = pygame.image.load(os.path.join(image_path, "gameselect-bg.png"))
-    self._bg = self._bg.convert()
-    self._sprites = pygame.sprite.RenderUpdates()
+    InterfaceWindow.__init__(self, screen, "gameselect-bg.png")
     self._songs = songs
     self._courses = courses
     self._indicator_y = [152, 322, 414]
@@ -154,12 +115,11 @@ class MainWindow(object):
     self._sprites.update(pygame.time.get_ticks())
     self._sprites.draw(self._screen)
     pygame.display.update()
-    self.loop()
+    self._lists[0].set_index(0)
+    self._lists[1].set_index(0)
+    self._lists[2].set_index(0)
 
-  def update(self):
-    self._sprites.update(pygame.time.get_ticks())
-    pygame.display.update(self._sprites.draw(self._screen))
-    self._sprites.clear(self._screen, self._bg)
+    self.loop()
 
   def loop(self):
     values = [GAMES, TYPES, SS]
@@ -168,10 +128,6 @@ class MainWindow(object):
     indices = [0, 0, 0]
     pid, ev = ui.ui.poll()
     
-    self._lists[0].set_index(0)
-    self._lists[1].set_index(0)
-    self._lists[2].set_index(0)
-
     while not (ev == ui.CANCEL and active == 0):
 
       if ev == ui.UP: indices[active] -= 1
