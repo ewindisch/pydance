@@ -43,52 +43,48 @@ class BGmovie(pygame.sprite.Sprite):
         self.movie.render_frame(curframe)
         self.oldframe = curframe
 
-class fpsDisp(pygame.sprite.Sprite):
+class FPSDisp(pygame.sprite.Sprite):
   def __init__(self):
     pygame.sprite.Sprite.__init__(self)
     self.oldtime = -10000000
-    self.loops = 0
     self.image = pygame.surface.Surface((1,1))
-    self.lowest = 1000
-    self.highest = -1
-    self.fpses = []
+    self.clock = pygame.time.Clock()
+    self.cycles = 0
+    self.totalcount = 0
 
-  def fpsavg(self):
-    return reduce(operator.add,self.fpses[2:])/(len(self.fpses)-2)
+  def fps(self):
+    return self.totalcount / self.cycles
 
   def update(self, time):
-    self.loops += 1
+    self.clock.tick()
+
+    self.totalcount += loops
+    self.cycles += 1
+
+    loops = int(self.clock.get_fps())
     if (time - self.oldtime) > 1:
-      text = repr(self.loops) + " loops/sec"
-      self.image = FONTS[16].render(text,1,(160,160,160))
+      text = repr(loops) + " fps"
+      self.image = FONTS[16].render(text, True, [160, 160, 160])
       self.rect = self.image.get_rect()
-      self.image.set_colorkey(self.image.get_at((0,0)), RLEACCEL)
+      self.image.set_colorkey(self.image.get_at([0, 0]), RLEACCEL)
       self.rect.bottom = 480
       self.rect.right = 640
-
-      if self.loops > self.highest:
-        self.highest = self.loops
-      if (self.loops < self.lowest) and len(self.fpses)>2:
-        self.lowest = self.loops
-
-      self.fpses.append(self.loops)
       self.oldtime = time
-      self.loops = 0
 
 class Blinky(pygame.sprite.Sprite):
   def __init__ (self, bpm):
     pygame.sprite.Sprite.__init__(self)
-    self.tick = toRealTime(bpm, 1);
+    self.tick = toRealTime(bpm, 0.5)
     self.frame = 0
     self.oldframe = -100
     self.topimg = []
     
-    im = pygame.surface.Surface((48,40))
-    im.fill((1,1,1))
+    im = pygame.surface.Surface([48, 40])
+    im.fill([1, 1, 1])
     self.topimg.append(im.convert())
     self.topimg.append(im.convert())
-    im.fill((255,255,255))
 
+    im.fill([255, 255, 255])
     for i in range(2):          
       self.topimg.append(im.convert())
 
@@ -97,9 +93,9 @@ class Blinky(pygame.sprite.Sprite):
     self.rect.top = 440
     self.rect.left = 592
 
-  def update(self,time):
-    self.frame = int(time / (self.tick / 2)) % 8
-    if self.frame > 3:        self.frame = 3
+  def update(self, time):
+    self.frame = int(time / self.tick) % 8
+    if self.frame > 3: self.frame = 3
 
     if self.frame != self.oldframe:
       self.image = self.topimg[self.frame]
@@ -277,7 +273,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
   fpsdisplay = mainconfig["fpsdisplay"]
   if fpsdisplay:
-    fpstext = fpsDisp()
+    fpstext = FPSDisp()
     timewatch = TimeDisp()
     tgroup.add([fpstext, timewatch])
 
@@ -405,9 +401,5 @@ def dance(screen, song, players, prevscr, ready_go, game):
       songtext.zout()
       grptext.zout()
 
-  try:
-    print "LPS for this song was %d tops, %d on average, %d at worst." % (fpstext.highest, fpstext.fpsavg(), fpstext.lowest)
-  except:
-    pass
-    
+  print "Average FPS for this song was %d." % fpstext.fps()
   return songFailed
