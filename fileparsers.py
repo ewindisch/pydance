@@ -533,13 +533,14 @@ class SMFile(GenericFile):
             beat, wait = change.split("=")
             self.freezes.append((float(beat), float(wait)/1000.0))
       elif parts[0] == "NOTES":
-        game = SMFile.gametypes[parts[1]]
-        if not self.difficulty.has_key(game):
-          self.difficulty[game] = {}
-          self.steps[game] = {}
-        self.difficulty[game][parts[2].upper()] = int(parts[4])
-        if need_steps:
-          self.steps[game][parts[2].upper()] = self.parse_steps(parts[6], game)
+        if parts[1] in SMFile.gametypes:
+          game = SMFile.gametypes[parts[1]]
+          if not self.difficulty.has_key(game):
+            self.difficulty[game] = {}
+            self.steps[game] = {}
+          self.difficulty[game][parts[2].upper()] = int(parts[4])
+          if need_steps:
+            self.steps[game][parts[2].upper()] = self.parse_steps(parts[6], game)
 
     self.find_mixname()
     for k in ("banner", "background", "filename"):
