@@ -10,6 +10,8 @@ class GameType:
     self.double = False
     self.__dict__.update(args)
     self.left_off = (640 / self.players - self.width * len(self.dirs)) / 2
+    self.sprite_center = 320 / self.players
+    self.player_offset = 640 / self.players
 
 GAMES = {
   "SINGLE": GameType(),

@@ -81,6 +81,7 @@ class Steps:
     little = player.little
     coloring_mod = 0
     cur_time = float(self.offset)
+    last_event_was_freeze = False
     cur_beat = 0
     cur_bpm = self.bpm
     self.speed = player.speed
@@ -102,11 +103,12 @@ class Steps:
       if words[0] == 'W':
         cur_time += float(words[1])
         cur_beat += cur_bpm * float(words[1]) / 60
+        last_event_was_freeze = False
       elif words[0] == 'R':
         self.ready = cur_time
+        last_event_was_freeze = False
         coloring_mod = 0
       elif words[0] in BEATS or isinstance(words[0], int):
-        
         cando = True # FIXME: Do little correctly for 24th etc notes
         if ((little == 1 and (coloring_mod % 4 == 1 or
                               coloring_mod % 4 == 3)) or
@@ -151,8 +153,12 @@ class Steps:
               releaselist[holding[hold] - 1] = hold
               feetstep[hold] = 0 # broken stepfile, junk the event
               holding[hold] = 0
-
-          self.events.append(SongEvent(when = cur_time, bpm = cur_bpm,
+              
+          if last_event_was_freeze:
+            time_to_add = last_event_was_freeze
+            last_event_was_freeze = False
+          else: time_to_add = cur_time
+          self.events.append(SongEvent(when = time_to_add, bpm = cur_bpm,
                                        feet = feetstep, extra = words[0],
                                        beat = cur_beat,
                                        color = coloring_mod % 4))
@@ -174,16 +180,19 @@ class Steps:
           cur_beat = float(int(cur_beat + 0.0001))
 
       elif words[0] == "D":
+        last_event_was_freeze = False
         cur_time += toRealTime(cur_bpm, BEATS['q'] * words[1])
         cur_beat += BEATS['q'] * words[1]
         coloring_mod += 4 * words[1]
 
       elif words[0] == "B":
         cur_bpm = words[1]
+        last_event_was_freeze = False
         self.lastbpmchangetime.append([cur_time, cur_bpm])
 
       elif words[0] == "S":
         # We can treat stops as a BPM change to zero with a wait.
+        last_event_was_freeze = cur_time
         self.lastbpmchangetime.append([cur_time, 1e-127]) # This is zero
         cur_time += float(words[1])
         self.lastbpmchangetime.append([cur_time, cur_bpm])

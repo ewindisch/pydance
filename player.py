@@ -7,13 +7,13 @@ import fontfx, spritelib, colors
 
 # Display the score overlaying the song difficulty
 class ScoringDisp(pygame.sprite.Sprite):
-  def __init__(self, playernum, text):
+  def __init__(self, playernum, text, game):
     pygame.sprite.Sprite.__init__(self)
     self.set_text(text)
     self.image = pygame.surface.Surface((160, 48))
     self.rect = self.image.get_rect()
     self.rect.bottom = 484
-    self.rect.centerx = 160 + playernum * 320
+    self.rect.centerx = game.sprite_center + playernum * game.player_offset
 
   def set_text(self, text):
     tx = FONTS[28].size(text)[0] + 2
@@ -116,6 +116,7 @@ class LifeBarDisp(AbstractLifeBar):
 class DropLifeBarDisp(LifeBarDisp):
   def __init__(self, playernum, theme, songconf):
     LifeBarDisp.__init__(self, playernum, theme, songconf)
+    self.life = self.maxlife
     for k in self.deltas:
       if self.deltas[k] > 0: self.deltas[k] = 0
 
@@ -328,7 +329,7 @@ class Player:
     elif self.scrollstyle == 1: self.top = 384
     else: self.top = 64
     
-    self.score = ScoringDisp(pid, "Player " + str(pid))
+    self.score = ScoringDisp(pid, "Player " + str(pid), game)
     self.lifebar = Player.lifebars[songconf["lifebar"]](pid, self.theme,
                                                         songconf)
     self.holdtext = HoldJudgeDisp(self, game)
