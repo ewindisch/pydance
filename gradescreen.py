@@ -9,6 +9,7 @@ class GradingScreen:
     self.judges = judges
 
     for judge in judges:
+      if judge == None: continue
       print "Player "+repr(judges.index(judge)+1)+":"
     
       grade = judge.grade()
@@ -28,6 +29,9 @@ class GradingScreen:
  
   def make_gradescreen(self, screen, background):
     judge = self.judges[0]
+
+    if judge is None: return None
+
     totalsteps = (judge.marvelous + judge.perfect + judge.great +
                   judge.ok + judge.boo + judge.miss)
 

@@ -10,7 +10,9 @@ legend:
 + New step file parsers
   + Beginner and hardcore (smaniac/oni/challenge) difficulty.
 + New hold arrow display
-+ Bug fixes, optimizations, whippings, etc.
+- 'mixerclock' option removed (it's now the only timing method).
+- 'transcolor' option removed in favor of new 'lyriccolor' syntax.
+* Bug fixes, optimizations, whippings, etc.
   + Most notably, hold arrows are working wonderfully now.
 
 0.6.3 - Reasonable Starting Times!				[2003.05.17]
