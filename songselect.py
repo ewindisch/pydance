@@ -130,7 +130,10 @@ class SongSelect:
     self.screen = screen
 
     pygame.mixer.music.fadeout(500)
-    
+
+    self.helpfiles = ["menuhelp-" + str(i) + ".png" for i in range(1, 6)]
+    self.last_help_update = 0
+
     song_changed = True # Whether or not the song was changed
     needs_update = False # Whether or not we need to render the screen
     not_changed_for = 0 # How long since the song was changed, in cycles
@@ -147,6 +150,7 @@ class SongSelect:
       pygame.mixer.music.play(4, 0.0)
 
     self.songs.sort(SORTS[mainconfig["sortmode"]])
+    self.update_help()
     self.render()
 
     while ev[1] != E_QUIT:
@@ -320,8 +324,7 @@ class SongSelect:
         needs_update = True
         pygame.mixer.music.fadeout(500)
 
-      if needs_update and (not_changed_for or not mainconfig["gratuitous"]):
-        self.render()
+      self.render()
 
       # Song preview support
       if previews:
@@ -439,6 +442,11 @@ class SongSelect:
                             DIFF_LOCATION[1] + 25 * i))
       i += 1
 
+    # Key help display
+    if mainconfig["ingamehelp"]:
+      self.update_help()
+      self.screen.blit(self.helpimage, (5, DIFF_LOCATION[1] + len(diff_list) * 26))
+
     pygame.display.flip()
 
   def scroll_up(self):
@@ -511,3 +519,19 @@ class SongSelect:
     text = self.current_song.info["song"] + " "
     for d in self.diff_list[-1]: text += "/" + d[0]
     self.title_list.append(text)
+
+  def update_help(self):
+    if self.last_help_update == 0:
+      fn = self.helpfiles.pop(0)
+      self.helpfiles.append(fn)
+      fn = os.path.join(image_path, fn)
+      self.helpimage = pygame.image.load(fn)
+      self.helpimage.set_colorkey(self.helpimage.get_at((0,0)), RLEACCEL)
+      self.helpimage.set_alpha(0)
+    if self.last_help_update <= 25:
+      self.helpimage.set_alpha(10 * self.last_help_update)
+    elif 75 <= self.last_help_update <= 100:
+      self.helpimage.set_alpha(250 - 20 * (self.last_help_update - 75))
+    elif self.last_help_update == 110:
+      self.last_help_update = -1
+    self.last_help_update += 1

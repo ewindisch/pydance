@@ -146,6 +146,7 @@ def do(screen, songselect, songdata):
         ["Arrow Effects", rotate_index_opt,
          ('explodestyle', ('none', 'rotate', 'scale', 'rotate & scale'))],
         ["Gratuitous Extras", onoff_opt, ('gratuitous',)],
+        ["Display Help", onoff_opt, ("ingamehelp",)],
         ["Spin Arrows", onoff_opt, ("arrowspin",)],
         ["Backgrounds", onoff_opt, ('showbackground',)],
         ["Brightness", tuple_opt, ('bgbrightness',
