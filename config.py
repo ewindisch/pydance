@@ -39,7 +39,9 @@ class Config:
 
   def write(self, filename):
     fi = open(filename, "w")
-    for key in self.user:
+    keys = self.user.keys()
+    keys.sort()
+    for key in keys:
       if not self.master.has_key(key) or self.master[key] != self.user[key]:
         fi.write("%s %s\n" % (key, self.user[key]))
     fi.close()
