@@ -126,6 +126,11 @@ system, and other ideas about what makes a fun dancing game.
 cabinet and attached some pads and a keyboard, I guess it would be an
 arcade machine; but it still won't look like the other games very
 much.)</dd>      
+      <dt>Network Play</dt>
+      <dd>Although a future version of pydance <em>might</em> have
+      network support, the current version does not. The best way to
+      ensure that pydance does have network support in the future is
+      to help write it yourself.</dd>
       <dt>Edit Dance Patterns Graphically</dt>
       <dd>There is no graphical step pattern editor for pydance's
 .dance format; instead, you can use a text editor.</dd>
@@ -284,7 +289,7 @@ few sections, because those files are optional.</p>
     <p>pydance comes with some courses for "Nonstop Mode" (explained
 later), but you can also download your own. Courses go in
 <tt><em>rc_path</em>/courses/</tt> or
-<tt><em>pydance_path</em>/courses</tt>.
+<tt><em>pydance_path</em>/courses</tt>.</p>
 
     <h3>.crs Files</h3>
     <p><tt>.crs</tt> files are the only courses supported by pydance
@@ -491,9 +496,10 @@ the rating of that difficulty, and the top score on that difficulty.</p>
 more than one)</dd>
       <dt>Confirm</dt><dd>Open a folder, or start a song</dd>
       <dt>Cancel</dt><dd>Close a folder (and return to the folder
-list), or exit (if currently viewing the folder list)</dd>
+list), or exit (if currently viewing the folder list, or folders are
+turned off)</dd>
       <dt>Start</dt><dd>Switch to the Player Options screen</dd>
-      <dd>Select</dd><dd>Go to a random song (or folder)</dd>
+      <dt>Select</dt><dd>Go to a random song (or folder)</dd>
     </dl>
 
     <img src="images/diff-indicator.jpg" alt="The difficulty selector"
@@ -548,6 +554,39 @@ out!</p>
     </dl>
 
     <h2>Nonstop Mode</h2>
+    <p>pydance lets you play several songs in a row, also called a
+    "course". In nonstop mode you to select courses to play. The
+    course selector works much like the song selector, except you
+    can't select difficulties. Again, if you have over 60 courses, a
+    folder display will be on by default.</p>
+    <dl>
+      <dt>Up, Down</dt><dd>Select a song or folder</dd>
+      <dt>Confirm</dt><dd>Open a folder, or start a course</dd>
+      <dt>Cancel</dt><dd>Close a folder (and return to the folder
+list), or exit (if currently viewing the folder list or folders are
+turned off)</dd>
+      <dt>Start</dt><dd>Switch to the Player Options screen</dd>
+      <dt>Select</dt><dd>Go to a random song (or folder)</dd>
+    </dl>
+    <h3>Included Courses</h3>
+    <p>pydance comes with two sets of courses that you can play,
+    without having to install them.</p>
+    <dl>
+      <dt>Player's Picks</dt>
+      <dd>The Player's Picks courses are courses that changed based on
+      what songs you play in the regular game mode. The courses
+      contain songs with your best or worst scores, or songs you have
+      played often ("Likes") or least ("Dislikes"). You must play
+      songs at least once for them to appear anywhere on these lists
+      (even in Dislikes). Songs played in Nonstop or Endless mode
+      don't affect these lists.</dd>
+      <dt>random.choose(songs)</dt>
+      <dd>These courses consist of randomly selected songs, and will
+      be different each time you play them. In the <em>All Random</em>
+      course, even the difficulty you play on is random each
+      time.</dd>
+    </dl>
+
 
     <h2>Endless Mode</h2>
     <p>TODO</p>
