@@ -850,11 +850,11 @@ class SongItem(object):
     # Default values
     for k in ("subtitle", "background", "banner",
                 "author", "revision", "md5sum", "movie"):
-      if not self.info.has_key(k): self.info[k] = None
+      self.info[k] = self.info.get(k, None)
 
 
     for k in SongItem.defaults:
-      if not self.info.has_key(k): self.info[k] = SongItem.defaults[k]
+      self.info[k] = self.info.get(k, SongItem.defaults[k])
 
     for k in ("filename",):
       if self.info[k] and not os.path.isfile(self.info[k]):
@@ -867,6 +867,8 @@ class SongItem(object):
     for k in ("startat", "endat", "gap", "bpm"):
       self.info[k] = float(self.info[k])
 
+    self.info["valid"] = int(self.info["valid"])
+
     self.steps = song.steps
     if song.lyrics: self.lyrics = song.lyrics
     else: self.lyrics = []
@@ -875,7 +877,7 @@ class SongItem(object):
     self.description = song.description
 
     if self.info["mix"] == "": self.info["mix"] = "No Mix Available"
-  
+
     for k, v in SongItem.equivs.items():
       if self.difficulty.has_key(k) and not self.difficulty.has_key(v):
         self.difficulty[v] = self.difficulty[k]
