@@ -1,3 +1,6 @@
+# These parse various file formats describing steps.
+# Please read docs/fileparsers.txt and docs/dance-spec.txt
+
 from lyrics import Lyrics
 from constants import *
 
