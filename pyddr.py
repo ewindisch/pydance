@@ -20,12 +20,11 @@ from spritelib import *
 from pygame.sprite import RenderUpdates
 
 import fontfx, menudriver, fileparsers, colors, gradescreen, steps, audio
+import optionscreen
 
 import os, sys, random, operator, string, error, util, getopt
 
 os.chdir(pyddr_path)
-
-songdir = mainconfig['songdir']
 
 class BGmovie(pygame.sprite.Sprite):
   def __init__ (self, filename):
@@ -324,50 +323,6 @@ class ComboDisp(pygame.sprite.Sprite):
       self.image = self.space #display the blank image
  
 
-class HoldJudgeDisp(pygame.sprite.Sprite):
-    def __init__(self, playernum):
-        pygame.sprite.Sprite.__init__(self)
-        self.playernum = playernum
-
-        self.space = pygame.surface.Surface((48,24))
-        self.space.fill((0,0,0))
-
-        self.baseimage = pygame.surface.Surface((320,24))
-        self.baseimage.fill((0,0,0))
-        self.image = self.baseimage
-
-        self.okimg = fontfx.shadefade("OK",28,3,(48,24),(112,224,112))
-        self.ngimg = fontfx.shadefade("NG",28,3,(48,24),(224,112,112))
-
-        self.rect = self.image.get_rect()
-        self.image.set_colorkey(self.image.get_at((0,0)))
-        if mainconfig['scrollstyle'] == 2: self.rect.top = 228
-        elif mainconfig['scrollstyle'] == 1: self.rect.top = 400
-        else: self.rect.top = 56
-        self.rect.left = 60+(320*self.playernum)
-
-        self.slotnow = ['','','','']        
-        self.slotold = ['','','','']
-        self.slothit = [-1,-1,-1,-1]
-        
-    def fillin(self, curtime, direction, value):
-      self.slothit[direction] = curtime
-      self.slotnow[direction] = value
-      
-    def update(self, curtime):
-      for i in range(4):
-        if (curtime - self.slothit[i] > 0.5):
-          self.slotnow[i]=''
-        if self.slotnow[i] != self.slotold[i]:
-          x = (i*72)
-          if self.slotnow[i] == 'OK':
-            self.image.blit(self.okimg,(x,0))
-          if self.slotnow[i] == 'NG':
-            self.image.blit(self.ngimg,(x,0))
-          if self.slotnow[i] == '':
-            self.image.blit(self.space,(x,0))
-          self.slotold[i] = self.slotnow[i]
-          
 class fpsDisp(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -538,7 +493,7 @@ class ArrowSprite(CloneSprite):
     else: self.sample = None
 
     self.pos = {}
-    if mainconfig['scrollstyle'] == 2:
+    if player.scrollstyle == 2:
       self.top = 236
       self.bottom = random.choice((748, -276))
       if self.top < self.bottom:
@@ -547,7 +502,7 @@ class ArrowSprite(CloneSprite):
       else:
         self.suddenzone = int(64.0 * player.sudden) 
         self.hiddenzone = 236 - int(64.0 * player.hidden)
-    elif mainconfig['scrollstyle'] == 1:
+    elif player.scrollstyle == 1:
       self.top = 384
       self.bottom = -128
       self.suddenzone = int(64.0 * player.sudden)
@@ -645,7 +600,7 @@ class HoldArrowSprite(CloneSprite):
     self.timef = times[2]
     self.life  = times[2]-curtime
     self.pos = {}
-    if mainconfig['scrollstyle'] == 2:
+    if player.scrollstyle == 2:
       self.top = 236
       self.bottom = random.choice((748, -276))
       if self.top < self.bottom:
@@ -654,7 +609,7 @@ class HoldArrowSprite(CloneSprite):
       else:
         self.suddenzone = 64 + int(64.0 * player.sudden) 
         self.hiddenzone = 300 - int(64.0 * player.hidden)
-    elif mainconfig['scrollstyle'] == 1:
+    elif player.scrollstyle == 1:
       self.top = 384
       self.bottom = -128
       self.suddenzone = 64 + int(64.0 * player.sudden)
@@ -800,8 +755,6 @@ class HoldArrowSprite(CloneSprite):
     if alp != self.image.get_alpha(): self.image.set_alpha(alp)
 
 def SetDisplayMode(mainconfig):
-  global screen
-  
   try:
     if mainconfig["vesacompat"]:
       screen = pygame.display.set_mode((640, 480), 16)
@@ -817,6 +770,7 @@ def SetDisplayMode(mainconfig):
   except:
     print "Can't get a 16 bit display!" 
     sys.exit()
+  return screen
 
 def main():
   global screen
@@ -831,7 +785,7 @@ def main():
 
   # Search recursively for files
   fileList = []
-  for dir in songdir.split(os.pathsep):
+  for dir in mainconfig["songdir"].split(os.pathsep):
     print "Searching", dir
     fileList += util.find(dir, ('*.step', '*.dance', '*.dwi', '*.sm')) # Python's matching SUCKS
 
@@ -839,7 +793,7 @@ def main():
   parsedsongs = 0
   songs = []
 
-  SetDisplayMode(mainconfig)
+  screen = SetDisplayMode(mainconfig)
   
   pygame.display.set_caption('pyDDR ' + VERSION)
   pygame.mouse.set_visible(0)
@@ -855,7 +809,7 @@ def main():
   r.center = (320, 240)
   for f in fileList:
     try: songs.append(fileparsers.SongItem(f, False))
-    except None: print "Error loading " + f
+    except: print "Error loading " + f
     img = pbar.render(parsedsongs / totalsongs)
     pygame.display.update(screen.blit(img, r))
     parsedsongs += 100.0
@@ -870,7 +824,7 @@ def main():
                        "and download some free ones."
                        " ", " ", " ",
                        "If you already have some, make sure they're in",
-                       songdir))
+                       mainconfig["songdir"]))
     print "You don't have any songs. http://icculus.org/pyddr/get.php."
     sys.exit(1)
 
@@ -940,14 +894,16 @@ def blatantplug():
   sys.exit()    
 
 
-def playSequence(numplayers, playlist):
+def playSequence(playlist, configs):
   global screen
+
+  numplayers = len(configs)
 
   players = []
   for playerID in range(numplayers):
-    plr = Player(playerID, HoldJudgeDisp(playerID), ComboDisp(playerID))
+    plr = Player(playerID, ComboDisp(playerID), configs[playerID])
     players.append(plr)
-    
+
   for songfn, diff in playlist:
     current_song = fileparsers.SongItem(songfn)
     pygame.mixer.quit()
@@ -955,8 +911,8 @@ def playSequence(numplayers, playlist):
     songdata = steps.SongData(current_song)
 
     for pid in range(len(players)):
-      players[pid].set_song(steps.Steps(current_song, diff[pid],
-                                        lyrics = songdata.lyricdisplay),
+      players[pid].set_song(steps.Steps(current_song, diff[pid], players[pid],
+                                        songdata.lyricdisplay),
                                         Judge)
 
     print "Playing", songfn
@@ -1002,7 +958,6 @@ def dance(song, players, prevscr):
   if song.movie != None:
     backmovie = BGmovie(song.movie)
     background.fill(colors.BLACK)
-#    backmovie.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
   else:
     backmovie = BGmovie(None)
     
@@ -1044,16 +999,16 @@ def dance(song, players, prevscr):
       pj = JudgingDisp(pid)
       players[pid].judging_list.append(pj)
       pj.add(tgroup)
-    
 
-  fpstext = fpsDisp()
-  timewatch = TimeDisp()
+  strobe = mainconfig["strobe"]
+  if strobe:
+    extbox = Blinky(song.bpm)
+    extbox.add(tgroup)
 
-  colortype = mainconfig['arrowcolors']
-  if colortype == 0:
-    colortype = 1
-
+  fpsdisplay = mainconfig["fpsdisplay"]
   if mainconfig['fpsdisplay']:
+    fpstext = fpsDisp()
+    timewatch = TimeDisp()
     tgroup.add(fpstext)
     tgroup.add(timewatch)
 
@@ -1061,7 +1016,6 @@ def dance(song, players, prevscr):
     lgroup.add(song.lyricdisplay.channels.values())
 
   showcombo = mainconfig['showcombo']
-
   if showcombo:
     for plr in players:
       tgroup.add(plr.combos)
@@ -1089,17 +1043,13 @@ def dance(song, players, prevscr):
   if mainconfig['assist']: audio.set_volume(0.6)
   else: audio.set_volume(1.0)
 
-  if (mainconfig['strobe']):
-    extbox = Blinky(song.bpm)
-    extbox.add(tgroup)
-
   song.play()
   for plr in players:
     plr.start_song()
     for arrowID in DIRECTIONS:
       if mainconfig['explodestyle'] > -1:
         plr.toparrfx[arrowID].add(fgroup)
-      if mainconfig['showtoparrows']:
+      if plr.toparrows:
         plr.toparr[arrowID].add(sgroup)
       
   while 1:
@@ -1151,7 +1101,7 @@ def dance(song, players, prevscr):
       playerID = keyAction[0]
       if playerID < len(players):
         keyPress = keyAction[1]
-        players[playerID].toparr[keyPress].stepped(1, curtime+(players[playerID].steps.offset*1000))
+        players[playerID].toparr[keyPress].stepped(1, curtime+(players[playerID].steps.soffset))
         players[playerID].fx_data.append(players[playerID].judge.handle_key(keyPress, curtime) )
 
     # This maps the old holdkey system to the new event ID one
@@ -1195,13 +1145,18 @@ def dance(song, players, prevscr):
         for ev in nevents:
           if ev.feet:
             for (dir,num) in zip(DIRECTIONS, ev.feet):
+              dirstr = dir + repr(int(ev.color) % plr.colortype)
+              groups = (plr.arrow_group, rgroup)
               if num & 1:
                 if not (num & 2):
-                  ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, plr).add([plr.arrow_group, rgroup])
+                  ArrowSprite(plr.theme.arrows[dirstr].c,
+                              curtime, ev.when, plr).add(groups)
 
               if num & 2:
-                holdindex = plr.steps.holdref.index((DIRECTIONS.index(dir),ev.when))
-                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, plr.steps.holdinfo[holdindex], plr).add([plr.arrow_group, rgroup])
+                holdindex = plr.steps.holdref.index((DIRECTIONS.index(dir),
+                                                     ev.when))
+                HoldArrowSprite(plr.theme.arrows[dirstr].c, curtime,
+                                plr.steps.holdinfo[holdindex], plr).add(groups)
 
     for plr in players:
       if len(plr.steps.lastbpmchangetime) > 0:
@@ -1213,8 +1168,8 @@ def dance(song, players, prevscr):
      
     for plr in players: plr.check_sprites(curtime)
 
-    if(mainconfig['strobe']):
-      extbox.update(curtime+(players[0].steps.offset*1000.0))
+    if strobe:
+      extbox.update(curtime+(players[0].steps.soffset))
     
     song.lyricdisplay.update(curtime)
 
@@ -1230,7 +1185,7 @@ def dance(song, players, prevscr):
     songtext.update()
     grptext.update()
 
-    if mainconfig["fpsdisplay"]:
+    if fpsdisplay:
       fpstext.update(curtime)
       timewatch.update(curtime)
 

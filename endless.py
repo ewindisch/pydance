@@ -108,8 +108,9 @@ class Endless:
 
       # Start game
       if ev[0] == 0 and ev[1] == E_START:
-        playSequence(len(self.constraints),
-                     FakePlaylist(songitems, self.constraints, screen))
+        playSequence(FakePlaylist(songitems, self.constraints, screen),
+                     len(self.constraints) * [player_config])
+                     
 
         audio.load(os.path.join(sound_path, "menu.ogg"))
         audio.play(4, 0.0)

@@ -14,13 +14,14 @@ BEATS = { 'x': 0.25, 't': 0.5, 'u': 1.0/3.0, 'f': 2.0/3.0,
 # FIXME: This can probably be replaced by something smaller, like a tuple.
 
 class SongEvent:
-  def __init__ (self, bpm, when=0.0, feet=None, next=None,
+  def __init__ (self, bpm, when=0.0, beat = 0, feet=None, next=None,
                 extra=None, color=None):
     self.bpm  = bpm
     self.when = when
     self.feet = feet
     self.extra = extra
     self.color = color
+    self.beat = beat
 
   def __repr__(self):
     rest = []
@@ -32,15 +33,14 @@ class SongEvent:
 
 # Step objects, made from SongItem objects
 
-#FIXME Why are we using a linked list? We should be using a python list
 class Steps:
-  def __init__(self, song, difficulty, playmode="SINGLE",
-               lyrics = None):
+  def __init__(self, song, difficulty, player, lyrics, playmode="SINGLE"):
     self.playmode = playmode
     self.difficulty = difficulty
     self.feet = song.difficulty[playmode][difficulty]
     self.length = 0.0
     self.offset = -(song.info["gap"] + mainconfig['masteroffset']) / 1000.0
+    self.soffset = self.offset * 1000
     self.bpm = song.info["bpm"]
 
     if mainconfig['onboardaudio']:
@@ -56,13 +56,14 @@ class Steps:
     releasetimes = []
     self.numholds = 1
     holding = [0, 0, 0, 0]
-    little = mainconfig["little"]
+    little = player.little
     coloring_mod = 0
     cur_time = float(self.offset)
+    cur_beat = 0
     cur_bpm = self.bpm
-    self.speed = mainconfig['scrollspeed']
+    self.speed = player.speed
     self.lastbpmchangetime = []
-    self.events = [SongEvent(when = cur_time, bpm = cur_bpm,
+    self.events = [SongEvent(when = cur_time, bpm = cur_bpm, beat = cur_beat,
                              extra = song.difficulty[playmode][difficulty])]
 
     self.event_idx = 0
@@ -72,11 +73,13 @@ class Steps:
 
       if words[0] == 'W':
         cur_time += float(words[1])
+        beat += cur_bpm * float(words[1]) / 60
       elif words[0] == 'R':
-        self.events.append(SongEvent(when=cur_time,bpm=cur_bpm,extra='READY'))
+        self.events.append(SongEvent(when = cur_time, bpm = cur_bpm,
+                                     beat = cur_beat, extra= ' READY'))
         coloring_mod = 0
       elif words[0] in BEATS:
-        cando = True
+        cando = True # FIXME: Do little correctly for 24th etc notes
         if ((little == 1 and (coloring_mod % 4 == 1 or
                               coloring_mod % 4 == 3)) or
             (little == 2 and (coloring_mod % 4 == 2)) or
@@ -92,7 +95,7 @@ class Steps:
           arrowcount = 0
           for jump in range(len(feetstep)):
             if (feetstep[jump] & 1):
-              if (arrowcount != 0 and mainconfig['badknees'] and
+              if (arrowcount != 0 and player.jumps and
                   holding[jump] == 0):
                 feetstep[jump] = 0
               arrowcount += 1
@@ -116,18 +119,21 @@ class Steps:
 
           self.events.append(SongEvent(when = cur_time, bpm = cur_bpm,
                                        feet = feetstep, extra = words[0],
-                                       color = coloring_mod % 4))
+                                       beat = cur_beat,
+                                       color = coloring_mod))
 
           for arrowadder in feetstep:
             if arrowadder & 1:
               self.totalarrows += 1
 
         cur_time += toRealTime(cur_bpm, BEATS[words[0]])
+        cur_beat += BEATS[words[0]]
 
-        coloring_mod += BEATS[words[0]]
+        coloring_mod += BEATS[words[0]] % 4
 
       elif words[0] == "D":
         cur_time += toRealTime(cur_bpm, BEATS['q'] * words[1])
+        cur_beat += BEATS['q'] * words[1]
         coloring_mod += 4 * words[1]
 
       elif words[0] == "B":
@@ -166,8 +172,8 @@ class Steps:
     self.event_idx = idx
 
     if idx < len(self.events) and nidx < len(self.events):
-      ntime = time + toRealTime(self.events[nidx].bpm, 64) / self.speed
-      while nidx < len(self.events) and self.events[nidx].when <= ntime:
+      nbeat = self.events[idx].beat + (64 / self.speed)
+      while (nidx < len(self.events) and self.events[nidx].beat <= nbeat):
         self.playingbpm = self.events[nidx].bpm
         nevents.append(self.events[nidx])
         nidx += 1

@@ -54,22 +54,24 @@ if not os.path.isdir(rc_path): os.mkdir(rc_path)
 
 search_paths = (pyddr_path, rc_path)
 
+if not sys.stdout.isatty():
+  sys.stdout = open(os.path.join(rc_path, "pyddr.log"), "w")
+  sys.stderr = sys.stdout
+
 # Set up the configuration file
 mainconfig = config.Config({ # Wow we have a lot of options
   "gfxtheme": "classic", "djtheme": "none", "songdir": ".",
   "stickycombo": 1,  "lowestcombo": 4,  "totaljudgings": 1,  "stickyjudge": 1,
   "lyriccolor": "cyan/aqua",
   "onboardaudio": 0, "masteroffset": 0,
-  "scrollstyle": 0, "scrollspeed": 1,
-  "explodestyle": 3, "arrowspin": 0, "arrowscale" : 1,
-  "vesacompat": 0, "fullscreen": 0,
+  "explodestyle": 3, "vesacompat": 0, "fullscreen": 0,
   "sortmode": 0,
   "previewmusic": 1,
   "showbackground": 1, "bgbrightness": 127,
   "gratuitous": 1,
-  "sudden": 0, "hidden": 0, "little": 0, "assist": 0, "badknees": 0,
-  "arrowcolors": 4, "fpsdisplay": 1, "showlyrics": 1,
-  "showcombo": 1, "showtoparrows": 1,
+  "assist": 0,
+  "fpsdisplay": 1, "showlyrics": 1,
+  "showcombo": 1,
   "autofail": 1, "maxonilife": 0,
   "grading": 1,
   "keyboard": "qwerty",
@@ -77,6 +79,17 @@ mainconfig = config.Config({ # Wow we have a lot of options
   "strobe": 0,
   "usemad": 1
   })
+
+player_config = {"spin": 0,
+                 "scale": 1,
+                 "speed": 1.0,
+                 "sudden": 0,
+                 "hidden": 0,
+                 "little": 0,
+                 "toparrows": 1,
+                 "jumps": 1,
+                 "colortype": 4,
+                 "scrollstyle": 0 }
 
 if osname == "posix":
   mainconfig.load("/etc/pyddr.cfg", True)

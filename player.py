@@ -5,20 +5,23 @@ from gfxtheme import GFXTheme
 import fontfx, spritelib, colors
 
 class Player:
-  def __init__(self, pid, holdtext, combos, mode = "SINGLE"):
+
+  def __init__(self, pid, combos, config, mode = "SINGLE"):
     self.theme = GFXTheme(mainconfig["gfxtheme"])
-    if mainconfig["scrollstyle"] == 2: self.top = 236
-    elif mainconfig["scrollstyle"] == 1: self.top = 384
+    self.pid = pid
+
+    self.__dict__.update(config)
+
+    if self.scrollstyle == 2: self.top = 236
+    elif self.scrollstyle == 1: self.top = 384
     else: self.top = 64
     
-    self.pid = pid
     self.score = ScoringDisp(pid, "Player " + str(pid))
     if mainconfig["maxonilife"] == 0:
       self.lifebar = LifeBarDisp(pid, self.theme)
     else:
       self.lifebar = OniLifeBarDisp(pid, self.theme)
-    self.holdtext = holdtext
-    self.arrow_group = pygame.sprite.RenderUpdates()
+    self.holdtext = HoldJudgeDisp(self)
     self.judging_list = []
     self.total_judgings = mainconfig['totaljudgings']
     self.tempholding = [-1, -1, -1, -1]
@@ -29,16 +32,9 @@ class Player:
     self.evt = None
     self.mode = mode
 
-    # Various display options - these should be in player rather than
-    # global or the sprites, so we can have per-player options
-    self.sudden = mainconfig['sudden']
-    self.hidden = mainconfig['hidden']
-    self.spin = mainconfig['arrowspin']
-    self.speed = mainconfig['scrollspeed']
-    self.scale = mainconfig['arrowscale']
-
   def set_song(self, steps, Judge): # FIXME factor these out
     self.steps = steps
+    self.arrow_group = pygame.sprite.RenderUpdates()
     arr, arrfx = self.theme.toparrows(self.steps.bpm, self.top, self.pid)
     self.toparr = arr
     self.toparrfx = arrfx
@@ -67,7 +63,7 @@ class Player:
     self.fx_data = []
 
   def change_bpm(self, newbpm):
-    if mainconfig['showtoparrows']:
+    if self.toparrows:
       for d in self.toparr:
         self.toparr[d].tick = toRealTime(newbpm, 1)
         self.toparrfx[d].tick = toRealTime(newbpm, 1)
@@ -254,3 +250,47 @@ class OniLifeBarDisp(AbstractLifeBar):
 
     if self.failed:
       self.image.blit(self.failtext, (70, 2) )
+
+class HoldJudgeDisp(pygame.sprite.Sprite):
+  def __init__(self, player):
+    pygame.sprite.Sprite.__init__(self)
+
+    self.space = pygame.surface.Surface((48, 24))
+    self.space.fill((0, 0, 0))
+
+    self.image = pygame.surface.Surface((320, 24))
+    self.image.fill((0, 0, 0))
+    self.image.set_colorkey((0, 0, 0))
+
+    self.okimg = fontfx.shadefade("OK",28,3,(48,24),(112,224,112))
+    self.ngimg = fontfx.shadefade("NG",28,3,(48,24),(224,112,112))
+
+    self.rect = self.image.get_rect()
+    if player.scrollstyle == 2: self.rect.top = 228
+    elif player.scrollstyle == 1: self.rect.top = 400
+    else: self.rect.top = 56
+
+    self.rect.left = 60 + (320 * player.pid)
+
+    self.slotnow = ['','','','']        
+    self.slotold = ['','','','']
+    self.slothit = [-1,-1,-1,-1]
+        
+  def fillin(self, curtime, direction, value):
+    self.slothit[direction] = curtime
+    self.slotnow[direction] = value
+    
+  def update(self, curtime):
+    for i in range(len(self.slotnow)):
+      if (curtime - self.slothit[i] > 0.5):
+        self.slotnow[i]=''
+      if self.slotnow[i] != self.slotold[i]:
+        x = (i*72)
+        if self.slotnow[i] == 'OK':
+          self.image.blit(self.okimg,(x,0))
+        elif self.slotnow[i] == 'NG':
+          self.image.blit(self.ngimg,(x,0))
+        elif self.slotnow[i] == '':
+          self.image.blit(self.space,(x,0))
+        self.slotold[i] = self.slotnow[i]
+          

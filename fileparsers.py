@@ -1,8 +1,5 @@
 import os, stat, util, string
 
-# FIXME: DanceFile and StepFile can easily share a parent class.
-# FIXME: This file needs major refactoring and cleanups
-
 class GenericFile:
   def __init__(self, filename, need_steps):
     self.filename = filename
@@ -66,13 +63,19 @@ class GenericFile:
             largefile = max(largefile, size)
             self.info["banner"] = fullfile
           except ValueError:
-            if size > largefile and not found_bg:
-              largefile = size
-              if self.info.has_key("background"):
-                self.info["banner"] = self.info["background"]
-              self.info["background"] = fullfile
-            else:
+            try:
+              lfile.index("bn")
+              found_ban = True
+              largefile = max(largefile, size)
               self.info["banner"] = fullfile
+            except ValueError:
+              if size > largefile and not found_bg:
+                largefile = size
+                if self.info.has_key("background"):
+                  self.info["banner"] = self.info["background"]
+                self.info["background"] = fullfile
+              elif not found_ban:
+                self.info["banner"] = fullfile
     if (self.info.get("banner") == self.info.get("background") and
         self.info.has_key("banner")):
       del(self.info["banner"])
@@ -348,7 +351,7 @@ class DWIFile(GenericFile):
       else: # This is some sort of metadata key
         # don't support filenames. They're useless cross-platform.
         # Don't support genre, it's a dumbass tag
-        if parts[0] == "GAP": self.info["gap"] = -int(parts[1])
+        if parts[0] == "GAP": self.info["gap"] = -int(float(parts[1]))
         elif parts[0] == "TITLE": self.info["title"] = ":".join(parts[1:])
         elif parts[0] == "ARTIST": self.info["artist"] = ":".join(parts[1:])
         elif parts[0] == "MD5": self.info["md5sum"] = parts[1]

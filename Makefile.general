@@ -1,6 +1,6 @@
 MANPAGES += docs/man
 UTILS += utils/findbpm.py
-PYMODS += config.py announcer.py fontfx.py input.py constants.py menus.py menudriver.py spritelib.py gfxtheme.py songselect.py fileparsers.py colors.py player.py endless.py gradescreen.py lyrics.py steps.py util.py audio.py error.py
+PYMODS += config.py announcer.py fontfx.py input.py constants.py menus.py menudriver.py spritelib.py gfxtheme.py songselect.py fileparsers.py colors.py player.py endless.py gradescreen.py lyrics.py steps.py util.py audio.py error.py optionscreen.py
 DATA += themes images sound
 
 clean:

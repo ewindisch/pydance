@@ -4,7 +4,7 @@
 import os, string, pygame, random, copy
 from constants import *
 
-import spritelib, announcer, audio, colors
+import spritelib, announcer, audio, colors, optionscreen
 
 # FIXME: this needs to be moved elsewhere if we want theming
 ITEM_BG = pygame.image.load(os.path.join(image_path, "ss-item-bg.png"))
@@ -129,8 +129,7 @@ class SongItemDisplay:
       self.menuimage.blit(grouptext, (15, 36))
 
 class SongSelect:
-  # FIXME We need to remove playSequence, by refactoring
-  # it elsewhere, too
+  # FIXME We need to remove playSequence, by refactoring it elsewhere, too
   def __init__(self, songitems, screen, playSequence,
                players = 1, gametype = "SINGLE"):
     self.songs = [SongItemDisplay(s) for s in songitems
@@ -142,8 +141,6 @@ class SongSelect:
     self.player_image = [pygame.image.load(os.path.join(image_path,
                                                         "player0.png"))]
 
-    # FIXME This is stupid fucking crap we need to get rid of...
-    # Who's in charge of those new parsers? oh right, me.
     self.diff_list = []
     self.song_list = []
     self.title_list = []
@@ -171,6 +168,7 @@ class SongSelect:
       audio.play(4, 0.0)
 
     self.player_diffs = [0]
+    self.player_configs = [copy.copy(player_config)]
     self.player_diff_names = [self.songs[self.index].song.diff_list[self.gametype][self.player_diffs[0]]]
 
     self.songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
@@ -265,6 +263,7 @@ class SongSelect:
         self.player_diff_names.append(self.current_song.diff_list[gametype][0])
         file = os.path.join(image_path, "player" + str(ev[0]) + ".png")
         self.player_image.append(pygame.image.load(file))
+        self.player_configs.append(copy.copy(player_config))
         self.diff_list = []
         self.song_list = []
         self.title_list = []
@@ -276,6 +275,7 @@ class SongSelect:
         while len(self.player_diffs) > ev[0]:
           self.player_diffs.pop()
           self.player_diff_names.pop()
+          self.player_configs.pop()
         self.diff_list = []
         self.song_list = []
         self.title_list = []
@@ -288,19 +288,20 @@ class SongSelect:
         except: self.add_current_song()
         background = spritelib.CloneSprite(pygame.transform.scale(self.screen,
                                                                   (640,480)))
-        audio.fadeout(1000)
         ann = announcer.Announcer(mainconfig["djtheme"])
         ann.say("menu")
-
         # Wait for the announcer to finish
         try:
           while ann.chan.get_busy(): pygame.time.wait(1)
         except: pass
 
+        self.optionscreen()
+        audio.fadeout(500)
+
         # playSequence can probably derive the number of players from
         # the length of the other lists
-        playSequence(len(self.player_diffs), zip(self.song_list,
-                                                 self.diff_list))
+        playSequence(zip(self.song_list, self.diff_list), self.player_configs)
+
         # Reset the playlist
         self.song_list = []
         self.diff_list = []
@@ -623,3 +624,15 @@ class SongSelect:
       self.helpimage.set_colorkey(self.helpimage.get_at((0,0)), RLEACCEL)
       self.helpimage.set_alpha(0)
       self.last_help_update = pygame.time.get_ticks()
+
+  def optionscreen(self):
+    ev = (0, E_QUIT)
+    start = pygame.time.get_ticks()
+
+    while (event.states[(0, E_START)] and
+           pygame.time.get_ticks() - start < 1500):
+      ev = event.poll()
+
+    if event.states[(0, E_START)]:
+      optionscreen.OptionScreen(self.screen, self.player_configs,
+                                "Song Select")
