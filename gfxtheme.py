@@ -172,11 +172,12 @@ class ArrowSet(object):
         else: color = cnum
         arrows[dir+repr(cnum)] = Arrow(theme, "c", dir, color, left)
 
+    for n in arrows: self.__dict__[n] = arrows[n]
     self.arrows = arrows
 
   # allow access by instance['l']
-  def __getitem__ (self,item):
-    return getattr(self,item)
+  def __getitem__ (self, item):
+    return getattr(self, item)
 
 # The basic arrow that animates itself with the beat of the music. It's
 # used for displaying the scrolling arrows and the top arrows.
