@@ -14,7 +14,6 @@ def sorted_diff_list(difficulty_hash):
   for key in dhash: diffs.append(key)
   return diffs
 
-
 class StepFile:
   def __init__(self, filename):
     self.filename = filename
@@ -85,19 +84,19 @@ class StepFile:
     if not self.info.has_key("subtitle"):
       try:
         l, r = self.info["song"].index("["), self.info["song"].rindex("]")
-        if l != 1 and r > l + 1:
+        if l != 0 and r > l + 1:
           self.info["subtitle"] = self.info["song"][l+1:r]
           self.info["song"] = self.info["song"][:l]
       except ValueError:
         try:
           l, r = self.info["song"].index("("), self.info["song"].rindex(")")
-          if l != 1 and r > l + 1:
+          if l != 0 and r > l + 1:
             self.info["subtitle"] = self.info["song"][l+1:r]
             self.info["song"] = self.info["song"][:l]
         except ValueError:
           try:
             l, r = self.info["song"].index("~"), self.info["song"].rindex("~")
-            if l != 1 and r > l + 1:
+            if l != 0 and r > l + 1:
               self.info["subtitle"] = self.info["song"][l+1:r]
               self.info["song"] = self.info["song"][:l]
           except ValueError:
