@@ -11,7 +11,9 @@
 # C = Current combo count.
 # V(n) = The point value of the nth step.
 
-import colors, pygame, fontfx
+import colors
+import pygame
+import fontfx
 
 from listener import Listener
 from constants import *

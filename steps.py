@@ -1,7 +1,9 @@
 # These parse various file formats describing steps.
 # Please read docs/dance-spec.txt
 
-import colors, games, stepfilters
+import colors
+import games
+import stepfilters
 
 from lyrics import Lyrics
 from util import toRealTime

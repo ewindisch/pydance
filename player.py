@@ -1,3 +1,15 @@
+import fontfx
+import colors
+import steps
+import random
+import arrows
+import lifebars
+import scores
+import combos
+import grades
+import judge
+import stats
+
 from constants import *
 from pad import pad
 
@@ -8,9 +20,6 @@ from announcer import Announcer
 from listener import Listener
 
 from pygame.sprite import RenderUpdates, RenderClear
-
-import fontfx, colors, steps, random, arrows
-import lifebars, scores, combos, grades, judge, stats
 
 # This class keeps an ordered list of sprites in addition to the dict,
 # so we can draw in the order the sprites were added.
@@ -123,72 +132,72 @@ class JudgingDisp(Listener, pygame.sprite.Sprite):
   def __init__(self, playernum, game):
     pygame.sprite.Sprite.__init__(self)
 
-    self.sticky = mainconfig['stickyjudge']
-    self.needsupdate = 1
-    self.laststep = 0
-    self.oldzoom = -1
-    self.bottom = 320
-    self.centerx = game.sprite_center + (playernum * game.player_offset)
+    self._sticky = mainconfig['stickyjudge']
+    self._needsupdate = True
+    self._laststep = 0
+    self._oldzoom = -1
+    self._bottom = 320
+    self._centerx = game.sprite_center + (playernum * game.player_offset)
         
-    tx = FONTS[48].size("MARVELOUS")[0]+4
-    self.marvelous = fontfx.shadefade("MARVELOUS", 48, 4,
-                                      [tx, 40], [224, 224, 224])
+    tx = FONTS[48].size("MARVELOUS")[0] + 4
+    marvelous = fontfx.shadefade("MARVELOUS", 48, 4, [tx, 40], [224, 224, 224])
 
-    tx = FONTS[48].size("PERFECT")[0]+4
-    self.perfect = fontfx.shadefade("PERFECT", 48, 4, [tx, 40], [224, 224, 32])
+    tx = FONTS[48].size("PERFECT")[0] + 4
+    perfect = fontfx.shadefade("PERFECT", 48, 4, [tx, 40], [224, 224, 32])
 
-    tx = FONTS[48].size("GREAT")[0]+4
-    self.great = fontfx.shadefade("GREAT", 48, 4, [tx, 40], [32, 224, 32])
+    tx = FONTS[48].size("GREAT")[0] + 4
+    great = fontfx.shadefade("GREAT", 48, 4, [tx, 40], [32, 224, 32])
 
-    tx = FONTS[48].size("OKAY")[0]+4
-    self.okay = fontfx.shadefade("OKAY", 48, 4, [tx, 40], [32, 32, 224])
+    tx = FONTS[48].size("OKAY")[0] + 4
+    okay = fontfx.shadefade("OKAY", 48, 4, [tx, 40], [32, 32, 224])
 
-    tx = FONTS[48].size("BOO")[0]+4
-    self.boo = fontfx.shadefade("BOO", 48, 4, [tx, 40], [96, 64, 32])
+    tx = FONTS[48].size("BOO")[0] + 4
+    boo = fontfx.shadefade("BOO", 48, 4, [tx, 40], [96, 64, 32])
 
     tx = FONTS[48].size("MISS")[0]+4
-    self.miss = fontfx.shadefade("MISS", 48, 4, [tx, 40], [224, 32, 32])
+    miss = fontfx.shadefade("MISS", 48, 4, [tx, 40], [224, 32, 32])
 
-    self.space = FONTS[48].render(" ", True, [0, 0, 0])
+    self._space = FONTS[48].render(" ", True, [0, 0, 0])
 
-    self.marvelous.set_colorkey(self.marvelous.get_at([0, 0]), RLEACCEL)
-    self.perfect.set_colorkey(self.perfect.get_at([0, 0]), RLEACCEL)
-    self.great.set_colorkey(self.great.get_at([0, 0]), RLEACCEL)
-    self.okay.set_colorkey(self.okay.get_at([0, 0]), RLEACCEL)
-    self.boo.set_colorkey(self.boo.get_at([0, 0]), RLEACCEL)
-    self.miss.set_colorkey(self.miss.get_at([0, 0]), RLEACCEL)
+    marvelous.set_colorkey(marvelous.get_at([0, 0]), RLEACCEL)
+    perfect.set_colorkey(perfect.get_at([0, 0]), RLEACCEL)
+    great.set_colorkey(great.get_at([0, 0]), RLEACCEL)
+    okay.set_colorkey(okay.get_at([0, 0]), RLEACCEL)
+    boo.set_colorkey(boo.get_at([0, 0]), RLEACCEL)
+    miss.set_colorkey(miss.get_at([0, 0]), RLEACCEL)
+
+    self._images = { "V": marvelous, "P": perfect, "G": great,
+                     "O": okay, "B": boo, "M": miss }
     
-    self.image = self.space
-    self.baseimage = self.space
+    self.image = self._space
+    self._baseimage = self._space
 
   def stepped(self, pid, dir, curtime, etime, rating, combo):
     if rating is None: return
 
-    self.laststep = curtime
-    self.rating = rating
-    self.baseimage = { "V": self.marvelous, "P": self.perfect,
-                       "G": self.great, "O": self.okay,
-                       "B": self.boo, "M": self.miss }.get(rating, self.space)
+    self._laststep = curtime
+    self._rating = rating
+    self._baseimage = self._images.get(rating, self._space)
 
   def update(self, curtime):
-    self.laststep = min(curtime, self.laststep)
-    steptimediff = curtime - self.laststep
+    self._laststep = min(curtime, self._laststep)
+    steptimediff = curtime - self._laststep
 
     zoomzoom = 1 - min(steptimediff, 0.2) * 2
 
-    if zoomzoom != self.oldzoom:
-      self.oldzoom = zoomzoom
-      self.needsupdate = True
-      if (steptimediff > 0.36) and not self.sticky:
-        self.image = self.space
+    if zoomzoom != self._oldzoom:
+      self._oldzoom = zoomzoom
+      self._needsupdate = True
+      if (steptimediff > 0.36) and not self._sticky:
+        self.image = self._space
 
-    if self.needsupdate:
-      self.image = pygame.transform.rotozoom(self.baseimage, 0, zoomzoom)
+    if self._needsupdate:
+      self.image = pygame.transform.rotozoom(self._baseimage, 0, zoomzoom)
       self.rect = self.image.get_rect()
-      self.rect.centerx = self.centerx
-      self.rect.bottom = self.bottom
+      self.rect.centerx = self._centerx
+      self.rect.bottom = self._bottom
       self.image.set_colorkey(self.image.get_at([0, 0]), RLEACCEL)
-      self.needsupdate = False
+      self._needsupdate = False
 
 class Player(object):
 
@@ -430,9 +439,6 @@ class Player(object):
   def handle_key(self, ev, time):
     ev = ev[0], self.game.dirmap.get(ev[1], ev[1])
     if ev[1] not in self.game.dirs: return
-
-    # Note that we can't pack up the listener arguments ahead of time
-    # here, because otherwise we use the old values for combos.combo.
 
     if self.game.double:
       pid = ev[0] & 1

@@ -8,6 +8,7 @@ Legend:
 
 ----- - CURRENT
 0.9.1 -
++ Display the average time off (in milliseconds) when grading.
 * Don't crash sometimes on slower systems when failing.
 * Commas (or periods) are displayed on the grading screen in the score again.
 * Fix a rare mixer-related crash.
