@@ -531,8 +531,8 @@ class SongSelect:
       self.helpimage.set_alpha(0)
     if self.last_help_update <= 25:
       self.helpimage.set_alpha(10 * self.last_help_update)
-    elif 150 <= self.last_help_update <= 175:
-      self.helpimage.set_alpha(250 - 20 * (self.last_help_update - 150))
-    elif self.last_help_update == 200:
+    elif 125 <= self.last_help_update <= 150:
+      self.helpimage.set_alpha(250 - 20 * (self.last_help_update - 125))
+    elif self.last_help_update == 175:
       self.last_help_update = -1
     self.last_help_update += 1
