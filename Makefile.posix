@@ -11,9 +11,8 @@ install:
 	install -d $(DESTDIR)$(PREFIX)/share/games/pydance/songs
 	install -d $(DESTDIR)$(PREFIX)/share/man/man1 $(DESTDIR)$(PREFIX)/share/man/man6
 	install -m 644 $(PYMODS) $(DESTDIR)$(PREFIX)/share/games/pydance
-	install -m 755 pydance.py any2dance.py $(DESTDIR)$(PREFIX)/share/games/pydance
+	install -m 755 pydance.py $(DESTDIR)$(PREFIX)/share/games/pydance
 	ln -sf ../share/games/pydance/pydance.py $(DESTDIR)$(PREFIX)/games/pydance
-	ln -sf ../share/games/pydance/any2dance.py $(DESTDIR)$(PREFIX)/bin/any2dance
 	cp pydance.posix.cfg pydance.cfg
 	install -D -m 644 pydance.cfg $(DESTDIR)/etc/pydance.cfg
 	for U in $(UTILS); do\
