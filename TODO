@@ -13,6 +13,7 @@ add to it.
  - DWI loader natively using the SongFile interface.
  - New song select
  - Themable menus?
+ - Support A2B8 pads.
 
 Misc:
 md5 checksums in .step files for the music they go with (wait for rewrite)
