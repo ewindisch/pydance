@@ -9,6 +9,7 @@
 #from psyco.classes import *
 
 
+from announcer import Announcer
 import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
 import os, sys, glob, random, fnmatch, types, operator, copy, string
 import pygame.transform
@@ -127,63 +128,11 @@ class ConfigFile:
 #MAIN CONFIG FILE
 mainconfig = ConfigFile('pyddr.cfg')
 
-class Announcer:
-  def __init__(self, config):
-    self.config = config
-    self.path = os.path.join(os.path.split(self.config.filename)[:-1])[0]
-    ann = self.config.get_section("announcer")
-    self.name = ann["name"]
-    self.author = ann["author"]
-    self.rev = ann["rev"]
-    self.date = ann["date"]
-    self.saytime = -1000000
-  def __play(self, filename):
-#    os.system("playmus %s &" % os.path.join(self.path,filename))
-    if (pygame.time.get_ticks() - self.saytime > 6000):
-      self.snd = pygame.mixer.Sound(os.path.join(self.path,filename))
-      self.chan = self.snd.play()
-    self.saytime = pygame.time.get_ticks()
-  def say_file(self, filename):
-    self.__play(filename)
-  def saywait(self, sections, mood=(1,100)):
-    self.say(sections,mood)
-    try:
-      while self.chan.get_busy():
-        pass
-    except:
-      pass
-  def say(self, sections, mood=(1,100)):
-    # sections can be either a string or a sequence of strings.
-    # mood can be either a number from 1-100, or a 2-tuple of numbers, which
-    # will be treated as a range.
-    secdata = {}
-    try:
-      sections.isalnum()
-    except AttributeError:
-      for x in sections:
-        secdata.update(self.config.get_section(x))
-    else:
-      # we have only one section to read.
-      secdata = self.config.get_section(sections)
-    try:
-      mood[0]
-    except TypeError:
-      # it's a single number, not a range.
-      mood = (mood, mood)
-    possible = []
-    for x in secdata.keys():
-      cm = int(secdata[x])
-      if cm >= mood[0] and cm <= mood[1]:
-        possible.append(x)
-    if len(possible):
-      self.__play(possible[random.randrange(len(possible))])
-      
 DefaultThemeDir = os.path.join('themes','gfx')
 theme = mainconfig.get_value('gfxtheme',default='bryan')
 songdir = mainconfig.get_value('songdir',default='.')
 anncname = mainconfig.get_value('djtheme',default='none')
-annc_cf = ConfigFile(os.path.join('themes','dj',anncname,'djtheme.cfg'))
-annc = Announcer(annc_cf)
+annc = Announcer(os.path.join('themes','dj',anncname,'djtheme.cfg'))
 
 """
 def colorMultiply(surf,color):
@@ -2852,7 +2801,7 @@ def main():
       update_screen = update_display_hardware
   #else it defaults to software update rect
 
-  pygame.mixer.music.load("loading.ogg")
+  pygame.mixer.music.load("menu.ogg")
   try:
     pygame.mixer.music.play(4, 0.0)
   except TypeError:
