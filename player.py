@@ -552,12 +552,18 @@ class Player(object):
     self.lifebar = Lifebar(pid, self.theme, songconf, game)
     self.judging_disp = JudgingDisp(self.pid, game)
 
-    self.Judge = judge.judges[songconf["judge"]]
-    
     self.game = game
 
-    if self.game.double: self.judge = [None, None]
-    else: self.judge = None
+    if not game.double:
+      self.judge = judge.judges[songconf["judge"]](self.combos, self.score,
+                                                   self.judging_disp,
+                                                   self.grade, self.lifebar)
+    else:
+      Judge = judge.judges[songconf["judge"]]
+      self.judge = [Judge(self.combos, self.score, self.judging_disp,
+                         self.grade, self.lifebar),
+                    Judge(self.combos, self.score, self.judging_disp,
+                         self.grade, self.lifebar)]
 
   def set_song(self, song, diff, lyrics):
     self.difficulty = diff
@@ -592,25 +598,15 @@ class Player(object):
       self.holdtext = [HoldJudgeDisp(self.pid * 2, self, self.game),
                        HoldJudgeDisp(self.pid * 2 + 1, self, self.game)]
 
-      # FIXME: This is ugly
-      self.lifebar.set_song(
-        diff,
-        self.steps[0].totalarrows + self.steps[1].totalarrows,
-        self.steps[0].feet)
-        
-      self.score.set_song(
-        diff,
-        self.steps[0].totalarrows + self.steps[1].totalarrows,
-        self.steps[0].feet)
+      count = self.steps[0].totalarrows + self.steps[1].totalarrows
+      self.lifebar.set_song(diff, count, self.steps[0].feet)
+      self.score.set_song(diff, count, self.steps[0].feet)
 
       for i in range(2):
         if self.steps[i].holdref: holds = len(self.steps[i].holdref)
         else: holds = 0
-        j = self.Judge(self.steps[i].bpm, holds, self.combos, self.score,
-                       self.judging_disp, self.grade,
-                       self.difficulty, self.lifebar)
-        if self.judge[i] != None: j.munch(self.judge[i])
-        self.judge[i] = j
+        self.judge[i].set_song(self.steps[i].bpm, diff, count,
+                               holds, self.steps[i].feet)
 
     else:
       self.holding = [-1] * len(self.game.dirs)
@@ -629,18 +625,11 @@ class Player(object):
 
       self.score.set_song(diff, self.steps.totalarrows, self.steps.feet)
       self.lifebar.set_song(diff, self.steps.totalarrows, self.steps.feet)
-
-      j = self.Judge(self.steps.bpm, holds, self.combos, self.score,
-                     self.judging_disp, self.grade,
-                     self.difficulty, self.lifebar)
-      if self.judge != None: j.munch(self.judge)
-      self.judge = j
+      self.judge.set_song(self.steps.bpm, diff, self.steps.totalarrows,
+                          holds, self.steps.feet)
 
   def get_judge(self):
-    if self.game.double:
-      # judge[0] may be None, if no songs were found in Endless mode.
-      if self.judge[0]: self.judge[0].munch(self.judge[1])
-      return self.judge[0]
+    if self.game.double: return self.judge[0]
     else: return self.judge
 
   def start_song(self):
@@ -801,7 +790,7 @@ class Player(object):
           for d in toparr:
             toparr[d].tick = toRealTime(newbpm, 1)
             toparrfx[d].tick = toRealTime(newbpm, 1)
-        judge.changebpm(newbpm)
+        judge.bpm_change(newbpm)
         steps.lastbpmchangetime.pop(0)
 
   def clear_sprites(self, screen, bg):

@@ -5,17 +5,13 @@ from announcer import Announcer
 import random
 
 class AbstractJudge(object):
-  def __init__ (self, bpm, holds, combos, score, display, grade, diff, lifebar):
+  def __init__ (self, combos, score, display, grade, lifebar):
     self.steps = {}
     self.stats = { "V": 0, "P": 0, "G": 0, "O": 0, "B": 0, "M": 0 }
     self.combos = combos
-    self.actualtimes = {}
-    self.tick = toRealTime(bpm, 0.16666666666666666)
     self.early = self.late = self.ontime = 0
-    self.bpm = bpm
     self.failed = False
     self.lifebar = lifebar
-    self.diff = diff
     self.score = score
     self.grade = grade
     self.numholds = 0
@@ -25,26 +21,18 @@ class AbstractJudge(object):
     announcer = Announcer(mainconfig["djtheme"])
     self.listeners = [self.combos, announcer, display, self.grade,
                       self.lifebar, self.score]
+
+  def set_song(self, bpm, difficulty, count, holds, feet):
+    self.bpm = bpm
+    self.diff = difficulty
+    self.tick = toRealTime(bpm, 0.16666666666666666)
     self.holdsub = [0] * holds
-
-  def munch(self, anotherjudge):
-    self.grade.munch(anotherjudge.grade)
-
-    if anotherjudge.failed: self.failed = True
-
-    for k, v in anotherjudge.stats.items(): self.stats[k] += v
-
-    self.badholds += anotherjudge.badholds
-    self.holdsub += anotherjudge.holdsub
-
-    self.early += anotherjudge.early
-    self.late += anotherjudge.late
-    self.ontime += anotherjudge.ontime
+    self.steps = {}
 
   def get_rating(self, dir, curtime):
     raise NotImplementedError("This class should not be instantiated.")
         
-  def changebpm(self, bpm):
+  def bpm_change(self, bpm):
     if bpm >= 1: self.tick = toRealTime(bpm, 0.16666666666666666)
     self.bpm = bpm
         
