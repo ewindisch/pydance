@@ -378,10 +378,9 @@ class Player(object):
       if (rating == "V" or rating == "P" or rating == "G"):
         for spr in arrows.sprites():
           if spr.endtime == time and spr.dir == dir:
-            if spr.hold: spr.broken = False
-            else: spr.kill()
+            if not spr.hold: spr.kill()
 
-    arrows.update(curtime, self.bpm, curbeat, steps.lastbpmchangetime)
+    arrows.update(curtime, self.bpm, curbeat, steps.lastbpmchangetime, judge)
     self.toparr_group.update(curtime, curbeat)
 
   def should_hold(self, steps, direction, curtime):
@@ -407,15 +406,20 @@ class Player(object):
           if judge.holdsub.get(holding[dir_idx]) != -1:
             toparrfx[dir].holding(1)
           holding[dir_idx] = current_hold
+          botchdir, timef1, timef2 = steps.holdinfo[current_hold]
+          for spr in arrows.sprites():
+            if (spr.endtime == timef1 and spr.dir == dir):
+              spr.held()
+              break
         else:
           if judge.holdsub.get(current_hold) != -1:
-            args = (pid, curtime, dir, current_hold)
-            for l in self.listeners: l.broke_hold(*args)
             botchdir, timef1, timef2 = steps.holdinfo[current_hold]
             for spr in arrows.sprites():
               if (spr.endtime == timef1 and spr.dir == dir):
-                  spr.broken = True
-                  break
+                if spr.broken_at(curtime, judge):
+                  args = (pid, curtime, dir, current_hold)
+                  for l in self.listeners: l.broke_hold(*args)
+                break
       else:
         if holding[dir_idx] > -1:
           if judge.holdsub.get(holding[dir_idx]) != -1:

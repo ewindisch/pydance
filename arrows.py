@@ -83,7 +83,7 @@ class AbstractArrow(pygame.sprite.Sprite):
       self.origcenterx = self.centerx = self.rect.centerx
     else: self.centerx = self.rect.centerx = self.goalcenterx
 
-  def set_alpha(self, curtime, beatsleft, top):
+  def set_alpha(self, curtime, beatsleft, top, factor):
     alp = 256
 
     if self.fade == 4: alp = int(alp * sin(beatsleft * 1.5708) ** 2)
@@ -104,7 +104,7 @@ class AbstractArrow(pygame.sprite.Sprite):
 
     if self.secret: alp /= 5
 
-    if self.hold and self.broken and curtime > self.endtime + 0.025: alp /= 2
+    alp = int(alp * factor)
 
     # NB - Making a new surface, then blitting the image in place, is 20%
     # slower than calling image.convert() (and is longer to type).
@@ -161,7 +161,7 @@ class ArrowSprite(AbstractArrow):
     self.hold = False
     self.endtime = endtime
 
-  def update(self, curtime, curbpm, curbeat, lbct):
+  def update(self, curtime, curbpm, curbeat, lbct, judge):
     AbstractArrow.update(self, curtime, curbpm, curbeat, lbct)
 
     if curbeat > self.endbeat + 1:
@@ -187,7 +187,7 @@ class ArrowSprite(AbstractArrow):
     pct = abs(float(top - self.top) / self.diff)
 
     self.rect, self.image = self.scale_spin_battle(self.baseimage, top, pct)
-    self.set_alpha(curtime, beatsleft, top)
+    self.set_alpha(curtime, beatsleft, top, 1)
 
 class HoldArrowSprite(AbstractArrow):
   def __init__ (self, arrow, beats, secret, times, player, song):
@@ -199,9 +199,18 @@ class HoldArrowSprite(AbstractArrow):
     self.endbeat2 = beats[1] / 4
     if self.timef2 is None: self.timef2 = self.timef1
 
-    self.broken = True
+    self.broken = False
+    self._broken_at = -1
 
-  def update(self, curtime, curbpm, beat, lbct):
+  def broken_at(self, time, judge):
+    if self._broken_at == -1: self._broken_at = time
+    elif time - self._broken_at > judge.ok_time: self.broken = True
+    return self.broken
+
+  def held(self):
+    self._broken_at = -1
+
+  def update(self, curtime, curbpm, beat, lbct, judge):
     AbstractArrow.update(self, curtime, curbpm, 0, lbct)
 
     if beat > self.endbeat2:
@@ -266,4 +275,9 @@ class HoldArrowSprite(AbstractArrow):
     image.set_colorkey(c)
 
     self.rect, self.image = self.scale_spin_battle(image, top, pct)
-    self.set_alpha(curtime, beatsleft_bot, top)
+    if self.broken: f = 0.5
+    elif self._broken_at != -1:
+      p = (curtime - self._broken_at) / judge.ok_time
+      f = 1.0 * (1 - p) + 0.5 * p
+    else: f = 1
+    self.set_alpha(curtime, beatsleft_bot, top, f)

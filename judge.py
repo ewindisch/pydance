@@ -87,6 +87,7 @@ class TimeJudge(AbstractJudge):
     self._g = self._scale * 0.090
     self._o = self._scale * 0.135
     self._b = self._scale * 0.180
+    self.ok_time = self._scale * 0.25
   
   def _get_rating(self, curtime, t):
     offset = abs(curtime - t)
@@ -112,6 +113,7 @@ class BeatJudge(AbstractJudge):
     self._g = self._scale * 7
     self._o = self._scale * 9
     self._b = self._scale * 12
+    self.ok_time = toRealTime(bpm, 2) * self._scale
     self._b_ticks = self._b * self._tick
   
   def change_bpm(self, pid, curtime, bpm):
@@ -122,6 +124,7 @@ class BeatJudge(AbstractJudge):
     self._g = self._scale * 7
     self._o = self._scale * 9
     self._b = self._scale * 12
+    self.ok_time = toRealTime(bpm, 2) * self._scale
     self._b_ticks = self._b * self._tick
 
   def _get_rating(self, curtime, t):
