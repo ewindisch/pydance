@@ -29,15 +29,17 @@ class AbstractLifeBar(pygame.sprite.Sprite):
 
   def broke_hold(self): pass
 
+  def ok_hold(self): pass
+
   def next_song(self): pass
 
   # Inform the judge if we've failed, and adjust life.
-  def update(self, judges):
+  def update(self, judge):
     if self.gameover: return False
     
     if self.life < 0:
       # Don't set self.failed; the child does that when the graphic is updated.
-      judges.failed_out = True
+      judge.failed = True
       self.life = -1
     elif self.life > self.maxlife:
       self.life = self.maxlife

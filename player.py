@@ -145,72 +145,71 @@ class JudgingDisp(pygame.sprite.Sprite):
 
     self.sticky = mainconfig['stickyjudge']
     self.needsupdate = 1
-    self.did_step = False
     self.laststep = 0
-    self.judgetype = " "
     self.oldzoom = -1
     self.bottom = 320
     self.centerx = game.sprite_center + (playernum * game.player_offset)
         
-    # prerender the text for judging for a little speed boost
     tx = FONTS[48].size("MARVELOUS")[0]+4
-    self.marvelous = fontfx.shadefade("MARVELOUS",48,4,(tx,40),(224,224,224))
-    tx = FONTS[48].size("PERFECT")[0]+4
-    self.perfect   = fontfx.shadefade("PERFECT"  ,48,4,(tx,40),(224,224, 32))
-    tx = FONTS[48].size("GREAT")[0]+4
-    self.great     = fontfx.shadefade("GREAT"    ,48,4,(tx,40),( 32,224, 32))
-    tx = FONTS[48].size("OK")[0]+4
-    self.ok        = fontfx.shadefade("OK"       ,48,4,(tx,40),( 32, 32,224))
-    tx = FONTS[48].size("BOO")[0]+4
-    self.boo      = fontfx.shadefade("BOO"      ,48,4,(tx,40),( 96, 64, 32))
-    tx = FONTS[48].size("MISS")[0]+4
-    self.miss      = fontfx.shadefade("MISS"     ,48,4,(tx,40),(224, 32, 32))
-    self.space     = FONTS[48].render( " ",       1, (  0,   0,   0) )
+    self.marvelous = fontfx.shadefade("MARVELOUS", 48, 4,
+                                      [tx, 40], [224, 224, 224])
 
-    self.marvelous.set_colorkey(self.marvelous.get_at((0,0)), RLEACCEL)
-    self.perfect.set_colorkey(self.perfect.get_at((0,0)), RLEACCEL)
-    self.great.set_colorkey(self.great.get_at((0,0)), RLEACCEL)
-    self.ok.set_colorkey(self.ok.get_at((0,0)), RLEACCEL)
-    self.boo.set_colorkey(self.boo.get_at((0,0)), RLEACCEL)
-    self.miss.set_colorkey(self.miss.get_at((0,0)), RLEACCEL)
+    tx = FONTS[48].size("PERFECT")[0]+4
+    self.perfect = fontfx.shadefade("PERFECT", 48, 4, [tx, 40], [224, 224, 32])
+
+    tx = FONTS[48].size("GREAT")[0]+4
+    self.great = fontfx.shadefade("GREAT", 48, 4, [tx, 40], [32, 224, 32])
+
+    tx = FONTS[48].size("OKAY")[0]+4
+    self.okay = fontfx.shadefade("OKAY", 48, 4, [tx, 40], [32, 32, 224])
+
+    tx = FONTS[48].size("BOO")[0]+4
+    self.boo = fontfx.shadefade("BOO", 48, 4, [tx, 40], [96, 64, 32])
+
+    tx = FONTS[48].size("MISS")[0]+4
+    self.miss = fontfx.shadefade("MISS", 48, 4, [tx, 40], [224, 32, 32])
+
+    self.space = FONTS[48].render(" ", True, [0, 0, 0])
+
+    self.marvelous.set_colorkey(self.marvelous.get_at([0, 0]), RLEACCEL)
+    self.perfect.set_colorkey(self.perfect.get_at([0, 0]), RLEACCEL)
+    self.great.set_colorkey(self.great.get_at([0, 0]), RLEACCEL)
+    self.okay.set_colorkey(self.okay.get_at([0, 0]), RLEACCEL)
+    self.boo.set_colorkey(self.boo.get_at([0, 0]), RLEACCEL)
+    self.miss.set_colorkey(self.miss.get_at([0, 0]), RLEACCEL)
     
     self.image = self.space
+    self.baseimage = self.space
+
+  def ok_hold(self): pass
+
+  def broke_hold(self): pass
 
   def stepped(self, curtime, rating, combo):
     self.laststep = curtime
-    self.judgetype = { "V": "MARVELOUS", "P": "PERFECT", "G": "GREAT",
-                       "O": "OKAY", "B": "BOO", "M": "MISS", }.get(rating, " ")
+    self.rating = rating
+    self.baseimage = { "V": self.marvelous, "P": self.perfect,
+                       "G": self.great, "O": self.okay,
+                       "B": self.boo, "M": self.miss }.get(rating, self.space)
 
   def update(self, curtime):
     self.laststep = min(curtime, self.laststep)
     steptimediff = curtime - self.laststep
 
-    if steptimediff < 0.5 or (self.judgetype == ('MISS' or ' ')):
-      if   self.judgetype == "MARVELOUS": self.image = self.marvelous
-      elif self.judgetype == "PERFECT": self.image = self.perfect
-      elif self.judgetype == "GREAT": self.image = self.great
-      elif self.judgetype == "OKAY": self.image = self.ok
-      elif self.judgetype == "BOO": self.image = self.boo
-      elif self.judgetype == "MISS": self.image = self.miss
-      elif self.judgetype == " ": self.image = self.space
+    zoomzoom = 1 - min(steptimediff, 0.2) * 2
 
-      zoomzoom = steptimediff
-
-      if zoomzoom != self.oldzoom:
-        self.needsupdate = True
-        if (steptimediff > 0.36) and (self.sticky == 0) and self.did_step:
-          self.image = self.space
-          self.did_step = True
-
-        if steptimediff > 0.2: zoomzoom = 0.2
-        self.image = pygame.transform.rotozoom(self.image, 0, 1-(zoomzoom*2))
-        self.did_step = False
+    if zoomzoom != self.oldzoom:
+      self.oldzoom = zoomzoom
+      self.needsupdate = True
+      if (steptimediff > 0.36) and not self.sticky:
+        self.image = self.space
 
     if self.needsupdate:
+      self.image = pygame.transform.rotozoom(self.baseimage, 0, zoomzoom)
       self.rect = self.image.get_rect()
       self.rect.centerx = self.centerx
       self.rect.bottom = self.bottom
-      self.image.set_colorkey(self.image.get_at((0,0)), RLEACCEL)
+      self.image.set_colorkey(self.image.get_at([0, 0]), RLEACCEL)
       self.needsupdate = False
 
 class ComboDisp(pygame.sprite.Sprite):
@@ -244,13 +243,14 @@ class ComboDisp(pygame.sprite.Sprite):
     self.space = pygame.surface.Surface((0,0)) #make a blank image
     self.image = self.space
 
-  def broke(self, time):
-    self.laststep = time
-    self.combo = 0
+  def broke_hold(self): pass
 
-  def addcombo(self, time):
-    self.laststep = time
-    self.combo += 1
+  def ok_hold(self): pass
+
+  def stepped(self, curtime, rating, combo):
+    self.laststep = curtime
+    # Add negative our current count to break our combo.
+    self.combo += { "V": 1, "P": 1, "G": 1 }.get(rating, -self.combo)
     if self.combo > self.bestcombo: self.bestcombo = self.combo
 
   def update(self, curtime):
@@ -875,7 +875,7 @@ class Player(object):
             toparrfx[dir].holding(1)
           holding[dir_idx] = current_hold
         else:
-          judge.botchedhold(current_hold)
+          judge.broke_hold(current_hold)
           holdtext.fillin(curtime, dir_idx, "NG")
           botchdir, timef1, timef2 = steps.holdinfo[current_hold]
           # FIXME it's slow.
@@ -890,6 +890,7 @@ class Player(object):
         if holding[dir_idx] > -1:
           if judge.holdsub[holding[dir_idx]] != -1:
             holding[dir_idx] = -1
+            judge.ok_hold(holding[dir_idx])
             holdtext.fillin(curtime, dir_idx, "OK")
 
   def handle_key(self, ev, time):

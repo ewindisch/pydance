@@ -10,16 +10,16 @@ class GradingScreen(object):
 
     for judge in judges:
       if judge == None: continue
-      print "Player "+repr(judges.index(judge)+1)+":"
+      print "Player %d:" % (judges.index(judge) + 1)
     
-      grade = judge.grade()
-      totalsteps = judge.arrow_count
+      grade = judge.grade.grade(judge.failed)
+      totalsteps = judge.arrow_count()
 
       steps = (grade, judge.diff, totalsteps,
                judge.combos.bestcombo, judge.combos.combo)
 
-      numholds = judge.numholds()
-      goodholds = numholds - judge.badholds
+      numholds = judge.numholds
+      goodholds = judge.numholds - judge.badholds
 
       steptypes = (judge.stats["V"], judge.stats["P"], judge.stats["G"],
                    judge.stats["O"], judge.stats["B"], judge.stats["M"],
@@ -34,7 +34,7 @@ class GradingScreen(object):
 
     if judge is None: return None
 
-    totalsteps = judge.arrow_count
+    totalsteps = judge.arrow_count()
 
     if totalsteps == 0: return None
 
@@ -72,7 +72,7 @@ class GradingScreen(object):
     player = 0
 
     for judge in self.judges:
-      grade = judge.grade()
+      grade = judge.grade.grade(judge.failed)
       for i in range(4):
         font = pygame.font.Font(None, 100-(i*2))
         gradetext = font.render(grade, 1, (48 + i*16, 48 + i*16, 48 + i*16))
@@ -81,7 +81,7 @@ class GradingScreen(object):
         pygame.display.update(r)
         pygame.time.delay(48)
 
-      totalsteps = judge.arrow_count
+      totalsteps = judge.arrow_count()
 
       rows = [judge.stats[k] for k in ["M", "V", "G", "O", "B", "M"]]
       rows += [judge.early, judge.late]
@@ -134,7 +134,7 @@ class GradingScreen(object):
 
       # Holds
       for j in range(4):
-        text = "%d / %d" % (judge.numholds() - judge.badholds, judge.numholds())
+        text = "%d / %d" % (judge.numholds - judge.badholds, judge.numholds)
         gradetext = fontfx.shadefade(text,28,j,(FONTS[28].size(text)[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()

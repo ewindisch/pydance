@@ -55,6 +55,16 @@ class Announcer:
       snd.play()
     self.lasttime = pygame.time.get_ticks()
 
+  def ok_hold(self): pass
+  def broke_hold(self): pass
+
+  def stepped(self, curtime, rating, combo):
+    if random.randrange(15) != 1: return
+    rng = { "V": [80, 100], "P": [80, 100],
+            "G": [70, 94], "O": [40, 69],
+            "B": [20, 30], "M": [0, 19] }.get(rating, [0, 100])
+    self.say('ingame', rng)
+
   def say(self, sec, mood=(0, 100)):
     if not self.sections.has_key(sec) or len(self.sections[sec]) == 0: return
     l = len(self.sections[sec])
