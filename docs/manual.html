@@ -16,6 +16,8 @@ img {
  margin: 1em;
 }
 
+pre { margin-left: 10% }
+
 dl { margin-left: 3em }
 
 dl dl { margin-left: 0 }
@@ -755,7 +757,159 @@ song. It is also a pickled Python file. Deleting this will reset all
 your grades.</p>
 
     <h1>Creating .dance Files</h1>
-
+    <p>.dance is designed to be easily written by hand, and work for
+    all possible dancing or beat games. If you're interested in
+    writing tools to work with .dance files, read the
+    <tt>docs/dance-spec.txt</tt> file included with pydance.</p>
+    <p>.dance files are broken up into 3 parts &mdash; the header
+    information (often called the metadata), the text information, and the
+    step information. All parts are in UTF-8 encoding (which is
+    compatible with standard ASCII), and all filenames in .dance files
+    are case-sensitive. If you begin any line with a #, it will be
+    ignored as a comment.</p>
+    <h2>Header Information</h2>
+    <p>The header gives important information about the song that
+    pydance uses to load or categorize it. A sample header (for,
+    mysong.dance) might look
+    like:</p>
+    <pre>filename mysong.ogg
+title My Song
+artist Me & I
+author Also Me
+banner mysong-ban.png
+background mysong-bg.jpg
+bpm 140.2
+end</pre>
+    <p>The header <em>must</em> end with 'end'.</p>
+    <h3>A List of .dance Tags</h3>
+    <dl>
+      <dt>filename</dt><dd>The music file to play when the steps are
+loaded. There is no default setting; you must specify a music file to
+load the steps.</dd>
+      <dt>title</dt><dd>The title of the song.</dd>
+      <dt>subtitle</dt><dd>The subtitle of the song (displayed in a
+smaller font underneath the title).</dd>
+      <dt>artist</dt><dd>The artist or composer of the song.</dd>
+      <dt>mix</dt><dt>The mix of the song (where it will appear in
+"Sort By Mix" mode).</dd>
+      <dt>bpm</dt><dd>The beats per minute of the song.</dd>
+      <dt>bpmdisplay</dt><dd>A list of BPMs (separated by commas) that
+will be displayed on the song song selector.</dd>
+      <dt>gap</dt><dd>The time, in milliseconds, between the start of
+the arrows, and the start of the song. If the first beat occurs 300
+into the song, this should e.g. be -300.</dd>
+      <dt>startat, endat</dt><dd>Second offsets into the music at
+which to start playing it, and end playing it. Normally this is the
+start of the song and the end of the song, and since music files are
+large, it's preferred that you cut them down to the proper size rather
+than using these tags.</dd>
+      <dt>banner, background, cdtitle</dt><dd>Images to go with the
+song. The banner is a 256x80 image that will be displayed on the song
+selector. The background is 640x480 or 320x240 and will be displayed
+while the song is playing. The CD title is a 64x40 (or so) image to be
+displayed on the song selector, as well.</dd>
+      <dt>preview</dt><dd>Set the time and length of the preview to be
+played in the song selector. <tt>preview 10, 15</tt> plays a 15 second
+preview, starting 10 seconds into the song.</dd>
+      <dt>md5sum</dt><dd>The MD5 checksum string of the music file, to
+verify whether or not the correct one is being used.</dd>
+      <dt>valid</dt><dd>If <tt>valid 0</tt> is in the header, then
+this file won't be selected for endless mode, random courses, or when
+pressing select.</dd>
+      <dt>revision</dt><dd>The last date the file was modified, in
+YYYY.MM.DD format.</dd>
+      <dt>movie</dt><dd>A background movie to play with the
+file. pydance currently only plays MPEG-1 files, but .dance files can
+specify any format.</dd>
+    </dl>
+    <h2>Text Data</h2>
+    <p>The text data section contains a description of the file, and
+    lyrics. Both sections are optional.</p>
+    <h3>The Description</h3>
+    <p>The description section contains a description of the song. The format
+roughly follows the DPKG description format: All lines of text start
+with a space. Whitespace, including newlines, is ignored. A period ('.')
+on a line by itself (with a space before it!) is to be interpreted as a
+paragraph separator. An 'end' on a single line, with no space before
+it, ends the description. e.g.</p>
+    <pre>DESCRIPTION
+ This is a description of the file.
+ It is not particularly interesting, but here it is.
+ Hooray.
+ .
+ Here is another paragraph.
+end</pre>
+    <h3>Lyrics</h3>
+    <p>The lyrics section contains lyric timing information. The format
+of each line is, an integer, a float, and then a string. The integer
+specifies the lyric "channel"; lyrics in the same channel should overwrite
+each other, appear in the same place on the screen, etc. The float is the
+time into the song during which the lyric should appear, irrespective
+of the 'gap' value. e.g.</p>
+    <pre>LYRICS
+1.0 1 I will be displayed 1 second into the song.
+2.0 2 Two seconds in and elsewhere on the screen!
+3.0 1 I'll cover up the first lyric since we're on the same channel.
+end</pre>
+    <h2>Step Data</h2>
+    <p>Step sections must have at least three lines. First the game,
+    then the difficulty and rating, and at the end, "end". In between
+    that can be any number of step specifiers, e.g.</p>
+    <pre>SINGLE
+MANIAC 8
+q 1000
+q 0001
+end</pre>
+    <p>This makes steps for SINGLE (4 panel, 1 player) mode, MANIAC
+    difficulty, with a rating of 7. First a left step, then a right
+    step, and then the song ends.</p>
+    <p>The string of numerals indicates which directions to press at
+    that time; from left to right they are the same as the directions
+    displayed in pydance's top arrows left to right (e.g. left, down,
+    up, right for 4 panel). A 1 indicates a normal arrow or the end of
+    a hold arrow; a 3 indicates the start of a hold arrow; a 5
+    indicates a secret arrow.</p>
+    <p>.dance has the following types of notes (specified by
+    a single lowercase character starting the line) (a "beat" is a
+    non-overlapping but touching pair of arrows, on 1x speed):</p>
+    <table style="width: 80%; margin-left: 10%">
+      <tr><td>o</td><td>whole</td><td>4 beats</td></tr>
+      <tr><td>h</td><td>1/2</td><td>2 beats</td></tr>
+      <tr><td>q</td><td>1/4</td><td>1 beat</td></tr>
+      <tr><td>e</td><td>1/8</td><td>0.5 beats</td></tr>
+      <tr><td>w</td><td>1/12</td><td>0.3<span style="text-decoration:
+      overline">3</span> beats</td></tr>
+      <tr><td>s</td><td>1/16</td><td>0.25 beats</td></tr>
+      <tr><td>f</td><td>1/24</td><td>0.1<span style="text-decoration:
+      overline">6</span> beats</td></tr>
+      <tr><td>t</td><td>1/32</td><td>0.125 beats</td></tr>
+      <tr><td>u</td><td>1/48</td><td>0.08<span style="text-decoration:
+      overline">3</span> beats</td></tr>
+      <tr><td>x</td><td>1/64</td><td>0.0625 beats</td></tr>
+      <tr><td>n</td><td>1/192nd</td><td>0.0208<span style="text-decoration:
+      overline">3</span> beats</td></tr>
+    </table>
+    <p>.dance also has single uppercase character
+    commands. <tt>B&nbsp;[new&nbsp;BPM]</tt> changes the BPM at that
+    point to a new value. <tt>S&nbsp;[seconds]</tt> stops the arrows
+    at that point for a certain number of seconds. <tt>L [channel]
+    [text]</tt> displays a lyric, on a particular channel, with the
+    given text (this lets you have different lyrics for each
+    difficulty).</p>
+    <p>If you're making double or couple steps, separate the two
+    players' steps with spaces, like
+    <tt>q&nbsp;1001&nbsp;0110</tt>.</p>
+    <p>The game modes that pydance supports follows: SINGLE, VERSUS,
+    COUPLE, DOUBLE (these are for 4 panel mode), 3PANEL, 3VERSUS,
+    3COUPLE, 3DOUBLE, 5PANEL etc, 6PANEL etc, 8PANEL etc, 9PANEL etc,
+    EZ2SINGLE, EZ2VERSUS, EZ2COUPLE, EZ2DOUBLE, EZ2REAL, REALVERSUS,
+    REALCOUPLE, REALDOUBLE, PARAPARA, PARAVERSUS, PARACOUPLE,
+    PARADOUBLE, DMX, DMXVERSUS, DMXCOUPLE, DMXDOUBLE. The definitive
+    version of this list is in the <tt>games.py</tt> file. If steps
+    aren't found for a versus mode, the single mode steps will be
+    used. If steps aren't found for any mode but they exist for 4 or 5
+    panel, then steps for every other mode will be autogenerated (but
+    they might not be very fun).</p>
     <h1>Creating Graphical Themes</h1>
 
     <h1>Contact the Developers</h1>
