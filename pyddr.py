@@ -1259,8 +1259,10 @@ def dance(song, players, prevscr):
     rectlist.extend( fgroup.draw(screen))
     rectlist.extend( tgroup.draw(screen))
     rectlist.extend( lgroup.draw(screen))
+
     
-    pygame.display.update(rectlist)
+    if not backmovie.filename: pygame.display.update(rectlist)
+    else: pygame.display.update()
 
     if screenshot:
       pygame.image.save(pygame.transform.scale(screen, (640,480)),
