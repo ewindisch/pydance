@@ -472,29 +472,29 @@ class Judge:
     mpg_count = self.marvelous + self.perfect + self.great
 
     #pick a grade
-    if self.marvelous == totalsteps: return '!!!'
-    elif self.marvelous + self.perfect == totalsteps: return 'wow'
-    elif (marvpct + perfectpct >= 92) and (mpg_count == totalsteps):
-      return 'SSS'
-    elif ((self.marvelous + self.perfect >= self.great) and
-          (mpg_count == totalsteps)):
-      return 'SS'
-    elif mpg_count == totalsteps:
-      return 'S'
-    elif ((mpg_count >= totalsteps*0.8) and (misspct <= 2) and
-          (shitpct <= 4) and (crappypct <= 6) and (okpct <= 8)):
+    if self.marvelous == totalsteps:
+      return '!!!'
+    elif self.marvelous + self.perfect == totalsteps:
+      return 'wow'
+    
+    elif mpg_count == totalsteps :
+      if marvpct + perfectpct >= 92:
+        return 'SSS'
+      elif self.marvelous + self.perfect >= self.great:
+        return 'SS'
+      else:
+        return 'S'
+    
+    elif ((mpg_count >= totalsteps*0.8) and (misspct <= 2) and (shitpct <= 4) and (crappypct <= 6) and (okpct <= 8)):
       return 'A'
-    elif ((mpg_count >= totalsteps*0.6) and (misspct <= 4) and
-          (shitpct <= 8) and (crappypct <= 12) and (okpct <= 16)):
+    elif ((mpg_count >= totalsteps*0.6) and (misspct <= 4) and (shitpct <= 8) and (crappypct <= 12) and (okpct <= 16)):
       return 'B'
-    elif ((mpg_count >= totalsteps*0.4) and (misspct <= 6) and
-          (shitpct <= 12) and (crappypct <= 18) and (okpct <= 24)):
+    elif ((mpg_count >= totalsteps*0.4) and (misspct <= 6) and (shitpct <= 12) and (crappypct <= 18) and (okpct <= 24)):
       return 'C'
-    elif ((mpg_count >= totalsteps*0.2) and (misspct <= 8) and
-          (shitpct <= 16) and (crappypct <= 24) and (okpct <= 32)):
+    elif ((mpg_count >= totalsteps*0.2) and (misspct <= 8) and (shitpct <= 16) and (crappypct <= 24) and (okpct <= 32)):
       return "D"
-    else: return "doh!"
-
+    else:
+      return "doh!"
 
 
 class GradingScreen:
@@ -505,27 +505,20 @@ class GradingScreen:
       print "Player "+repr(judges.index(judge)+1)+":"
     
       grade = judge.grade()
-      totalsteps = (judge.marvelous + judge.perfect + judge.great +
-                    judge.ok + judge.crap + judge.shit + judge.miss)
+      totalsteps = (judge.marvelous + judge.perfect + judge.great + judge.ok + judge.crap + judge.shit + judge.miss)
       steps = (grade, judge.diff, totalsteps, judge.bestcombo, judge.combo)
 
       numholds = judge.numholds()
       goodholds = numholds - judge.badholds
 
-      steptypes = (judge.marvelous, judge.perfect, judge.great,
-                   judge.ok, judge.crap, judge.shit, judge.miss, goodholds,
-                   numholds)
-      print ("GRADE: %s (%s) - total steps: %d best combo" +
-             " %d current combo: %d") % steps
-
-      print ("V: %d P: %d G: %d O: %d C: " +
-             "%d S: %d M: %d - %d/%d holds") % steptypes
+      steptypes = (judge.marvelous, judge.perfect, judge.great, judge.ok, judge.crap, judge.shit, judge.miss, goodholds, numholds)
+      print ("GRADE: %s (%s) - total steps: %d best combo" + " %d current combo: %d") % steps
+      print ("V: %d P: %d G: %d O: %d C: %d S: %d M: %d - %d/%d holds") % steptypes
       print
 
   def make_gradescreen(self, screen):
     judge = self.judges[0]
-    totalsteps = (judge.marvelous + judge.perfect + judge.great +
-                  judge.ok + judge.crap + judge.shit + judge.miss)
+    totalsteps = (judge.marvelous + judge.perfect + judge.great + judge.ok + judge.crap + judge.shit + judge.miss)
 
     if totalsteps == 0: return None
 
@@ -1097,11 +1090,11 @@ class ArrowFX(pygame.sprite.Sprite):
     self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
     self.tintimg.blit(self.baseimg, (0,0))
     tinter = pygame.surface.Surface((64,64))
-    if tinttype == 'PERFECT':
-      tinter.fill((255,255,0))
     if tinttype == 'MARVELOUS':
       tinter.fill((255,255,255))
-    if tinttype == 'GREAT':
+    elif tinttype == 'PERFECT':
+      tinter.fill((255,255,0))
+    elif tinttype == 'GREAT':
       tinter.fill((0,255,0))
     tinter.set_alpha(127)
     self.tintimg.blit(tinter,(0,0))
@@ -1141,18 +1134,18 @@ class ArrowFX(pygame.sprite.Sprite):
       self.rect.left += (320*self.playernum)
 
 class LifeBarDisp(pygame.sprite.Sprite):
-    def __init__(self,playernum,previously=None):
+    def __init__(self, playernum, previously = None):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
         self.playernum = playernum
         if previously:
           self.oldlife = -1
           self.failed = previously.failed
-          self.prevlife = previously.life
+          self.prevlife = previously.life - 25
+          self.life = previously.life
         else:
           self.oldlife = self.failed = 0
-          self.prevlife = 25
-
-        self.life = 25
+          self.prevlife = 0
+          self.life = 25
 
         self.image = pygame.Surface((204,28))
         self.blkbar = pygame.Surface((3,24))
@@ -1209,9 +1202,7 @@ class LifeBarDisp(pygame.sprite.Sprite):
         #self.life += judges.bestcombo*8 / tstmp
       
       if self.life > 0: #If you failed, you failed. You can't gain more life afterwards
-        self.life = 25 + (judges.marvelous * self.vamt) + (judges.perfect * self.pamt) + (judges.great * self.gamt) + (judges.ok * self.oamt) + (judges.crap * self.camt) + (judges.shit * self.samt) + (judges.miss * self.mamt)
-        
-        self.life += (self.prevlife-25)
+        self.life = 25 + self.prevlife + (judges.marvelous * self.vamt) + (judges.perfect * self.pamt) + (judges.great * self.gamt) + (judges.ok * self.oamt) + (judges.crap * self.camt) + (judges.shit * self.samt) + (judges.miss * self.mamt)
         
         if self.life <= 0: #FAILED but we don't do anything yet
           self.failed = 1
@@ -2826,7 +2817,7 @@ def main():
     pixelbar.fill((192,192,192))
     fuxor = 1
     for n in songs:
-      x = brect.size[0] * fuxor/float(totalsongs)
+      x = brect.size[0] * fuxor/ totalsongs
       dirty = []
       for i in range(x-ox):
         dirty.append(screen.blit(pixelbar,(brect.left+ox+i,brect.bottom+3)))
@@ -3202,15 +3193,7 @@ def domenu(songs):
 
   def fullscreen_toggle():
     mainconfig["fullscreen"] = mainconfig["fullscreen"] ^ 1
-    if mainconfig["fullscreen"] == 1:
-      if osname == "macosx":
-        screen = pygame.display.set_mode((640, 480), FULLSCREEN, 16)
-      else:
-        screen = pygame.display.set_mode((640, 480),
-                                         HWSURFACE|DOUBLEBUF|FULLSCREEN, 16)
-    else:
-      screen = pygame.display.set_mode((640, 480),
-                                       HWSURFACE|DOUBLEBUF, 16)
+    SetDisplayMode(mainconfig)
 
   gr_opts = ['Graphic Options',
              [('Fullscreen', fullscreen_toggle),
@@ -3324,8 +3307,7 @@ def domenu(songs):
 
 def blatantplug():
   xiphlogo = pygame.image.load(os.path.join("images", "xifish.png")).convert()
-  pygamelogo = pygame.image.load(os.path.join("images",
-                                              "pygamelogo.png")).convert()
+  pygamelogo = pygame.image.load(os.path.join("images", "pygamelogo.png")).convert()
   oddlogo = pygame.image.load(os.path.join("images", "oddlogos.png")).convert()
   xiphlogo.set_colorkey(xiphlogo.get_at((0,0)))
   pygamelogo.set_colorkey(pygamelogo.get_at((0,0)))
@@ -3361,7 +3343,7 @@ def blatantplug():
   pygame.time.delay(225)
   
   tfont = pygame.font.Font(None,48)
-  plugtext = ["You have been playing pyDDR","by Brendan Becker","which is available at:","http://icculus.org/pyddr/"," ","If you like it, please donate a few bucks!","The programmer is unemployed! =]"," ","it was made possible by:","Python, SDL,  Pygame,  and Xiph.org"]
+  plugtext = ["You have been playing pyDDR","by Brendan Becker","which is available at:", "http://icculus.org/pyddr/", " ", "If you like it, please donate a few bucks!", "The programmer is unemployed! =]", " ", "it was made possible by:", "Python, SDL, Pygame, and Xiph.org"]
   for i in plugtext:
     mrtext = tfont.render(i,1,(plugtext.index(i)*8,plugtext.index(i)*8,plugtext.index(i)*8))
     mrtextrect = mrtext.get_rect()
@@ -3995,22 +3977,22 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
   # so the current combos get displayed
   global holdkey
   
-  tj = mainconfig['totaljudgings']
-  if tj > 3:
-    tj = 3
-  elif tj < 0 :
-    tj = 0
+  totalJudgings = mainconfig['totaljudgings']
+  if totalJudgings > 3:
+    totalJudgings = 3
+  elif totalJudgings < 0 :
+    totalJudgings = 0
   
   playerContents = []
   for playerID in range(players):
     plr = {
       'playerID': playerID,
       'score': ScoringDisp(playerID, difficulty[playerID]),
-      'lifebar': LifeBarDisp(playerID,prevlife[playerID]),
+      'lifebar': LifeBarDisp(playerID, prevlife[playerID]),
       'holdtext': HoldJudgeDisp(playerID),
       'arrowGroup': RenderLayered(),
       
-      'judgingList': [JudgingDisp(playerID), JudgingDisp(playerID), JudgingDisp(playerID)],
+      'judgingList': [],
       
       'tempholding': [-1, -1, -1, -1],
 
@@ -4024,8 +4006,11 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
     plr['lifebar'].add(tgroup)
     plr['holdtext'].add(tgroup)
 
-    for i in range(tj):
-      plr['judgingList'][i].add(tgroup)
+    for i in range(totalJudgings):
+      pj = JudgingDisp(playerID)
+      plr['judgingList'].append(pj)
+      pj.add(tgroup)
+    
     playerContents.append(plr)
   
   fpstext = fpsDisp()
@@ -4061,15 +4046,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
 
   bgroup.draw(screen)
 
-  blackspot,blkbar,blacktext = map(BlankSprite,((64,64),(3,24),(240,56)))
-
-  marvelous=perfect=great=ok=crappy=shit=0
-  life,oldlife = 25.0,0.0
-  totalmiss=bestcombo=combo=failed=0
-  oldet=0
-  fps=0
-  i,j,k=1,0,0
-  screenshot=fontdisp=0
+  screenshot=0
   
   song.cache()
   if song.crapout == 0:
@@ -4113,18 +4090,9 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
       if (event.type == KEYDOWN and (event.key==13 or event.key==271)) or (event.type==JOYBUTTONDOWN and event.button==9):
         break
 
-  tick=brokecombo=drawmiss=0   
-  stepj = " "
-  beatnum = bar = arroff = 0
-  pulsechange = 1
   screenshot = 0
 
   arrowSet = currentTheme.arrows
-
-#  for n in ['l','d','u','r']:
-#    c=CloneSprite(arrowSet[n].n)
-#    c.rect.top=64
-#    c.add(rgroup)
 
 #  print "playmode: %r difficulty %r modes %r" % (playmode,difficulty,song.modes)
 #  print "Total arrows are %d " % song.totarrows[difficulty]
@@ -4333,7 +4301,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
     
     # make sure the combo displayed at the bottom is current and the correct size
       plr['score'].update(plr['judge'].score)
-      for i in range(3):
+      for i in range(totalJudgings):
         plr['judgingList'][i].update(i, curtime - plr['judge'].steppedtime, plr['judge'].recentsteps[i])
       plr['lifebar'].update(plr['judge'])
       plr['holdtext'].update(curtime)
@@ -4390,9 +4358,6 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
         plr['arrowGroup'].clear(screen,background.image)
       #dgroup.clear(screen,background.image)
       sgroup.clear(screen,background.image)
-
-#    time.sleep(0.0066667)
-#    time.sleep(0.0096066)
 
     if (curtime > song.length - 1) and (songtext.zdir == 0) and (songtext.zoom > 0):
       songtext.zout()
