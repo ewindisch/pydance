@@ -63,7 +63,7 @@ class Judge:
   def __init__ (self, bpm, holds, feet, stepcount, diff, lifebar):
     self.steps = {}
     self.actualtimes = {}
-    self.tick = toRealTime(bpm, 1)
+    self.tick = toRealTime(bpm, 0.16666666666666666)
     self.marvelous = self.perfect = self.great = self.ok = self.boo = self.miss = 0
     self.combo = self.bestcombo = self.broke = 0
     self.steppedtime = -1000
@@ -110,7 +110,8 @@ class Judge:
     self.ontime += anotherjudge.ontime
         
   def changebpm(self, bpm):
-    self.tick = toRealTime(bpm, 1)
+    if bpm >= 1:
+      self.tick = toRealTime(bpm, 0.16666666666666666)
     self.bpm = bpm
         
   def numholds(self):
@@ -125,21 +126,21 @@ class Judge:
     
   def handle_key(self, dir, curtime):
     times = self.steps.keys()
+    times.sort()
     etime = 0.0
-    time = round(curtime / (self.tick / 6))
     done = 0
     early = late = ontime = 0
     off = -1
-    for i in range(-11, 12):
-      if time+i in times:
-        if dir in self.steps[time+i]:
-          off = i
-          if off > 1: self.early += 1
-          elif off < 1: self.late += 1
+    for i in range(len(times)):
+      if (curtime - self.tick*12) < times[i] < (curtime + self.tick*12):
+        if dir in self.steps[times[i]]:
+          off = (curtime-times[i]) / self.tick
+          if off < 1: self.early += 1
+          elif off > 1: self.late += 1
           else: self.ontime += 1
           done = 1
-          etime = self.actualtimes[time+i]
-          self.steps[time+i] = self.steps[time+i].replace(dir, "")
+          etime = times[i]
+          self.steps[etime] = self.steps[etime].replace(dir, "")
           break
 
     text = ' '
@@ -155,7 +156,7 @@ class Judge:
         if self.combo > self.bestcombo:
           self.bestcombo = self.combo 
 
-        if off == 1:
+        if off <= 1:
           self.marvelous += 1
           self.score += 10 * self.score_coeff * self.arrow_count
           self.dance_score += 2
@@ -203,16 +204,14 @@ class Judge:
 
 
   def expire_arrows(self, time):
-    curtick = round((time - 2*self.tick) / (self.tick / 6))
     self.times = self.steps.keys()
     self.times.sort()
-    for k in range(24):
-      j = curtick - k
-      if (j in self.times) and self.steps[j]:
+    for k in range(len(self.times)):
+      if (self.times[k] < time - self.tick*12) and self.steps[self.times[k]]:
         self.broke = 1
         self.combo = 0
-        n = len(self.steps[j]) 
-        del self.steps[j]
+        n = len(self.steps[self.times[k]]) 
+        del self.steps[self.times[k]]
         for i in range(n):
           self.miss += 1
           self.recentsteps.insert(0, "MISS")
@@ -221,28 +220,14 @@ class Judge:
           self.arrow_count += 1
           self.recentsteps.pop()
   
-  def handle_arrow(self, key, time, etime):
-      multicheck = self.tick
-      curtick = round(6 * (time/multicheck + 2))
+  def handle_arrow(self, key, etime):
       self.times = self.steps.keys()
-      self.actualtimes[curtick] = etime
-      if curtick in self.times:
-        self.steps[curtick] += key
+      if etime in self.times:
+        self.steps[etime] += key
       else:
-        self.steps[curtick] = key
+        self.steps[etime] = key
         self.times = self.steps.keys()
-        
-      self.times.sort()
-      isdl = 0
-      for i in range(len(self.times)-1,-1,-1):
-        if self.times[i] < curtick - 24:
-          dellist = self.times[0:i+1]
-          isdl = 1
-          break
-      if isdl:
-        for i in dellist:
-          del self.steps[i]
-        self.times = self.steps.keys()
+
 
   def grade(self):
     totalsteps = (self.marvelous + self.perfect + self.great + self.ok +
@@ -1205,7 +1190,7 @@ def dance(song, players, prevscr):
           if ev.feet:
             for (dir,num) in zip(DIRECTIONS,ev.feet):
               if num & 1:
-                plr.judge.handle_arrow(dir, curtime, ev.when)
+                plr.judge.handle_arrow(dir, ev.when)
          
         for ev in nevents:
           if ev.feet:
