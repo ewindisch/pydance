@@ -348,8 +348,8 @@ class OptionScreen(InterfaceWindow):
         else: self._config[opt] = value_of(index, opt)
           
       elif ev == ui.FULLSCREEN:
-        pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
+        pygame.display.toggle_fullscreen()
 
       if ev in [ui.UP, ui.DOWN]:
         values = OPTIONS[OPTS[self._index[pid]]][VALUES]

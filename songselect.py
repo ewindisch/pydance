@@ -336,8 +336,8 @@ class SongSelect(InterfaceWindow):
         self._index = root_idx
 
       elif ev == ui.FULLSCREEN:
-        pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
+        pygame.display.toggle_fullscreen()
 
       self._index %= len(self._songs)
       self._song = self._songs[self._index]

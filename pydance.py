@@ -103,6 +103,10 @@ def load_files(screen, files, type, Ctr, args):
 
   return objects
 
+# Support fullscreen on Win32 / OS X?
+if osname != "posix": pygame.display.toggle_fullscreen = set_display_mode
+else: pass
+
 # Actually start the program running.
 def main():
   print "pydance", VERSION, "<pyddr-discuss@icculus.org> - irc.freenode.net/#pyddr"

@@ -209,8 +209,8 @@ class Endless(InterfaceWindow):
           self.constraints[pid].value = (newmin, newmin + 2)
 
       elif ev == ui.FULLSCREEN:
-        pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
+        pygame.display.toggle_fullscreen()
 
       self.update()
 

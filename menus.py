@@ -175,9 +175,8 @@ class Menu(object):
         ev = self.items[curitem].activate(SELECT)
 
       elif ev == ui.FULLSCREEN:
-        pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
-
+        pygame.display.toggle_fullscreen()
 
       # Otherwise, if the event actually happened, pass it on to the button.
       elif ev != ui.PASS and ev != ui.QUIT:
