@@ -1,20 +1,35 @@
-import os, random, pygame
+import os
+import random
+import pygame
 from math import sin, cos
+
+# FIXME: Mark hidden attributes appropriately.
 
 from constants import *
 
+# Base arrow class. Hold arrows and the regular arrows both extend this.
 class AbstractArrow(pygame.sprite.Sprite):
 
-  # Assist mode sound samples
+  # Assist mode sound samples. FIXME - we need sounds for the other
+  # directions.
   samples = {}
   for d in ["u", "d", "l", "r"]:
     samples[d] = pygame.mixer.Sound(os.path.join(sound_path,
-                                                 "assist-" + d + ".ogg"))
+                                                 "assist-%s.ogg" % d))
 
+  # arrow is the actual graphical arrow from gfxtheme.py.
+  # beat is the beat this arrow is to be "hit" on.
+  # secret is the kind of secret arrow this is (if any)
+  # player is the Player object this arrow belongs to.
+  # song is a SongData object; we only need it to get the 'battle'
+  # attribute, which means we should probably merge the player and
+  # song-wide configuration options. FIXME
   def __init__(self, arrow, beat, secret, player, song):
     pygame.sprite.Sprite.__init__(self)
 
     self.dir = arrow.dir
+    # Barf. Sometimes beat means 16th notes, for historical
+    # reasons. Here it sanely means quarter notes.
     self.endbeat = beat / 4
     self.arrow = arrow
 
@@ -23,10 +38,13 @@ class AbstractArrow(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.left = self.arrow.left
 
+    # It's probably possible to make player store this somehow so we
+    # can do this much more quickly.
     self.width = player.game.width
     self.battle = song.battle
     self.secret = secret
 
+    # This (mainconfig lookup) is slow.
     if mainconfig['assist'] == 2 and self.dir in ArrowSprite.samples:
       self.sample = ArrowSprite.samples[self.dir]
     elif mainconfig['assist']:
@@ -77,19 +95,27 @@ class AbstractArrow(pygame.sprite.Sprite):
     # "proper" beats, meaning a quarter note.
     self.totalbeats = abs(self.diff) / 64.0
 
+    # "goal" locations are used for battle mode (and possibly
+    # elsewhere later), meaning the arrow slowly moves towards that
+    # location as it also approaches top on the other axis.
     self.goalcenterx = self.rect.centerx
     if self.battle:
-      self.rect.left = 320 - int(player.game.width *
-                                 (len(player.game.dirs) / 2.0 -
-                                  player.game.dirs.index(self.dir)))
+      # This expression needs FIXMEing. We should be able to
+      # precalcuate this value since it only relies on information in
+      # the GameType object.
+      self.rect.left = 320 - player.game.battle_lefts[self.dir]
       self.origcenterx = self.centerx = self.rect.centerx
     else: self.centerx = self.rect.centerx = self.goalcenterx
 
+  # Figure out what our alpha channel should be based on where we are
+  # on the scrreen.
   def set_alpha(self, curtime, beatsleft, top, factor):
     alp = 256
 
+    # Blinking
     if self.fade == 4: alp = int(alp * sin(beatsleft * 1.5708) ** 2)
 
+    # Sudden/hidden checking.
     if self.top < self.bottom: 
       if top > self.suddenzone:
         alp = 256 - 4 * (top - self.suddenzone)
@@ -104,17 +130,22 @@ class AbstractArrow(pygame.sprite.Sprite):
     if alp > 256: alp = 256
     elif alp < 0: alp = 0
 
+    # "Faint" mode. If secret arrows are off or totally hidden,
+    # a sprite isn't even initialized for them.
     if self.secret: alp /= 5
 
     alp = int(alp * factor)
 
     # NB - Making a new surface, then blitting the image in place, is 20%
     # slower than calling image.convert() (and is longer to type).
+    # We should do some real benchmarks later to verify this.
+    # Also, once we *have* a converted image, we can do whatever we
+    # want to it... there's no reason to convert it again. FIXME
     if alp < 255:
       self.image = self.image.convert()
       self.image.set_alpha(alp)
 
-  def update(self, curtime, curbpm, beat, lbct):
+  def update(self, curtime, curbpm, beat):
     self.image = self.arrow.get_image(beat)
     self.baseimage = self.image
     self.rect = self.image.get_rect()
@@ -124,6 +155,8 @@ class AbstractArrow(pygame.sprite.Sprite):
       self.sample.play()
       self.sample = None
 
+  # Depending on our settings, rotate, move, or change the image size
+  # appropriately.
   def scale_spin_battle(self, image, top, pct):
     if self.scale != 1:
       if self.scale < 1: # Shrink
@@ -157,14 +190,15 @@ class AbstractArrow(pygame.sprite.Sprite):
     pygame.sprite.Sprite.kill(self)
     if self.sample: self.sample.play()
 
+# The basic arrow.
 class ArrowSprite(AbstractArrow):
   def __init__ (self, arrow, beat, secret, endtime, player, song):
     AbstractArrow.__init__(self, arrow, beat, secret, player, song)
     self.hold = False
     self.endtime = endtime
 
-  def update(self, curtime, curbpm, curbeat, lbct, judge):
-    AbstractArrow.update(self, curtime, curbpm, curbeat, lbct)
+  def update(self, curtime, curbpm, curbeat, judge):
+    AbstractArrow.update(self, curtime, curbpm, curbeat)
 
     if curbeat > self.endbeat + 1:
       self.kill()
@@ -174,10 +208,10 @@ class ArrowSprite(AbstractArrow):
 
     if self.accel == 1:
       p = max(0, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats))
-      speed = 2 * p * self.speed + self.speed * (1 - p)
+      speed = self.speed * (p + 1)
     elif self.accel == 2:
       p = min(1, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats))
-      speed = p * self.speed / 2.0 + self.speed * (1 - p)
+      speed = self.speed * (p * -0.5 + 1)
     else: speed = self.speed
 
     # The second term (self.vector * ...) is a simplication of
@@ -191,6 +225,8 @@ class ArrowSprite(AbstractArrow):
     self.rect, self.image = self.scale_spin_battle(self.baseimage, top, pct)
     self.set_alpha(curtime, beatsleft, top, 1)
 
+# Hold arrows have a start time and an end time, instead of just a
+# "hit" time.
 class HoldArrowSprite(AbstractArrow):
   def __init__ (self, arrow, beats, secret, times, player, song):
     AbstractArrow.__init__(self, arrow, beats[1], secret, player, song)
@@ -199,21 +235,23 @@ class HoldArrowSprite(AbstractArrow):
     self.timef2 = times[2]
     self.endbeat1 = beats[0] / 4
     self.endbeat2 = beats[1] / 4
-    if self.timef2 is None: self.timef2 = self.timef1
+    if self.timef2 is None: self.timef2 = self.timef1 # ?
 
     self.broken = False
     self._broken_at = -1
 
+  # Mark the time the arrow was broken at.
   def broken_at(self, time, judge):
     if self._broken_at == -1: self._broken_at = time
     elif time - self._broken_at > judge.ok_time: self.broken = True
     return self.broken
 
+  # The arrow is re-held.
   def held(self):
     self._broken_at = -1
 
-  def update(self, curtime, curbpm, beat, lbct, judge):
-    AbstractArrow.update(self, curtime, curbpm, 0, lbct)
+  def update(self, curtime, curbpm, beat, judge):
+    AbstractArrow.update(self, curtime, curbpm, 0)
 
     if beat > self.endbeat2:
       self.kill()
@@ -236,15 +274,17 @@ class HoldArrowSprite(AbstractArrow):
     beatsleft_bot = self.endbeat2 - beat
 
     if self.accel == 1:
-      p = max(0, -1 / self.totalbeats * (beatsleft_top * self.speed - self.totalbeats))
-      speed_top = 2 * p * self.speed + self.speed * (1 - p)
-      p = max(0, -1 / self.totalbeats * (beatsleft_bot * self.speed - self.totalbeats))
-      speed_bottom = 2 * p * self.speed + self.speed * (1 - p)
+      nootb = -1 / self.totalbeats
+      p = max(0, nootb * (beatsleft_top * self.speed - self.totalbeats))
+      speed_top = self.speed * (p + 1)
+      p = max(0, nootb * (beatsleft_bot * self.speed - self.totalbeats))
+      speed_bottom = self.speed * (p + 1)
     elif self.accel == 2:
-      p = min(1, -1 / self.totalbeats * (beatsleft_top * self.speed - self.totalbeats))
-      speed_top = p * self.speed / 2.0 + self.speed * (1 - p)
-      p = min(1, -1 / self.totalbeats* (beatsleft_bot * self.speed - self.totalbeats))
-      speed_bottom = p * self.speed / 2.0 + self.speed * (1 - p)
+      nootb = -1 / self.totalbeats
+      p = min(1, nootb * (beatsleft_top * self.speed - self.totalbeats))
+      speed_top = self.speed * (p * -0.5 + 1)
+      p = min(1, nootb * (beatsleft_bot * self.speed - self.totalbeats))
+      speed_bottom = self.speed * (p * -0.5 + 1)
     else: speed_top = speed_bottom = self.speed
 
     # See the notes in ArrowSprite about the derivation of this.
@@ -252,8 +292,8 @@ class HoldArrowSprite(AbstractArrow):
       top = self.top + self.vector * int(beatsleft_top * speed_top * 64)
       bottom = self.top + self.vector * int(beatsleft_bot * speed_bottom * 64)
     else:
-      top = self.top + self.vector * int(beatsleft_bot * speed_top * 64)
-      bottom = self.top + self.vector * int(beatsleft_top * speed_bottom * 64)
+      top = self.top + self.vector * int(beatsleft_bot * speed_bottom * 64)
+      bottom = self.top + self.vector * int(beatsleft_top * speed_top * 64)
 
     if bottom > 480: bottom = 480
     if top > 480: top = 480
@@ -277,9 +317,12 @@ class HoldArrowSprite(AbstractArrow):
     image.set_colorkey(c)
 
     self.rect, self.image = self.scale_spin_battle(image, top, pct)
-    if self.broken: f = 0.5
+    if self.broken: f = 0.33
     elif self._broken_at != -1:
       p = (curtime - self._broken_at) / judge.ok_time
       f = 1.0 * (1 - p) + 0.33 * p
     else: f = 1
-    self.set_alpha(curtime, beatsleft_bot, top, f)
+    if self.top < self.bottom:
+      self.set_alpha(curtime, beatsleft_bot, top, f)
+    else:
+      self.set_alpha(curtime, beatsleft_top, bottom, f)
