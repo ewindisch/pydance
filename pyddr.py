@@ -3093,7 +3093,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
   bpmchanged = 0
   
   while 1:
-    if mainconfig['killsongonfail']:
+    if mainconfig['autofail']:
       songFailed = 1
       for plr in playerContents:
         if plr['lifebar'].failed == 0:

@@ -91,7 +91,7 @@ def do(screen, songselect, songdata):
 
   m = (["Play Game", {E_START: songselect}, songdata],
        ("Game Options",
-        ["Autofail", onoff_opt, ("killsongonfail",)],
+        ["Autofail", onoff_opt, ("autofail",)],
         ["Announcer", rotate_opt, ("djtheme", Announcer.themes())],
         ["Reverse", onoff_opt, ("reversescroll",)],
         ["Speed", rotate_opt, ('scrollspeed', [0.5, 1, 1.5, 2, 4, 8])],
