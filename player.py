@@ -21,6 +21,8 @@ class Player:
       self.lifebar = LifeBarDisp(pid, self.theme)
     elif songconf["lifebar"] == "oni":
       self.lifebar = OniLifeBarDisp(pid, self.theme, songconf["onilives"])
+    elif songconf["lifebar"] == "suck":
+      self.lifebar = MiddleLifeBarDisp(pid, self.theme)
     self.holdtext = HoldJudgeDisp(self)
     self.judging_list = []
     self.total_judgings = mainconfig['totaljudgings']
@@ -201,6 +203,43 @@ class LifeBarDisp(AbstractLifeBar):
 
     if (AbstractLifeBar.update(self, judges) == False and
         self.displayed_life <= 0): return
+
+    if self.displayed_life < 0: self.displayed_life = 0
+    self.image.blit(self.empty, (0, 0))
+    self.image.set_clip((0, 0, int(202 * self.displayed_life / 100.0), 28))
+    self.image.blit(self.full, (0, 0))
+    self.image.set_clip()
+
+    if self.failed:
+      self.image.blit(self.failtext, (70, 2))
+
+# Lifebar where doing too good also fails you
+class MiddleLifeBarDisp(AbstractLifeBar):
+  def __init__(self, playernum, theme):
+    AbstractLifeBar.__init__(self, playernum, 20)
+    self.life = 10.0
+    self.displayed_life = 10
+
+    self.deltas = {"V": 0.8, "P": 0.5, "G": 0.0,
+                       "O": -1.0, "B": -4.0, "M": -8.0}
+    self.empty = pygame.image.load(os.path.join(theme.path,
+                                                'lifebar-empty.png'))
+    self.full = pygame.image.load(os.path.join(theme.path,
+                                               'lifebar-full.png'))
+
+  def update(self, judges):
+    if self.displayed_life < self.life:  self.displayed_life += 1
+    elif self.displayed_life > self.life:  self.displayed_life -= 1
+
+    if abs(self.displayed_life - self.life) < 1:
+      self.displayed_life = self.life
+
+    if (AbstractLifeBar.update(self, judges) == False and
+        self.displayed_life <= 0): return
+
+    if self.life == 20:
+      self.failed = True
+      judges.failed_out = True
 
     if self.displayed_life < 0: self.displayed_life = 0
     self.image.blit(self.empty, (0, 0))

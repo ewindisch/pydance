@@ -41,7 +41,8 @@ def game_opt_driver(screen, config):
   start = pygame.time.get_ticks()
   menu =  [
     ("Battle", "battle", [(0, "Off"), (1, "On")]),
-    ("Lifebar", "lifebar", [("normal", "Normal"), ("oni", "Oni")]),
+    ("Lifebar", "lifebar", [("normal", "Normal"), ("oni", "Oni"),
+                            ("suck", "Suck")]),
     ("Oni Life", "onilives", [(1, "1"), (3, "3"), (5, "5"), (9, "9")]),
     ]
   clrs = [colors.color["green"]]
