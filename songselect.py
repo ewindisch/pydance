@@ -137,7 +137,6 @@ class SongSelect:
     ev = (0, E_PASS)
     self.numsongs = len(self.songs)
     self.gametype = gametype
-    self.player_diffs = [0]
     self.player_image = [pygame.image.load(os.path.join(image_path,
                                                         "player0.png"))]
 
@@ -169,9 +168,13 @@ class SongSelect:
       pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
       pygame.mixer.music.play(4, 0.0)
 
+    self.player_diffs = [0]
+    self.player_diff_names = [self.songs[self.index].song.diff_list[self.gametype][self.player_diffs[0]]]
+
     self.songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
     self.update_help()
     self.render(True, True)
+
 
     while ev[1] != E_QUIT:
       self.oldindex = self.index
@@ -192,6 +195,9 @@ class SongSelect:
       # unless up/down is pressed, you will always be the same difficulty
       # on the same song - and between songs that have the same difficulty
       # levels (e.g. the standard 3).
+
+      # Also we store the name of the last manually selected difficulty
+      # and go to it if the song has it.
 
       # Scroll up the menu list
       if ev[1] == E_LEFT:
@@ -239,6 +245,7 @@ class SongSelect:
       elif (ev[1] == E_UP and ev[0] < len(self.player_diffs)):
         self.player_diffs[ev[0]] -= 1
         self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
+        self.player_diff_names[ev[0]] = self.current_song.diff_list[gametype][self.player_diffs[ev[0]]]
         changed = True
         MOVE_SOUND.play()
 
@@ -246,6 +253,7 @@ class SongSelect:
       elif (ev[1] == E_DOWN and ev[0] < len(self.player_diffs)):
         self.player_diffs[ev[0]] += 1
         self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
+        self.player_diff_names[ev[0]] = self.current_song.diff_list[gametype][self.player_diffs[ev[0]]]
         changed = True
         MOVE_SOUND.play()
 
@@ -264,6 +272,7 @@ class SongSelect:
       elif ev[1] == E_START and ev[0] > 0:
         while len(self.player_diffs) > ev[0]:
           self.player_diffs.pop()
+          self.player_diff_names.pop()
         self.diff_list = []
         self.song_list = []
         self.title_list = []
@@ -353,6 +362,10 @@ class SongSelect:
       self.current_song = self.songs[self.index].song
 
       if self.index != self.oldindex:
+        for i in range(len(self.player_diff_names)):
+          name = self.player_diff_names[i]
+          if name in self.current_song.diff_list[self.gametype]:
+            self.player_diffs[i] = self.current_song.diff_list[self.gametype].index(name)
         new_preview = True
         not_changed_since = current_time
         pygame.mixer.music.fadeout(500)
