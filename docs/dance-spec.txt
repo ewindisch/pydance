@@ -1,5 +1,4 @@
-This document describes the .dance format version 1.1. It was published
-on June 4th, 2003.
+== THIS IS A DRAFT VERSION OF THE .DANCE FORMAT ==
 
 The "Dance" Format
 ------------------
@@ -62,9 +61,11 @@ Metadata Storage:
 <Valid> ::= "valid" <Whitespace> 1 | 0
 
 Text Sections:
-<TextSection> ::= [<Description>] [<Lyrics>]
+<TextSection> ::= [<Description>] [<Lyrics>] [<Backgrounds>]
 <Lyrics> ::= "LYRICS" <Newline> (<LyricLine>)+ <EndToken>
-<LyricLine> ::= <Float> <Whitespace> <PosInt> <Whitespace> <LongString>
+<LyricLine> ::= <Float> <Whitespace> <PosInt> <Whitespace> <LongString> <Newline>
+<Backgrounds> ::= "BACKGROUNDS" <Newline> (<BgLine>)+ <EndToken>
+<BgLine> ::= <Float> <Whitespace> <LongString> <Newline>
 <Description> ::= "DESCRIPTION" <Newline> (<LongString> <Newline>)+ <EndToken>
 
 Step Sections:
@@ -74,7 +75,7 @@ Step Sections:
 <Sequence> ::= (<Comment> | <Buttons> | <Command>) <Newline>
 
 Note Sequences:
-<Buttons> ::= <NoteType> <Whitespace> <ButtonPresses>
+<Buttons> ::= <NoteType> (<Whitespace> <ButtonPresses>)+
 <NoteType> ::= "u" | "n" | "x" | "t" | "f" | "s" | "w" | "e" | "q" | "h" | "o"
 <ButtonPresses> ::= (0 | 1 | 2 | 3)+
 
@@ -257,11 +258,19 @@ single characters in the song section.
 Standard Game Modes
 -------------------
 SINGLE - Normal single player DDR, or versus mode
+COUPLE - Two players with different steps (up/down/left/right)
 DOUBLE - Doubles DDR
 6PANEL - 6 panels (upleft and upright)
 
 Changes:
 --------
+2003.06.27
+ - Add EBNF for COUPLE-style modes (spaces in Buttons)
+
+2003.06.26
+ - Add a missing newline to LyricLine.
+ - Add (currently unexplained) BACKGROUNDS section.
+
 2003.06.03
  - Version 1.1
  - Add 192nd notes with 'n', 48th with 'u'.
