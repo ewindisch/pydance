@@ -2165,7 +2165,7 @@ class HoldArrowSprite(CloneSprite):
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           bpmbeats = float(bpmdoom / onefbeat)
 #          print "bpmbeats",bpmbeats
-          self.top = self.top - int(bpmbeats*ARROWDIFF/8.0)
+          self.bottom = self.bottom - int(bpmbeats*ARROWDIFF/8.0)
           oldbpmsub = bpmsub
       if not finaltime:
 #        print "adjusting for finaltime",
@@ -2186,7 +2186,7 @@ class HoldArrowSprite(CloneSprite):
       beatsleft = float(doomtime / onebeat) #- 0.5
       self.top = self.top - int( (beatsleft/8.0)*ARROWDIFF )
     else:
-      print "holdarrow + bpmchange = weirdstuffmighthappen"
+#      print "holdarrow + bpmchange = weirdstuffmighthappen"
       oldbpmsub = [curtime,curbpm]
       bpmbeats = 0
       for bpmcheck in range(len(lbct[-1])-1):
@@ -3559,6 +3559,7 @@ def songSelect(songs, players):
       mrsong = Song(fooblah)
       pygame.mixer.quit()
       oldfoo = 1
+      screen.fill(BLACK)
       dance(mrsong,players,biggerdifflist)
       #blatantplug()
 
@@ -3954,19 +3955,6 @@ def dance(song,players,difficulty):
 
   bg = pygame.Surface(screen.get_size())
   bg.fill((0,0,0))
-
-  # FLASHY SONG ZOOM
-  for j in range(8):
-    screen.blit(bg, (0,0))
-    
-    font = pygame.font.Font(None, ((8-j)*32)-14)
-    backtext = font.render("pyDDR", 1, (16-j*2, 16-j*2, 16-j*2))
-    backtextpos = backtext.get_rect()
-    backtextpos.centerx = 320
-    backtextpos.centery = 240
-    screen.blit(backtext, backtextpos)
-
-    pygame.display.flip()
 
   songtext = zztext(song.song,480,12)
   grptext = zztext(song.group,160,12)
