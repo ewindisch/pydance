@@ -136,6 +136,7 @@ class Menu:
     pygame.display.update(screen.blit(Menu.bgimage.image, TOPLEFT))
     curitem = 0
     topitem = 0
+    changed = False
     toprotater = TextZoomer(self.text, FONTS[60], (640, 64),
                             (178, 110, 0), colors.WHITE)
 
@@ -143,6 +144,7 @@ class Menu:
 
     ev = E_PASS
     while ev != E_QUIT:
+      r = []
       ev = event.poll()[1]
 
       if ev == E_FULLSCREEN:
@@ -177,10 +179,12 @@ class Menu:
       elif ev != E_PASS and ev != E_QUIT:
         if ev == E_START: Menu.click_sound.play()
         ev = self.items[curitem].activate(ev)
+        changed = True
 
       toprotater.iterate()
-      screen.blit(Menu.bgimage.image, TOPLEFT)
-      r = [screen.blit(toprotater.tempsurface, TOPLEFT)]
+      if changed: r.append(screen.blit(Menu.bgimage.image, TOPLEFT))
+      else: screen.blit(Menu.bgimage.image, TOPLEFT)
+      r.append(screen.blit(toprotater.tempsurface, TOPLEFT))
       for i in range(DISPLAYED_ITEMS):
         if i + topitem < len(self.items):
           r.append(screen.blit(self.items[i + topitem].image,
