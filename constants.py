@@ -62,7 +62,6 @@ if os.path.exists(os.path.join(rc_path, "pyddr.cfg")):
 
 if not os.path.isdir(rc_path): os.mkdir(rc_path)
 
-print pyddr_path
 search_paths = (pyddr_path, rc_path, old_rc_path)
 #if pyddr_path != "." and rc_path != ".":
 #  search_paths += (".",)
