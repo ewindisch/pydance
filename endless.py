@@ -45,8 +45,9 @@ class Constraint:
 # Generate a playlist forever
 class FakePlaylist:
   def __init__(self, songs, constraints, screen, mode):
-    self.songs = [s for s in songs if check_constraints(constraints,
-                                                        s.difficulty[mode])]
+    self.songs = [s for s in songs if (s.info["valid"] and
+                                       check_constraints(constraints,
+                                                        s.difficulty[mode]))]
     self.working = []
     self.mode = mode
     self.constraints = constraints
@@ -110,8 +111,7 @@ class Endless:
       # Start game
       if ev[0] == 0 and ev[1] == E_START:
 
-        if optionscreen.driver(screen, E_START,
-                               self.player_configs, "Endless"):
+        if optionscreen.player_opt_driver(screen, self.player_configs):
           playSequence(FakePlaylist(songitems, self.constraints,
                                     screen, gametype),
                        self.player_configs, self.game_config, gametype)
@@ -122,7 +122,7 @@ class Endless:
         while ev[1] != E_PASS: ev = event.poll()
 
       if ev[0] == 0 and ev[1] == E_SELECT:
-        optionscreen.driver(screen, E_SELECT, [self.game_config], "Endless")
+        optionscreen.game_opt_driver(screen, self.game_config)
 
       # Player 2 on
       elif ev[0] == len(self.constraints) and ev[1] == E_START:

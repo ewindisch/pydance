@@ -5,45 +5,53 @@ from constants import *
 import pygame
 import colors
 
-MENUS = {
-  E_START: [
-  ("Speed", "speed", [(0.25, ".25x"), (0.5, ".5x"), (1, "1x"), (2, "2x"),
-                      (3, "3x"), (4, "4x"), (8, "8x")]),
-  ("Sudden", "sudden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
-                        (3, "Hide 3")]),
-  ("Hidden", "hidden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
-                        (3, "Hide 3")]),
-  ("Size", "scale", [(1, "Normal"), (0, "Shrink"), (2, "Grow")]),
-  ("Little", "little", [(0, "Off"), (1, "No 16ths"), (3, "No 16ths/8ths")]),
-  ("Scroll", "scrollstyle", [(0, "Normal"), (1, "Reverse"), (2, "Center")]),
-  ("Spin", "spin", [(0, "Off"), (1, "On")]),
-  ("Flat", "colortype", [(4, "Off"), (1, "On")]),
-  ("Dark", "toparrows", [(1, "Off"), (0, "On")]),
-  ("Jumps", "jumps", [(1, "On"), (0, "Off")]),
-  ],
-  E_SELECT: [
-  ("Battle", "battle", [(0, "Off"), (1, "On")]),
-  ("Lifebar", "lifebar", [("normal", "Normal"), ("oni", "Oni")]),
-  ("Oni Life", "onilives", [(1, "1"), (3, "3"), (5, "5"), (9, "9")]),
-  ]
-  }
-
-COLORS = {E_START: [colors.color["cyan"], colors.color["yellow"]],
-          E_SELECT: [colors.color["green"]]
-          }
-
-def driver(screen, key, conf, title):
+def player_opt_driver(screen, configs):
   ev = (0, E_QUIT)
   start = pygame.time.get_ticks()
+  clrs = [colors.color["cyan"], colors.color["yellow"]]
+  menu = [
+    ("Speed", "speed", [(0.25, ".25x"), (0.5, ".5x"), (1, "1x"), (2, "2x"),
+                        (3, "3x"), (4, "4x"), (8, "8x")]),
+    ("Sudden", "sudden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
+                          (3, "Hide 3")]),
+    ("Hidden", "hidden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
+                          (3, "Hide 3")]),
+    ("Size", "scale", [(1, "Normal"), (0, "Shrink"), (2, "Grow")]),
+    ("Little", "little", [(0, "Off"), (1, "No 16ths"), (3, "No 16ths/8ths")]),
+    ("Scroll", "scrollstyle", [(0, "Normal"), (1, "Reverse"), (2, "Center")]),
+    ("Spin", "spin", [(0, "Off"), (1, "On")]),
+    ("Flat", "colortype", [(4, "Off"), (1, "On")]),
+    ("Dark", "toparrows", [(1, "Off"), (0, "On")]),
+    ("Jumps", "jumps", [(1, "On"), (0, "Off")]),
+    ]
 
-  while (event.states[(0, key)] and pygame.time.get_ticks() - start < 1500):
-    ev = event.poll()
+  while (event.states[(0, E_START)] and
+         pygame.time.get_ticks() - start < 1500): ev = event.poll()
 
-  if event.states[(0, key)]:
-    op = OptionScreen(conf, title, MENUS[key], COLORS[key])
+  if event.states[(0, E_START)]:
+    op = OptionScreen(configs, "Player Options", menu, clrs)
     return op.display(screen)
   else: return True
 
+def game_opt_driver(screen, config):
+  ev = (0, E_QUIT)
+  start = pygame.time.get_ticks()
+  menu =  [
+    ("Battle", "battle", [(0, "Off"), (1, "On")]),
+    ("Lifebar", "lifebar", [("normal", "Normal"), ("oni", "Oni")]),
+    ("Oni Life", "onilives", [(1, "1"), (3, "3"), (5, "5"), (9, "9")]),
+    ]
+  clrs = [colors.color["green"]]
+
+  while (event.states[(0, E_SELECT)] and
+         pygame.time.get_ticks() - start < 1500): ev = event.poll()
+
+  if event.states[(0, E_SELECT)]:
+    op = OptionScreen([config], "Game Options", menu, clrs)
+    op.display(screen)
+    return False
+  else: return True
+                    
 class OptionScreen:
 
   bg = pygame.image.load(os.path.join(pyddr_path, "images", "option-bg.png"))
@@ -90,9 +98,9 @@ class OptionScreen:
       self.render(screen)
       
       pid, ev = event.wait()
-      if pid >= len(self.players): pass
-      
-      elif ev == E_DOWN:
+      pid = min(pid, len(self.current) - 1)
+
+      if ev == E_DOWN:
         self.current[pid] = (self.current[pid] + 1) % len(self.menu)
         
       elif ev == E_UP:
@@ -156,25 +164,26 @@ class OptionScreen:
         text = FONTS[32].render(values[k][1], 1, color)
         blankimage.blit(text, (120 + width * k, 70 + 35 * i))
 
-    faketext = " / ".join([str(i+1) for i in range(len(self.current))])
-    faketext = "Players: " + faketext
-    textimage = pygame.surface.Surface(FONTS[16].size(faketext))
-    textimage.set_colorkey(textimage.get_at((0, 0)))
-    text = FONTS[16].render("Players: ", 1, colors.WHITE)
-    textimage.blit(text, (0, 0))
-    xpos = text.get_width()
-    for i in range(len(self.current)):
-      text = FONTS[16].render(str(i+1), 1, self.colors[i])
-      textimage.blit(text, (xpos, 0))
-      xpos += text.get_width()
-      if i != len(self.current) - 1:
-        text = FONTS[16].render(" / ", 1, colors.WHITE)
+    if len(self.current) > 1:
+      faketext = " / ".join([str(i+1) for i in range(len(self.current))])
+      faketext = "Players: " + faketext
+      textimage = pygame.surface.Surface(FONTS[16].size(faketext))
+      textimage.set_colorkey(textimage.get_at((0, 0)))
+      text = FONTS[16].render("Players: ", 1, colors.WHITE)
+      textimage.blit(text, (0, 0))
+      xpos = text.get_width()
+      for i in range(len(self.current)):
+        text = FONTS[16].render(str(i+1), 1, self.colors[i])
         textimage.blit(text, (xpos, 0))
         xpos += text.get_width()
+        if i != len(self.current) - 1:
+          text = FONTS[16].render(" / ", 1, colors.WHITE)
+          textimage.blit(text, (xpos, 0))
+          xpos += text.get_width()
 
-    r = textimage.get_rect()
-    r.center = (blankimage.get_rect().centerx, 450)
-    blankimage.blit(textimage, r)
+      r = textimage.get_rect()
+      r.center = (blankimage.get_rect().centerx, 450)
+      blankimage.blit(textimage, r)
 
     screen.blit(self.baseimage, (0, 0))
     screen.blit(blankimage, rect)

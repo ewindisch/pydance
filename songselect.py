@@ -310,8 +310,7 @@ class SongSelect:
           while ann.chan.get_busy(): pygame.time.wait(1)
         except: pass
 
-        if optionscreen.driver(screen, E_START, self.player_configs,
-                               "Song Select"):
+        if optionscreen.player_opt_driver(screen, self.player_configs):
           audio.fadeout(500)
 
           playSequence(zip(self.song_list, self.diff_list),
@@ -355,8 +354,7 @@ class SongSelect:
         changed = True
 
       elif ev[1] == E_SELECT:
-        if optionscreen.driver(screen, E_SELECT, [self.game_config],
-                               "Song Select"):
+        if optionscreen.game_opt_driver(screen, self.game_config):
           self.index = random.randint(0, self.numsongs - 1)
 	changed = True
         all_changed = True
