@@ -6,6 +6,16 @@ from constants import *
 RESOLUTION = (640, 480)
 BACKGROUND = os.path.join(image_path, "endless-bg.png")
 
+DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "TRICK", "ANOTHER", "STANDARD",
+                "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI"]
+
+def python_sucks_sort(a, b):
+  if a in DIFFICULTIES and b in DIFFICULTIES:
+    return cmp(DIFFICULTIES.index(a), DIFFICULTIES.index(b))
+  elif a in DIFFICULTIES: return a
+  elif b in DIFFICULTIES: return b
+  else: return cmp(a, b)
+
 def check_constraints(constraints, diff):
   for c in constraints:
     if not c.meets(diff): return False
@@ -57,8 +67,17 @@ class FakePlaylist:
 class Endless:
   def __init__(self, songitems, screen, playSequence,
                numplayers = 1, gametype = "SINGLE"):
+    songitems = [s for s in songitems if s.difficulty.has_key(gametype)]
     oldaf = mainconfig["autofail"]
-    diffs = ["BASIC", "TRICK", "MANIAC"]
+    diffs = []
+    diff_count = {} # if we see a difficulty 2 times or more, use it
+    for song in songitems:
+      if song.difficulty.has_key(gametype):
+        for d in song.difficulty[gametype]:
+          if diff_count.has_key(d) and d not in diffs : diffs.append(d)
+          else: diff_count[d] = True
+
+    diffs.sort(python_sucks_sort)
     mainconfig["autofail"] = 1
 
     self.constraints = [Constraint()]
