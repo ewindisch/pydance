@@ -4,8 +4,7 @@ from gfxtheme import GFXTheme
 import fontfx, spritelib
 
 class Player:
-  def __init__(self, pid, diff, prevlife,  holdtext,
-               combos, song, mode = "SINGLE"):
+  def __init__(self, pid, holdtext, combos, mode = "SINGLE"):
     self.theme = GFXTheme(mainconfig["gfxtheme"])
     if mainconfig["reversescroll"]:
       self.arrow_top = 408
@@ -15,35 +14,42 @@ class Player:
       self.arrow_bot = int(576 * mainconfig["scrollspeed"])
     self.arrow_diff = float(self.arrow_top - self.arrow_bot)
     self.pid = pid
-    self.score = ScoringDisp(pid, diff)
-    self.lifebar = LifeBarDisp(pid, self.theme, prevlife)
+    self.score = ScoringDisp(pid, "Player " + str(pid))
+    self.lifebar = LifeBarDisp(pid, self.theme)
     self.holdtext = holdtext
     self.arrow_group = spritelib.RenderLayered()
     self.judging_list = []
     self.total_judgings = mainconfig['totaljudgings']
     self.tempholding = [-1, -1, -1, -1]
     self.combos = combos
-    self.song = song
-    self.difficulty = diff
+    self.judge = None
+    self.song = None
     self.holds = None
-    arr, arrfx = self.theme.toparrows(self.song.bpm, self.arrow_top, self.pid)
-    self.toparr = arr
-    self.toparrfx = arrfx
     self.evt = None
     self.mode = mode
 
     self.sudden = mainconfig['sudden']
     self.hidden = mainconfig['hidden']
 
-  def start_song(self, Judge, combos): # FIXME factor these out
+  def set_song(self, song, diff, Judge): # FIXME factor these out
+    self.song = song
+    arr, arrfx = self.theme.toparrows(self.song.bpm, self.arrow_top, self.pid)
+    self.toparr = arr
+    self.toparrfx = arrfx
+    self.judging_list = []
+    self.difficulty = diff
+    self.score.set_text(diff)
     difflist = self.song.modediff[self.mode]
-    self.song.play(self.mode, self.difficulty, self.pid == 0)
     self.holds = len(self.song.holdref[self.song.modediff[self.mode].index(self.difficulty)])
-    self.judge = Judge(self.song.bpm, self.holds,
-                       self.song.modeinfo[self.mode][difflist.index(self.difficulty)][1],
-                       self.song.totarrows[self.difficulty],
-                       self.difficulty)
-    self.judge.combo = combos[self.pid]
+    j = Judge(self.song.bpm, self.holds,
+              self.song.modeinfo[self.mode][difflist.index(self.difficulty)][1],
+              self.song.totarrows[self.difficulty],
+              self.difficulty)
+    if self.judge != None: j.munch(self.judge)
+    self.judge = j
+
+  def start_song(self):
+    self.song.play(self.mode, self.difficulty, self.pid == 0)
 
   def get_next_events(self):
     self.evt = self.song.get_events()
@@ -91,21 +97,26 @@ class Player:
           return i
 
 class ScoringDisp(pygame.sprite.Sprite):
-    def __init__(self,playernum,playmode):
+    def __init__(self,playernum, text):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
         self.playernum = playernum
         
-        # prerender the baseimage
-        tx = FONTS[28].size(playmode)[0]+2
-        self.basemode = pygame.transform.scale(fontfx.embfade(playmode,28,2,(tx,24),(127,127,127)),(tx,48))
-        self.baseimage = pygame.surface.Surface((128,48))
-        self.baseimage.blit(self.basemode,(64-(tx/2),0))
+        self.set_text(text)
         self.oldscore = -1
         self.image = pygame.surface.Surface((160,48))
         self.rect = self.image.get_rect()
         self.rect.bottom = 484
         self.rect.centerx = 160+(self.playernum*320)
-        
+
+    def set_text(self, text):
+      tx = FONTS[28].size(text)[0]+2
+      self.basemode = pygame.transform.scale(fontfx.embfade(text,28,2,(tx,24),
+                                                            (127,127,127)),
+                                             (tx,48))
+      self.baseimage = pygame.surface.Surface((128,48))
+      self.baseimage.blit(self.basemode,(64-(tx/2),0))
+      self.oldscore = 0 # Force a refresh
+
     def update(self, score):
       if score != self.oldscore:
         self.image.blit(self.baseimage,(0,0))
@@ -180,12 +191,6 @@ class LifeBarDisp(pygame.sprite.Sprite):
        return self.failed
        
     def update(self, judges):
-      #I assume this is for testing stuff, but seeing as it's essentially an expensive NOP, I disabling it --DS
-      #tstmp = judges.marvelous + judges.perfect + judges.great + judges.ok + judges.crap + judges.shit + judges.miss
-      #if tstmp: 
-        #self.life += judges.combo*8 / tstmp
-        #self.life += judges.bestcombo*8 / tstmp
-      
       if self.life >= 0: #If you failed, you failed. You can't gain more life afterwards
         self.life = 25 + self.prevlife + (judges.marvelous * self.vamt) + (judges.perfect * self.pamt) + (judges.great * self.gamt) + (judges.ok * self.oamt) + (judges.crap * self.camt) + (judges.shit * self.samt) + (judges.miss * self.mamt)
         
