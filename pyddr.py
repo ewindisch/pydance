@@ -1113,7 +1113,7 @@ class ArrowFX(pygame.sprite.Sprite):
           scale = 1.54
         else:
           scale = 1.0 + (steptimediff * 4.0) * (1.0+(combo/256.0))
-        newsize = [x*scale for x in self.image.get_size()]
+        newsize = [int(x*scale) for x in self.image.get_size()]
         self.image = pygame.transform.scale(self.image, newsize)
       if self.rotating:
         angle = steptimediff * 230.0 * self.direction
@@ -1897,9 +1897,11 @@ class fastSong:
     text.set_colorkey(text.get_at((0,0)))
     listimage.blit(text,(160,30))
     if self.bannertype == 2:
-      listimage.blit(pygame.transform.scale(self.lilbanner,(self.lilbanner.get_rect().size[0]/2,self.lilbanner.get_rect().size[1]/2)),(20,4))
+      rectSize = self.lilbanner.get_rect().size
+      listimage.blit(pygame.transform.scale(self.lilbanner, (int(rectSize[0]/2), int(rectSize[1]/2))), (20, 4))
     elif self.bannertype == 1:
-      listimage.blit(pygame.transform.scale(self.lilbanner,(self.lilbanner.get_rect().size[0]/1.5,self.lilbanner.get_rect().size[1]/1.5)),(3,65-(self.lilbanner.get_rect().size[1]/2)))
+      rectSize = self.lilbanner.get_rect().size
+      listimage.blit(pygame.transform.scale(self.lilbanner, (int(rectSize[0]/1.5), int(rectSize[1]/1.5))), (3, 65 - int(rectSize[1]/2)))
 
     pygame.draw.line(listimage.image,(191,191,191),(4,1),(12,46),2)
     pygame.draw.line(listimage.image,(191,191,191),(544,1),(552,46),2)
@@ -3559,8 +3561,6 @@ def songSelect(songs, players):
       print "        to read the file it took", songs[songidx].filereadcreationtime - songs[songidx].variablecreationtime
       print "     to filter the modes it took", songs[songidx].modereadcreationtime - songs[songidx].filereadcreationtime
       '''
-    elif (event == E_START2):
-      players = 2
     elif (event == E_SELECT):
       newidx = int(random.random()*len(songs))
       if newidx < songidx:
@@ -3580,9 +3580,10 @@ def songSelect(songs, players):
         print "added to taglist."
       except:
         print "new taglist created."
-        taglist = []
-        taglist.append(currentSong)
-    elif event == E_START or ((event == E_START2) and (players==2)):
+        taglist = [currentSong]
+    elif event == E_START2 and players != 2:
+      players = 2
+    elif event == E_START or event == E_START2:
       pygame.mixer.music.fadeout(1000)
       annc.say('menu')
       background.blit(screen,(0,0))
@@ -3607,35 +3608,15 @@ def songSelect(songs, players):
         print "nonstop: taglist is",taglist
       except:
         print "single song, no taglist"
-        taglist = []
-        taglist.append(currentSong)
+        taglist = [currentSong]
       
-      megajudge = []
-      lifebars = []
-      for playerID in range(players):
-        megajudge.append(Judge(1, 1, 1, 1, 'Nonstop'))
-        lifebars.append(None)
+      biggerdifflist = [diffList[difficulty]]
+      if players == 2:
+        biggerdifflist.append(diffList[difficulty2])
       
-      for thisSong in taglist:
-        biggerdifflist = [diffList[difficulty]]
-        if players == 2:
-          biggerdifflist.append(diffList[difficulty2])
-        
-        combos = map(lambda plr: plr.combo, megajudge)
-
-        fooblah = thisSong.fooblah
-        mrsong = Song(fooblah)
-        pygame.mixer.quit()
-        oldfoo = 1
-        prevscr = pygame.transform.scale(screen, (640,480))
-        screen.fill(BLACK)
-        
-        thisjudging, lifebars, prevscr = dance(mrsong, players, biggerdifflist, lifebars, combos, prevscr)
-        
-        for playerID in range(players):
-          megajudge[playerID].munch(thisjudging[playerID])
-
-        thisSong.listimage.blit(pygame.surface.Surface((12,16)),(536,28))
+      megajudge = playSequence(players, biggerdifflist, taglist)
+      fooblah = taglist[len(taglist)-1].fooblah
+      oldfoo = 1
           
       if mainconfig['grading']:
         grade = GradingScreen(megajudge)
@@ -3903,6 +3884,31 @@ def songSelect(songs, players):
         songs = map(lambda x:x[1], blah)
         songidx = songs.index(currentSong)
         s = 0
+
+def playSequence(players, diffList, songList):
+  megajudge = []
+  lifebars = []
+  for playerID in range(players):
+    megajudge.append(Judge(1, 1, 1, 1, 'Nonstop'))
+    lifebars.append(None)
+  
+  for thisSong in songList:
+    combos = map(lambda plr: plr.combo, megajudge)
+
+    fooblah = thisSong.fooblah
+    mrsong = Song(fooblah)
+    pygame.mixer.quit()
+    prevscr = pygame.transform.scale(screen, (640,480))
+    screen.fill(BLACK)
+    
+    thisjudging, lifebars, prevscr = dance(mrsong, players, diffList, lifebars, combos, prevscr)
+    
+    for playerID in range(players):
+      megajudge[playerID].munch(thisjudging[playerID])
+
+    thisSong.listimage.blit(pygame.surface.Surface((12,16)),(536,28))
+        
+  return megajudge
 
 def dance(song,players,difficulty,prevlife,combos,prevscr):
   global screen,background,eventManager,currentTheme,playmode
