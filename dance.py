@@ -216,6 +216,8 @@ def play(screen, playlist, configs, songconf, playmode):
       first = False
       break # Failed
     first = False
+    if True in [p.escaped for p in players]:
+      break
 
   if mainconfig['grading'] and not first and songdata:
     grade = gradescreen.GradingScreen(screen, players, songdata.banner)

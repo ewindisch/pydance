@@ -7,7 +7,7 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
-0.8.5 - Great Three-Toed Sloth of Ice Planet Hoth!		[2004.01.xx]
+0.9.0 - Great Three-Toed Sloth of Ice Planet Hoth!		[2004.02.01]
 + "Click only" assist tick.
 + New grading screen... with groove graph!
  + Thanks to sjbrown for the grade graphics.
@@ -22,6 +22,7 @@ Legend:
   (Thanks to Pavel).
 + A comprehensive new manual is available in docs/manual.html!
 * Movies work again (thanks to Jon Åslund).
+! Start + Select now exits to the grading screen always, by popular demand.
 ! .step support removed.
 ! All your records will be deleted upon running this.
 ! pydance no longer searches "pyddr" folders by default.

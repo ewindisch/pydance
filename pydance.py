@@ -5,7 +5,7 @@ import os
 import sys
 from getopt import getopt
 
-VERSION = "0.8.5"
+VERSION = "0.9.0"
 
 # fuck you, Python.
 def print_help():

@@ -11,7 +11,7 @@ import colors
 
 from pygame.locals import *
 
-VERSION = "0.8.5"
+VERSION = "0.9.0"
 
 # Detect the name of the OS - Mac OS X is not really UNIX.
 osname = None
