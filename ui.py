@@ -1,8 +1,10 @@
 from pygame.locals import *
 import pad, pygame
 
-(PASS, QUIT, UP, DOWN, LEFT, RIGHT, START, SELECT, MARK, UNMARK, PGUP,
+(PASS, QUIT, UP, DOWN, LEFT, RIGHT, START, SELECT, MARK, UNMARK, CONFIRM,
  PGDN, FULLSCREEN, SORT, CLEAR) = range(15)
+
+PGUP = CONFIRM
 
 SCREENSHOT = SORT
 
@@ -15,7 +17,7 @@ pad_defaults = {
   pad.LEFT: LEFT,
   pad.RIGHT: RIGHT,
   pad.START: START,
-  pad.UPRIGHT: PGUP,
+  pad.UPRIGHT: CONFIRM,
   pad.DOWNRIGHT: PGDN,
   pad.UPLEFT: MARK,
   pad.CENTER: START,
@@ -33,6 +35,7 @@ key_defaults = {
   100 * K_INSERT: MARK,
   100 * K_DELETE: UNMARK,
   100 * K_F11: FULLSCREEN,
+  100 * K_RETURN: CONFIRM,
   }
 
 # This class wraps pad and maps pad events to UI events.

@@ -4,6 +4,7 @@ from constants import *
 from songselect import SongSelect
 from endless import Endless
 from courses import CourseSelector
+from newss import MainWindow
 
 import ui
 
@@ -14,7 +15,7 @@ SELECTORS = {
   "Normal": SongSelect,
   "Endless": Endless,
   "Nonstop": CourseSelector,
-  
+  "Testing": MainWindow,
   }
 
 # We can probably autogenerate this list somehow.
@@ -74,7 +75,7 @@ DESCRIPTIONS = {
   "Normal": "One song at a time, or set up a playlist.",
   "Endless": "Keep dancing until you fail.",
   "Nonstop": "Several songs in a row.",
-
+  "Testing": "Try out the incomplete new song selector."
   }
 
 class GameSelect(object):
@@ -124,7 +125,7 @@ class GameSelect(object):
     return self.select_general(1, ["SINGLE", "VERSUS", "COUPLE", "DOUBLE"])
 
   def select_selector(self):
-    s = ["Normal", "Endless"]
+    s = ["Normal", "Endless", "Testing"]
     if self.courses: s.append("Nonstop")
     return self.select_general(2, s)
 
