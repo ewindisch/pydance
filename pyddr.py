@@ -759,7 +759,7 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
           self.slotold[i] = self.slotnow[i]
           
 class LyricDispKludge(pygame.sprite.Sprite):
-  def __init__(self,top,colors):
+  def __init__(self,top,clrs):
       pygame.sprite.Sprite.__init__(self) #call Sprite initializer
       self.lyrics = []
       self.times = []
@@ -773,8 +773,8 @@ class LyricDispKludge(pygame.sprite.Sprite):
       self.oldalp = 0
       self.baseimage = self.space
       self.image = self.baseimage
-      self.colors = colors
-      self.darkcolors = colors.darken_div(colors)
+      self.colors = clrs
+      self.darkcolors = colors.darken_div(clrs)
       self.topimg = top
 
       self.rect = self.image.get_rect()
