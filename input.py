@@ -194,3 +194,7 @@ class EventManager:
       ev = self.poll()
       pygame.time.wait(delay)
     return ev
+
+  def empty(self):
+    ev = (0, E_QUIT)
+    while ev[1] != E_PASS: ev = self.poll()

@@ -258,17 +258,17 @@ class SongSelect:
       self.folders = None
       self.songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
     self.update_help()
-    self.render(True, True)
+    self.render(True)
 
     while ev[1] != E_QUIT:
+      loop_start_time = pygame.time.get_ticks()
+
       self.oldindex = self.index
       changed = False
-      all_changed = False
       current_time = pygame.time.get_ticks()
 
       if last_event_was_expose:
         changed = True
-        all_changed = True
 
       ev = event.poll()
 
@@ -295,14 +295,16 @@ class SongSelect:
         MOVE_SOUND.play()
 
       elif ev[1] == E_PGUP:
+        MOVE_SOUND.play()
+        self.scroll_out(self.index)
         self.index = (self.index - 7) % self.numsongs
         scroll_wait = current_time
-        MOVE_SOUND.play()
 
       elif (event.states[(0, E_PGUP)] and
             current_time - scroll_wait > 1000):
-        self.index = (self.index - 7) % self.numsongs
         MOVE_SOUND.play()
+        self.scroll_out(self.index)
+        self.index = (self.index - 7) % self.numsongs
 
       # Down the menu list
       elif ev[1] == E_RIGHT:
@@ -316,30 +318,34 @@ class SongSelect:
         MOVE_SOUND.play()
 
       elif ev[1] == E_PGDN:
+        MOVE_SOUND.play()
+        self.scroll_out(self.index)
         self.index = (self.index + 7) % self.numsongs
         scroll_wait = current_time
-        MOVE_SOUND.play()
 
       elif (event.states[(0, E_PGDN)] and
             current_time - scroll_wait > 1000):
-        self.index = (self.index + 7) % self.numsongs
         MOVE_SOUND.play()
+        self.scroll_out(self.index)
+        self.index = (self.index + 7) % self.numsongs
 
       # Easier difficulty
       elif (ev[1] == E_UP and ev[0] < len(self.player_diffs)):
-        self.player_diffs[ev[0]] -= 1
-        self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
-        self.player_diff_names[ev[0]] = self.current_song.diff_list[gametype][self.player_diffs[ev[0]]]
-        changed = True
-        MOVE_SOUND.play()
+        if not self.songs[self.index].isfolder:
+          self.player_diffs[ev[0]] -= 1
+          self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
+          self.player_diff_names[ev[0]] = self.current_song.diff_list[gametype][self.player_diffs[ev[0]]]
+          changed = True
+          MOVE_SOUND.play()
 
       # Harder difficulty
       elif (ev[1] == E_DOWN and ev[0] < len(self.player_diffs)):
-        self.player_diffs[ev[0]] += 1
-        self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
-        self.player_diff_names[ev[0]] = self.current_song.diff_list[gametype][self.player_diffs[ev[0]]]
-        changed = True
-        MOVE_SOUND.play()
+        if not self.songs[self.index].isfolder:
+          self.player_diffs[ev[0]] += 1
+          self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
+          self.player_diff_names[ev[0]] = self.current_song.diff_list[gametype][self.player_diffs[ev[0]]]
+          changed = True
+          MOVE_SOUND.play()
 
       # Player n+1 hit start, so add a new player
       elif ev[1] == E_START and ev[0] == len(self.player_diffs):
@@ -368,10 +374,13 @@ class SongSelect:
 
       # Open up a new folder
       elif ev[1] == E_START and ev[0] == 0 and self.songs[self.index].isfolder:
-        self.set_up_songlist(self.songs[self.index].name)
         OPEN_SOUND.play()
+        self.scroll_out(self.index)
+        self.set_up_songlist(self.songs[self.index].name)
+        self.scroll_in(self.index)
+        self.oldindex = self.index
+        event.empty()
         changed = True
-        all_changed = True
 
       # Start the dancing!
       elif ev[1] == E_START and ev[0] == 0:
@@ -403,7 +412,7 @@ class SongSelect:
           self.screen.blit(self.bg, (0, 0))
           pygame.display.flip()
 
-        changed = all_changed = True
+        changed = True
 
         # Reset the playlist
         self.song_list = []
@@ -412,6 +421,7 @@ class SongSelect:
 
       # Add the current song to the playlist
       elif ev[1] == E_MARK:
+        MOVE_SOUND.play()
         self.add_current_song()
         changed = True
 
@@ -432,9 +442,14 @@ class SongSelect:
 
       elif ev[1] == E_SELECT:
         if optionscreen.game_opt_driver(screen, self.game_config):
-          self.index = random.randint(0, self.numsongs - 1)
+          self.scroll_out(self.index)
+          OPEN_SOUND.play()
+          self.index = random.randint(0, len(self.all_songs) - 1)
+          s = self.all_songs[self.index]
+          if self.folders:
+            self.set_up_songlist(s.folder[SORT_NAMES[mainconfig["sortmode"]]])
+          self.index = self.songs.index(s)
 	changed = True
-        all_changed = True
 
       # Change sort modes - FIXME: terrible event name
       elif ev[1] == E_SCREENSHOT:
@@ -461,7 +476,6 @@ class SongSelect:
         pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
         changed = True
-        all_changed = True
 
       elif ev[1] == E_EXPOSE:
         last_event_was_expose = True
@@ -524,13 +538,12 @@ class SongSelect:
         elif self.index == (self.oldindex - 1) % self.numsongs:
           self.scroll_up()
         else:
-          all_changed = True
-          self.scroll_out(self.oldindex)
+          changed = True
           self.scroll_in(self.index)
 
-      self.render(changed, all_changed)
+      self.render(changed)
 
-      pygame.time.wait(30)
+      pygame.time.wait(50 - (pygame.time.get_ticks() - loop_start_time))
 
     audio.fadeout(500)
     pygame.time.wait(500)
@@ -539,11 +552,11 @@ class SongSelect:
     audio.set_volume(1.0)
     audio.play(4, 0.0)
 
-  def render(self, changed, all_changed):
+  def render(self, changed):
     r = []
     
     bg_r = self.screen.blit(self.bg, (0,0))
-    if all_changed: r.append(bg_r)
+    if changed: r.append(bg_r)
 
     # Difficulty list rendering
     if not self.songs[self.index].isfolder:
@@ -553,10 +566,6 @@ class SongSelect:
       diff_list = []
 
     if changed: # We need to rerender everything
-      r += [Rect((5, 5), (256, 80)), # banner area
-            Rect((5, 15), (190, 460))] # Sidebar
-      # The song area is always full, so we don't need to update it
-
       # The song list
       for i in range(-4, 5):
         idx = (self.index + i) % self.numsongs
@@ -565,7 +574,7 @@ class SongSelect:
         y = 210 + i * 60
         img = self.songs[idx].menuimage
         img.set_alpha(226 - (40 * abs(i)))
-        r.append(self.screen.blit(self.songs[idx].menuimage, (x,y)))
+        self.screen.blit(self.songs[idx].menuimage, (x,y))
         
       # The banner
       self.screen.blit(self.songs[self.index].banner,
@@ -577,9 +586,8 @@ class SongSelect:
 
       for i in range(len(temp_list)):
         txt = FONTS[14].render(temp_list[i], 1, colors.WHITE)
-        self.screen.blit(txt,
-                         (10, 480 - (FONTS[14].size("I")[1] - 2) *
-                          (i + 2)))
+        self.screen.blit(txt, (10, 480 - (FONTS[14].size("I")[1] - 2) *
+                               (i + 2)))
 
       # Sort mode
       stxt = FONTS[20].render("sort by " + SORT_NAMES[mainconfig["sortmode"]],
@@ -637,9 +645,12 @@ class SongSelect:
   def scroll_up(self):
     if not mainconfig["gratuitous"]: return
     r = [Rect((5, 5), (256, 80)), Rect((240, 0), (400, 480))]
-    for i in range(1, 7):
-      p = i/6.0
-      q = 1 - p
+    end_time = pygame.time.get_ticks() + 75
+    cur_time = pygame.time.get_ticks()
+    while cur_time < end_time:
+      cur_time = pygame.time.get_ticks()
+      q = min(1, max(0, (end_time - cur_time) / 75.0))
+      p = 1 - q
       self.screen.blit(self.bg, (0,0))
       for k in range(-5, 5):
         idx = (self.oldindex + k) % self.numsongs
@@ -649,22 +660,25 @@ class SongSelect:
         img = self.songs[idx].menuimage
         img.set_alpha(226 - int(40 * (abs(k) * q + abs(k + 1) * p)))
         self.screen.blit(self.songs[idx].menuimage, (x,y))
-      self.songs[self.oldindex].banner.set_alpha(255 * q)
+      self.songs[self.oldindex].banner.set_alpha(256 * q)
       self.screen.blit(self.songs[self.oldindex].banner,
                        self.songs[self.oldindex].banner_rect)
-      self.songs[self.index].banner.set_alpha(255 * p)
+      self.songs[self.index].banner.set_alpha(256 * p)
       self.screen.blit(self.songs[self.index].banner,
                        self.songs[self.index].banner_rect)
       pygame.display.update(r)
-    self.songs[self.oldindex].banner.set_alpha(255)
-    self.songs[self.index].banner.set_alpha(255)
+    self.songs[self.oldindex].banner.set_alpha(256)
+    self.songs[self.index].banner.set_alpha(256)
 
   def scroll_down(self):
     if not mainconfig["gratuitous"]: return
     r = [Rect((5, 5), (256, 80)), Rect((240, 0), (400, 480))]
-    for i in range(1, 7):
-      p = i/6.0
-      q = 1 - p
+    end_time = pygame.time.get_ticks() + 75
+    cur_time = pygame.time.get_ticks()
+    while cur_time < end_time:
+      cur_time = pygame.time.get_ticks()
+      q = min(1, max(0, (end_time - cur_time) / 75.0))
+      p = 1 - q
       self.screen.blit(self.bg, (0,0))
       for k in range(-4, 6):
         idx = (self.oldindex + k) % self.numsongs
@@ -687,12 +701,17 @@ class SongSelect:
   def scroll_out(self, index):
     if not mainconfig["gratuitous"]: return
     r = [Rect((5, 5), (256, 80)), Rect((240, 0), (400, 480))]
-    for j in range(240, 866, 25): # position to move to
+    end_time = pygame.time.get_ticks() + 200
+    cur_time = pygame.time.get_ticks()
+    while cur_time < end_time:
+      cur_time = pygame.time.get_ticks()
+      q = min(1, max(0, (end_time - cur_time) / 200.0))
+      p = 1 - q
       self.screen.blit(self.bg, (0,0))
       for k in range(-4, 5): # Redraw screen
         idx = (index + k) % self.numsongs
         self.songs[idx].render()
-        x = max(j - 50 * k, ITEM_X[abs(k)])
+        x = max(240 + int((866 - 240) * p) - 50 * k, ITEM_X[abs(k)])
         y = 210 + k * 60
         self.screen.blit(self.songs[idx].menuimage, (x,y))
       pygame.display.update(r)
@@ -700,12 +719,18 @@ class SongSelect:
   def scroll_in(self, index):
     if not mainconfig["gratuitous"]: return
     r = [Rect((5, 5), (256, 80)), Rect((240, 0), (400, 480))]
-    for j in range(840, 214, -25): # position to move to
+    end_time = pygame.time.get_ticks() + 150
+    cur_time = pygame.time.get_ticks()
+    while cur_time < end_time:
+      cur_time = pygame.time.get_ticks()
+      q = min(1, max(0, (end_time - cur_time) / 150.0))
+      p = 1 - q
+#    for j in range(840, 214, -25): # position to move to
       self.screen.blit(self.bg, (0,0))
       for k in range(-4, 5): # Redraw screen
         idx = (index + k) % self.numsongs
         self.songs[idx].render()
-        x = max(j - 50 * k, ITEM_X[abs(k)])
+        x = max(214 + int((840 - 214) * q) - 50 * k, ITEM_X[abs(k)])
         y = 210 + k * 60
         self.songs[idx].menuimage.set_alpha(226 - (40 * abs(k)))
         self.screen.blit(self.songs[idx].menuimage, (x,y))
