@@ -6,7 +6,7 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
-0.7.4 - In My Pants
+0.7.4 - In My Pants						[2003.07.28]
 + 6 panel ("solo") and 8 panel support.
 + Double (1 player, both sides) support.
  - 'totaljudgings' option no longer works (no one was using it anyway...)
@@ -15,6 +15,7 @@ legend:
 * All 9 directions can always be done on the numeric pad for player 1.
  - azerty 2nd player start key changed to '+' on the numeric pad.
 * Some more speed optimizations for slower processors.
+* Some DWI parser fixes for bad files.
 * 'usepsyco' option (on by default) to try and load the Psyco JIT compiler.
 
 0.7.3

@@ -182,11 +182,11 @@ def play(screen, playlist, configs, songconf, playmode):
     players.append(plr)
 
   for songfn, diff in playlist:
-    current_song = fileparsers.SongItem(songfn)
-#    try: current_song = fileparsers.SongItem(songfn)
-#    except: error.ErrorMessage(screen, ["There was an error loading",
-#                                        os.path.split(songfn)[1]])
-#      continue
+    try: current_song = fileparsers.SongItem(songfn)
+    except:
+      error.ErrorMessage(screen, ["There was an error loading",
+                                  os.path.split(songfn)[1]])
+      continue
       
     pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
@@ -197,10 +197,15 @@ def play(screen, playlist, configs, songconf, playmode):
 
     print "Playing", songfn
     print songdata.title, "by", songdata.artist
-  
-    if dance(screen, songdata, players, prevscr, first, game):
-      break # Failed
-    first = False
+
+    try:
+      if dance(screen, songdata, players, prevscr, first, game):
+        break # Failed
+      first = False
+    except:
+      error.ErrorMessage(screen ["There was an error playing",
+                                 os.path.split(songfn)[1]])
+      first = True
 
   judges = [player.get_judge() for player in players]
 
