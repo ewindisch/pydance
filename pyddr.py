@@ -121,27 +121,6 @@ class BGmovie(pygame.sprite.Sprite):
         self.movie.render_frame(curframe)
         self.oldframe = curframe
 
-class keykludge:
-  def __init__ (self):
-    self.directionlist = DIRECTIONS
-    self.holdingstates = [ 0 , 0 , 0 , 0 ]
-  
-  def pressed(self,direction):
-    self.holdingstates[self.directionlist.index(direction)] = 1
-    
-  def letgo(self,direction):
-    self.holdingstates[self.directionlist.index(direction)] = 0
-    
-  def shouldhold(self,direction,curtime,list,bpm):
-    for i in range(len(list)):
-      if list[i][0] == self.directionlist.index(direction):
-        if (curtime - (15.0/float(bpm)) > list[i][1]) and (curtime < list[i][2]):
-          return i
-    
-  def checkstate(self,direction):
-    return self.holdingstates[self.directionlist.index(direction)]
-
-
 class Judge:
   def __init__ (self, bpm, holds, feet, stepcount, diff):
     self.steps = {}
@@ -854,56 +833,6 @@ class fpsDisp(pygame.sprite.Sprite):
         self.oldtime = time
         self.loops = 0
 
-class TopArrow(pygame.sprite.Sprite):
-  def __init__ (self, bpm, direction, ypos, playernum, theme):
-    pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
-    self.presstime = -1
-#    self.steps = {}
-    self.tick = toRealTime(bpm, 1);
-    self.frame = 0
-    self.oldframe = -1
-    self.state = 'n'
-    self.filepref = 'arr_'
-    self.adder = 0
-    self.direction = direction
-    self.topimg = []
-    self.playernum = playernum
-    self.ypos = ypos
-
-    for i in range(8):
-      if i < 4:        ftemp = 'n_'
-      else:            ftemp = 's_'
-      fn = os.path.join(theme.path,
-                        'arr_'+ftemp+self.direction+'_'+repr(i)+'.png')
-      self.topimg.append(pygame.image.load(fn))
-      self.topimg[i].set_colorkey(self.topimg[i].get_at((0,0)),RLEACCEL)
-
-      self.image = self.topimg[0]
-      self.rect = self.image.get_rect()
-      self.rect.top = self.ypos
-      if self.direction == 'l':        self.rect.left = 12
-      if self.direction == 'd':        self.rect.left = 88
-      if self.direction == 'u':        self.rect.left = 164
-      if self.direction == 'r':        self.rect.left = 240
-
-      self.rect.left += (320*self.playernum)
-
-  def stepped(self, modifier, time):
-    if modifier:    self.adder = 4
-    else:           self.adder = 0
-    self.presstime = time
-
-  def update(self,time):
-    if time > (self.presstime+0.2):        self.adder = 0
-
-    self.keyf = int(time / (self.tick / 2)) % 8
-    if self.keyf > 3:        self.keyf = 3
-    self.frame = self.adder + self.keyf
-
-    if self.frame != self.oldframe:
-      self.image = self.topimg[self.frame]
-      self.oldframe = self.frame
-
 class Blinky(pygame.sprite.Sprite):
   def __init__ (self, bpm):
     pygame.sprite.Sprite.__init__(self)
@@ -933,118 +862,6 @@ class Blinky(pygame.sprite.Sprite):
     if self.frame != self.oldframe:
       self.image = self.topimg[self.frame]
       self.oldframe = self.frame
-
-class LifeBarDisp(pygame.sprite.Sprite):
-    def __init__(self, playernum, theme, previously = None):
-        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-        self.playernum = playernum
-        if previously:
-          self.oldlife = -1
-          self.failed = previously.failed
-          self.prevlife = previously.life - 25
-          self.life = previously.life
-        else:
-          self.oldlife = self.failed = 0
-          self.prevlife = 0
-          self.life = 25
-
-        self.image = pygame.Surface((204,28))
-        self.blkbar = pygame.Surface((3,24))
-        self.bugbar = pygame.Surface((2,24))
-        self.bugbar.fill((192,192,192))
-        self.grade = None
-        self.vamt = 0.4
-        self.pamt = 0.25
-        self.gamt = 0
-        self.oamt = -0.5
-        self.camt = -1
-        self.samt = -2
-        self.mamt = -4
-        
-        self.redbar = pygame.image.load(os.path.join(theme.path,
-                                                     'redbar.png')).convert()
-        self.orgbar = pygame.image.load(os.path.join(theme.path,
-                                                     'orgbar.png')).convert()
-        self.yelbar = pygame.image.load(os.path.join(theme.path,
-                                                     'yelbar.png')).convert()
-        self.grnbar = pygame.image.load(os.path.join(theme.path,
-                                                     'grnbar.png')).convert()
-        self.redbar_pos = self.redbar.get_rect()
-        self.orgbar_pos = self.orgbar.get_rect()
-        self.yelbar_pos = self.yelbar.get_rect()
-        self.grnbar_pos = self.grnbar.get_rect()
-        
-        self.failtext = fontfx.embfade("FAILED",28,3,(80,32),(224,32,32))
-        self.failtext.set_colorkey(self.failtext.get_at((0,0)))
-        
-        embossbar = pygame.Surface((204,1))
-        embossbar.fill((128,128,128))
-        self.image.blit(embossbar,(0,0))
-        self.image.blit(embossbar,(-1,1))
-        embossbar.fill((192,192,192))
-        self.image.blit(embossbar,(1,26))
-        self.image.blit(embossbar,(0,27))
-        embossbar = pygame.Surface((1,28))
-        embossbar.fill((128,128,128))
-        self.image.blit(embossbar,(0,0))
-        self.image.blit(embossbar,(1,-1))
-        embossbar.fill((192,192,192))
-        self.image.blit(embossbar,(202,1))
-        self.image.blit(embossbar,(203,0))
-
-        self.rect = self.image.get_rect()
-        self.rect.top = 30
-        self.rect.left = 58+(320*self.playernum)
-
-    def failed(self):
-       return self.failed
-       
-    def update(self, judges):
-      #I assume this is for testing stuff, but seeing as it's essentially an expensive NOP, I disabling it --DS
-      #tstmp = judges.marvelous + judges.perfect + judges.great + judges.ok + judges.crap + judges.shit + judges.miss
-      #if tstmp: 
-        #self.life += judges.combo*8 / tstmp
-        #self.life += judges.bestcombo*8 / tstmp
-      
-      if self.life >= 0: #If you failed, you failed. You can't gain more life afterwards
-        self.life = 25 + self.prevlife + (judges.marvelous * self.vamt) + (judges.perfect * self.pamt) + (judges.great * self.gamt) + (judges.ok * self.oamt) + (judges.crap * self.camt) + (judges.shit * self.samt) + (judges.miss * self.mamt)
-        
-        if self.life <= 0: #FAILED but we don't do anything yet
-          self.failed = 1
-          self.life = 0
-        elif self.life > 52:
-          self.life = 52
-        
-        self.life = int(self.life)
-        if self.life != self.oldlife:
-          self.oldlife = self.life
-#          print "life went to",self.life
-          for j in range(52-self.life-1):
-            self.image.blit(self.blkbar, ((2+int(self.life+j)*4), 2) )
-
-          self.image.blit(self.bugbar,(202,2))   # because the damn bar eraser bugs out all the time
-
-          for j in range(self.life):
-            barpos = int(self.life-(j+1))
-            if barpos <= 10:
-              self.redbar_pos.left = 2+ barpos*4
-              self.redbar_pos.top = 2
-              self.image.blit(self.redbar,self.redbar_pos)
-            elif barpos <= 20:
-              self.orgbar_pos.left = 2+ barpos*4
-              self.orgbar_pos.top = 2
-              self.image.blit(self.orgbar,self.orgbar_pos)
-            elif barpos <= 35:
-              self.yelbar_pos.left = 2+ barpos*4
-              self.yelbar_pos.top = 2
-              self.image.blit(self.yelbar,self.yelbar_pos)
-            elif barpos < 50:
-              self.grnbar_pos.left = 2+ barpos*4
-              self.grnbar_pos.top = 2
-              self.image.blit(self.grnbar,self.grnbar_pos)
-
-          if self.failed:
-            self.image.blit(self.failtext, (70, 2) )
 
 class JudgingDisp(pygame.sprite.Sprite):
     def __init__(self,playernum):
@@ -1115,30 +932,6 @@ class JudgingDisp(pygame.sprite.Sprite):
         self.rect.bottom = 320+(listnum*24)
         self.rect.centerx = 160+(self.playernum*320)
         self.needsupdate = 0
-
-class ScoringDisp(pygame.sprite.Sprite):
-    def __init__(self,playernum,playmode):
-        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-        self.playernum = playernum
-        
-        # prerender the baseimage
-        tx = FONTS[28].size(playmode)[0]+2
-        self.basemode = pygame.transform.scale(fontfx.embfade(playmode,28,2,(tx,24),(127,127,127)),(tx,48))
-        self.baseimage = pygame.surface.Surface((128,48))
-        self.baseimage.blit(self.basemode,(64-(tx/2),0))
-        self.oldscore = -1
-        self.image = pygame.surface.Surface((160,48))
-        self.rect = self.image.get_rect()
-        self.rect.bottom = 484
-        self.rect.centerx = 160+(self.playernum*320)
-        
-    def update(self, score):
-      if score != self.oldscore:
-        self.image.blit(self.baseimage,(0,0))
-        scoretext = FONTS[28].render(repr(score),1,(192,192,192))
-        self.image.blit(scoretext,(64-(scoretext.get_rect().size[0]/2),13))
-        self.image.set_colorkey(self.image.get_at((0,0)),RLEACCEL)
-        self.oldscore = score
 
 class TimeDisp(pygame.sprite.Sprite):
     def __init__(self):
@@ -1584,7 +1377,6 @@ class ArrowSprite(CloneSprite):
       self.playedsound = 1
 
     if curtime > self.timef + (0.001*(60000.0/curbpm)):
-#      print "killing sprite"
       self.kill()
       return
       
@@ -1695,7 +1487,6 @@ class HoldArrowSprite(CloneSprite):
       self.playedsound = 1
 
     if curtime > self.timef2:  #+ (0.001*(60000.0/curbpm)):
-      print "killing sprite"
       self.kill()
       return
       
@@ -1795,38 +1586,6 @@ class HoldArrowSprite(CloneSprite):
       self.image.set_alpha(alp)
   
 #    print "alpha ",alp
-    
-class RenderLayered(pygame.sprite.RenderClear):
-
-  def draw(self,surface):
-    spritedict = self.spritedict
-    surface_blit = surface.blit
-    dirty = self.lostsprites
-    dirty_append = dirty.append
-    self.lostsprites = []
-    sitems=spritedict.items()
-    sitems.sort(lambda a,b: cmp(a[0].zindex,b[0].zindex))
-    for s,r in sitems:
-      newrect = surface_blit(s.image,s.rect)
-      if r is 0:
-        dirty_append(newrect)
-      else:
-        dirty_append(newrect.union(r))
-      spritedict[s] = newrect
-    return dirty
-
-  def ordersprites(self):
-    " self.ordersprites() -> overlaplist, cleanlist"
-    dirty=[]
-    clean=[]
-    dirty_append=dirty.append
-    clean_append=clean.append
-    sprlist = self.sprites
-    while len(sprlist):
-      sprite1 = sprlist.pop(0)
-      spritecollide = sprite.rect.colliderect
-      
-      
 
 def text_fadeon(screen, font, message, center, fadetime=500):
     start = pygame.time.get_ticks()
@@ -1964,12 +1723,8 @@ def main():
     print "You don't have any songs, and you need one. Go here: http://icculus.org/pyddr/"
     sys.exit()
 
-  global holdkey, sortmode
+  global sortmode
   
-  holdkey = {}
-  for playerID in range(MAXPLAYERS):
-    holdkey[playerID] = keykludge()
-
   screen.fill(colors.BLACK)
     
   menudriver.do(screen, songselect.SongSelect,
@@ -2075,8 +1830,6 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
 
   pygame.mixer.init()
 
-  currentTheme = GFXTheme(mainconfig["gfxtheme"])
-
   # render group, almost[?] every sprite that gets rendered
   rgroup = RenderLayered()
   # text group, EG. judgings and combos
@@ -2125,19 +1878,13 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
     background.fill(colors.BLACK)
 
   # so the current combos get displayed
-  global holdkey
 
   playerContents = []
   for playerID in range(players):
-    plr = Player(playerID,
-                 ScoringDisp(playerID, difficulty[playerID]),
-                 LifeBarDisp(playerID, currentTheme, prevlife[playerID]),
+    plr = Player(playerID, difficulty[playerID], prevlife[playerID],
                  HoldJudgeDisp(playerID),
-                 RenderLayered(),
                  ComboDisp(playerID),
-                 holdkey[playerID],
-                 songL[playerID],
-                 difficulty[playerID])
+                 songL[playerID])
       
     plr.score.add(tgroup)
     plr.lifebar.add(tgroup)
@@ -2229,8 +1976,6 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
 
   screenshot = 0
 
-  arrowSet = currentTheme.arrows
-
 #  print "playmode: %r difficulty %r modes %r" % (playmode,difficulty,song.modes)
 #  print "Total arrows are %d " % song.totarrows[difficulty]
   if mainconfig['assist']:
@@ -2307,7 +2052,6 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
       if playerID < players:
         keyPress = keyAction[1]
         playerContents[playerID].toparr[keyPress].stepped(1, curtime+(song.offset*1000))
-        holdkey[playerID].pressed(keyPress)
         playerContents[playerID].fx_data.append(playerContents[playerID].judge.handle_key(keyPress, curtime) )
 
     # This maps the old holdkey system to the new event ID one
@@ -2317,7 +2061,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
     for plr in playerContents:
       for checkhold in DIRECTIONS:
         plr.toparrfx[checkhold].holding(0)
-        currenthold = plr.holdkey.shouldhold(checkhold, curtime, song.holdinfo[song.modediff[playmode].index(plr.difficulty)], song.playingbpm)
+        currenthold = plr.should_hold(checkhold, curtime)
         dirID = DIRECTIONS.index(checkhold)
         if currenthold is not None:
           if event.states[(plr.pid, keymap_kludge[checkhold])]:
@@ -2360,12 +2104,12 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
             for (dir,num) in zip(DIRECTIONS, ev.feet):
               if num & 8:
                 if not (num & 128):
-                  ArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr.pid).add([plr.arrow_group, rgroup])
+                  ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr.pid).add([plr.arrow_group, rgroup])
 
               if num & 128:
                 diffnum = song.modediff[playmode].index(plr.difficulty)
                 holdindex = song.holdref[diffnum].index((DIRECTIONS.index(dir),ev.when))
-                HoldArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr.pid).add([plr.arrow_group, rgroup])
+                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr.pid).add([plr.arrow_group, rgroup])
           
     if len(song.lastbpmchangetime) > 1:
       if (curtime >= song.lastbpmchangetime[1][0]):

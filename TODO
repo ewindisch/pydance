@@ -2,11 +2,12 @@ This is my (piman's) rough outline of where I want to be. Other people,
 add to it.
 
 0.6.3
+ - FIX ARROW COUNTING BUG - at least as far back as 0.6.1
  - Have installer files for Mac OS X.
  - better help in game (sort of done)
  - Clean up the main select/dance/judge loop. (3/4th done)
- - Player-as-object patch
-   - Removal of keykludge
+ - Player-as-object patch (in progress)
+   - Removal of keykludge (yay!)
  - Separate Song (makes arrow events out of patterns), and SongFile.
    (loads file, gets metadata, creates Song given a difficulty)
    - Removes fastSong (done)

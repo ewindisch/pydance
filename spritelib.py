@@ -145,3 +145,32 @@ class BGimage(pygame.sprite.Sprite):
       self.rect = self.image.get_rect()
       self.rect.top = 0
       self.rect.left = 0
+
+class RenderLayered(pygame.sprite.RenderClear):
+  def draw(self,surface):
+    spritedict = self.spritedict
+    surface_blit = surface.blit
+    dirty = self.lostsprites
+    dirty_append = dirty.append
+    self.lostsprites = []
+    sitems=spritedict.items()
+    sitems.sort(lambda a,b: cmp(a[0].zindex,b[0].zindex))
+    for s,r in sitems:
+      newrect = surface_blit(s.image,s.rect)
+      if r is 0:
+        dirty_append(newrect)
+      else:
+        dirty_append(newrect.union(r))
+      spritedict[s] = newrect
+    return dirty
+
+  def ordersprites(self):
+    " self.ordersprites() -> overlaplist, cleanlist"
+    dirty=[]
+    clean=[]
+    dirty_append=dirty.append
+    clean_append=clean.append
+    sprlist = self.sprites
+    while len(sprlist):
+      sprite1 = sprlist.pop(0)
+      spritecollide = sprite.rect.colliderect
