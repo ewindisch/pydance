@@ -168,7 +168,7 @@ class Steps:
     self.head = head
 
     if head and fhead:
-      ntime = (time + toRealTime(head.bpm, 64)) / self.speed
+      ntime = time + toRealTime(head.bpm, 64) / self.speed
       while fhead and fhead.when <= ntime:
         self.playingbpm = fhead.bpm
         nevents.append(fhead)
