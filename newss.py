@@ -1,6 +1,7 @@
 import os
-import pygame
 import math
+import pygame
+import fontfx
 from constants import *
 
 # Make an outlined box. The size is given without the 4 pixel border.
@@ -93,11 +94,12 @@ class DifficultyBox(pygame.sprite.Sprite):
     f = pygame.font.Font(None, 24)
     self.image = make_box(color)
 
-    t1 = f.render(diff, True, [255, 255, 255])
+    t1 = fontfx.shadow(diff, f, 1, [255, 255, 255], [0, 0, 0])
     r1 = t1.get_rect()
     r1.center = [self.image.get_width()/2, 14]
 
-    t2 = f.render("x%d - %s" % (feet, grade), True, [255, 255, 255])
+    t2 = fontfx.shadow("x%d - %s" % (feet, grade), f, 1,
+                       [255, 255, 255],[0, 0, 0])
     r2 = t2.get_rect()
     r2.center = [self.image.get_width()/2, 34]
 
@@ -118,8 +120,12 @@ SS_HELP = [
   "F11 toggles fullscreen. S changes the sort mode.",
   "Enjoy pydance 0.9.0!",
   ]
-  
-           
+
+
+#class ListBox(pygame.sprite.Sprite):
+#  def __init__(self, items, spacing, count, topleft):
+#    self.s
+    
 
 class MainWindow(object):
   def __init__(self, screen, numplayers):

@@ -50,9 +50,17 @@ def embfade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
     displaysurface.blit(text, (0+i,0+i))
   return displaysurface
 
+def shadow(text, font, offset, color, color2):
+  t1 = font.render(text, True, color)
+  t2 = font.render(text, True, color2)
+  s = pygame.Surface([i + offset for i in t1.get_size()], SRCALPHA, t1)
+  s.blit(t2, [offset, offset])
+  s.blit(t1, [0, 0])
+  return s
+
 # SHADEFADE - does a 3d dropshadow-like effect
 def shadefade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
-  displaysurface = pygame.Surface(displaysize)
+  displaysurface = pygame.Surface(displaysize, SRCALPHA, 32)
   font = pygame.font.Font(None, textsize)
   for i in range(amount):
     camt = amount-i
