@@ -191,9 +191,9 @@ class Pad(object):
     # not mapped.
     if ((ev.type == KEYDOWN or ev.type == KEYUP) and
         (ev.key == K_LEFT or ev.key == K_RIGHT or ev.key == K_UP or
-         ev.key == K_DOWN)):
+         ev.key == K_DOWN or ev.key == K_RETURN)):
       default = (0, {K_LEFT: LEFT, K_RIGHT: RIGHT,
-                     K_UP: UP, K_DOWN: DOWN}[ev.key])
+                     K_UP: UP, K_DOWN: DOWN, K_RETURN: START}[ev.key])
     elif (ev.type == KEYUP or ev.type == KEYDOWN) and passthrough:
       default = (-2, ev.key * 100)
     else: default = (-1, PASS)
