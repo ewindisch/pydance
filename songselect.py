@@ -273,7 +273,7 @@ class SongSelect:
         # playSequence can probably derive the number of players from
         # the length of the other lists
         megajudge = playSequence(len(self.player_diffs),
-                                 self.diff_list, self.song_list)
+                                 (self.diff_list, self.song_list))
         if mainconfig['grading']:
           grade = GradingScreen(megajudge)
 

@@ -1794,28 +1794,28 @@ def blatantplug():
   sys.exit()    
 
 
-def playSequence(numplayers, diffList, songList):
+def playSequence(numplayers, playlist):
   global screen
 
-  print diffList
-    
+  diff_list, song_list = playlist
+
   players = []
   for playerID in range(numplayers):
     plr = Player(playerID, HoldJudgeDisp(playerID), ComboDisp(playerID))
     players.append(plr)
     
-  for thisSong in songList:
-    song = Song(thisSong)
+  for song in song_list:
+    current_song = Song(song)
     pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
     screen.fill(colors.BLACK)
 
-    difficulty = diffList.pop(0)
+    difficulty = diff_list.pop(0)
 
     for pid in range(len(players)):
-      players[pid].set_song(copy.copy(song), difficulty[pid], Judge)
+      players[pid].set_song(copy.copy(current_song), difficulty[pid], Judge)
 
-    dance(song, players)
+    dance(current_song, players)
     
   return [player.judge for player in players]
 
