@@ -1,24 +1,32 @@
 pydance ChangeLog
 
-legend:
-+ new feature added or made an existing one better
-- removed a feature, or something bad happened
-* fixed a bug
+Legend:
++ New feature added or made an existing one better
+- Removed a feature, or something bad happened
+* Fixed a bug
+! Changed something important, probably incompatibly.
 
 ----- - CURRENT
 0.8.1
-+ Major internal simplifications for those who want to write new
-  lifebar/grade/score/judge/other algorithms, see listeners.py.
 + The focus of this release is on making pydance very configurable.
 + pydance, DDR 1st/2nd, 3rd, 4th, 5th/Max2/Ex, Ex Oni, or Ex Nonstop scoring.
-+ DDR Ex Oni and Pump It Up combo counters.
++ DDR Oni and Pump It Up combo counters.
 + Regular or endless mode grading.
-+ Beat-based (old pydance) or time-based (Stepmania) judge.
- * Time-based is the new default judge.
++ Beat-based (old pydance) or time-based (Stepmania-like) judge.
+ ! Time-based is the new default judge.
 + Secret arrows added; these cannot be missed (although they can be boo'd),
-  but still add (many!) points, combo counts, and so on.
- + Can be turned off, not displayed but counted, or displayed faintly.
+  but still add (many!) points, combo counts, and so on. These can be turned
+  off, not displayed but counted (default), or displayed faintly.
++ "Cycle" arrow fading in addition to sudden/hidden. 
+* Break and boost look much better now.
+* Growing and shrinking hold arrows work.
+* For people interested in working on pydance, the start of a HACKING
+  file is included with this release, and the source is much cleaner
+  and well-documented in many places.
 - This release may be slightly slower on some systems; Psyco is recommended.
+! pydance no longer loads or renames old pyddr configuration files and
+  directories (You've had almost two months to do this).
+
 
 0.8.0 - That's the second largest ChangeLog I've ever seen!	[2003.08.22]
 + New options:
