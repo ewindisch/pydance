@@ -5,6 +5,8 @@ import pygame, menus, os, sys, copy, colors
 from constants import *
 from announcer import Announcer
 from gfxtheme import GFXTheme
+from songselect import SongSelect
+from endless import Endless
 
 # A simple on/off setting, 1 or 0
 def get_onoff(name):
@@ -98,11 +100,12 @@ def switch_tuple_back(name, list):
   list.reverse()
   return switch_tuple(name, list)
 
-def wrap_ss(SongSelect, args):
-  SongSelect(*args)
+# Wrap an object constructor
+def wrap_ctr(Obj, args):
+  Obj(*args)
   return None, None
 
-def do(screen, songselect, songdata):
+def do(screen, songdata):
 
   onoff_opt = { E_START: switch_onoff, E_CREATE: get_onoff,
                  E_LEFT: off_onoff, E_RIGHT: on_onoff }
@@ -121,7 +124,11 @@ def do(screen, songselect, songdata):
                 E_RIGHT: switch_tuple,
                 E_CREATE: get_tuple }
 
-  m = (["Play Game", {E_START: wrap_ss}, (songselect, songdata)],
+  m = (("Play Game",
+        ["Regular", {E_START: wrap_ctr}, (SongSelect, songdata)],
+        ["Endless", {E_START: wrap_ctr}, (Endless, songdata)],
+        ["Back", None, None]
+        ),
        ("Game Options",
         ["Autofail", onoff_opt, ("autofail",)],
         ["Arrow Colors", tuple_opt, ('arrowcolors', [(0, 'flat'), (4, 'normal')])],

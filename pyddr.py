@@ -16,7 +16,7 @@ from gfxtheme import GFXTheme
 from player import Player
 from spritelib import *
 
-import fontfx, menudriver, fileparsers, songselect, colors
+import fontfx, menudriver, fileparsers, colors
 
 import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
 import os, sys, glob, random, fnmatch, types, operator, copy, string
@@ -1729,8 +1729,7 @@ def main():
   
   screen.fill(colors.BLACK)
     
-  menudriver.do(screen, songselect.SongSelect,
-                (songs, screen, playSequence, GradingScreen))
+  menudriver.do(screen, (songs, screen, playSequence, GradingScreen))
   mainconfig.write(os.path.join(rc_path, "pyddr.cfg"))
 
 def blatantplug():
@@ -1797,25 +1796,21 @@ def blatantplug():
 def playSequence(numplayers, playlist):
   global screen
 
-  diff_list, song_list = playlist
-
   players = []
   for playerID in range(numplayers):
     plr = Player(playerID, HoldJudgeDisp(playerID), ComboDisp(playerID))
     players.append(plr)
     
-  for song in song_list:
-    current_song = Song(song)
+  for songfn, diff in playlist:
+    current_song = Song(songfn)
     pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
     screen.fill(colors.BLACK)
 
-    difficulty = diff_list.pop(0)
-
     for pid in range(len(players)):
-      players[pid].set_song(copy.copy(current_song), difficulty[pid], Judge)
+      players[pid].set_song(copy.copy(current_song), diff[pid], Judge)
 
-    dance(current_song, players)
+    if dance(current_song, players): break # Failed
     
   return [player.judge for player in players]
 
@@ -2178,10 +2173,7 @@ def dance(song, players):
   except:
     pass
     
-  return map(lambda x: x.judge, players), map(lambda x: x.lifebar, players), pygame.transform.scale(screen, (640,480));
-
-  song.kill()
-  print "proper exit"
-# "end"
+  print "songFailed is", songFailed
+  return songFailed
 
 if __name__ == '__main__': main()
