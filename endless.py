@@ -197,4 +197,4 @@ class Endless(object):
       self.screen.blit(ctext, ctext_r)
       self.screen.blit(vtext, vtext_r)
 
-    pygame.display.flip()
+    pygame.display.update()

@@ -23,9 +23,8 @@ from constants import *
 
 def set_display_mode(mainconfig):
   try:
-    flags = HWSURFACE | DOUBLEBUF
-    if mainconfig["vesacompat"]: flags = 0
-    elif mainconfig["fullscreen"]: flags |= FULLSCREEN
+    flags = 0
+    if mainconfig["fullscreen"]: flags |= FULLSCREEN
     screen = pygame.display.set_mode([640, 480], flags, 16)
   except:
     print "E: Can't get a 16 bit display!" 

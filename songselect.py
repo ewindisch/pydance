@@ -343,7 +343,7 @@ class SongSelect(InterfaceWindow):
                      self._configs, self._config, self._game)
           music.fadeout(500) # The just-played song
           self._screen.blit(self._bg, [0, 0])
-          pygame.display.flip()
+          pygame.display.update()
           ui.ui.empty()
           ui.ui.clear()
 

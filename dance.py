@@ -269,18 +269,18 @@ def dance(screen, song, players, prevscr, ready_go, game):
         screen.fill(colors.BLACK)
         screen.blit(prevscr,(0,0))
         screen.blit(bgkludge,(0,0))
-        pygame.display.flip()
+        pygame.display.update()
         pygame.time.delay(1)
 
       background.blit(bgkludge, (0, 0))
     else:
       background.fill(colors.BLACK)
       screen.fill(colors.BLACK)
-      pygame.display.flip()
+      pygame.display.update()
   else:
     background.fill(colors.BLACK)
     screen.fill(colors.BLACK)
-    pygame.display.flip()
+    pygame.display.update()
 
   # Store these values so we don't look them up during the main loop
   strobe = mainconfig["strobe"]
