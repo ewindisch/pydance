@@ -382,7 +382,34 @@ class DWIFile(GenericFile):
       if len(parts) > 3:
         parts[0] = DWIFile.game_map.get(parts[0], parts[0])
         parts[1] = DWIFile.diff_map.get(parts[1], parts[1])
-      if len(parts) == 4 and parts[0] in games.SINGLE:
+
+      rest = ":".join(parts[1:])
+
+      # don't support filenames. They're useless cross-platform.
+      # Don't support genre, it's a dumbass tag
+      if parts[0] == "GAP": self.info["gap"] = -int(float(rest))
+      elif parts[0] == "TITLE": self.info["title"] = rest
+      elif parts[0] == "ARTIST": self.info["artist"] = rest
+      elif parts[0] == "MD5": self.info["md5sum"] = rest
+      elif parts[0] == "BPM": self.info["bpm"] = float(rest)
+      elif parts[0] == "SAMPLESTART":
+        if self.info.has_key("preview"):
+          self.info["preview"][0] = self.parse_time(rest)
+        else: self.info["preview"] = [self.parse_time(rest), 10]
+      elif parts[0] == "SAMPLELENGTH":
+        if self.info.has_key("preview"):
+          self.info["preview"][1] = self.parse_time(rest)
+        else: self.info["preview"] = [45, self.parse_time(rest)]
+      elif parts[0] == "CHANGEBPM":
+        for change in parts[1].split(","):
+          beat, bpm = change.split("=")
+          self.bpms.append((float(beat), float(bpm)))
+      elif parts[0] == "FREEZE":
+        for change in parts[1].split(","):
+          beat, wait = change.split("=")
+          self.freezes.append((float(beat), float(wait)/1000.0))
+
+      elif len(parts) == 4 and parts[0] not in games.COUPLE:
         if not self.difficulty.has_key(parts[0]):
           self.difficulty[parts[0]] = {}
           self.steps[parts[0]] = {}
@@ -398,31 +425,6 @@ class DWIFile(GenericFile):
         if need_steps:
           self.parse_steps(parts[0], parts[1], parts[3])
           self.parse_steps(parts[0], parts[1], parts[4])
-
-      else: # This is some sort of metadata key
-        # don't support filenames. They're useless cross-platform.
-        # Don't support genre, it's a dumbass tag
-        if parts[0] == "GAP": self.info["gap"] = -int(float(parts[1]))
-        elif parts[0] == "TITLE": self.info["title"] = ":".join(parts[1:])
-        elif parts[0] == "ARTIST": self.info["artist"] = ":".join(parts[1:])
-        elif parts[0] == "MD5": self.info["md5sum"] = parts[1]
-        elif parts[0] == "BPM": self.info["bpm"] = float(parts[1])
-        elif parts[0] == "SAMPLESTART":
-          if self.info.has_key("preview"):
-            self.info["preview"][0] = self.parse_time(parts[1])
-          else: self.info["preview"] = [self.parse_time(parts[1]), 10]
-        elif parts[0] == "SAMPLELENGTH":
-          if self.info.has_key("preview"):
-            self.info["preview"][1] = self.parse_time(parts[1])
-          else: self.info["preview"] = [45, self.parse_time(parts[1])]
-        elif parts[0] == "CHANGEBPM":
-          for change in parts[1].split(","):
-            beat, bpm = change.split("=")
-            self.bpms.append((float(beat), float(bpm)))
-        elif parts[0] == "FREEZE":
-          for change in parts[1].split(","):
-            beat, wait = change.split("=")
-            self.freezes.append((float(beat), float(wait)/1000.0))
 
     self.find_mixname()
     self.find_files_insanely()
@@ -470,8 +472,8 @@ class DWIFile(GenericFile):
         steplist.append([step_type] + self.parse_merge(tomerge, dwifile_steps))
       else: steps.pop(0)
 
-    if mode in games.SINGLE: self.steps[mode][diff] = steplist
-    elif mode in games.COUPLE:
+    if mode not in games.COUPLE: self.steps[mode][diff] = steplist
+    else:
       if self.steps[mode].get(diff) == None: self.steps[mode][diff] = []
       self.steps[mode][diff].append(steplist)
 

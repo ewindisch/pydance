@@ -22,6 +22,3 @@ GAMES = {
 
 COUPLE = [mode for mode in GAMES if GAMES[mode].couple]
 DOUBLE = [mode for mode in GAMES if GAMES[mode].double]
-
-# FIXME: This can be replaced with not in COUPLE...
-SINGLE = [mode for mode in GAMES if not GAMES[mode].couple]
