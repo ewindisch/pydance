@@ -87,7 +87,8 @@ class Steps(object):
     song_steps = stepfilters.compress(song_steps)
 
     if player.transform:
-      stepfilters.rotate(song_steps, player.transform, playmode)
+      T = stepfilters.rotate[player.transform]
+      song_steps = T(playmode).transform(song_steps)
 
     if player.size: stepfilters.size(song_steps, player.size)
     if player.jumps != 1: stepfilters.jumps(song_steps, player.jumps)

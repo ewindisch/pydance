@@ -65,6 +65,8 @@ class NonRandom(random.Random):
   
 # General step transformation class. By default, this is an identity transform.
 class Transform(object):
+  def __init__(self, *args): pass
+  
   def transform(self, steps):
     return [self._update_state(s) or self._transform(s) for s in steps]
 
@@ -94,27 +96,47 @@ def compress(steps):
 
   return new_steps
 
-# Rotate the steps according the player's rotation mode
-# Random and shuffle aren't really rotations but... whatever.
-def rotate(steps, opt, mode):
+class MappingTransform(Transform):
+  def __init__(self, mode, opt):
+    self._mapping = STEP_MAPPINGS[mode][opt][:]
 
-  # Don't crash if we haven't implemented transforms for a mode yet.
-  if mode not in STEP_MAPPINGS: return
-  elif opt == -1:
-    mapping = list(STEP_MAPPINGS[mode][0])
-    random.shuffle(mapping)
-  elif opt >= 0: mapping = STEP_MAPPINGS[mode][opt]
-  else: mapping = None
+  def _transform(self, steps):
+    if steps[0] not in NOT_STEPS:
+      steps = steps[:]
+      step = steps[1:]
+      for j in range(len(step)): steps[self._mapping[j] + 1] = step[j]
+      return steps
+    else:
+      return steps[:]
 
-  for s in steps:
-    if s[0] not in NOT_STEPS:
-      if mapping != None:
-        step = list(s[1:])
-        for j in range(len(step)): s[mapping[j] + 1] = step[j]
-      else:
-        random_steps = list(s[1:])
-        random.shuffle(random_steps)
-        s[1:] = random_steps
+class MirrorTransform(MappingTransform):
+  def __init__(self, mode): MappingTransform.__init__(self, mode, 1)
+
+class LeftTransform(MappingTransform):
+  def __init__(self, mode): MappingTransform.__init__(self, mode, 2)
+
+class RightTransform(MappingTransform):
+  def __init__(self, mode): MappingTransform.__init__(self, mode, 3)
+
+class ShuffleTransform(MappingTransform):
+  def __init__(self, mode):
+    MappingTransform.__init__(self, mode, 2)
+    random.shuffle(self._mapping)
+
+class RandomTransform(ShuffleTransform):
+  def __init__(self, mode):
+    MappingTransform.__init__(self, mode, 0)
+    self._holds = []
+
+  def _update_state(self, steps):
+    if steps[0] not in NOT_STEPS:
+      if len(self._holds) == 0: random.shuffle(self._mapping)
+      for i in range(1, len(steps)):
+        if steps[i] & 1 and i in self._holds: self._holds.remove(i)
+        if steps[i] & 2: self._holds.append(i)
+
+rotate = [Transform, MirrorTransform, LeftTransform, RightTransform,
+          RandomTransform, ShuffleTransform]
 
 # Apply myriad additions/deletions to the step pattern
 # FIXME: Return a list rather than in-place modify.
@@ -186,7 +208,7 @@ def insert_taps(steps, interval, offset, not_same):
 
       beat += new_steps[-1][0]
       # Stupid inaccurate floating point.
-      if int(beat + 0.0000001) > int(beat): beat = int(beat + 0.0000001)
+      if int(beat + 0.00001) > int(beat): beat = int(beat + 0.00001)
     else:
       if steps[i][0] == "D": beat += steps[i][1]
       new_steps.append(steps[i])
