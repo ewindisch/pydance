@@ -11,7 +11,7 @@ legend:
 + 5 panel (Pump It Up) support (single, versus/unison, couple, and double).
  + Support for KSF, SM, and .dance files with 5 panel steps.
  - Actual PIU pads may or may not work; none were available for testing.
-+ Versus, couple, and double 6 panel mode.
++ Versus, couple, and double 6 and 8 panel modes.
 + New game type selector, so you can do e.g. Double/Endless.
 + A document on the KSF file format has been added in docs/.
 + The .dance specification has been updated with new modes and corrections.
@@ -19,6 +19,7 @@ legend:
 + New theming code.
  + Brings back oldschool and bryan themes.
  + Autodetect what game modes a theme will work for.
++ New 32x32 arrow set for 8/9 panel modes, by xsdg.
 * Support the Thrustmaster USB mats (probably), and X-Box controllers.
  + We suspect that pydance will run on GNU/Linux on an X-Box now.
 * Correctly encode/decode KSF, SM, DWI, and .dance file metadata.

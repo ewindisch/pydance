@@ -832,6 +832,7 @@ class SongItem(object):
   equivs = { "SINGLE": "VERSUS",
              "5PANEL": "5VERSUS",
              "6PANEL": "6VERSUS",
+             "8PANEL": "8VERSUS",
              }
   
   def __init__(self, filename, need_steps = True):
