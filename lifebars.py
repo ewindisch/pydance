@@ -23,7 +23,7 @@ class AbstractLifeBar(Listener, pygame.sprite.Sprite):
     self.rect.top = 30
     self.rect.centerx = game.sprite_center + playernum * game.player_offset
 
-  def stepped(self, pid, dir, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, etime, rating, combo):
     if self.life >= 0:
       self.life += self.deltas.get(rating, 0)
       self.life = min(self.life, self.maxlife)
@@ -94,8 +94,8 @@ class TugLifeBarDisp(LifeBarDisp):
     if playernum == 0: TugLifeBarDisp.active_bars = [self]
     else: TugLifeBarDisp.active_bars.append(self)
 
-  def stepped(self, pid, dir, curtime, rating, combo):
-    LifeBarDisp.stepped(self, pid, dir, curtime, rating, combo)
+  def stepped(self, pid, dir, curtime, etime, rating, combo):
+    LifeBarDisp.stepped(self, pid, dir, curtime, etime, rating, combo)
     for bar in TugLifeBarDisp.active_bars:
       if bar != self: bar.update_life_opponent(rating)
     
@@ -179,8 +179,8 @@ class OniLifeBarDisp(AbstractLifeBar):
     OniLifeBarDisp.lose_sound.play()
     self.life -= 1
        
-  def stepped(self, pid, dir, curtime, rating, combo):
-    AbstractLifeBar.stepped(self, pid, dir, curtime, rating, combo)
+  def stepped(self, pid, dir, curtime, etime, rating, combo):
+    AbstractLifeBar.stepped(self, pid, dir, curtime, etime, rating, combo)
     if self.deltas.get(rating, 0) < 0: OniLifeBarDisp.lose_sound.play()
 
   def update(self, time):

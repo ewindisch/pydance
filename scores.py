@@ -60,7 +60,7 @@ class PydanceScore(AbstractScore):
     self.inc = { "V": 4 * score_coeff, "P": 3.5 * score_coeff,
                  "G": 2.5 * score_coeff, "O": 0.5 * score_coeff }
 
-  def stepped(self, pid, dir, cur_time, rating, combo):
+  def stepped(self, pid, dir, cur_time, etime, rating, combo):
     if rating == None: return
     self.score += self.inc.get(rating, 0) + combo * self.combo_coeff
 
@@ -72,7 +72,7 @@ class FirstScore(AbstractScore):
     AbstractScore.__init__(self, pid, text, game)
     self.combo = 0
 
-  def stepped(self, pid, dir, cur_time, rating, combo):
+  def stepped(self, pid, dir, cur_time, etime, rating, combo):
     if rating == None: return
     if self.combo == combo == 0: return # No points when combo is 0.
 
@@ -101,7 +101,7 @@ class ThirdScore(AbstractScore):
     p = 1000000.0 / (count * (count + 1) / 2)
     self.inc = { "V": p * 10, "P": p * 10, "G": p * 5, "O": p }
 
-  def stepped(self, pid, dir, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, etime, rating, combo):
     if rating == None: return
     self.arrow += 1
     self.score += self.inc.get(rating, 0) * self.arrow
@@ -109,7 +109,7 @@ class ThirdScore(AbstractScore):
 # L(V) = L(P) = 777, L(G) = 555
 # V(n) = L(r) + C * 333
 class FourthScore(AbstractScore):
-  def stepped(self, pid, dir, cur_time, rating, combo):
+  def stepped(self, pid, dir, cur_time, etime, rating, combo):
     if rating == None: return
     base = {"V": 777, "P": 777, "G": 555 }
     self.score += base.get(rating, 0) + combo * 333
@@ -146,7 +146,7 @@ class ExtremeScore(ThirdScore):
 
 # This is closer to the grading algorithm than to a scoring algorithm.
 class ExtremeOniScore(AbstractScore):
-  def stepped(self, pid, dir, cur_time, rating, combo):
+  def stepped(self, pid, dir, cur_time, etime, rating, combo):
     self.score += {"V": 3, "P": 2, "G": 1}.get(rating, 0)
 
   def ok_hold(self, pid, time, dir, whichone): self.score += 3

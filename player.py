@@ -161,7 +161,7 @@ class JudgingDisp(Listener, pygame.sprite.Sprite):
     self.image = self.space
     self.baseimage = self.space
 
-  def stepped(self, pid, dir, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, etime, rating, combo):
     if rating is None: return
 
     self.laststep = curtime
@@ -373,7 +373,7 @@ class Player(object):
     misses = judge.expire_arrows(curtime)
     for d in misses:
       for l in self.listeners:
-        l.stepped(self.pid, d, curtime, "M", self.combos.combo)
+        l.stepped(self.pid, d, curtime, -1, "M", self.combos.combo)
     for rating, dir, time in fx_data:
       if (rating == "V" or rating == "P" or rating == "G"):
         for spr in arrows.sprites():
@@ -438,12 +438,12 @@ class Player(object):
       pid = ev[0] & 1
       rating, dir, etime = self.judge[pid].handle_key(ev[1], time)
       for l in self.listeners:
-        l.stepped(ev[0], dir, time, rating, self.combos.combo)
+        l.stepped(ev[0], dir, time, etime, rating, self.combos.combo)
       self.fx_data[pid].append((rating, dir, etime))
     else:
       rating, dir, etime = self.judge.handle_key(ev[1], time)
       for l in self.listeners:
-        l.stepped(ev[0], dir, time, rating, self.combos.combo)
+        l.stepped(ev[0], dir, time, etime, rating, self.combos.combo)
       self.fx_data.append((rating, dir, etime))
 
   def check_bpm_change(self, pid, time, steps, judge):

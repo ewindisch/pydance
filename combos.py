@@ -90,7 +90,7 @@ class AbstractCombo(Listener, pygame.sprite.Sprite):
 
 # Breaks the combo on anything not a marvelous, perfect, or great.
 class NormalCombo(AbstractCombo):
-  def stepped(self, pid, dir, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, etime, rating, combo):
     if rating is None: return
     self._laststep = curtime
     self.combo += { "V": 1, "P": 1, "G": 1 }.get(rating, -self.combo)
@@ -98,14 +98,14 @@ class NormalCombo(AbstractCombo):
 # Breaks the combo on anything less than a great, but also doesn't
 # increase it for great.
 class OniCombo(AbstractCombo):
-  def stepped(self, pid, dir, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, etime, rating, combo):
     if rating is None: return
     self._laststep = curtime
     self.combo += { "V": 1, "P": 1, "G": 0 }.get(rating, -self.combo)
 
 # Pump It Up-style combo; okays add to your combo too.
 class PumpCombo(AbstractCombo):
-  def stepped(self, pid, dir, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, etime, rating, combo):
     if rating is None: return
     self._laststep = curtime
     self.combo += { "V": 1, "P": 1, "G": 1, "O": 1 }.get(rating, -self.combo)

@@ -57,7 +57,7 @@ class Announcer(Listener):
       snd.play()
     self.lasttime = pygame.time.get_ticks()
 
-  def stepped(self, pid, dir, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, etime, rating, combo):
     if random.randrange(15) != 1: return
     rng = { "V": [80, 100], "P": [80, 100],
             "G": [70, 94], "O": [40, 69],

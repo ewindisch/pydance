@@ -266,7 +266,7 @@ class TopArrow(Listener, pygame.sprite.Sprite):
     self.rect.left = left
 
   # The arrow was pressed, so we have to change it for some time (s state).
-  def stepped(self, pid, dir, time, rating, combo):
+  def stepped(self, pid, dir, time, etime, rating, combo):
     if self.pid != pid or self.dir != dir or rating == "M": return
     self._pressed = True
     self.endpresstime = time + 0.25 # Number of seconds to change it for.
@@ -305,12 +305,12 @@ class ArrowFX(Listener, pygame.sprite.Sprite):
 
     style = mainconfig['explodestyle']
     self.rotating, self.scaling = style & 1, style & 2
-    self.stepped(self.pid, self.dir, -1, "V", 0)
+    self.stepped(self.pid, self.dir, -1, -1, "V", 0)
     
   def holding(self, yesorno):
     self.holdtype = yesorno
   
-  def stepped(self, pid, dir, time, tinttype, combo):
+  def stepped(self, pid, dir, time, etime, tinttype, combo):
     if pid != self.pid or dir != self.dir: return
     elif tinttype not in self.colors: return
 
