@@ -12,7 +12,7 @@
 
 import pygame, pygame.font
 import random
-from pygame.locals import *
+from constants import *
 
 # SINKBLUR - sinking "motion blur" effect (middle is brightest)
 def sinkblur(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
@@ -66,15 +66,13 @@ def shadefade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
     displaysurface.blit(text, (camt,camt))
   return displaysurface
 
-# Zoom and rotate text randomly
 class TextZoomer:
-  def __init__(self,text,r,g,b):
-    self.zf = pygame.font.Font(None,60)
-    self.tempsurface = pygame.surface.Surface((640,64))
-    self.r = random.randint(64, r)
-    self.g = random.randint(64, g)
-    self.b = random.randint(64, b)
-    self.cycles_left = 0
+  def __init__(self, text, font, size, fore, back):
+    self.tempsurface = pygame.surface.Surface(size)
+    self.back = back
+    self.fore = fore
+    self.size = size
+    self.font = font
 
     self.reset()
     self.zoomtext = text
@@ -83,41 +81,20 @@ class TextZoomer:
   def reset(self):
     self.mrangle = 0
     self.textrendered = 0
-    self.cycles_left = 0
 
   def iterate(self):
-    if self.cycles_left == 0:
-      self.cycles_left = random.randint(20, 50)
-      self.colortochange = random.randint(0,3)
-      self.colordiff = random.randint(-2, 2)
-
-    if self.colortochange == 0:
-      if self.r == 64 or self.r == 128: self.colordiff *= -1
-      self.r += self.colordiff
-      self.r = min(128, max(self.r, 64))
-    elif self.colortochange == 1:
-      if self.g == 64 or self.g == 128: self.colordiff *= -1
-      self.g += self.colordiff
-      self.g = min(128, max(self.g, 64))
-    elif self.colortochange == 2:
-      if self.b == 64 or self.b == 128: self.colordiff *= -1
-      self.b += self.colordiff
-      self.b = min(128, max(self.b, 64))
-
-    opposite = (127 + self.r, 127 + self.g, 127 + self.b)
-
     self.mrangle += 2
-    self.cycles_left -= 1
 
-    zoomsurface = pygame.transform.scale(self.tempsurface,(656,72))
+    zoomsurface = pygame.transform.scale(self.tempsurface,
+                                         (self.size[0] + 16,
+                                          self.size[1] + 16))
     zoomsurface = pygame.transform.rotate(self.tempsurface,self.mrangle)
     zoomsurface.set_alpha(120)
     zsrect = zoomsurface.get_rect()
-    zsrect.centerx = 320
-    zsrect.centery = 32
-    self.tempsurface.fill(opposite)
+    zsrect.center = (self.size[0] / 2, self.size[1] / 2)
+    self.tempsurface.fill(self.back)
     self.tempsurface.blit(zoomsurface, zsrect)
-    text = self.zf.render(self.zoomtext,1,(self.r,self.g,self.b))
+    text = self.font.render(self.zoomtext,1, self.fore)
     trect = text.get_rect()
     self.tempsurface.blit(text, (320-(trect.size[0]/2),
                                       32-(trect.size[1]/2)))

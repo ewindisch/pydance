@@ -6,12 +6,6 @@ from constants import *
 
 import spritelib, announcer
 
-# FIXME - we use various fonts all over the place, this should be in constants
-# Hash of names?
-large_font = pygame.font.Font(None, 26)
-medium_font = pygame.font.Font(None, 20)
-small_font = pygame.font.Font(None, 14)
-
 # FIXME: this needs to be moved elsewhere if we want theming
 ITEM_BG = pygame.image.load(os.path.join(image_path, "ss-item-bg.png"))
 NO_BANNER = pygame.image.load(os.path.join(image_path, "no-banner.png"))
@@ -96,7 +90,7 @@ class SongItemDisplay:
 
       self.menuimage = pygame.surface.Surface(ITEM_SIZE)
       self.menuimage.blit(ITEM_BG, (0,0))
-      songtext = large_font.render(info["song"], 1, color)
+      songtext = FONTS[26].render(info["song"], 1, color)
       self.menuimage.blit(songtext, (10, 5))
 
       subtext_text = ""
@@ -104,10 +98,10 @@ class SongItemDisplay:
       if info.has_key("mix"): subtext_text += info["mix"] + " / "
       subtext_text  += "bpm: " + str(int(info["bpm"]))
 
-      subtext = small_font.render(subtext_text, 1, color)
+      subtext = FONTS[14].render(subtext_text, 1, color)
       self.menuimage.blit(subtext, (30, 26))
       st = "by " + info["group"]
-      grouptext = medium_font.render(st, 1, color)
+      grouptext = FONTS[20].render(st, 1, color)
       self.menuimage.blit(grouptext, (15, 36))
 
 class SongSelect:
@@ -394,11 +388,11 @@ class SongSelect:
     temp_list.reverse()
 
     for i in range(len(temp_list)):
-      txt = small_font.render(temp_list[i], 1, WHITE)
-      self.screen.blit(txt, (10, 480 - (small_font.size("I")[1] - 2) * (i + 2)))
+      txt = FONTS[14].render(temp_list[i], 1, WHITE)
+      self.screen.blit(txt, (10, 480 - (FONTS[14].size("I")[1] - 2) * (i + 2)))
 
     # Sort mode
-    stxt = medium_font.render("sort by " + SORT_NAMES[mainconfig["sortmode"]],
+    stxt = FONTS[20].render("sort by " + SORT_NAMES[mainconfig["sortmode"]],
                               1, WHITE)
     r = stxt.get_rect()
     r.center = (DIFF_LOCATION[0] + 90, DIFF_LOCATION[1] - 10)
@@ -415,7 +409,7 @@ class SongSelect:
 
       if difficulty[d] >= 10: text += " - x" + str(difficulty[d])
 
-      text = large_font.render(text.lower(), 1,
+      text = FONTS[26].render(text.lower(), 1,
                                map((lambda x: min(255, x + 64)), color))
       r = text.get_rect()
       r.center = (DIFF_LOCATION[0] + 92, DIFF_LOCATION[1] + 25 * i + 12)

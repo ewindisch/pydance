@@ -420,8 +420,6 @@ class GradingScreen:
       pygame.display.flip()
       pygame.time.wait(1)
 
-    font = pygame.font.Font(None, 28)
-
     grading = fontfx.sinkblur("GRADING",64,4,(224,72),(64,64,255))
     grading.set_colorkey(grading.get_at((0,0)))
     screen.blit(grading, (320-grading.get_rect().centerx,-8) )
@@ -440,7 +438,7 @@ class GradingScreen:
         gradetextpos = gradetext.get_rect()
         gradetextpos.right = 32 + screen.get_rect().centerx + 8-j
         gradetextpos.top = 64 + (i*24) + 8-j
-        r = screen.blit(gradetext, (320-font.size(rows[i])[0]/2,
+        r = screen.blit(gradetext, (320-FONTS[28].size(rows[i])[0]/2,
                                 64 + (i*24) + 8-j))
         update_screen(r)
       pygame.time.wait(100)
@@ -462,14 +460,12 @@ class GradingScreen:
       rows = [judge.marvelous, judge.perfect, judge.great, judge.ok,
               judge.crap, judge.shit, judge.miss, judge.early, judge.late]
 
-      testf = pygame.font.Font(None,28)
-
       for j in range(4):
         for i in range(len(rows)):
           fc = ((j*32)+96-(i*8))
           if fc < 0: fc=0
           text = "%d (%d%%)" % (rows[i], 100 * rows[i] / totalsteps)
-          gradetext = fontfx.shadefade(text,28,j,(testf.size(text)[0]+8,32), (fc,fc,fc))
+          gradetext = fontfx.shadefade(text,28,j,(FONTS[28].size(text)[0]+8,32), (fc,fc,fc))
           gradetext.set_colorkey(gradetext.get_at((0,0)))
           graderect = gradetext.get_rect()
           graderect.top = 72 + (i*24) - j
@@ -483,7 +479,7 @@ class GradingScreen:
 
       # Total
       for j in range(4):
-        gradetext = fontfx.shadefade(str(totalsteps),28,j,(testf.size(str(totalsteps))[0]+8,32), (fc,fc,fc))
+        gradetext = fontfx.shadefade(str(totalsteps),28,j,(FONTS[28].size(str(totalsteps))[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()
         graderect.top = 288-j
@@ -498,7 +494,7 @@ class GradingScreen:
       # Combo
       for j in range(4):
         text = "%d (%d%%)" % (judge.bestcombo, judge.bestcombo * 100 / totalsteps)
-        gradetext = fontfx.shadefade(text,28,j,(testf.size(text)[0]+8,32), (fc,fc,fc))
+        gradetext = fontfx.shadefade(text,28,j,(FONTS[28].size(text)[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()
         graderect.top = 336-j
@@ -513,7 +509,7 @@ class GradingScreen:
       # Holds
       for j in range(4):
         text = "%d / %d" % (judge.numholds() - judge.badholds, judge.numholds())
-        gradetext = fontfx.shadefade(text,28,j,(testf.size(text)[0]+8,32), (fc,fc,fc))
+        gradetext = fontfx.shadefade(text,28,j,(FONTS[28].size(text)[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()
         graderect.top = 360-j
@@ -528,7 +524,7 @@ class GradingScreen:
       # Score
       for j in range(4):
         gradetext = fontfx.shadefade(str(judge.score), 28, j,
-                                     (testf.size(str(judge.score))[0]+8,32), (fc,fc,fc))
+                                     (FONTS[28].size(str(judge.score))[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()
         graderect.top = 412-j
@@ -550,7 +546,6 @@ class GradingScreen:
     idir = -4
     i = 192
     screenshot = 0
-    font = pygame.font.Font(None, 32)
     while 1:
       if i < 32:        idir =  4
       elif i > 224:     idir = -4
@@ -566,7 +561,7 @@ class GradingScreen:
         print "writing next frame to screenshot.bmp"
         screenshot = 1
           
-      gradetext = font.render("Press ESC/ENTER/START",1, (i,128,128) )
+      gradetext = FONTS[32].render("Press ESC/ENTER/START",1, (i,128,128) )
       gradetextpos = gradetext.get_rect()
       gradetextpos.centerx = screen.get_rect().centerx
       gradetextpos.bottom = screen.get_rect().bottom - 16
@@ -778,7 +773,6 @@ class LyricDispKludge(pygame.sprite.Sprite):
       self.oldalp = 0
       self.baseimage = self.space
       self.image = self.baseimage
-      self.font = pygame.font.Font(None,32)
       self.colors = colors
       self.darkcolors = map((lambda x: int(x / 3.5)), self.colors)
       self.topimg = top
@@ -794,8 +788,8 @@ class LyricDispKludge(pygame.sprite.Sprite):
     self.lyrics.append(newlyric)
     self.times.append(time)
 
-    image1 = self.font.render(newlyric,1,self.darkcolors)
-    image2 = self.font.render(newlyric,1,self.colors)
+    image1 = FONTS[32].render(newlyric,1,self.darkcolors)
+    image2 = FONTS[32].render(newlyric,1,self.colors)
     rimage = pygame.Surface(image1.get_size(), 0, 16)
     rimage.fill((64,64,64))
     rimage.blit(image1,(-2,-2))
@@ -842,7 +836,6 @@ class fpsDisp(pygame.sprite.Sprite):
         self.oldtime = -10000000
         self.loops = 0
         self.image = pygame.surface.Surface((1,1))
-        self.font = pygame.font.Font(None, 16)
         self.lowest = 1000
         self.highest = -1
         self.fpses = []
@@ -854,7 +847,7 @@ class fpsDisp(pygame.sprite.Sprite):
       self.loops += 1
       if (time - self.oldtime) > 1:
         text = repr(self.loops) + " loops/sec"
-        self.image = self.font.render(text,1,(160,160,160))
+        self.image = FONTS[16].render(text,1,(160,160,160))
         self.rect = self.image.get_rect()
         self.image.set_colorkey(self.image.get_at((0,0)))
         self.rect.bottom = 480
@@ -1148,22 +1141,21 @@ class JudgingDisp(pygame.sprite.Sprite):
         self.oldzoom = -1
         
         # prerender the text for judging for a little speed boost
-        font = pygame.font.Font(None, 48)
-        tx = font.size("MARVELOUS")[0]+4
+        tx = FONTS[48].size("MARVELOUS")[0]+4
         self.marvelous = fontfx.shadefade("MARVELOUS",48,4,(tx,40),(224,224,224))
-        tx = font.size("PERFECT")[0]+4
+        tx = FONTS[48].size("PERFECT")[0]+4
         self.perfect   = fontfx.shadefade("PERFECT"  ,48,4,(tx,40),(224,224, 32))
-        tx = font.size("GREAT")[0]+4
+        tx = FONTS[48].size("GREAT")[0]+4
         self.great     = fontfx.shadefade("GREAT"    ,48,4,(tx,40),( 32,224, 32))
-        tx = font.size("OK")[0]+4
+        tx = FONTS[48].size("OK")[0]+4
         self.ok        = fontfx.shadefade("OK"       ,48,4,(tx,40),( 32, 32,224))
-        tx = font.size("CRAPPY")[0]+4
+        tx = FONTS[48].size("CRAPPY")[0]+4
         self.crappy    = fontfx.shadefade("CRAPPY"   ,48,4,(tx,40),(128, 32,128))
-        tx = font.size("ACK")[0]+4
+        tx = FONTS[48].size("ACK")[0]+4
         self.shit      = fontfx.shadefade("ACK"      ,48,4,(tx,40),( 96, 64, 32))
-        tx = font.size("MISS")[0]+4
+        tx = FONTS[48].size("MISS")[0]+4
         self.miss      = fontfx.shadefade("MISS"     ,48,4,(tx,40),(224, 32, 32))
-        self.space     = font.render( " ",       1, (  0,   0,   0) )
+        self.space     = FONTS[48].render( " ",       1, (  0,   0,   0) )
 
         self.marvelous.set_colorkey(self.marvelous.get_at((0,0)),RLEACCEL)
         self.perfect.set_colorkey(self.perfect.get_at((0,0)),RLEACCEL)
@@ -1213,8 +1205,7 @@ class ScoringDisp(pygame.sprite.Sprite):
         self.playernum = playernum
         
         # prerender the baseimage
-        self.font = pygame.font.Font(None, 28)
-        tx = self.font.size(playmode)[0]+2
+        tx = FONTS[28].size(playmode)[0]+2
         self.basemode = pygame.transform.scale(fontfx.embfade(playmode,28,2,(tx,24),(127,127,127)),(tx,48))
         self.baseimage = pygame.surface.Surface((128,48))
         self.baseimage.blit(self.basemode,(64-(tx/2),0))
@@ -1227,7 +1218,7 @@ class ScoringDisp(pygame.sprite.Sprite):
     def update(self, score):
       if score != self.oldscore:
         self.image.blit(self.baseimage,(0,0))
-        scoretext = self.font.render(repr(score),1,(192,192,192))
+        scoretext = FONTS[28].render(repr(score),1,(192,192,192))
         self.image.blit(scoretext,(64-(scoretext.get_rect().size[0]/2),13))
         self.image.set_colorkey(self.image.get_at((0,0)),RLEACCEL)
         self.oldscore = score
@@ -1235,7 +1226,6 @@ class ScoringDisp(pygame.sprite.Sprite):
 class TimeDisp(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-        self.font = pygame.font.Font(None, 40)
         self.oldtime = "-1000"
         self.image = pygame.surface.Surface((1,1))
         self.rect = self.image.get_rect()
@@ -1246,7 +1236,7 @@ class TimeDisp(pygame.sprite.Sprite):
     def update(self, time):
       nowtime = repr(time)[:repr(time).index('.')+3]
       if (nowtime != self.oldtime) and (self.blahmod > 1):
-        self.image = self.font.render(nowtime,1,(224,224,224))
+        self.image = FONTS[40].render(nowtime,1,(224,224,224))
         self.image.set_colorkey(self.image.get_at((0,0)),RLEACCEL)
         self.oldtime = nowtime
         self.rect = self.image.get_rect()
@@ -2018,8 +2008,6 @@ def main():
 
   playmode = 'SINGLE'
   
-  font = pygame.font.Font(None, 60)
-
   if debugmode:
     print "Entering debug mode. Not loading the song list."
     totalsongs = 1
@@ -2034,8 +2022,8 @@ def main():
   parsedsongs = 0
   songs = []
 
-  pbar = fontfx.TextProgress(font, "Found " + str(totalsongs) + " files. Loading...",
-                             WHITE, BLACK)
+  pbar = fontfx.TextProgress(FONTS[60], "Found " + str(totalsongs) +
+                             " files. Loading...", WHITE, BLACK)
   for f in fileList:
     try: songs.append(fileparsers.SongItem(f))
     except: pass
@@ -2104,10 +2092,9 @@ def blatantplug():
 
   pygame.time.delay(225)
   
-  tfont = pygame.font.Font(None,48)
   plugtext = ["You have been playing pyDDR","by Brendan Becker","which is available at:", "http://icculus.org/pyddr/", " ", "If you like it, please donate a few bucks!", "The programmer is unemployed! =]", " ", "it was made possible by:", "Python, SDL, Pygame, and Xiph.org"]
   for i in plugtext:
-    mrtext = tfont.render(i,1,(plugtext.index(i)*8,plugtext.index(i)*8,plugtext.index(i)*8))
+    mrtext = FONTS[48].render(i,1,(plugtext.index(i)*8,plugtext.index(i)*8,plugtext.index(i)*8))
     mrtextrect = mrtext.get_rect()
     mrtextrect.centerx = 320
     mrtextrect.top = plugtext.index(i)*43
@@ -2303,8 +2290,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
   else:
     font = None
     text = None
-    font = pygame.font.Font(None, 192)
-    text = font.render('ERROR!', 1, (48,48,48))
+    text = FONTS[192].render('ERROR!', 1, (48,48,48))
     textpos = text.get_rect()
     textpos.centerx = 320
     textpos.centery = 240
@@ -2312,12 +2298,11 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
 
     font = None
     text = None
-    font = pygame.font.Font(None, 32)
 
     if song.crapout == 1:
-      text = font.render("The type of music file this song is in isn't recognised", 1, (224,224,224))
+      text = FONTS[32].render("The type of music file this song is in isn't recognised", 1, (224,224,224))
     elif song.crapout == 2:
-      text = font.render("The music file ("+song.file+") for this song wasn't found", 1, (224,224,224))
+      text = FONTS[32].render("The music file ("+song.file+") for this song wasn't found", 1, (224,224,224))
 
     text.set_colorkey(text.get_at((0,0)))
     textpos = text.get_rect()
@@ -2325,7 +2310,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
     textpos.centery = 216
     screen.blit(text, textpos)
 
-    text = font.render("Press ENTER", 1, (160,160,160))
+    text = FONTS[32].render("Press ENTER", 1, (160,160,160))
     text.set_colorkey(text.get_at((0,0)))
     textpos = text.get_rect()
     textpos.centerx = 320
