@@ -13,7 +13,7 @@ def get_onoff(name):
 
 def switch_onoff(name):
   mainconfig[name] ^= 1
-  return get_onff(name)
+  return get_onoff(name)
 
 def on_onoff(name):
   mainconfig[name] = 1
