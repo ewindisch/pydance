@@ -279,7 +279,7 @@ class JudgingDisp(pygame.sprite.Sprite):
     self.judgetype = judgetype
 
   def update(self, curtime):
-    steptimediff = curtime - self.laststep2
+    steptimediff = curtime - self.laststep
     if steptimediff < 0.5 or (self.judgetype == ('MISS' or ' ')):
       if   self.judgetype == "MARVELOUS": self.image = self.marvelous
       elif self.judgetype == "PERFECT": self.image = self.perfect
