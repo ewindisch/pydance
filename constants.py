@@ -7,6 +7,8 @@ E_PASS,E_QUIT,E_FULLSCREEN,E_SCREENSHOT,E_PGUP,E_PGDN,E_SELECT,E_MARK,E_UP,E_DOW
 DIRECTIONS = ['l', 'd', 'u', 'r']
 MAXPLAYERS = 2
 
+COUPLE_MODES = ["COUPLE"]
+
 VERSION = "0.7.1"
 
 import sys, os, config, pygame
@@ -98,6 +100,7 @@ elif osname == "macosx":
 
 mainconfig.load("pyddr.cfg")
 mainconfig.load(os.path.join(rc_path, "pyddr.cfg"))
+mainconfig["sortmode"] %= 5
 
 pygame.init()
 
@@ -109,3 +112,4 @@ event = input.EventManager()
 FONTS = {}
 for s in (192, 60, 48, 40, 32, 28, 26, 20, 16, 14):
   FONTS[s] = pygame.font.Font(None, s)
+
