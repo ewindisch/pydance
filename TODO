@@ -76,6 +76,15 @@ A Comprehensive List of Features for pydance 1.2
            songs, leaving only the keyboard for that, and activating
            the mat only when actually "dancing".
 
+  This might be better served by decoupling UI events and pad events
+  entirely, and having two separate configurations.
+
+* Event rewrite
+   We should use Pygame's Event objects internally, for all the events
+   (UI, pad, and Listener). This is much better than the crap I wrote
+   before, and means (esp. for Listeners) that we can add more information
+   without having to rewrite many objects.
+
 * BG Animation
    This is probably a Sprite like BGMovie is now, but with complicated
    timing information about when to change. For good support of
@@ -150,6 +159,8 @@ A Comprehensive List of Features for pydance 1.2
 
 * Fix endless mode
    The UI is so ugly, and there should be more selection criteria.
+   Maybe we should merge this with Nonstop mode and have a "Loop"
+   checkbox.
 
 * FIXME: There are a lot of FIXMEs in the code. Some of them get
   obsoleted over time, but most will still need fixing.

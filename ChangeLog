@@ -7,8 +7,10 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
-1.0.0 - 							[2004.03.XX]
+1.0.0 - Oh, it's a snaaaaaaaaaaake! (on a dancepad!)		[2004.03.01]
 + The TODO file has been revised with plans for pydance 1.2.
++ Display a "Press Confirm" on the grading screen over the banner.
++ Add an icon (pydance-icon.png).
 * Fix a possible divide-by-zero in FPS calculuation.
 
 0.9.1 - This release is dedicated to Gentoo bug #35890.		[2004.02.11]
