@@ -125,13 +125,18 @@ def do(screen, songdata):
                 E_CREATE: get_tuple }
 
   m = (("Play Game",
+        ["Oni Mode", tuple_opt, ('maxonilife',
+                                 [(0, 'off'), (3, 'three lives'),
+                                  (4, 'four lives'), (5, 'five lives'),
+                                  (7, 'seven lives'), (10, 'ten lives')])],
         ["Regular", {E_START: wrap_ctr}, (SongSelect, songdata)],
         ["Endless", {E_START: wrap_ctr}, (Endless, songdata)],
         ["Back", None, None]
         ),
        ("Game Options",
         ["Autofail", onoff_opt, ("autofail",)],
-        ["Arrow Colors", tuple_opt, ('arrowcolors', [(0, 'flat'), (4, 'normal')])],
+        ["Arrow Colors", tuple_opt, ('arrowcolors', [(0, 'flat'),
+                                                     (4, 'normal')])],
         ["Assist Mode", onoff_opt, ("assist",)],
         ["Jumps", offon_opt, ("badknees",)],
         ["Little", rotate_index_opt,

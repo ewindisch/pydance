@@ -71,7 +71,7 @@ mainconfig = config.Config({ # Wow we have a lot of options
   "sudden": 0, "hidden": 0, "little": 0, "assist": 0, "badknees": 0,
   "arrowcolors": 4, "fpsdisplay": 1, "showlyrics": 1,
   "showcombo": 1, "showtoparrows": 1,
-  "autofail": 1,
+  "autofail": 1, "maxonilife": 0,
   "grading": 1,
   "keyboard": "qwerty",
   "ingamehelp": 1,

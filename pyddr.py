@@ -193,6 +193,7 @@ class Judge:
       self.holdsub[whichone] = -1
       self.badholds += 1
       self.dance_score -= 6
+      self.lifebar.broke_hold()
     
   def handle_key(self, dir, curtime):
     times = self.steps.keys()

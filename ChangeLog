@@ -7,18 +7,20 @@ legend:
 
 ----- - CURRENT
 0.6.3 - Reasonable Starting Times!				[2003.XX.XX]
-+ New song loading display and algorithm (4-5 times faster).
++ New song loading display and algorithm (at least 4-5 times faster).
 + New song selector based roughly on DDR 5th Mix.
   + Nonstop help and playlist display.
   + 'gratuitous' option to turn off the slow extras in the song selector.
++ Endless mode.
++ Oni-style life neter.
+* DDR Extreme (8th Mix) grading and scoring algorithm.
 + Smaller download size by converting wavs to oggs.
   - Requires SDL_mixer 1.2.5.
 + The timer display is controllable via the 'fpsdisplay' option.
-+ New theme ('blue') and a new lifebar display for all themes.
-+ Endless mode.
-* DDR Extreme (8th Mix) grading and scoring algorithm.
++ New theme ('blue') and a new life display for all themes.
 * Split off the ddrmat.o driver from the main package.
 * The constant cleanup/speedup/refactor/bug fix process.
+* Bad hold arrows should no longer crash pyDDR.
 
 0.6.2 - No More Ugly-Ass Buttons				[2003.04.28]
 - Fullscreen switching during the game doesn't work on MacOS X.

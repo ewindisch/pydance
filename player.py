@@ -15,7 +15,10 @@ class Player:
     self.arrow_diff = float(self.arrow_top - self.arrow_bot)
     self.pid = pid
     self.score = ScoringDisp(pid, "Player " + str(pid))
-    self.lifebar = LifeBarDisp(pid, self.theme)
+    if mainconfig["maxonilife"] == 0:
+      self.lifebar = LifeBarDisp(pid, self.theme)
+    else:
+      self.lifebar = OniLifeBarDisp(pid, self.theme)
     self.holdtext = holdtext
     self.arrow_group = spritelib.RenderLayered()
     self.judging_list = []
@@ -49,6 +52,7 @@ class Player:
               self.song.totarrows[self.difficulty],
               self.difficulty,
               self.lifebar)
+    self.lifebar.next_song()
     if self.judge != None: j.munch(self.judge)
     self.judge = j
 
@@ -127,56 +131,103 @@ class ScoringDisp(pygame.sprite.Sprite):
         self.image.set_colorkey(self.image.get_at((0, 0)), RLEACCEL)
         self.oldscore = score
 
-# FIXME - Use two large images instead of a bunch of small ones
-class LifeBarDisp(pygame.sprite.Sprite):
-    def __init__(self, playernum, theme, previously = None):
-        pygame.sprite.Sprite.__init__(self)
-        self.oldlife = self.failed = 0
-        self.life = 50.0
+class AbstractLifeBar(pygame.sprite.Sprite):
+  def __init__(self, playernum, maxlife):
+    pygame.sprite.Sprite.__init__(self)
+    self.oldlife = 0
+    self.failed = False
+    self.maxlife = maxlife
+    self.image = pygame.Surface((204, 28))
+    self.deltas = {}
 
-        self.image = pygame.Surface((204,28))
-        self.grade = None
-        self.deltas = {"V": 0.8, "P": 0.5, "G": 0.0,
-                       "O": -1.0, "B": -4.0, "M": -8.0}
-        self.empty = pygame.image.load(os.path.join(theme.path,
-                                                     'lifebar-empty.png'))
-        self.full = pygame.image.load(os.path.join(theme.path,
-                                                   'lifebar-full.png'))
-
-        self.failtext = fontfx.embfade("FAILED",28,3,(80,32),(224,32,32))
-        self.failtext.set_colorkey(self.failtext.get_at((0,0)))
+    self.failtext = fontfx.embfade("FAILED",28,3,(80,32),(224,32,32))
+    self.failtext.set_colorkey(self.failtext.get_at((0,0)))
         
-        self.rect = self.image.get_rect()
-        self.rect.top = 30
-        self.rect.left = 58 + (320 * playernum)
+    self.rect = self.image.get_rect()
+    self.rect.top = 30
+    self.rect.left = 58 + (320 * playernum)
 
-    def failed(self):
-       return self.failed
+  def failed(self):
+    return self.failed
 
-    def update_life(self, rating):
-      if self.life > 0 and self.deltas.has_key(rating):
-        self.oldlife = self.life
-        self.life += self.deltas[rating]
-        self.life = min(self.life, 100.0)
-       
-    def update(self, judges):
-      if self.failed: return
-
-      if self.life <= 0:
-        self.failed = 1
-        judges.failed_out = True
-        self.life = 0
-      elif self.life > 100.0:
-        self.life = 100.0
-        
-      if self.life == self.oldlife: return
-
+  def update_life(self, rating):
+    if self.life > 0 and self.deltas.has_key(rating):
       self.oldlife = self.life
+      self.life += self.deltas[rating]
+      self.life = min(self.life, self.maxlife)
 
-      self.image.blit(self.empty, (0, 0))
-      self.image.set_clip((0, 0, int(202 * self.life / 100.0), 28))
-      self.image.blit(self.full, (0, 0))
-      self.image.set_clip()
+  def broke_hold(self):
+    pass
 
-      if self.failed:
-        self.image.blit(self.failtext, (70, 2) )
+  def next_song(self):
+    pass
+      
+  def update(self, judges):
+    if self.failed: return False
+    
+    if self.life <= 0:
+      self.failed = 1
+      judges.failed_out = True
+      self.life = 0
+    elif self.life > self.maxlife:
+      self.life = self.maxlife
+        
+    if self.life == self.oldlife: return False
+
+    self.oldlife = self.life
+
+    return True
+
+# Regular lifebar
+class LifeBarDisp(AbstractLifeBar):
+  def __init__(self, playernum, theme):
+    AbstractLifeBar.__init__(self, playernum, 100)
+    self.life = 50.0
+
+    self.deltas = {"V": 0.8, "P": 0.5, "G": 0.0,
+                       "O": -1.0, "B": -4.0, "M": -8.0}
+    self.empty = pygame.image.load(os.path.join(theme.path,
+                                                'lifebar-empty.png'))
+    self.full = pygame.image.load(os.path.join(theme.path,
+                                               'lifebar-full.png'))
+
+  def update(self, judges):
+    if AbstractLifeBar.update(self, judges) == False: return
+    self.image.blit(self.empty, (0, 0))
+    self.image.set_clip((0, 0, int(202 * self.life / 100.0), 28))
+    self.image.blit(self.full, (0, 0))
+    self.image.set_clip()
+
+    if self.failed:
+      self.image.blit(self.failtext, (70, 2))
+
+# Oni mode lifebar
+class OniLifeBarDisp(AbstractLifeBar):
+  def __init__(self, playernum, theme):
+    AbstractLifeBar.__init__(self, playernum, mainconfig["maxonilife"])
+
+    self.life = mainconfig["maxonilife"]
+
+    self.deltas = { "O": -1, "B": -1, "M": -1}
+    self.empty = pygame.image.load(os.path.join(theme.path, 'oni-empty.png'))
+    self.bar = pygame.image.load(os.path.join(theme.path, 'oni-bar.png'))
+
+    self.width = 192 / self.maxlife
+    self.bar = pygame.transform.scale(self.bar, (self.width, 20))
+        
+  def next_song(self):
+    self.life = min(self.maxlife, self.life + 1)
+
+  def broke_hold(self):
+    self.life -= 1
+       
+  def update(self, judges):
+    if AbstractLifeBar.update(self, judges) == False: return
+    
+    self.image.blit(self.empty, (0, 0))
+    if self.life > 0:
+      for i in range(self.life):
+        self.image.blit(self.bar, (6 + self.width * i, 4))
+
+    if self.failed:
+      self.image.blit(self.failtext, (70, 2) )
