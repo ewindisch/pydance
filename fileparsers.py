@@ -874,6 +874,7 @@ class SongItem(object):
                "title": "Untitled",
                "subtitle": "",
                "artist": "Unknown",
+               "author": "Unknown",
                "endat": 0.0,
                "preview": (45.0, 10.0),
                "startat": 0.0,
@@ -909,6 +910,9 @@ class SongItem(object):
 
     for k in SongItem.defaults:
       self.info.setdefault(k, SongItem.defaults[k])
+
+    for k in ("artist", "author", "title"):
+      if self.info[k] == "": self.info[k] = "Unknown"
 
     for k in ("filename",):
       if self.info[k] and not os.path.isfile(self.info[k]):
