@@ -190,6 +190,9 @@ class GradingScreen(InterfaceWindow):
                  p.stats.good_holds, p.stats.hold_count)
       print "GRADE: %s (%s) - total steps: %d; best combo: %d" % steps
       print "V: %d P: %d G: %d O: %d B: %d M: %d - %d/%d holds" % ratings
+      try:
+        print "Average off: %0.3f, standard deviation %0.2f" % p.stats.times()
+      except: pass # Python 2.2
       print
 
     if self.players[0] == None: return None

@@ -1,3 +1,4 @@
+from math import sqrt
 from listener import Listener
 
 # Track statistics about the kind of steps being made.
@@ -10,6 +11,7 @@ class Stats(Listener):
     self.maxcombo = 0
     self.steps = { "V": 0, "P": 0, "G": 0, "O": 0, "B": 0, "M": 0 }
     self.early = self.late = self.ontime = 0
+    self._times = []
 
   def stepped(self, pid, dir, curtime, etime, rating, combo):
     if rating is None: return
@@ -21,6 +23,16 @@ class Stats(Listener):
     if curtime > etime: self.late += 1
     elif etime > curtime: self.early += 1
     else: self.ontime += 1
+
+    if rating != "M" and rating != None:
+      self._times.append(curtime - etime)
+
+  def times(self):
+    s = sum(self._times)
+    s2 = sum([i*i for i in self._times])
+    avg = s / len(self._times)
+    stddev = sqrt((s2 - s) / (len(self._times) - 1))
+    return avg, stddev
 
   def ok_hold(self, pid, time, dir, whichone):
     self.hold_count += 1
