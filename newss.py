@@ -64,6 +64,10 @@ def make_box(color = [111, 255, 148], size = [130, 40]):
   return s
 
 class SongItemDisplay(pygame.sprite.Sprite):
+  no_banner = make_box(size = [256, 80])
+  no_banner.blit(pygame.image.load(NO_BANNER), [0, 0]
+  no_banner.set_colorkey(no_banner.get_at([4, 4]))
+
   def __init__(self, song): # A SongItem object
     self._song = song
     self.difficulty = song.difficulty
@@ -74,6 +78,30 @@ class SongItemDisplay(pygame.sprite.Sprite):
     self.menuimage = None
     self.isfolder = False
     self.isfolder = {}
+
+  def render(self):
+    if self._song.info["banner"]:
+      banner = pygame.image.load(self._song.info["banner"])
+      size = banner.get_rect().size
+      if size <= (100, 100): # Parapara-style
+        self._banner = banner
+      elif size == (177, 135): # KSF-style 1
+        self._banner = banner
+      elif size == (300, 200): # KSF-style 2
+        banner = banner.convert()
+        banner.set_colorkey(banner.get_at([0, 0]))
+        self._banner = banner
+      elif abs(size[0] - size[1]) < 3: # "Square", need to rotate.
+        banner = banner.convert()
+        banner.set_colorkey(banner.get_at([0, 0]), RLEACCEL)
+        self._banner = pygame.transform.rotozoom(banner, -45, 1.0)
+        self._clip = [51, 20, 256, 80]
+      else: # 256x80, standard banner, I hope.
+        banner = pygame.transform.scale(banner, [256, 80])
+        self._banner = make_box([0, 0, 0], banner.get_size())
+        self._banner.blit(banner, [4, 4])
+    else: self._banner = SongItemDisplay.no_banner
+    self._render()
 
 # Crossfading help text along the top of the screen.
 class HelpText(pygame.sprite.Sprite):
@@ -219,30 +247,6 @@ class BannerDisplay(pygame.sprite.Sprite):
     self._subtitle = song.info["subtitle"]
     self._artist = song.info["artist"]
     self._clip = None
-    if song.info["banner"]:
-      banner = pygame.image.load(song.info["banner"])
-      size = banner.get_rect().size
-      if size <= (100, 100): # Parapara-style
-        self._banner = banner
-      elif size == (177, 135): # KSF-style 1
-        self._banner = banner
-      elif size == (300, 200): # KSF-style 2
-        banner = banner.convert()
-        banner.set_colorkey(banner.get_at([0, 0]))
-        self._banner = banner
-      elif abs(size[0] - size[1]) < 3: # "Square", need to rotate.
-        banner = banner.convert()
-        banner.set_colorkey(banner.get_at([0, 0]), RLEACCEL)
-        self._banner = pygame.transform.rotozoom(banner, -45, 1.0)
-        self._clip = [51, 20, 256, 80]
-      else: # 256x80, standard banner, I hope.
-        banner = pygame.transform.scale(banner, [256, 80])
-        self._banner = make_box([0, 0, 0], banner.get_size())
-        self._banner.blit(banner, [4, 4])
-    else:
-      self._banner = pygame.image.load(NO_BANNER).convert()
-      self._banner.set_colorkey(self._banner.get_at([0, 0]))
-    self._render()
 
   def _render(self):
     self.image = pygame.Surface(self._box.get_size(), SRCALPHA, 32)
@@ -250,7 +254,7 @@ class BannerDisplay(pygame.sprite.Sprite):
 
     self.image.set_clip(self._clip)
     r_b = self._banner.get_rect()
-    r_b.center = (self.image.get_rect().size[0] / 2, 60)
+    r_b.center = (self.image.get_rect().size[0] / 2, 80)
     self.image.blit(self._banner, r_b)
     self.image.set_clip(None)
     
@@ -409,16 +413,15 @@ class MainWindow(object):
           self._diff_names[pid] = name
 
       elif ev == ui.CONFIRM:
-        if optionscreen.player_opt_driver(self._screen, self._configs):
-          music.fadeout(500)
-          diffs = [self._song.diff_list[self._game][self._diffs[i]]
-                   for i in range(len(self._diffs))]
-          dance.play(self._screen, [(self._song.filename, diffs)],
-                     self._configs, self._config, self._game)
-          music.fadeout(500) # The just-played song
-          ui.ui.empty()
-          self._screen.blit(self._bg, [0, 0])
-          pygame.display.flip()
+        music.fadeout(500)
+        diffs = [self._song.diff_list[self._game][self._diffs[i]]
+                 for i in range(len(self._diffs))]
+        dance.play(self._screen, [(self._song.filename, diffs)],
+                   self._configs, self._config, self._game)
+        music.fadeout(500) # The just-played song
+        self._screen.blit(self._bg, [0, 0])
+        pygame.display.flip()
+        ui.ui.empty()
         ui.ui.clear()
 
       elif ev == ui.FULLSCREEN:
