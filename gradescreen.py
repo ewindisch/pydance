@@ -4,7 +4,28 @@ import colors
 import fontfx
 import ui
 
+from interface import InterfaceWindow
 from constants import *
+
+class TextSprite(pygame.sprite.Sprite):
+  def __init__(self, center):
+    pygame.sprite.Sprite.__init__(self)
+    self._idir = 4
+    self._i = 128
+    self._center = center
+    self._last_update = pygame.time.get_ticks() - 200
+
+  def update(self, time):
+    if time - self._last_update > 100:
+      if self._i < 32: self._idir =  4
+      elif self._i > 224: self._idir = -4
+      self._i += self._idir
+
+      c = [self._i, 128, 128]
+      self.image = FONTS[24].render("Press Escape/Confirm/Start", True, c)
+      self.rect = self.image.get_rect()
+      self.rect.center = self._center
+      self._last_update = time
 
 class GradeSprite(pygame.sprite.Sprite):
   def __init__(self, center, rating):
@@ -21,7 +42,6 @@ class GradeSprite(pygame.sprite.Sprite):
   def update(self, time):
     if time < self._end:
       angle = (self._end - time) / 3.0
-      #print "angle is", angle, time, self._end
       zoom = (1 - (self._end - time) / 3000.0)
       self.image = pygame.transform.rotozoom(self._image, angle, zoom)
       self.image = self.image.convert()
@@ -133,9 +153,8 @@ class HoldStatSprite(pygame.sprite.Sprite):
       self._curtotal = self._totalcount
       self._render()
 
-# FIXME: Make an interfacewindow.
-class GradingScreen(object):
-  def __init__(self, players):
+class GradingScreen(InterfaceWindow):
+  def __init__(self, screen, players):
     self.players = players
     for p in players:
       if p == None: continue
@@ -150,21 +169,18 @@ class GradingScreen(object):
       print "V: %d P: %d G: %d O: %d B: %d M: %d - %d/%d holds" % ratings
       print
 
-  def render(self, screen):
     if self.players[0] == None: return None
     elif self.players[0].stats.arrow_count == 0: return None
-    bg = pygame.image.load(os.path.join(image_path, "grade-bg.png"))
-    bg = bg.convert()
-    screen.blit(bg, [0, 0])
+    InterfaceWindow.__init__(self, screen, "grade-bg.png")
     pygame.display.update()
     
-    sprites = pygame.sprite.RenderUpdates()
+    self._sprites.add(TextSprite([320, 242]))
     plr = self.players[0]
 
     s = [180, 34]
     # FIXME: There is probably a shorter way to do this.
-    sprites.add([
-      StatSprite([200, 10], "MARV.:", plr.stats["V"], s, 0),
+    self._sprites.add([
+      StatSprite([200, 10], "MARVEL.:", plr.stats["V"], s, 0),
       StatSprite([200, 44], "PERFECT:", plr.stats["P"], s, 333),
       StatSprite([200, 78], "GREAT:", plr.stats["G"], s, 666),
       StatSprite([200, 112], "OKAY:", plr.stats["O"], s, 1000),
@@ -178,13 +194,14 @@ class GradingScreen(object):
       StatSprite([400, 146], "Score:", int(plr.score.score), s, 2000),
       StatSprite([400, 180], "TOTAL:", plr.stats.arrow_count, s, 2333)
       ])
-    sprites.add(GradeSprite([98, 183], plr.grade.grade(plr.failed)))
-    sprites.add(GrooveGaugeSprite([10, 10], [176, 112], plr.lifebar.record))
+    self._sprites.add(GradeSprite([98, 183], plr.grade.grade(plr.failed)))
+    self._sprites.add(GrooveGaugeSprite([10, 10], [176, 112],
+                                        plr.lifebar.record))
 
     if len(self.players) == 2:
       plr = self.players[1]
-      sprites.add([
-        StatSprite([15, 270], "MARV.:", plr.stats["V"], s, 0),
+      self._sprites.add([
+        StatSprite([15, 270], "MARVEL.:", plr.stats["V"], s, 0),
         StatSprite([15, 304], "PERFECT:", plr.stats["P"], s, 333),
         StatSprite([15, 338], "GREAT:", plr.stats["G"], s, 666),
         StatSprite([15, 372], "OKAY:", plr.stats["O"], s, 1000),
@@ -198,17 +215,14 @@ class GradingScreen(object):
         StatSprite([215, 406], "Score:", int(plr.score.score), s, 2000),
         StatSprite([215, 440], "TOTAL:", plr.stats.arrow_count, s, 2333),
         ])
-      sprites.add(GradeSprite([541, 294], plr.grade.grade(plr.failed)))
-      sprites.add(GrooveGaugeSprite([453, 358], [176, 112],
-                                    plr.lifebar.record))
+      self._sprites.add(GradeSprite([541, 294], plr.grade.grade(plr.failed)))
+      self._sprites.add(GrooveGaugeSprite([453, 358], [176, 112],
+                                          plr.lifebar.record))
 
     ui.ui.clear()
     screenshot = False
     pid, ev = ui.ui.poll()
-    i = 192
-    idir = -4
     clock = pygame.time.Clock()
-    bonus = 0
     exits = [ui.QUIT]
     start = pygame.time.get_ticks()
     
@@ -222,25 +236,7 @@ class GradingScreen(object):
             pygame.time.get_ticks() - start > 3333):
         exits.extend([ui.CONFIRM, ui.START])
         ev = ui.PASS
-        bonus += 3333
+        self._time_bonus += 3333
 
-      if i < 32: idir =  4
-      elif i > 224: idir = -4
-      i += idir
-      sprites.update(pygame.time.get_ticks() + bonus)
-
-      # FIXME: Make this a sprite.
-      text = FONTS[24].render("Press Escape/Confirm/Start", True, [i, 128,128])
-      tr = text.get_rect()
-      tr.center = [320, 240]
-      pygame.display.update([screen.blit(text, tr)] + sprites.draw(screen))
-      clock.tick(45)
-
-      if screenshot:
-        fn = os.path.join(rc_path, "screenshot.bmp")
-        print "Saving a screenshot to", fn
-        pygame.image.save(screen, fn)
-        screenshot = False
-
-      sprites.clear(screen, bg)
+      screenshot = self.update(screenshot)
       pid, ev = ui.ui.poll()

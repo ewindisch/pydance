@@ -493,10 +493,17 @@ class InterfaceWindow(object):
     self._screen.blit(self._bg, [0, 0])
     self._callbacks = {} #FIXME: TODO
     self._clock = pygame.time.Clock()
+    self._time_bonus = 0
 
-  def update(self):
-    self._sprites.update(pygame.time.get_ticks())
+  def update(self, screenshot = False):
+    self._sprites.update(pygame.time.get_ticks() + self._time_bonus)
     pygame.display.update(self._sprites.draw(self._screen))
+
+    if screenshot:
+      fn = os.path.join(rc_path, "screenshot.bmp")
+      print "Saving a screenshot to", fn
+      pygame.image.save(screen, fn)
+
     self._sprites.clear(self._screen, self._bg)
     self._clock.tick(45)
-
+    return False

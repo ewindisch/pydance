@@ -207,8 +207,7 @@ def play(screen, playlist, configs, songconf, playmode):
     first = False
 
   if mainconfig['grading'] and not first:
-    grade = gradescreen.GradingScreen(players)
-    grade.render(screen)
+    grade = gradescreen.GradingScreen(screen, players)
 
   # If we only play one song (all the way through), then it's safe to enter
   # a grade. This means course grades are going to get kind of messy.
