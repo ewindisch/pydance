@@ -4,7 +4,7 @@
    pyDDR is a dancing simulator, primarily for GNU/Linux, but it also
    runs on other UNIX-like operating systems, Windows, and MacOS X. DDR
    stands for "Dance Dance Revolution", a game that's slowly earning
-   populatority in the United States and other countries, that comes from
+   popularity in the United States and other countries, that comes from
    Japan. The game idea is simple. There's a mat with four directional
    arrows you can step on, and the game scrolls arrows up the screen
    while playing a song. When the arrows reach the top of the screen (not
@@ -155,6 +155,10 @@ pyddr.cfg
           If this is on pyDDR will display an FPS counter in the corner.
           See the FAQ for what to do if your FPS is very low.
 
+   fullscreen 0|1
+          If this is set to 1, pyDDR will start up in fullscreen mode. 
+          Otherwise, the game will open in a window.
+
    gfxtheme [themename]
           Sets your graphical theme (affecting the look of the arrows and
           your lifebar). pyDDR comes with the 'classic' and 'bryan'
@@ -224,11 +228,11 @@ pyddr.cfg
           between the position in the song and the arrows displayed.
 
    onboardaudio 0|1
-          Some systems (especially laptops) use sound cards that resample
-          sound in really stupid ways, which may make pyDDR play songs
-          such that they "drift" in relation to the steps. If you seem to
-          be having drifting issues in all the songs you play, you should
-          try turning this on.
+          Some systems (especially laptops and motherboards with built-in 
+          sound) use sound cards that resample sound in really stupid 
+          ways, which may make pyDDR play songs such that they "drift" in 
+          relation to the steps. If you seem to be having drifting issues 
+          in all the songs you play, you should try turning this on.
 
    previewmusic 1|0
           If this is on, the song selection screen will play a brief
