@@ -1,5 +1,5 @@
 # GFXTheme and associated classes.
-# These handle loading the various graphics themes for pyDDR.
+# These handle loading the various graphics themes for pydance.
 
 import dircache, os
 

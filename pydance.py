@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
-# pyDDR - DDR clone written in Python
-# I know the dependencies suck, but in terms of programming so do I.
+# pydance - Dancing game written in Python
 
 #import psyco
 #psyco.jit()
@@ -852,7 +851,7 @@ def SetDisplayMode(mainconfig):
 def main():
   global screen
 
-  print "pyDDR, by theGREENzebra (tgz@clickass.org)"
+  print "pydance, by theGREENzebra (tgz@clickass.org)"
   print "Initialising.."
 
   # FIXME Debug mode has been broken for like, 4 releases, take it out
@@ -869,7 +868,7 @@ def main():
 
   screen = SetDisplayMode(mainconfig)
   
-  pygame.display.set_caption('pyDDR ' + VERSION)
+  pygame.display.set_caption('pydance ' + VERSION)
   pygame.mouse.set_visible(0)
 
   audio.load(os.path.join(sound_path, "menu.ogg"))
@@ -905,68 +904,7 @@ def main():
   menudriver.do(screen, (songs, screen, playSequence))
   audio.stop()
   pygame.display.quit()
-  mainconfig.write(os.path.join(rc_path, "pyddr.cfg"))
-
-def blatantplug():
-  xiphlogo = pygame.image.load(os.path.join(image_path, "xifish.png")).convert()
-  pygamelogo = pygame.image.load(os.path.join(image_path, "pygamelogo.png")).convert()
-  oddlogo = pygame.image.load(os.path.join(image_path, "oddlogos.png")).convert()
-  xiphlogo.set_colorkey(xiphlogo.get_at((0,0)))
-  pygamelogo.set_colorkey(pygamelogo.get_at((0,0)))
-  oddlogo.set_colorkey(oddlogo.get_at((0,0)))
-  xiphlogo.set_alpha(32)
-  pygamelogo.set_alpha(32)
-  oddlogo.set_alpha(32)
-  xiphlogorect = xiphlogo.get_rect()
-  pygamelogorect = pygamelogo.get_rect()
-  oddlogorect = oddlogo.get_rect()
-  
-  oddlogorect.centerx = 320;  oddlogorect.centery = 128
-  pygamelogorect.centerx = 320;  pygamelogorect.centery = 256
-  xiphlogorect.centerx = 320;  xiphlogorect.centery = 384
-    
-  audio.load(os.path.join(sound_path, "menu.ogg"))
-  audio.play(0,14.75)
-  audio.set_volume(0)
-  
-  for i in range(26):
-    screen.fill((i*8,i*8,i*8))
-    pygame.display.flip()
-    audio.set_volume(i/2.0)
-    pygame.time.delay(16)
-    
-  pygame.time.delay(225)
-
-  screen.blit(pygamelogo,pygamelogorect)
-  screen.blit(oddlogo,oddlogorect)
-  screen.blit(xiphlogo,xiphlogorect)
-  pygame.display.flip()
-
-  pygame.time.delay(225)
-  
-  plugtext = ["You have been playing pyDDR","by Brendan Becker","which is available at:", "http://icculus.org/pyddr/", " ", "If you like it, please donate a few bucks!", "The programmer is unemployed! =]", " ", "it was made possible by:", "Python, SDL, Pygame, and Xiph.org"]
-  for i in plugtext:
-    mrtext = FONTS[48].render(i,1,(plugtext.index(i)*8,plugtext.index(i)*8,plugtext.index(i)*8))
-    mrtextrect = mrtext.get_rect()
-    mrtextrect.centerx = 320
-    mrtextrect.top = plugtext.index(i)*43
-    screen.blit(mrtext,mrtextrect)
-    pygame.display.flip()
-    pygame.time.delay(225)
-
-  pygame.time.delay(4500)
-
-  background = CloneSprite(pygame.transform.scale(screen, (640,480)))
-  for n in range(63):
-    background.set_alpha(255-(n*4))
-    screen.fill(colors.BLACK)
-    background.draw(screen)
-    pygame.display.flip()
-    pygame.time.wait(1)
-
-  print "pyDDR exited properly."
-  sys.exit()    
-
+  mainconfig.write(os.path.join(rc_path, "pydance.cfg"))
 
 def playSequence(playlist, configs, songconf, playmode):
   global screen
@@ -1157,7 +1095,7 @@ def dance(song, players, prevscr, ready_go):
 
     for i in range(len(players)):
       if (event.states[(i, E_START)] and event.states[(i, E_RIGHT)]):
-        print "Holding right plus start quits pyDDR."
+        print "Holding right plus start quits pydance."
         sys.exit()
       elif (event.states[(i, E_START)] and event.states[(i, E_LEFT)]):
         ev = (0, E_QUIT)

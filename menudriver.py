@@ -1,4 +1,4 @@
-# Code to construct pyDDR's menus
+# Code to construct pydance's menus
 
 import pygame, menus, os, sys, copy, colors
 

@@ -3,7 +3,7 @@
 The "Dance" Format
 ------------------
 This format is designed to supercede step, by removing extraneous
-information. pyDDR should use the dance format internally, and file
+information. pydance would use the dance format internally, and file
 parsers should normalize to it.
 
 The goals of this format are easy parsability, easy human readability,

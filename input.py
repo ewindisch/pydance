@@ -83,7 +83,7 @@ class EventManager:
         if mat == None: mat = i
         elif mat2 == None: mat2 = i
       else:
-        print "You have a joystick attached, but it doesn't seem to be a DDR mat."
+        print "You have a joystick attached, but it doesn't seem to be a mat."
         print "It has", ddrmat.get_numbuttons(), "buttons and", ddrmat.get_numaxes(), "axes."
       ddrmat.quit()
     if emsusb2 != None: # EMSUSB2, if found, is the only device we'll use.
@@ -107,7 +107,7 @@ class EventManager:
       elif MATS.get(ddrmat.get_numaxes(), ddrmat.get_numbuttons()):
         self.mergeEvents(MATS[(ddrmat.get_numaxes(), ddrmat.get_numbuttons())],
                          0, "js" + str(mat))
-      print "DDR mat 1 initialized: js", mat
+      print "Mat 1 initialized: js", mat
       self.handler.set_allowed((JOYBUTTONUP, JOYBUTTONDOWN))
       if mat2 != None:
         ddrmat = pygame.joystick.Joystick(mat2)
@@ -117,9 +117,9 @@ class EventManager:
         elif MATS.get(ddrmat.get_numaxes(), ddrmat.get_numbuttons()):
           self.mergeEvents(MATS[(ddrmat.get_numaxes(),
                                  ddrmat.get_numbuttons())], 0, "js" + str(mat))
-        print "DDR mat 2 initialized: js", mat2
+        print "Mat 2 initialized: js", mat2
     else:
-      print "No DDR mats found. Not initializing joystick support."
+      print "No mats found. Not initializing joystick support."
     self.setupKeys()
 
   def setupKeys(self):

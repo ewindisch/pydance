@@ -1,4 +1,4 @@
-# Contains various sprite extension classes pyDDR uses.
+# Contains various sprite extension classes pydance uses.
 
 #FIXME - needs documentation (and cleanups?)
 # and probably generalization so we can use these elsewhere in the code

@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head>
-    <title>pyDDR Documentation</title>
+    <title>pydance Documentation</title>
     <meta name="author" content="Joe Wreschnig &lt;piman@debian.org&gt;" />
       <style type="text/css">
 
@@ -15,8 +15,8 @@ dl.faq dt { font-weight: bold }
       </style>
   </head>
   <body>
-    <h1>About pyDDR</h1>
-    <p>pyDDR is a dancing simulator, primarily for GNU/Linux, but it also
+    <h1>About pydance</h1>
+    <p>pydance is a dancing simulator, primarily for GNU/Linux, but it also
       runs on other UNIX-like operating systems, Windows, and Mac OS
       X. DDR stands for "Dance Dance Revolution", a game that's slowly
       earning popularity in the  United States and other countries,
@@ -29,13 +29,13 @@ dl.faq dt { font-weight: bold }
       points. The idea is that the game is supposed to either teach you
       to dance, or simulate dancing. It works to a degree. =]</p>
     <p>However, if you're just hearing about this game (or you're broke), you
-      don't actually <em>need</em> a mat to play pyDDR (although it
+      don't actually <em>need</em> a mat to play pydance (although it
       definitely makes it more fun). You can use a keyboard or regular
       joystick instead.</p>
-    <p>This document assumes you've managed to install pyDDR already.
+    <p>This document assumes you've managed to install pydance already.
       If not, you might want to look at the INSTALL file included with
       the source.</p>
-    <h1>Playing pyDDR</h1>
+    <h1>Playing pydance</h1>
     <p>To play the game, just select "Play Game" from the menu, then
     select "Regular", and select
       a song. Press j and l to change your difficulty setting
@@ -67,33 +67,33 @@ dl.faq dt { font-weight: bold }
     you into a different selector. In this one, you can select a
     difficulty (either by name, or by rating), and just keep playing
     until you fail.</p>
-    <h1>Configuring pyDDR</h1>
-    <p>The easy way to configure pyDDR is to use the in-game
+    <h1>Configuring pydance</h1>
+    <p>The easy way to configure pydance is to use the in-game
     configuration menus. Just select the menu item you want to change
     and hit enter, or left and right. If you need more precise
     configuration, read on.</p>
-    <p>pyDDR reads from configuration files in appropriate
-    places. This means <tt>/etc/pyddr.cfg</tt> and
-    <tt>~/.pyddr/pyddr.cfg</tt> on POSIX,
-    <tt>/Library/Preferences/pyDDR/pyddr.cfg</tt> and
-    <tt>~/Library/Preferences/pyDDR/pyddr.cfg</tt> on Mac OS X, and
-      <tt>pyddr.cfg</tt> in the current directory on all platforms
+    <p>pydance reads from configuration files in appropriate
+    places. This means <tt>/etc/pydance.cfg</tt> and
+    <tt>~/.pydance/pydance.cfg</tt> on POSIX,
+    <tt>/Library/Preferences/pydance/pydance.cfg</tt> and
+    <tt>~/Library/Preferences/pydance/pydance.cfg</tt> on Mac OS X, and
+      <tt>pydance.cfg</tt> in the current directory on all platforms
     (note that this is the only configuration file Windows systems
     will read). Files are read in the order listed above.</p>
     <h2>Adding Songs</h2>
     <p>To add songs, you just need to put the .step file, music file,
     and (if they exist) background and banner files into one of your
     song directories. This is the <tt>songdir</tt> configuration
-    variable. On POSIX systems this is /usr/share/games/pyddr/songs,
-    /usr/local/share/games/pyddr/songs, and ~/.pyddr/songs. On
-    Windows, this is anywhere in the directory pyDDR was installed
-    in. On Mac OS X, this is the 'pyDDR Songs' folder in your Music folder.</p>
+    variable. On POSIX systems this is /usr/share/games/pydance/songs,
+    /usr/local/share/games/pydance/songs, and ~/.pydance/songs. On
+    Windows, this is anywhere in the directory pydance was installed
+    in. On Mac OS X, this is the 'pydance Songs' folder in your Music folder.</p>
     <!-- FIXME - adding themes -->
-    <h2>pyddr.cfg</h2>
+    <h2>pydance.cfg</h2>
     <h3>Gameplay Options</h3>
     <dl class="options">
       <dt>assist 0|1</dt>
-      <dd><p>In this mode, pyDDR will play a sound when you are
+      <dd><p>In this mode, pydance will play a sound when you are
       supposed to hit an arrow. It's useful if you can't see the
       screen, or need help getting on beat in a particular
       song.</p></dd>
@@ -103,7 +103,7 @@ dl.faq dt { font-weight: bold }
       your lifebar runs out.</p></dd>
 
       <dt>grading 1|0</dt>
-      <dd><p>pyDDR will normally display a grade at the end of every
+      <dd><p>pydance will normally display a grade at the end of every
       song. Turning this option off will bring you back to the song
       selector immediately instead.</p></dd>
     </dl>
@@ -114,20 +114,20 @@ dl.faq dt { font-weight: bold }
       the song is. Higher numbers mean a brighter background.</p></dd>
 
       <dt>explodestyle [0|1|2|3] (default 3)</dt>
-      <dd><p>pyDDR usually displays an effect if you successfully hit an
+      <dd><p>pydance usually displays an effect if you successfully hit an
       arrow, rotating and scaling the arrow at the top. If this is too
       CPU intensive (or you just don't like it), you can set it to 0
       for no effect, 1 for rotating, 2 for scaling, and 3 for rotating
       and scaling.</p></dd>
 
       <dt>fpsdisplay 1|0</dt>
-      <dd><p>If this is on pyDDR will display an FPS counter in the
+      <dd><p>If this is on pydance will display an FPS counter in the
       corner, and a timer in the top center. See the FAQ for what to
       do if your FPS is very low.</p></dd>
 
       <dt>gfxtheme [themename]</dt>
       <dd><p>Sets your graphical theme (affecting the look of the arrows
-      and your lifebar). pyDDR comes with the 'classic' and 'bryan'
+      and your lifebar). pydance comes with the 'classic' and 'bryan'
       themes. More themes can be installed by putting them in your
       <tt>themes/gfx</tt> directory.</p></dd>
 
@@ -136,7 +136,7 @@ dl.faq dt { font-weight: bold }
       game and interface considerably, but look nice.</p></dd>
 
       <dt>ingamehelp 1|0</dt>
-      <dd><p>Normally pyDDR displays some messages about how to use the
+      <dd><p>Normally pydance displays some messages about how to use the
 	  menus. If these annoy you, turn this off.</p></dd>
 
       <dt>lyriccolor [colors] (default cyan)</dt>
@@ -146,13 +146,13 @@ dl.faq dt { font-weight: bold }
 	  in those colors.</p></dd>
 
       <dt>showbackground 1|0</dt>
-      <dd><p>Many songs in pyDDR and other dancing games have a
+      <dd><p>Many songs in pydance and other dancing games have a
       background image that displays when you play them; however, this
       can make the game slightly slower. If you're desperate for more
       frames, try turning this off to remove the background.</p></dd>
 
       <dt>showcombo 1|0</dt>
-      <dd><p>Normally when you get a combo, pyDDR will display your
+      <dd><p>Normally when you get a combo, pydance will display your
       current combo length on the screen. Turning this off will remove
       that display.</p></dd>
 
@@ -177,10 +177,10 @@ dl.faq dt { font-weight: bold }
     <h3>Sound Options</h3>
     <dl class="options">
       <dt>djtheme [themename]</dt>
-      <dd><p>Sets your announcer theme. By default pyDDR comes with
+      <dd><p>Sets your announcer theme. By default pydance comes with
       the 'none' theme (no announcer). Copies from the official
       website also have a 'mrt' theme, which is not distributed with
-      various other packages for legal reasons. The pyDDR development
+      various other packages for legal reasons. The pydance development
       team is looking for people willing to do voice acting for free
       announcer samples! New themes can be installed in
       <tt>themes/dj</tt>.</p></dd>
@@ -197,7 +197,7 @@ dl.faq dt { font-weight: bold }
 
       <dt>onboardaudio 0|1</dt>
       <dd><p>Some systems (especially laptops) use sound cards or drivers
-      that resample sound in strange ways, which may make pyDDR play
+      that resample sound in strange ways, which may make pydance play
       songs such that they "drift" in relation to the steps. If you
       seem to be having drifting issues in all the songs you play, you
       should try turning this on.</p></dd>
@@ -226,9 +226,9 @@ dl.faq dt { font-weight: bold }
     <h3>System Options</h3>
     <dl class="options">
       <dt>songdir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)</dt>
-      <dd><p>This is a list of directories where pyDDR should look for
+      <dd><p>This is a list of directories where pydance should look for
       songs (.step files, backgrounds and banners, and the audio
-      itself). Generally installing pyDDR gives you a system-wide
+      itself). Generally installing pydance gives you a system-wide
       location to place songs (that all users will have access to),
       and a local one in your home directory.</p></dd>
     </dl>
@@ -237,13 +237,13 @@ dl.faq dt { font-weight: bold }
       <dt>strobe 0|1</dt>
       <dd><p>Turning this on results in a little blinking light in the
       bottom right corner of the screen. With various light detection
-      equipment, this can be used to make pyDDR communicate with a
+      equipment, this can be used to make pydance communicate with a
       strobe lighting system.</p></dd>
     </dl>
     <h1>Using a Mat</h1>
-    <p>The recommended adapter for pyDDR is the <a
+    <p>The recommended adapter for pydance is the <a
     href="http://levelsix.com/products/pc/EMSUSB2.shtml">EMSUSB2</a>
-    from Level Six. pyDDR easily supports two player with it, and it
+    from Level Six. pydance easily supports two player with it, and it
     works on all operating systems. Also known to work is the parallel
     port adapter that comes with <a href="http://www.buynshop.com">BNS
     pads</a>. Any other 6 axis, 12 button or 4 axis, 16 button
@@ -271,13 +271,13 @@ dl.faq dt { font-weight: bold }
     appropriate driver is installed".</p>
     <h2>Other</h2>
     <p>As long as <a href="http://www.pygame.org">Pygame</a> supports
-    your OS's joysticks, pyDDR will too. pyDDR specifically is looking
+    your OS's joysticks, pydance will too. pydance specifically is looking
     for 4 axis 16 button, or 6 axis 12 button joysticks (and also the
     32 button EMSUSB2).</p>
     <h1>Other Programs</h1>
     <h2>any2dance</h2>
-    <p>This program will convert any file pyDDR can read (such as .step
-      or .dwi files) to pyDDR's native .dance format. In addition to
+    <p>This program will convert any file pydance can read (such as .step
+      or .dwi files) to pydance's native .dance format. In addition to
       using it on one file, it will recurse directories. It also has a
       <kbd>--delete</kbd> option to delete the old files once it is done
       converting them.</p>
@@ -291,7 +291,7 @@ dl.faq dt { font-weight: bold }
       <p>The FAQ is available online at <a
     href="http://www.icculus.org/pyddr/faq.php">http://www.icculus.org/pyddr/faq.php</a>. Please read it before contacting the developers.</p>
     <h1>Contacts</h1>
-    <p>There are several different ways to get in touch with the pyDDR
+    <p>There are several different ways to get in touch with the pydance
       developers.</p>
     <h2>Email</h2>
     <p>The primary email address is the pyddr-discuss mailing list on
@@ -299,12 +299,12 @@ dl.faq dt { font-weight: bold }
     href="mailto:pyddr-discuss-subscribe@icculus.org">pyddr-discuss-subscribe@icculus.org</a>.
     You can then send email to <a
     href="mailto:pyddr-discuss@icculus.org">pyddr-discuss@icculus.org</a>
-    to talk about pyDDR. If you want to see about having pyDDR at a
+    to talk about pydance. If you want to see about having pydance at a
     convention or show, contact <a
     href="mailto:tgz@orotech.net">Brendan Becker
     &lt;tgz@orotech.net&gt;</a>, or show up on the IRC channel.</p>
     <h2>IRC</h2>
-    <p>If you need a bit more real-time help than email offers, pyDDR
+    <p>If you need a bit more real-time help than email offers, pydance
       has an <acronym title="Internet Relayed Chat">IRC</acronym> channel on
 	the <a href="http://www.freenode.net">Freenode IRC
 	  network</a>. Surprisingly, the channel is named

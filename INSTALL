@@ -1,9 +1,9 @@
-pyDDR INSTALLATION INSTRUCTIONS
--------------------------------
+pydance INSTALLATION INSTRUCTIONS
+---------------------------------
 
-pyDDR currently is known to run on Windows, UNIX and GNU/Linux, and
+pydance currently is known to run on Windows, UNIX and GNU/Linux, and
 MacOS X systems. In theory, it will run anywhere Pygame and Python do.
-pyDDR can be gotten from http://www.icculus.org/pyddr.
+pydance can be gotten from http://www.icculus.org/pyddr.
 
 In all installations, you need the following things:
  - A sufficiently recent SDL.
@@ -30,21 +30,21 @@ If you need to install it somewhere else, you can set DESTDIR (to
 install to an alternate root entirely), or PREFIX (which is /usr/local
 by default).
 
-The default configuration file looks in /usr/share/games/pyddr/songs,
-/usr/local/share/games/pyddr/songs, and ~/.pyddr/songs for Ogg/MP3
+The default configuration file looks in /usr/share/games/pydance/songs,
+/usr/local/share/games/pydance/songs, and ~/.pydance/songs for Ogg/MP3
 and step files.
 
 Installing under Windows
 ------------------------
- X:\pyddr> python setup.py
+ X:\pydance> python setup.py
 
-That's it. Copy your song and step files to the same directory as pyDDR,
+That's it. Copy your song and step files to the same directory as pydance,
 or to a ..\songs directory.
 
 Troubleshooting
 ---------------
-If you are having trouble with pyDDR, first check your OS distributor
-for updates. Debian and Gentoo GNU/Linux both have packages for pyDDR,
+If you are having trouble with pydance, first check your OS distributor
+for updates. Debian and Gentoo GNU/Linux both have packages for pydance,
 and this is the recommended installation method for these systems.
 Also, visit http://www.icculus.org/pyddr and see if a new version has
 been released, or if there is a package for your platform. If that

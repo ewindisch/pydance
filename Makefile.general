@@ -7,7 +7,7 @@ clean:
 	rm -f *.pyc
 
 distclean: clean
-	rm -f pyddr.cfg Makefile
+	rm -f pydance.cfg Makefile
 
 cvsclean: distclean
 	rm -rf CVS */CVS */*/CVS */*/*/CVS */*/*/*/CVS menuhelp ddrmat

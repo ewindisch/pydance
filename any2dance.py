@@ -3,10 +3,10 @@
 
 import sys, os, getopt, fnmatch, time
 
-pyddr_path = sys.argv[0]
+pydance_path = sys.argv[0]
 if os.name == "posix":
-  sys.path.append(os.path.split(os.path.realpath(pyddr_path))[0])
-else: sys.path.append(os.path.split(os.path.abspath(pyddr_path))[0])
+  sys.path.append(os.path.split(os.path.realpath(pydance_path))[0])
+else: sys.path.append(os.path.split(os.path.abspath(pydance_path))[0])
 
 VERSION = "0.2"
 FORMATS = ('*.step', '*.dance', '*.dwi', '*.sm')

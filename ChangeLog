@@ -1,4 +1,4 @@
-pyDDR ChangeLog
+pydance ChangeLog
 
 legend:
 + new feature added or made an existing one better
@@ -10,7 +10,8 @@ legend:
 + Boost, brake, left, right, mirror, and shuffle.
 + "Suck" lifebar mode, you fail if you do too good.
 * Parser bug fixes (especially for SM files).
-
+* pyDDR has been renamed to pydance.
+	
 0.7.1 - OUCH MY BLADDER                                         [2003.07.01]
 + Support for COUPLE mode.
  + And battle mode.

@@ -1,6 +1,3 @@
-# This file *cannot* be imported until pyddr.init() is called.
-# It needs to have pygame.event (and therefore display, too) ready.
-
 # Event types.
 E_PASS,E_QUIT,E_FULLSCREEN,E_SCREENSHOT,E_PGUP,E_PGDN,E_SELECT,E_MARK,E_UP,E_DOWN,E_LEFT,E_RIGHT,E_START,E_CREATE,E_UNSELECT,E_CLEAR,E_UNMARK,E_EXPOSE = range(18)
 
@@ -9,7 +6,7 @@ MAXPLAYERS = 2
 
 COUPLE_MODES = ["COUPLE"]
 
-VERSION = "0.7.1"
+VERSION = "0.7.2"
 
 import sys, os, config, pygame
 
@@ -22,7 +19,7 @@ elif os.name == "posix":
   elif os.environ.has_key("HOME"):
     osname = "posix"
 else:
-  print "Your platform is not supported by pyDDR. We're going to call it"
+  print "Your platform is not supported by pydance. We're going to call it"
   print "POSIX, and then just let it crash."
 
 if osname == 'posix': # We need to force stereo in many cases.
@@ -46,18 +43,28 @@ sound_path = os.path.join(pyddr_path, "sound")
 # Set a binding for our savable resource directory
 rc_path = None
 if osname == "posix":
-  rc_path = os.path.join(os.environ["HOME"], ".pyddr")
+  old_rc_path = os.path.join(os.environ["HOME"], ".pyddr")
+  rc_path = os.path.join(os.environ["HOME"], ".pydance")
 elif osname == "macosx":
-  rc_path = os.path.join(os.environ["HOME"], "Library", "Preferences", "pyDDR")
+  old_rc_path = os.path.join(os.environ["HOME"], "Library",
+                             "Preferences", "pyDDR")
+  rc_path = os.path.join(os.environ["HOME"], "Library",
+                             "Preferences", "pydance")
 elif osname == "win32":
-  rc_path = "."
+  old_rc_path = rc_path = "."
+
+if os.path.isdir(old_rc_path) and not os.path.isdir(rc_path):
+  os.rename(old_rc_path, rc_path)
+
+if os.path.exists(os.path.join(rc_path, "pyddr.cfg")):
+  os.rename(os.path.join(rc_path, "pyddr.cfg"), os.path.join(rc_path, "pydance.cfg"))
 
 if not os.path.isdir(rc_path): os.mkdir(rc_path)
 
-search_paths = (pyddr_path, rc_path)
+search_paths = (pyddr_path, rc_path, old_rc_path)
 
 if not sys.stdout.isatty():
-  sys.stdout = open(os.path.join(rc_path, "pyddr.log"), "w")
+  sys.stdout = open(os.path.join(rc_path, "pydance.log"), "w")
   sys.stderr = sys.stdout
 
 # Set up the configuration file
@@ -103,11 +110,15 @@ game_config = {"battle": 0,
 
 if osname == "posix":
   mainconfig.load("/etc/pyddr.cfg", True)
+  mainconfig.load("/etc/pydance.cfg", True)
 elif osname == "macosx":
-  mainconfig.load("/Library/Preferences/pyDDR/pyddr.cfg")
+  mainconfig.load("/Library/Preferences/pyDDR/pyddr.cfg", True)
+  mainconfig.load("/Library/Preferences/pydance/pydance.cfg", True)
 
 mainconfig.load("pyddr.cfg")
-mainconfig.load(os.path.join(rc_path, "pyddr.cfg"))
+mainconfig.load("pydance.cfg")
+mainconfig.load(os.path.join(old_rc_path, "pyddr.cfg"))
+mainconfig.load(os.path.join(rc_path, "pydance.cfg"))
 mainconfig["sortmode"] %= 4
 
 pygame.init()
