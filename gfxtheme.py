@@ -48,7 +48,8 @@ class ArrowSet:
           color = 1
         else:
           color = cnum
-        arrows[dir+repr(cnum)] = Arrow(path, dir, str(color), imgtype, left)
+        arrows[dir+repr(cnum)] = ScrollingArrow(path, dir, str(color),
+                                                imgtype, left)
     # allow access by instance.l or instance.arrows['l']
     for n in arrows: self.__dict__[n] = arrows[n] 
     self.arrows = arrows
@@ -56,7 +57,7 @@ class ArrowSet:
     # allow access by instance['l']
     return getattr(self,item)
 
-class Arrow:
+class ScrollingArrow:
   def __init__ (self, path, dir, color, imgtype, left):
     self.dir = dir
     states = {}
