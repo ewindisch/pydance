@@ -62,12 +62,15 @@ class GrooveGaugeSprite(pygame.sprite.Sprite):
 
     width = size[0]
     self._image.set_colorkey(self._image.get_at([0, 0]))
-    c1 = [0, 127, 0]
-    c2 = [127, 0, 0]
+    c1 = [0, 190, 0]
+    c2 = [190, 190, 0]
+    c3 = [190, 0, 0]
     for i in range(width):
       p = (float(i) / float(width))
-      h = size[1] - int(size[1] * records[int(p * len(records))])
-      c = colors.average(c1, c2, records[int(p * len(records))])
+      plife = records[int(p * len(records))]
+      h = size[1] - int(size[1] * plife)
+      if plife > 0.5: c = colors.average(c1, c2, (plife - 0.5) / 0.5)
+      else: c = colors.average(c2, c3, plife / 0.5)
       pygame.draw.line(self._image, c, [i, size[1] - 1], [i, h])
 
   def update(self, time):
@@ -195,7 +198,7 @@ class GradingScreen(InterfaceWindow):
       StatSprite([400, 180], "TOTAL:", plr.stats.arrow_count, s, 2333)
       ])
     self._sprites.add(GradeSprite([98, 183], plr.grade.grade(plr.failed)))
-    self._sprites.add(GrooveGaugeSprite([10, 10], [176, 112],
+    self._sprites.add(GrooveGaugeSprite([10, 10], [176, 100],
                                         plr.lifebar.record))
 
     if len(self.players) == 2:
@@ -216,7 +219,7 @@ class GradingScreen(InterfaceWindow):
         StatSprite([215, 440], "TOTAL:", plr.stats.arrow_count, s, 2333),
         ])
       self._sprites.add(GradeSprite([541, 294], plr.grade.grade(plr.failed)))
-      self._sprites.add(GrooveGaugeSprite([453, 358], [176, 112],
+      self._sprites.add(GrooveGaugeSprite([453, 358], [176, 100],
                                           plr.lifebar.record))
 
     ui.ui.clear()
