@@ -1303,7 +1303,8 @@ def dance(song, players, prevscr):
     pygame.display.update()
 
     if screenshot:
-      pygame.image.save(pygame.transform.scale(screen, (640,480)), "screenshot.bmp")
+      pygame.image.save(pygame.transform.scale(screen, (640,480)),
+                        os.path.join(rc_path, "screenshot.bmp"))
       screenshot = 0
 
     if not backmovie.filename:

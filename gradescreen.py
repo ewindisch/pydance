@@ -183,7 +183,7 @@ class GradingScreen:
         pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
       elif ev[1] == E_SCREENSHOT:
-        print "writing next frame to screenshot.bmp"
+        print "writing next frame to", os.path.join(rc_path, "screenshot.bmp")
         screenshot = 1
           
       gradetext = FONTS[32].render("Press ESC/ENTER/START",1, (i,128,128) )
@@ -196,7 +196,7 @@ class GradingScreen:
 
       if screenshot:
         pygame.image.save(pygame.transform.scale(screen, (640,480)),
-                          "screenshot.bmp")
+                          os.path.join(rc_path, "screenshot.bmp"))
         screenshot = 0
 
     return
