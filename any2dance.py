@@ -26,6 +26,7 @@ def convert(arg, delete):
 
     cwd = os.getcwd()
     dir, name = os.path.split(arg)
+    if dir == "": dir = "."
     os.chdir(dir)
     try:
       newname = name[:name.rindex(".")] + ".dance"

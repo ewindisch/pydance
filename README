@@ -68,7 +68,7 @@ Oni Mode
    left and right. If you need more precise configuration, read on.
 
    pyDDR reads from configuration files in appropriate places. This means
-   /etc/pyddr.cfg and ~/.pyddr/pyddr.cfg on UNIX,
+   /etc/pyddr.cfg and ~/.pyddr/pyddr.cfg on POSIX,
    /Library/Preferences/pyDDR/pyddr.cfg and
    ~/Library/Preferences/pyDDR/pyddr.cfg on Mac OS X, and pyddr.cfg in
    the current directory on all platforms (note that this is the only
@@ -110,8 +110,9 @@ pyddr.cfg
           lifebar runs out.
 
    badknees 0|1
-          If you have trouble with jumps (two arrows at once), you can
-          turn this option on to change jumps to one regular arrow.
+          If you have trouble with jumps (two or more arrows at once),
+          you can turn this option on to change jumps to one regular
+          arrow.
 
    grading 1|0
           pyDDR will normally display a grade at the end of every song.
@@ -342,12 +343,12 @@ Other
    pyDDR comes with a handful of miscellaneous programs to manipulate its
    step file format, and to help time songs.
 
-dwi2step, msd2step, and step2dwi
+any2dance
 
-   These programs convert to and from the popular MSD and DWI file
-   formats. Just run dwi2step file.dwi and it should convert the file
-   nicely. If a DWI file works in Dance With Intensity but not after
-   conversion, let us know.
+   This program will convert any file pyDDR can read (such as .step or
+   .dwi files) to pyDDR's native .dance format. In addition to using it
+   on one file, it will recurse directories. It also has a --delete
+   option to delete the old files once it is done converting them.
 
 findbpm
 
@@ -356,17 +357,6 @@ findbpm
    and calculates a BPM. This method sounds crude, but if you have a good
    sense of rhythm, it's actually highly accurate. Run it using findbpm
    song.ogg.
-
-lyrictag
-
-   This program helps you add lyrics to step files. To run it, use
-   lyrictag -s song.ogg -l lyrics.txt -o song.step. When the highlighted
-   lyric is said in the song, press space to advance the display. If you
-   press a key too early, press backspace to go back in the list.
-
-   lyrictag will not overwrite lyrics already in a file, so you need to
-   open up the step file and delete the LYRICS section if you want to add
-   new lyrics.
 
                                       FAQ
 

@@ -67,7 +67,7 @@ class DanceFile:
     parts = line.split()
     steps = [parts[0]]
     if parts[0] in ("B", "W", "S", "D"): steps.append(float(parts[1]))
-    elif parts[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x"):
+    elif parts[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x", "n"):
       steps.extend([int(s) for s in parts[1]])
     elif parts[0] == "L": steps.extend((int(parts[1]), " ".join(parts[2:])))
 
@@ -169,7 +169,7 @@ class StepFile:
         if self.difficulty.get(line) == None: self.difficulty[line] = {}
         return StepFile.GAMETYPE, data
       else:
-        line2 = line.replace(parts[0], '').strip()
+        line2 = line[len(parts[0]):].strip()
         self.info[parts[0]] = line2
         return StepFile.METADATA, data
 
@@ -224,8 +224,9 @@ class StepFile:
       return StepFile.GAMETYPE, data
 
 class DWIFile:
-  modes = { "{": "x", "[": "f", "(": "s", ")": "e", "]": "e", "}": "e" }
-  times = { "x": 0.25, "f": 2.0/3.0, "s": 1.0, "e": 2.0 }
+  modes = { "{": "x", "[": "f", "(": "s", "`": "n",
+            "'": "n", ")": "e", "]": "e", "}": "e" }
+  times = { "x": 0.25, "f": 2.0/3.0, "s": 1.0, "e": 2.0, "n": 1/12.0 }
   steps = {
     "0": [0, 0, 0, 0],
     "1": [1, 1, 0, 0],
@@ -295,7 +296,7 @@ class DWIFile:
     dir, name = os.path.split(filename)
     largefile = 10240 # Oh crap, I hate DWI. Shoot me now.
     found_bg = False
-    if dir == "": dir = "."
+    if dir == "": dir = os.path.realpath(".")
     for file in os.listdir(dir):
       lfile = file.lower()
       # SimWolf should be indicted for some sort of programming crime
@@ -331,9 +332,8 @@ class DWIFile:
 
       self.find_subtitle()
 
-      if not self.info.has_key("mix"):
-        mixname = os.path.split(os.path.split(dir)[0])[1]
-        if mixname != "songs": self.info["mix"] = mixname
+      mixname = os.path.split(os.path.split(dir)[0])[1]
+      if mixname != "songs": self.info["mix"] = mixname
 
       for key in ("title", "subtitle", "artist", "mix"):
         if self.info.has_key(key):

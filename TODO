@@ -1,10 +1,8 @@
 Bug Fixes
- - FIX ARROW COUNTING BUG - at least as far back as 0.6.1
  - Support A2B8 pads, if they don't work.
 
 UI Fixes & Improvements
  - In-game help (menu context help, mostly)
- - Go faster after scrolling through a few songs (not necessary w/ new code?)
  - Up/down indicators on menus
  - Menu and song select theming (including new songselect.pys)
  - Make quitting from the menus more difficult (make esc not exit last menu)
@@ -13,8 +11,6 @@ UI Fixes & Improvements
 
 Code Refactors & Cleanups
  - Rewrite event queue to use a list instead of linked list
- - '.dance' format forthcoming.
- - Player-as-object patch (in progress, needs a lot of work)
  - Judge refactor (for pluggable grading algorithms)
 
 Song Selector Improvements

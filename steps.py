@@ -9,7 +9,7 @@ from constants import *
 
 BEATS = { 'x': 0.25, 't': 0.5, 'f': 2.0/3.0,
           's': 1.0, 'w': 4.0/3.0, 'e': 2.0,
-          'q': 4.0, 'h': 8.0, 'o': 16.0 }
+          'q': 4.0, 'h': 8.0, 'o': 16.0, 'n': 1/12.0 }
 
 # FIXME: This can probably be replaced by something smaller, like a tuple.
 class SongEvent:
@@ -145,7 +145,7 @@ class Steps:
       elif words[0] == "L" and lyrics:
         lyrics.addlyric(cur_time - 0.4, words[1], words[2])
 
-    self.length = cur_time + toRealTime(cur_bpm, BEATS['h'])
+    self.length = cur_time + toRealTime(cur_bpm, BEATS['o'])
 
     self.holdinfo = zip(holdlist, holdtimes, releasetimes)
     self.holdref = zip(holdlist, holdtimes)
