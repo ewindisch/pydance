@@ -15,6 +15,8 @@ class AbstractLifeBar(Listener, pygame.sprite.Sprite):
     self.maxlife = maxlife * songconf["life"]
     self.image = pygame.Surface((204, 28))
     self.deltas = {}
+    self.record = []
+    self.last_record_update = 0
 
     self.failtext = fontfx.embfade("FAILED",28,3,(80,32),(224,32,32))
     self.failtext.set_colorkey(self.failtext.get_at((0,0)), RLEACCEL)
@@ -30,11 +32,13 @@ class AbstractLifeBar(Listener, pygame.sprite.Sprite):
 
   def update(self, time):
     if self.gameover: return False
-    
+
     if self.life < 0: self.life = -1
     elif self.life > self.maxlife: self.life = self.maxlife
-        
-    return True
+
+    if time - self.last_record_update > 1:
+      self.record.append(float(self.life) / float(self.maxlife))
+      self.last_record_update = time
 
 # Regular DDR-style lifebar, life from 0 to 100.
 class LifeBarDisp(AbstractLifeBar):

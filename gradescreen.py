@@ -31,6 +31,37 @@ class GradeSprite(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.center = self._center
 
+# And here is where I blatantly steal your idea, Matt. Sorry.
+class GrooveGaugeSprite(pygame.sprite.Sprite):
+  def __init__(self, pos, size, records):
+    pygame.sprite.Sprite.__init__(self)
+    self._image = pygame.Surface(size)
+    self._pos = pos
+    self._end = pygame.time.get_ticks() + 3000
+    self._size = size
+
+    width = size[0]
+    self._image.set_colorkey(self._image.get_at([0, 0]))
+    c1 = [0, 127, 0]
+    c2 = [127, 0, 0]
+    for i in range(width):
+      p = (float(i) / float(width))
+      h = size[1] - int(size[1] * records[int(p * len(records))])
+      c = colors.average(c1, c2, records[int(p * len(records))])
+      pygame.draw.line(self._image, c, [i, size[1] - 1], [i, h])
+
+  def update(self, time):
+    if time < self._end:
+      p = 1 - ((self._end - time)  / 3000.0)
+      self.image = pygame.Surface([int(self._size[0] * p), self._size[1]])
+      if self.image.get_size()[0] > 0:
+        self.image.set_colorkey(self.image.get_at([0, 0]))
+      self.image.blit(self._image, [0, 0])
+    else: self.image = self._image
+    self.rect = self.image.get_rect()
+    self.rect.topleft = self._pos
+    self.image.set_alpha(192)
+
 class StatSprite(pygame.sprite.Sprite):
   def __init__(self, pos, title, count, size, delay):
     pygame.sprite.Sprite.__init__(self)
@@ -148,6 +179,7 @@ class GradingScreen(object):
       StatSprite([400, 180], "TOTAL:", plr.stats.arrow_count, s, 2333)
       ])
     sprites.add(GradeSprite([98, 183], plr.grade.grade(plr.failed)))
+    sprites.add(GrooveGaugeSprite([10, 10], [176, 112], plr.lifebar.record))
 
     if len(self.players) == 2:
       plr = self.players[1]
@@ -167,6 +199,8 @@ class GradingScreen(object):
         StatSprite([215, 440], "TOTAL:", plr.stats.arrow_count, s, 2333),
         ])
       sprites.add(GradeSprite([541, 294], plr.grade.grade(plr.failed)))
+      sprites.add(GrooveGaugeSprite([453, 358], [176, 112],
+                                    plr.lifebar.record))
 
     ui.ui.clear()
     screenshot = False
