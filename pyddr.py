@@ -144,6 +144,7 @@ class Judge:
     self.ontime += anotherjudge.ontime
         
   def changebpm(self, bpm):
+    self.oldtick = self.tick
     self.tick = toRealTime(bpm, 1)
     self.bpm = bpm
         
@@ -739,13 +740,12 @@ class ArrowSprite(CloneSprite):
       self.image.set_alpha(alp)
 
 class HoldArrowSprite(CloneSprite):
-  def __init__ (self, spr, curtime, times, lastbpmtime, playernum, POS, zindex=ARROWZINDEX):
+  def __init__ (self, spr, curtime, times, playernum, POS, zindex=ARROWZINDEX):
     CloneSprite.__init__(self,spr,zindex=zindex)
     self.timef1 = times[1]
     self.timef2 = times[2]
     self.timef = times[2]
     self.life  = times[2]-curtime
-    self.lastbpmtime = lastbpmtime
     self.pos = copy.copy(POS)
     if self.pos['mode'] == 'switchy':
       self.pos = POS
@@ -1350,7 +1350,7 @@ def dance(song, players, ARROWPOS, prevscr):
 
               if num & 2:
                 holdindex = plr.steps.holdref.index((DIRECTIONS.index(dir),ev.when))
-                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, plr.steps.holdinfo[holdindex], plr.steps.lastbpmchangetime[0], plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
+                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, plr.steps.holdinfo[holdindex], plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
 
     for plr in players:
       if len(plr.steps.lastbpmchangetime) > 0:
