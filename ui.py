@@ -1,4 +1,5 @@
 from pygame.locals import *
+from constants import mainconfig
 import pad, pygame
 
 (PASS, CANCEL, UP, DOWN, LEFT, RIGHT, START, SELECT, UNMARK, CONFIRM,
@@ -19,11 +20,12 @@ pad_defaults = {
   pad.UPRIGHT: CONFIRM,
   pad.DOWNRIGHT: PGDN,
   pad.UPLEFT: CANCEL,
-  pad.CENTER: CONFIRM,
   pad.DOWNLEFT: UNMARK,
   pad.SELECT: SELECT,
   pad.SCREENSHOT: SCREENSHOT,
   }
+
+if mainconfig["centerconfirm"]: pad_defaults[pad.CENTER] = CONFIRM
 
 key_defaults = {
   100 * K_f: FULLSCREEN,

@@ -12,7 +12,7 @@ import locale
 
 from pygame.locals import *
 
-VERSION = "0.9.0"
+VERSION = "0.9.1"
 locale.setlocale(locale.LC_ALL, '')
 
 # Detect the name of the OS - Mac OS X is not really UNIX.
@@ -90,6 +90,7 @@ default_conf = {
   "strobe": 0,
   "usepsyco": 1,
   "autogen": 1,
+  "centerconfirm": 1,
 
   # Player config
   "spin": 0,
