@@ -84,8 +84,9 @@ class ThemeFile(object):
 
   is_zip_theme = classmethod(is_zip_theme)
 
-  def __init__(self, filename):
+  def __init__(self, filename, size):
     self.path = filename
+    self.size = size
     self.zip = None
     if not os.path.isdir(filename):
       self.zip = zipfile.ZipFile(filename)
@@ -135,6 +136,7 @@ class GFXTheme(object):
     self.game = game
     self.path = None
     self.pid = pid
+    self.size = game.width
     size = "%dx%d" % (game.width, game.width)
     for path in search_paths:
       if os.path.exists(os.path.join(path, "themes", "gfx", size, name)):
@@ -143,7 +145,7 @@ class GFXTheme(object):
     if self.path == None:
       raise RuntimeError("E: Cannot load theme '%s/%s'." % (size, name))
 
-    self.theme_data = ThemeFile(self.path)
+    self.theme_data = ThemeFile(self.path, self.size)
 
   # FIXME: Can probably be moved to __init__ and stored as members.
   def arrows(self, pid):
@@ -186,24 +188,25 @@ class Arrow(object):
     self.dir = dir
     self._image, rotate = theme.get_arrow(type, dir, color)
     # This arrow is animated
-    if self._image.get_width() != self._image.get_height():
+    if (self._image.get_width() != theme.size or
+        self._image.get_height() != theme.size):
       w = self._image.get_width()
       h = self._image.get_height()
-      frames = h / w
-      if frames * w != h:
+      frames = (h * w) / theme.size
+      if w / theme.size * theme.size != w or h / theme.size * theme.size != h:
         raise RuntimeError("Theme image is not evenly divisible: %dx%d."%(w,h))
-      elif frames % 4 != 0:
-        raise RuntimeError("%d frames not evenly divisble by 4." % frames)
 
       # Chop up the image.
       self._images = []
-      for i in range(frames):
-        s = pygame.Surface([w, w])
-        s.blit(self._image, [0, -i * w])
-        s = pygame.transform.rotate(s, rotate)
-        s.set_colorkey(s.get_at([0, 0]))
-        self._images.append(s)
-      self._beatcount = len(self._images) / 4 # 4 frames per beat
+      for i in range(w / theme.size):
+        for j in range(h / theme.size):
+          s = pygame.Surface([theme.size, theme.size])
+          s.blit(self._image, [-i * theme.size, -j * theme.size])
+          s = pygame.transform.rotate(s, rotate)
+          s.set_colorkey(s.get_at([0, 0]))
+          self._images.append(s)
+      self._beatcount = w / theme.size
+      self._fpb = h / theme.size # frames per beat
       self._image = None
     else:
       self._image.set_colorkey(self._image.get_at([0, 0]))
