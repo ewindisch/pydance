@@ -1,4 +1,6 @@
-import fnmatch, os, string
+import fnmatch
+import os
+import string
 
 # This is the standard order to present difficulties in.
 # DDR (USA home version) calls "beginner" "standard". Ignore that.
@@ -37,6 +39,8 @@ def toRealTime(bpm, steps):
 # Search the directory specified by path recursively for files that match
 # the shell wildcard pattern. A list of all matching file names is returned,
 # with absolute paths.
+# FIXME: Why aren't we using some sort of tree walk here? (Oh yeah, it's
+# Python 2.3 only. Fix that for 1.2.)
 def find(path, patterns):
   matches = []
   path = os.path.abspath(os.path.expanduser(path))
