@@ -131,6 +131,8 @@ def do(screen, songdata):
         ["Couple", {E_START: wrap_ctr}, (SongSelect, songdata + ("COUPLE",))],
         ["Double", {E_START: wrap_ctr}, (SongSelect, songdata + ("DOUBLE",))],
         ["5 Panel", {E_START: wrap_ctr}, (SongSelect, songdata + ("5PANEL",))],
+        ["5 Couple", {E_START: wrap_ctr}, (SongSelect, songdata + ("5COUPLE",))],
+        ["5 Double", {E_START: wrap_ctr}, (SongSelect, songdata + ("5DOUBLE",))],
         ["6 Panel", {E_START: wrap_ctr}, (SongSelect, songdata + ("6PANEL",))],
         ["8 Panel", {E_START: wrap_ctr}, (SongSelect, songdata + ("8PANEL",))],
         ["Endless", {E_START: wrap_ctr}, (Endless, songdata + ("SINGLE",))],

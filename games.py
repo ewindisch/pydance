@@ -59,7 +59,7 @@ GAMES = {
   "DOUBLE": GameType(double = True, players = 1),
   "5PANEL": GameType(players = 2, dirs = "wkczg", width = 56),
   "5COUPLE": GameType(players = 2, couple = True, dirs = "wkczg", width = 56),
-  "5DOUBLE": GameType(players = 2, double = True, dirs = "wkczg", width = 56),
+  "5DOUBLE": GameType(players = 1, double = True, dirs = "wkczg", width = 56),
   "6PANEL": GameType(players = 1, dirs = "lkduzr"),
   "8PANEL": GameType(players = 1, dirs = "wlkduzrg"),
   }

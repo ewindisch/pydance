@@ -16,22 +16,22 @@ MOVE_SOUND = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
 OPEN_SOUND = pygame.mixer.Sound(os.path.join(sound_path, "back.ogg"))
 
 difficulty_colors = { "BEGINNER": colors.color["white"],
-                      "LIGHT": colors.color["yellow"],
-                      "EASY": colors.color["cyan"],
+                      "LIGHT": colors.color["orange"],
+                      "EASY": colors.color["orange"],
                       "BASIC": colors.color["orange"],
-                      "STANDARD": colors.average(colors.color["red"],
-                                                 colors.color["orange"]),
+                      "STANDARD": colors.color["red"],
                       "TRICK": colors.color["red"],
                       "MEDIUM": colors.color["red"],
-                      "ANOTHER": colors.average(colors.color["yellow"],
-                                                colors.color["orange"]),
-                      "NORMAL": colors.color["green"],
+                      "ANOTHER": colors.color["red"],
+                      "NORMAL": colors.color["red"],
                       "MANIAC": colors.color["green"],
-                      "HARD": colors.color["red"],
-                      "HEAVY": colors.darken(colors.color["green"]),
+                      "HARD": colors.color["green"],
+                      "HEAVY": colors.color["green"],
                       "HARDCORE": colors.color["purple"],
                       "SMANIAC": colors.color["purple"],
-                      "CHALLENGE": colors.color["purple"]
+                      "CHALLENGE": colors.color["purple"],
+                      "CRAZY": colors.color["purple"],
+                      
                      }
 
 ITEM_SIZE = (344, 60)
@@ -144,8 +144,12 @@ class SongPreview(object):
 
   def preview(self, song):
     if mainconfig["previewmusic"] and not song.isfolder:
-      self.start, length = song.song.info["preview"]
-      self.filename = song.song.info["filename"]
+      if len(song.song.info["preview"]) == 2:
+        self.start, length = song.song.info["preview"]
+        self.filename = song.song.info["filename"]
+      else:
+        self.start, length = 0, 100
+        self.filename = song.song.info["preview"]
       if self.playing: audio.fadeout(500)
       self.playing = False
       self.start_time = pygame.time.get_ticks() + 500

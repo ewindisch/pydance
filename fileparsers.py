@@ -388,7 +388,7 @@ class MSDFile(GenericFile):
     if dir == "": dir = "."
 
     # FIXME: Make this a list comprehension, for speed...
-    for f in os.path.listdir():
+    for f in os.listdir(dir):
       fullname = os.path.join(dir, f)
       for ext in formats:
         if fullname.lower()[-len(ext):] == ext:
@@ -670,8 +670,90 @@ class SMFile(MSDFile):
 
     return stepdata
 
-DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "ANOTHER", "STANDARD", "TRICK",
-                "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "SMANIAC", "ONI"]
+# We have to detect KSFs via 'Song.ext' rather than the actual KSF
+# files, since they're split up.
+class KSFFile(MSDFile):
+  def __init__(self, filename, need_steps):
+    GenericFile.__init__(self, filename, need_steps)
+
+    self.info = {"artist": "Unknown", "title": "Unknown"}
+    self.difficulty = {}
+    self.steps = {}
+
+    self.info["filename"] = filename
+
+    path = os.path.split(filename)[0]
+    for fn in os.listdir(path):
+      fullname = os.path.join(path, fn)
+      fn_lower = fn.lower()
+      if fn_lower[-3:] == "ksf": self.parse_ksf(fullname)
+      elif fn_lower[:4] == "disc": self.info["banner"] = fullname
+      elif fn_lower[:5] == "intro": self.info["preview"] = fullname
+      elif fn_lower[:4] == "back" or fn_lower[:5] == "title":
+        self.info["background"] = fullname
+
+  def parse_ksf(self, filename):
+    steps = []
+
+    mode = "5PANEL"
+
+    name = os.path.split(filename)[1]
+
+    parts = name.split("_")
+    if len(parts) == 1:
+      couple = True
+      difficulty = "NORMAL"
+      mode = "5DOUBLE"
+      steps = [[], []]
+    else:
+      difficulty = parts[0]
+      couple = (parts[1][0] == "2")
+      if couple:
+        steps = [[], []]
+        mode = "5COUPLE"
+
+
+    for line in file(filename):
+      line = line.strip()
+      if line[0] == "#":
+        line = line[1:]
+        while line[-1] == ";": line = line[:-1]
+        parts = line.split(":")
+
+        if parts[0] == "TITLE":
+          pts = parts[1].split(" - ")
+          if len(pts) == 3:
+            self.info["artist"], self.info["title"], difficulty = pts
+          elif len(pts) == 2: self.info["artist"], self.info["title"] = pts
+          elif len(pts) == 1: self.info["title"] = pts[0]
+        elif parts[0] == "BPM": self.info["bpm"] = float(parts[1])
+        elif parts[0] == "TICKCOUNT": note_type = 4.0 / int(parts[1])
+        elif parts[0] == "STARTTIME": self.info["gap"] = -int(parts[1]) * 10
+      elif line[0] == "2": break
+      elif self.need_steps:
+        if couple:
+          s = [int(i) for i in line[0:5]]
+          steps[0].append([note_type] + s)
+          s = [int(i) for i in line[5:10]]
+          steps[1].append([note_type] + s)
+          pass
+        else:
+          s = [int(i) for i in line[0:5]]
+          steps.append([note_type] + s)
+      else: break
+
+    ratings = { "EASY": 3, "NORMAL": 5, "HARD": 7, "CRAZY": 9 }
+    difficulty = difficulty.upper()
+
+    if not self.difficulty.has_key(mode):
+      self.difficulty[mode] = {}
+      self.steps[mode] = {}
+    self.difficulty[mode][difficulty] = ratings.get(difficulty, 5)
+    self.steps[mode][difficulty] = steps
+
+DIFFICULTIES = ["BEGINNER", "LIGHT", "EASY", "BASIC", "ANOTHER", "NORMAL",
+                "STANDARD", "TRICK", "MEDIUM", "HARD", "MANIAC", "HEAVY",
+                "HARDCORE", "CHALLENGE", "SMANIAC", "ONI", "CRAZY"]
 
 def order_sort(a, b):
   if a in DIFFICULTIES and b in DIFFICULTIES:
@@ -689,7 +771,11 @@ class SongItem(object):
   formats = ((".step", StepFile),
              (".dance", DanceFile),
              (".dwi", DWIFile),
-             (".sm", SMFile))
+             (".sm", SMFile),
+             ("song.ogg", KSFFile),
+             ("song.mp3", KSFFile),
+             ("song.wav", KSFFile))
+             
 
   defaults = { "valid": 1,
                "mix": "No Mix",
