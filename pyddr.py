@@ -310,6 +310,7 @@ class keykludge:
 class Judge:
   def __init__ (self, bpm, holds, feet, stepcount):
     self.steps = {}
+    self.actualtimes = {}
     self.tick = toRealTime(bpm, 1)
     self.marvelous = self.perfect = self.great = self.ok = self.crap = self.shit = self.miss = 0
     self.combo = self.bestcombo = self.broke = 0
@@ -344,6 +345,7 @@ class Judge:
     
   def handle_key(self, dir, curtime):
     times = self.steps.keys()
+    etime = 0.0
     time = round(curtime / (self.tick / 6))
     done = 0
     early = late = ontime = 0
@@ -356,6 +358,7 @@ class Judge:
           elif off < 1: self.late += 1
           else: self.ontime += 1
           done = 1
+          etime = self.actualtimes[time+i]
           self.steps[time+i] = self.steps[time+i].replace(dir, "")
 #          print "Before: %s" % self.steps[time+i]
 #          print "Removing %s: %s" % (dir, self.steps[time+i])
@@ -415,7 +418,7 @@ class Judge:
       self.recentsteps.insert(0, text)
       self.recentsteps.pop()
 
-    return text, dir, time
+    return text, dir, etime
 
   def trytime(self, dir, time):
     return time in self.times and dir in self.steps[time]
@@ -436,10 +439,11 @@ class Judge:
           self.recentsteps.insert(0, "MISS")
           self.recentsteps.pop()
   
-  def handle_arrow(self, key, time):
+  def handle_arrow(self, key, time, etime):
     tick_6 = self.tick / 6
     curtick = round((time + 2*self.tick) / tick_6)
     self.times = self.steps.keys()
+    self.actualtimes[curtick] = etime
     if curtick in self.times:
       self.steps[curtick] += key
     else:
@@ -2037,6 +2041,7 @@ class ArrowSprite(CloneSprite):
     self.life  = endtime-curtime
     self.bpm = bpm
     self.curalpha = -1
+    self.dir = spr.fn[-7:-6]
     self.r = 0
     self.playernum = playernum-1
     self.bimage = self.image
@@ -2046,7 +2051,7 @@ class ArrowSprite(CloneSprite):
     self.centerx = copy.copy(self.rect.centerx)+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
-    if curtime>self.timef: # +(0.5*(60000/float(curbpm)))
+    if curtime > self.timef + (0.001*(60000.0/curbpm)):
       self.kill()
       return
       
@@ -2107,10 +2112,10 @@ class ArrowSprite(CloneSprite):
     alp = 0
     self.curalpha = self.get_alpha()
     if self.rect.top < hiddenzone:
-      alp = 255-(hiddenzone-self.rect.top)*8
+      alp = 255-(hiddenzone-self.rect.top)*4
     if self.rect.top > hiddenzone:
       if self.rect.top < suddenzone:
-        alp = (suddenzone-self.rect.top)*8
+        alp = (suddenzone-self.rect.top)*4
     if alp < 0:      alp = 0
     if alp > 255:    alp = 255
     if alp != self.curalpha:
@@ -2122,11 +2127,13 @@ class HoldArrowSprite(CloneSprite):
     self.timeo = curtime
     self.timef1 = times[1]
     self.timef2 = times[2]
+    self.timef = times[2]
     self.life  = times[2]-curtime
     self.bpm = bpm
     self.lastbpmtime = lastbpmtime
     self.playernum = playernum-1
     self.curalpha = -1
+    self.dir = spr.fn[-7:-6]
     self.r = 0
     self.oimage = pygame.surface.Surface((64,32))
     self.oimage.blit(self.image,(0,-32))
@@ -2255,10 +2262,10 @@ class HoldArrowSprite(CloneSprite):
     alp = 255
     self.curalpha = self.get_alpha()
     if self.rect.top < hiddenzone:
-      alp = 255-(hiddenzone-self.rect.top)*8
+      alp = 255-(hiddenzone-self.rect.top)*4
     if self.rect.top > hiddenzone:
       if self.rect.top < suddenzone:
-        alp = (suddenzone-self.rect.top)*8
+        alp = (suddenzone-self.rect.top)*4
     if alp < 0:      alp = 0
     if alp > 255:    alp = 255
     if alp != self.curalpha:
@@ -4190,6 +4197,7 @@ def dance(song,players,difficulty):
           keys += 1
 
     fxdir = fxtext = fxdir2 = fxtext2 = ' '
+    fxtime = fxtime2 = 0.0
             
     if keys:
       for checkkey in range(keys):
@@ -4276,7 +4284,7 @@ def dance(song,players,difficulty):
         if ev.feet:
           for (dir,num) in zip(['l','d','u','r'],ev.feet):
             if num & 8:
-              dajudge.handle_arrow(dir, curtime)
+              dajudge.handle_arrow(dir, curtime, ev.when)
 
     if players == 2:
       if ee2 is not None:
@@ -4284,7 +4292,7 @@ def dance(song,players,difficulty):
           if ev.feet:
             for (dir,num) in zip(['l','d','u','r'],ev.feet):
               if num & 8:
-                dajudge2.handle_arrow(dir, curtime)
+                dajudge2.handle_arrow(dir, curtime, ev.when)
               
     # handle only new arrows
     for ev in nevents:
@@ -4367,11 +4375,15 @@ def dance(song,players,difficulty):
         song.lastbpmchangetime = song.lastbpmchangetime[1:]
         print "lastbpmchangetime is now",song.lastbpmchangetime
         bpmchanged = 0
-    
+        
     if fxtext != ' ':
       if (fxtext == 'MARVELOUS') or (fxtext == 'PERFECT') or (fxtext == 'GREAT'):
-        for checkspr in range(len(agroup.sprites())):
-          dummy = 1
+        for checkspr in agroup.sprites():
+          try:  #because holds and other sprites will cause this to break
+            if (checkspr.timef == fxtime) and (checkspr.dir == fxdir):
+              checkspr.kill()  #they hit this arrow, kill it
+          except:
+            nothing = None  #dummy
         if fxdir == 'l':
           toparrfx1_l.stepped(curtime,fxtext)
         if fxdir == 'd':
@@ -4382,8 +4394,12 @@ def dance(song,players,difficulty):
           toparrfx1_r.stepped(curtime,fxtext)
     if fxtext2 != ' ':
       if (fxtext2 == 'MARVELOUS') or (fxtext2 == 'PERFECT') or (fxtext2 == 'GREAT'):
-        for checkspr in range(len(agroup2.sprites())):
-          dummy = 1
+        for checkspr in agroup2.sprites():
+          try:  #because holds and other sprites will cause this to break
+            if (checkspr.timef == fxtime2) and (checkspr.dir == fxdir2):
+              checkspr.kill()  #they hit this arrow, kill it
+          except:
+            nothing = None  #dummy
         if fxdir2 == 'l':
           toparrfx2_l.stepped(curtime,fxtext2)
         if fxdir2 == 'd':
