@@ -83,6 +83,8 @@ elif osname == "macosx":
 mainconfig.load("pyddr.cfg")
 mainconfig.load(os.path.join(rc_path, "pyddr.cfg"))
 
+pygame.init()
+
 import input
 
 event = input.EventManager()

@@ -158,7 +158,7 @@ def do(screen, songselect, songdata):
         ["Lyrics", onoff_opt, ("showlyrics",)],
         ["Main Lyrics", rotate_opt, ("lyriccolor", colors.color.keys())],
         ["Other Lyrics", rotate_opt, ("transcolor", colors.color.keys())],
-        ["FPS Display", onoff_opt, ('fpsdisplay',)],
+        ["Timer Display", onoff_opt, ('fpsdisplay',)],
         ["Back", None, None]
         ),
        ("Sound Options",
