@@ -33,7 +33,11 @@ SORTS = ((lambda x, y: cmp(x.song.filename, y.song.filename)),
          (lambda x, y: cmp(x.song.info.get("group"),
                            y.song.info.get("group"))),
          (lambda x, y: cmp(x.song.info.get("bpm"), y.song.info.get("bpm"))),
-         (lambda x, y: cmp(x.song.info.get("mix"), y.song.info.get("mix"))))
+         (lambda x, y: (cmp(x.song.info.get("mix"), y.song.info.get("mix"))
+                        or cmp(x.song.info["song"], y.song.info["song"]))
+          )
+         )
+
 SORT_NAMES = ("filename", "title", "artist", "bpm", "mix")
 
 NUM_SORTS = len(SORTS)
