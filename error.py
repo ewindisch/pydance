@@ -1,6 +1,7 @@
 # Put up a pretty error message for a variety of programs.
 
 from constants import *
+from pad import pad
 
 # FIXME: We should word-wrap text so we don't have to pass in a list.
 
@@ -28,8 +29,8 @@ class ErrorMessage(object):
     screen.blit(text, textpos)
 
     pygame.display.flip()
-    ev = (0, E_PASS)
-    while ev[1] != E_START and ev[1] != E_QUIT:
+    ev = (0, pad.PASS)
+    while ev[1] != pad.START and ev[1] != pad.QUIT:
       pygame.time.wait(50)
-      ev = event.poll()
+      ev = pad.poll()
 

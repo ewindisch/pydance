@@ -1,5 +1,6 @@
 import pygame, colors
 from constants import *
+from pad import pad
 from fontfx import TextZoomer
 
 # Hooray! Less magic numbers
@@ -12,6 +13,8 @@ LEFT_OFFSET, TOP_OFFSET = 425, 100
 TRANSPARENT, SOLID = 128, 255
 DISPLAYED_ITEMS = 6
 
+CREATE, SELECT, UNSELECT = -1, -2, -3
+
 button_bg = pygame.image.load(os.path.join(image_path, "button.png"))
 
 class MenuItem(object):
@@ -20,8 +23,8 @@ class MenuItem(object):
     # Dict of callbacks by keycodes, also "initial", "select", "unselect"
 
     # This looks something like:
-    # MenuItem({ 'initial': do_setup, E_START: do_change,
-    #            E_START: do_change }, (configdata, mystrings))
+    # MenuItem({ 'initial': do_setup, START: do_change,
+    #            START: do_change }, (configdata, mystrings))
     # When the button is pressed, do_change(configdata, mystrings) will be
     # called.
     self.callbacks = callbacks
@@ -39,17 +42,17 @@ class MenuItem(object):
   # the RGB value of the text.
 
   def activate(self, ev): # Note - event ID, not an event tuple
-    if ev == E_SELECT:
+    if ev == SELECT:
       self.rgb = colors.WHITE
       self.alpha = SOLID
       self.render()
-    elif ev == E_UNSELECT:
+    elif ev == UNSELECT:
       self.rgb = LIGHT_GRAY
       self.alpha = TRANSPARENT
       self.render()
     elif self.callbacks == None:
-      if ev == E_START or ev == E_RIGHT or ev == E_LEFT:
-        return E_QUIT # This is a back button
+      if ev == pad.START or ev == pad.RIGHT or ev == pad.LEFT:
+        return pad.QUIT # This is a back button
       else: return ev # Shouldn't happen
     elif callable(self.callbacks.get(ev)):
       text, subtext = self.callbacks[ev](*self.args)
@@ -99,7 +102,7 @@ class Menu(object):
     for i in itemlist:
       if type(i) == type([]): # Menuitems are lists
         self.items.append(MenuItem(i[0], i[1], i[2]))
-        self.items[-1].activate(E_CREATE)
+        self.items[-1].activate(CREATE)
       elif type(i) == type((0,0)): # New submenus are tuples
         self.items.append(Menu(i[0], i[1:], screen))
 
@@ -113,13 +116,13 @@ class Menu(object):
     self.image.set_alpha(self.alpha)
 
   def activate(self, ev):
-    if ev == E_START or ev == E_RIGHT:
+    if ev == pad.START or ev == pad.RIGHT:
       self.display()
-    elif ev == E_SELECT:
+    elif ev == SELECT:
       self.rgb = colors.WHITE
       self.alpha = SOLID
       self.render()
-    elif ev == E_UNSELECT:
+    elif ev == UNSELECT:
       self.rgb = LIGHT_GRAY
       self.alpha = TRANSPARENT
       self.render()
@@ -137,44 +140,40 @@ class Menu(object):
     toprotater = TextZoomer(self.text, FONTS[60], (640, 64),
                             (178, 110, 0), colors.WHITE)
 
-    self.items[curitem].activate(E_SELECT)
+    self.items[curitem].activate(SELECT)
 
-    ev = E_PASS
-    while ev != E_QUIT:
+    ev = pad.PASS
+    while ev != pad.QUIT:
       r = []
-      ev = event.poll()[1]
-
-      if ev == E_FULLSCREEN:
-        mainconfig["fullscreen"] ^= 1
-        pygame.display.toggle_fullscreen()
+      ev = pad.poll()[1]
 
       # Scroll down through the menu
-      elif ev == E_DOWN:
+      if ev == pad.DOWN:
         Menu.move_sound.play()
-        ev = self.items[curitem].activate(E_UNSELECT)
+        ev = self.items[curitem].activate(UNSELECT)
         curitem += 1
         if curitem == len(self.items): # Loop at the bottom
           curitem = 0
           topitem = 0
         elif curitem >= topitem + DISPLAYED_ITEMS: # Advance the menu
           topitem += 1
-        ev = self.items[curitem].activate(E_SELECT)
+        ev = self.items[curitem].activate(SELECT)
 
       # Same as above, but up
-      elif ev == E_UP:
+      elif ev == pad.UP:
         Menu.move_sound.play()
-        ev = self.items[curitem].activate(E_UNSELECT)
+        ev = self.items[curitem].activate(UNSELECT)
         curitem -= 1
         if curitem < 0:
           curitem = len(self.items) - 1
           topitem = max(0, curitem - DISPLAYED_ITEMS + 1)
         elif curitem < topitem:
           topitem = curitem
-        ev = self.items[curitem].activate(E_SELECT)
+        ev = self.items[curitem].activate(SELECT)
 
       # Otherwise, if the event actually happened, pass it on to the button.
-      elif ev != E_PASS and ev != E_QUIT:
-        if ev == E_START: Menu.click_sound.play()
+      elif ev != pad.PASS and ev != pad.QUIT:
+        if ev == pad.START: Menu.click_sound.play()
         ev = self.items[curitem].activate(ev)
         changed = True
 
@@ -192,7 +191,6 @@ class Menu(object):
       pygame.display.update(r)
       clock.tick(30)
 
-    if ev == E_QUIT:
+    if ev == pad.QUIT:
       Menu.back_sound.play()
-      self.items[curitem].activate(E_UNSELECT)
-
+      self.items[curitem].activate(UNSELECT)

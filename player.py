@@ -1,4 +1,6 @@
 from constants import *
+from pad import pad
+
 from util import toRealTime
 from gfxtheme import GFXTheme
 from announcer import Announcer
@@ -389,16 +391,16 @@ class Player(object):
 
   def check_holds(self, pid, curtime, arrows, steps, judge, toparrfx, holding):
     # FIXME THis needs to go away
-    keymap_kludge = { "u": E_UP, "k": E_UPLEFT, "z": E_UPRIGHT,
-                      "d": E_DOWN, "l": E_LEFT, "r": E_RIGHT,
-                      "g": E_DOWNRIGHT, "w": E_DOWNLEFT, "c": E_CENTER }
+    keymap_kludge = { "u": pad.UP, "k": pad.UPLEFT, "z": pad.UPRIGHT,
+                      "d": pad.DOWN, "l": pad.LEFT, "r": pad.RIGHT,
+                      "g": pad.DOWNRIGHT, "w": pad.DOWNLEFT, "c": pad.CENTER }
 
     for dir in self.game.dirs:
       toparrfx[dir].holding(0)
       current_hold = self.should_hold(steps, dir, curtime)
       dir_idx = self.game.dirs.index(dir)
       if current_hold is not None:
-        if event.states[(pid, keymap_kludge[dir])]:
+        if pad.states[(pid, keymap_kludge[dir])]:
           if judge.holdsub.get(holding[dir_idx]) != -1:
             toparrfx[dir].holding(1)
           holding[dir_idx] = current_hold

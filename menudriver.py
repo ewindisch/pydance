@@ -3,6 +3,7 @@
 import pygame, menus, os, sys, copy, colors, games
 
 from constants import *
+from pad import pad
 from announcer import Announcer
 from gfxtheme import ThemeFile
 from gameselect import GameSelect
@@ -108,25 +109,25 @@ def wrap_ctr(Obj, args):
 
 def do(screen, songdata):
 
-  onoff_opt = { E_START: switch_onoff, E_CREATE: get_onoff,
-                 E_LEFT: off_onoff, E_RIGHT: on_onoff }
-  offon_opt = { E_START: switch_offon, E_CREATE: get_offon,
-                 E_LEFT: off_offon, E_RIGHT: on_offon }
-  rotate_opt = { E_START: switch_rotate,
-                 E_LEFT: switch_rotate_back,
-                 E_RIGHT: switch_rotate,
-                 E_CREATE: get_rotate }
-  rotate_index_opt = { E_START: switch_rotate_index,
-                       E_LEFT: switch_rotate_index_back,
-                       E_RIGHT: switch_rotate_index,
-                       E_CREATE: get_rotate_index }
-  tuple_opt = { E_START: switch_tuple,
-                E_LEFT: switch_tuple_back,
-                E_RIGHT: switch_tuple,
-                E_CREATE: get_tuple }
+  onoff_opt = { pad.START: switch_onoff, menus.CREATE: get_onoff,
+                 pad.LEFT: off_onoff, pad.RIGHT: on_onoff }
+  offon_opt = { pad.START: switch_offon, menus.CREATE: get_offon,
+                 pad.LEFT: off_offon, pad.RIGHT: on_offon }
+  rotate_opt = { pad.START: switch_rotate,
+                 pad.LEFT: switch_rotate_back,
+                 pad.RIGHT: switch_rotate,
+                 menus.CREATE: get_rotate }
+  rotate_index_opt = { pad.START: switch_rotate_index,
+                       pad.LEFT: switch_rotate_index_back,
+                       pad.RIGHT: switch_rotate_index,
+                       menus.CREATE: get_rotate_index }
+  tuple_opt = { pad.START: switch_tuple,
+                pad.LEFT: switch_tuple_back,
+                pad.RIGHT: switch_tuple,
+                menus.CREATE: get_tuple }
 
 
-  m = (["Play Game", {E_START: wrap_ctr}, (GameSelect, songdata)],
+  m = (["Play Game", {pad.START: wrap_ctr}, (GameSelect, songdata)],
        ("Game Options",
         ["Autofail", onoff_opt, ("autofail",)],
         ["Assist Mode", onoff_opt, ("assist",)],

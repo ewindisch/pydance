@@ -2,6 +2,8 @@ import pygame, announcer, colors, fontfx
 
 from constants import *
 
+from pad import pad
+
 # FIXME - This whole thing needs reworking/documentation
 
 class GradingScreen(object):
@@ -178,13 +180,13 @@ class GradingScreen(object):
       elif i > 224:     idir = -4
 
       i += idir
-      ev = event.poll()
-      if (ev[1] == E_QUIT) or (ev[1] == E_START):
+      ev = pad.poll()
+      if (ev[1] == pad.QUIT) or (ev[1] == pad.START):
         break
-      elif ev[1] == E_FULLSCREEN:
+      elif ev[1] == pad.FULLSCREEN:
         pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
-      elif ev[1] == E_SCREENSHOT:
+      elif ev[1] == pad.SCREENSHOT:
         print "writing next frame to", os.path.join(rc_path, "screenshot.bmp")
         screenshot = 1
           

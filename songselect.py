@@ -5,6 +5,7 @@ import os, string, pygame, random, copy, dance
 from constants import *
 
 import announcer, audio, colors, optionscreen, error, games
+from pad import pad
 
 # FIXME: this needs to be moved elsewhere if we want theming
 ITEM_BG = pygame.image.load(os.path.join(image_path, "ss-item-bg.png"))
@@ -279,7 +280,7 @@ class SongSelect(object):
     players = games.GAMES[gametype].players
 
     self.bg = pygame.image.load(BACKGROUND).convert()
-    ev = (0, E_PASS)
+    ev = (0, pad.PASS)
     self.numsongs = len(self.songs)
 
     self.gametype = gametype
@@ -327,38 +328,39 @@ class SongSelect(object):
       self.songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
     self.render(True)
 
-    while ev[1] != E_QUIT:
+    while ev[1] != pad.QUIT:
       loop_start_time = pygame.time.get_ticks()
 
       self.oldindex = self.index
       changed = False
 
-      ev = event.poll()
+      ev = pad.poll()
 
       # Skip events from a player that isn't in this game.
       if ev[0] >= players: continue
 
-      if ev[1] in [E_LEFT, E_RIGHT, E_UP, E_DOWN, E_PGUP, E_PGDN, E_MARK]:
+      if ev[1] in [pad.LEFT, pad.RIGHT, pad.UP, pad.DOWN, pad.UPLEFT,
+                   pad.UPRIGHT, pad.DOWNLEFT, pad.DOWNRIGHT]:
         MOVE_SOUND.play()
 
       # Scroll up the menu list
-      if ev[1] == E_LEFT:
+      if ev[1] == pad.LEFT:
         self.index = (self.index - 1) % self.numsongs
 
-      elif ev[1] == E_PGUP:
+      elif ev[1] == pad.PGUP:
         self.scroll_out(self.index)
         self.index = (self.index - 7) % self.numsongs
 
       # Down the menu list
-      elif ev[1] == E_RIGHT:
+      elif ev[1] == pad.RIGHT:
         self.index = (self.index + 1) % self.numsongs
   
-      elif ev[1] == E_PGDN:
+      elif ev[1] == pad.PGDN:
         self.scroll_out(self.index)
         self.index = (self.index + 7) % self.numsongs
 
       # Easier difficulty
-      elif ev[1] == E_UP:
+      elif ev[1] == pad.UP:
         if not self.songs[self.index].isfolder:
           self.player_diffs[ev[0]] -= 1
           self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
@@ -366,7 +368,7 @@ class SongSelect(object):
           changed = True
 
       # Harder difficulty
-      elif ev[1] == E_DOWN:
+      elif ev[1] == pad.DOWN:
         if not self.songs[self.index].isfolder:
           self.player_diffs[ev[0]] += 1
           self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
@@ -374,7 +376,7 @@ class SongSelect(object):
           changed = True
 
       # Open up a new folder
-      elif ev[1] == E_START and self.songs[self.index].isfolder:
+      elif ev[1] == pad.START and self.songs[self.index].isfolder:
         OPEN_SOUND.play()
         self.scroll_out(self.index)
         self.set_up_songlist(self.songs[self.index].name)
@@ -382,7 +384,7 @@ class SongSelect(object):
         changed = True
 
       # Start the dancing!
-      elif ev[1] == E_START:
+      elif ev[1] == pad.START:
         # If we added the current song with E_MARK earlier, don't readd it
         try: self.title_list[-1].index(self.current_song.info["title"])
         except: self.add_current_song()
@@ -417,13 +419,13 @@ class SongSelect(object):
         self.title_list = []
 
       # Add the current song to the playlist
-      elif ev[1] == E_MARK:
+      elif ev[1] == pad.MARK:
         if not self.songs[self.index].isfolder:
           self.add_current_song()
           changed = True
 
       # Remove the most recently added song
-      elif ev[1] == E_UNMARK:
+      elif ev[1] == pad.UNMARK:
 	if self.title_list != []:
           self.title_list.pop()
           self.diff_list.pop()
@@ -431,13 +433,13 @@ class SongSelect(object):
           changed = True
 
       # Remove all songs on the playlist
-      elif ev[1] == E_CLEAR:
+      elif ev[1] == pad.CLEAR:
         self.title_list = []
         self.diff_list = []
         self.song_list = []
         changed = True
 
-      elif ev[1] == E_SELECT:
+      elif ev[1] == pad.SELECT:
         if optionscreen.game_opt_driver(screen, self.game_config):
           self.scroll_out(self.index)
           OPEN_SOUND.play()
@@ -452,7 +454,7 @@ class SongSelect(object):
                                         "good random one can't be chosen."])
 	changed = True
 
-      elif ev[1] == E_SORT:
+      elif ev[1] == pad.SORT:
         s = self.songs[self.index]
         self.scroll_out(self.index)
         mainconfig["sortmode"] = (mainconfig["sortmode"] + 1) % NUM_SORTS
@@ -471,7 +473,7 @@ class SongSelect(object):
           self.oldindex = self.index # We're cheating!
         changed = True
 
-      elif ev[1] == E_FULLSCREEN:
+      elif ev[1] == pad.FULLSCREEN:
         pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
         changed = True
@@ -480,7 +482,7 @@ class SongSelect(object):
       if not self.songs[self.index].isfolder:
         self.current_song = self.songs[self.index].song
 
-      if locked and ev[1] in [E_UP, E_DOWN]:
+      if locked and ev[1] in [pad.UP, pad.DOWN]:
         for i in range(len(self.player_diffs)):
           self.player_diffs[i] = self.player_diffs[ev[0]]
           self.player_diff_names[i] = self.player_diff_names[ev[0]]

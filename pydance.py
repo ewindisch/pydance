@@ -4,6 +4,8 @@
 import pygame
 from constants import *
 
+from pad import pad
+
 import fontfx, menudriver, fileparsers, audio, colors
 
 import os, sys, error, util, getopt
@@ -69,8 +71,8 @@ def main():
     pygame.display.update(screen.blit(img, r))
     parsedsongs += 100
 
-  ev = event.poll()
-  while ev[1] != E_PASS: ev = event.poll()
+  ev = pad.poll()
+  while ev[1] != pad.PASS: ev = pad.poll()
 
   if len(songs) < 1:
     error.ErrorMessage(screen,
@@ -87,5 +89,6 @@ def main():
   audio.stop()
   pygame.display.quit()
   mainconfig.write(os.path.join(rc_path, "pydance.cfg"))
+  pad.write(os.path.join(rc_path, "input.cfg"))
 
 if __name__ == '__main__': main()

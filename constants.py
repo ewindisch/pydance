@@ -124,10 +124,6 @@ mainconfig["sortmode"] %= 4
 
 pygame.init()
 
-import input
-
-event = input.EventManager()
-
 # Fonts
 FONTS = {}
 for s in (192, 60, 48, 40, 36, 32, 28, 26, 24, 20, 16, 14):

@@ -1,6 +1,8 @@
 import pygame
 from constants import *
 
+from pad import pad
+
 from util import toRealTime
 from player import Player
 from announcer import Announcer
@@ -323,35 +325,35 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
     key = []
 
-    ev = event.poll()
+    ev = pad.poll()
 
     for i in range(len(players)):
-      if (event.states[(i, E_START)] and event.states[(i, E_SELECT)]):
-        ev = (0, E_QUIT)
+      if (pad.states[(i, pad.START)] and pad.states[(i, pad.SELECT)]):
+        ev = (0, pad.QUIT)
         break
       else:
         pass
 
-    while ev[1] != E_PASS:
-      if ev[1] == E_QUIT: break
-      elif ev[1] == E_FULLSCREEN:
+    while ev[1] != pad.PASS:
+      if ev[1] == pad.QUIT: break
+      elif ev[1] == pad.FULLSCREEN:
         pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
-      elif ev[1] == E_SCREENSHOT:
+      elif ev[1] == pad.SCREENSHOT:
         screenshot = 1
-      elif ev[1] == E_LEFT: key.append((ev[0], 'l'))
-      elif ev[1] == E_MARK: key.append((ev[0], 'w'))
-      elif ev[1] == E_UNMARK: key.append((ev[0], 'k'))
-      elif ev[1] == E_RIGHT: key.append((ev[0], 'r'))
-      elif ev[1] == E_PGUP: key.append((ev[0], 'z'))
-      elif ev[1] == E_PGDN: key.append((ev[0], 'g'))
-      elif ev[1] == E_UP: key.append((ev[0], 'u'))
-      elif ev[1] == E_DOWN: key.append((ev[0], 'd'))
-      elif ev[1] == E_CENTER: key.append((ev[0], 'c'))
+      elif ev[1] == pad.LEFT: key.append((ev[0], 'l'))
+      elif ev[1] == pad.MARK: key.append((ev[0], 'w'))
+      elif ev[1] == pad.UNMARK: key.append((ev[0], 'k'))
+      elif ev[1] == pad.RIGHT: key.append((ev[0], 'r'))
+      elif ev[1] == pad.PGUP: key.append((ev[0], 'z'))
+      elif ev[1] == pad.PGDN: key.append((ev[0], 'g'))
+      elif ev[1] == pad.UP: key.append((ev[0], 'u'))
+      elif ev[1] == pad.DOWN: key.append((ev[0], 'd'))
+      elif ev[1] == pad.CENTER: key.append((ev[0], 'c'))
 
-      ev = event.poll()
+      ev = pad.poll()
 
-    if ev[1] == E_QUIT: return False
+    if ev[1] == pad.QUIT: return False
   
     for ev in key:
       if game.double: pid = ev[0] / 2

@@ -2,12 +2,14 @@
 
 import copy
 from constants import *
+from pad import pad
+
 import pygame
 import colors
 import scores, lifebars, combos, grades, judge
 
 def player_opt_driver(screen, configs):
-  ev = (0, E_QUIT)
+  ev = (0, pad.QUIT)
   start = pygame.time.get_ticks()
   clrs = [colors.color["cyan"], colors.color["yellow"]]
   menu = [
@@ -31,16 +33,16 @@ def player_opt_driver(screen, configs):
     ("Holds", "holds", [(0, "Off"), (1, "On")]),
     ]
 
-  while ((event.states[(0, E_START)] or event.states[(1, E_START)]) and
-         pygame.time.get_ticks() - start < 1500): ev = event.poll()
+  while ((pad.states[(0, pad.START)] or pad.states[(1, pad.START)]) and
+         pygame.time.get_ticks() - start < 1500): ev = pad.poll()
 
-  if event.states[(0, E_START)] or event.states[(1, E_START)]:
+  if pad.states[(0, pad.START)] or pad.states[(1, pad.START)]:
     op = OptionScreen(configs, "Player Options", menu, clrs)
     return op.display(screen)
   else: return True
 
 def game_opt_driver(screen, config):
-  ev = (0, E_QUIT)
+  ev = (0, pad.QUIT)
   start = pygame.time.get_ticks()
   menu = [
     ("Scoring", "scoring", scores.score_opt),
@@ -59,10 +61,10 @@ def game_opt_driver(screen, config):
     ]
   clrs = [colors.color["green"]]
 
-  while ((event.states[(0, E_SELECT)] or event.states[(1, E_SELECT)]) and
-         pygame.time.get_ticks() - start < 1500): ev = event.poll()
+  while ((pad.states[(0, pad.SELECT)] or pad.states[(1, pad.SELECT)]) and
+         pygame.time.get_ticks() - start < 1500): ev = pad.poll()
 
-  if event.states[(0, E_SELECT)] or event.states[(1, E_SELECT)]:
+  if pad.states[(0, pad.SELECT)] or pad.states[(1, pad.SELECT)]:
     op = OptionScreen([config], "Game Options", menu, clrs)
     op.display(screen)
     return False
@@ -108,21 +110,21 @@ class OptionScreen(object):
     screen.blit(baseimage, [0, 0])
     pygame.display.update()
     
-    ev = E_PASS
+    ev = pad.PASS
     
-    while not (ev == E_START or ev == E_QUIT or ev == E_MARK):
+    while not (ev == pad.START or ev == pad.QUIT or ev == pad.MARK):
       self.render(screen)
       
-      pid, ev = event.wait()
+      pid, ev = pad.wait()
       pid = min(pid, len(self.current) - 1)
 
-      if ev == E_DOWN:
+      if ev == pad.DOWN:
         self.current[pid] = (self.current[pid] + 1) % len(self.menu)
         
-      elif ev == E_UP:
+      elif ev == pad.UP:
         self.current[pid] = (self.current[pid] - 1) % len(self.menu)
         
-      elif ev == E_LEFT:
+      elif ev == pad.LEFT:
         optname = self.menu[self.current[pid]][1]
         cur_val = self.players[pid][optname]
         values = copy.copy(self.menu[self.current[pid]][2])
@@ -135,7 +137,7 @@ class OptionScreen(object):
             break
           elif self.players[pid][optname] == val[0]: next = True
 
-      elif ev == E_RIGHT:
+      elif ev == pad.RIGHT:
         optname = self.menu[self.current[pid]][1]
         cur_val = self.players[pid][optname]
         values = self.menu[self.current[pid]][2]
@@ -147,11 +149,11 @@ class OptionScreen(object):
             break
           elif self.players[pid][optname] == val[0]: next = True
 
-      elif ev == E_FULLSCREEN:
+      elif ev == pad.FULLSCREEN:
         pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
 
-    return (ev == E_START)
+    return (ev == pad.START)
 
   def render(self, screen):
     rect = [[45, 5], [570, 470]]
