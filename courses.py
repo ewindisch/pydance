@@ -1,5 +1,3 @@
-# Like DWI and SM files, CRS files are a variant of the MSD format.
-
 # Course loading is structured differently from step file loading. In
 # step files, SongItem is instantiated,creates an instance of a
 # specific file class, loads it, and pulls the information it needs
@@ -16,7 +14,8 @@ import error
 import records
 import os
 
-class Course(object):
+# The core course class.
+class AbstractCourse(object):
   def __init__(self, all_songs, recordkeys):
     self.songs = []
     self.name = "A Course"
@@ -131,7 +130,8 @@ def CourseFile(*args):
   if args[0].lower().endswith(".crs"): return CRSFile(*args)
   else: raise RuntimeError(filename + " is an unsupported format.")
 
-class CRSFile(Course):
+# Like DWI and SM files, CRS files are a variant of the MSD format.
+class CRSFile(AbstractCourse):
   # Map modifier names to internal pydance names.
   modifier_map = { "0.5x" : ("speed", 0.5),
                    "0.75x" : ("speed", 0.75),
@@ -159,7 +159,7 @@ class CRSFile(Course):
                    }
 
   def __init__(self, filename, all_songs, recordkeys):
-    Course.__init__(self, all_songs, recordkeys)
+    AbstractCourse.__init__(self, all_songs, recordkeys)
     self.filename = filename
     self.banner = filename[:-3] + "png"
     lines = []
@@ -204,13 +204,14 @@ class CRSFile(Course):
         self.songs.append((name, diff, mods))
 
 # A course we can easily initialize manually.
-class CodedCourse(Course):
+class CodedCourse(AbstractCourse):
   def __init__(self, all_songs, recordkeys, title, mix, songs):
-    Course.__init__(self, all_songs, recordkeys)
+    AbstractCourse.__init__(self, all_songs, recordkeys)
     self.name = title
     self.mixname = mix
     self.songs = songs
 
+# And then, initialize some of those courses manually.
 def make_players(all_songs, recordkeys):
   courses = []
   for start, end in [(1, 5), (5, 9), (1, 9)]:
@@ -220,6 +221,7 @@ def make_players(all_songs, recordkeys):
                              ("(Hard)", ["MANIAC", "HEAVY", "HARD"]),
                              ("(Expert)", ["HARDCORE", "CRAZY", "SMANIAC",
                                            "EXPERT"])]:
+      # Player's best, worst, likes, and dislikes
       for name, type in (["Best", "BEST"],
                          ["Worst", "WORST"],
                          ["Likes", "LIKES"],
@@ -229,6 +231,7 @@ def make_players(all_songs, recordkeys):
         courses.append(CodedCourse(all_songs, recordkeys, realname,
                                    "Player's Picks", songs))
 
+  # Random courses.
   for i in [4, 8, 12]:
     for diff_name, diffs in [("(Easy)", ["BASIC", "LIGHT", "EASY"]),
                              ("(Normal)", ["ANOTHER", "STANDARD", "NORMAL",
@@ -241,11 +244,13 @@ def make_players(all_songs, recordkeys):
       courses.append(CodedCourse(all_songs, recordkeys, randname,
                                  "random.choose(songs)", randsongs))
 
+    # ... with random difficulties.
     randname = "All Random %d" % i
     randsongs = [("*", "0..10", {})] * i
     courses.append(CodedCourse(all_songs, recordkeys, randname,
                                "random.choose(songs)", randsongs))
 
+  # I like this course.
   d1 = ["MANIAC", "HEAVY", "HARD"]
   d2 = ["HARDCORE", "CRAZY", "SMANIAC", "EXPERT"]
   songs1 = []

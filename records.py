@@ -13,6 +13,7 @@ bad_records = {}
 
 # Before starting, move any records we don't know about into a different hash,
 # so we don't try to load them for player's {best,worst}.
+# Do store them however, so when the songs appear again they'll be valid.
 def verify(recordkeys):
   for k in records.keys():
     if k[0] not in recordkeys:
@@ -23,6 +24,9 @@ def verify(recordkeys):
 # records maps the title, mix, difficulty, and game onto a tuple
 # (rank, name) where rank is a floating point number from 0 to 1; and
 # name is the name of the player who made the score.
+
+# recordkey is a string of the mix, title, and subtitle, concatenated,
+# lowercased, with non-alphanumerics removed.
 
 # A score is considered "beaten" (and therefore deserving of a new name
 # value) when the new rank is greater than the old rank.
@@ -49,11 +53,14 @@ def get(recordkey, diff, game):
   return records.get((recordkey, diff, game), (-1, ""))
 
 def write():
+  # FIXME: When we declare a dependency on Python 2.3, switch to the
+  # new binary pickle format.
   r = {}
   r.update(bad_records)
   r.update(records)
   pickle.dump(r, file(record_fn, "w"))
 
+# Highest scores
 def best(index, diffs, game):
   game = games.VERSUS2SINGLE.get(game, game)
   if not isinstance(diffs, list): diffs = [diffs]
@@ -66,6 +73,7 @@ def best(index, diffs, game):
   index %= len(r)
   return r[index][1]
 
+# Lowest scores
 def worst(index, diffs, game):
   game = games.VERSUS2SINGLE.get(game, game)
   index -= 1
@@ -77,6 +85,7 @@ def worst(index, diffs, game):
   index %= len(r)
   return r[index][1]
 
+# Most-played songs
 def like(index, diffs, game):
   game = games.VERSUS2SINGLE.get(game, game)
   if not isinstance(diffs, list): diffs = [diffs]
@@ -89,6 +98,7 @@ def like(index, diffs, game):
   index %= len(r)
   return r[index][1]
 
+# Least-played songs
 def dislike(index, diffs, game):
   game = games.VERSUS2SINGLE.get(game, game)
   index -= 1

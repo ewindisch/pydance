@@ -73,8 +73,8 @@ class GrooveGaugeSprite(pygame.sprite.Sprite):
       p = (float(i) / float(width))
       plife = records[int(p * len(records))]
       h = size[1] - int(size[1] * plife)
-      if plife > 0.5: c = colors.average(c1, c2, (plife - 0.5) / 0.5)
-      else: c = colors.average(c2, c3, plife / 0.5)
+      if plife > 0.5: c = colors.average(c1, c2, abs((plife - 0.5) / 0.5))
+      else: c = colors.average(c2, c3, abs(plife / 0.5))
       pygame.draw.line(self._image, c, [i, size[1] - 1], [i, h])
       if plife > 0.999999: self._image.set_at([i, 0], [255, 255, 255])
 

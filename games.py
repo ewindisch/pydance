@@ -53,6 +53,13 @@ class GameType(object):
     else:
       self.left_offset = (640 / self.players - self.width * len(self.dirs)) / 2
 
+    self.battle_lefts = {}
+
+    # Precalcuate soem offsets for battle mode.
+    for d in self.dirs:
+      self.battle_lefts[d] = int(self.width *
+                                 (len(self.dirs) / 2.0 - self.dirs.index(d)))
+
     # The center of the playfield, for non-arrow sprites (score, lifebar, etc)
     self.sprite_center = 320 / self.players
 

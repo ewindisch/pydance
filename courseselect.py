@@ -18,29 +18,6 @@ from pygame.mixer import music
 
 NO_BANNER = os.path.join(image_path, "no-banner.png")
 
-DIFF_COLORS = { "BEGINNER": colors.color["white"],
-                "LIGHT": colors.color["orange"],
-                "EASY": colors.color["orange"],
-                "BASIC": colors.color["orange"],
-                "STANDARD": colors.color["red"],
-                "STANDER": colors.color["red"], # Shit you not, 3 people.
-                "TRICK": colors.color["red"],
-                "MEDIUM": colors.color["red"],
-                "DOUBLE": colors.color["red"],
-                "ANOTHER": colors.color["red"],
-                "PARA": colors.color["blue"],
-                "NORMAL": colors.color["red"],
-                "MANIAC": colors.color["green"],
-                "HARD": colors.color["green"],
-                "HEAVY": colors.color["green"],
-                "HARDCORE": colors.color["purple"],
-                "SMANIAC": colors.color["purple"],
-                "S-MANIAC": colors.color["purple"], # Very common typo
-                "CHALLENGE": colors.color["purple"],
-                "CRAZY": colors.color["purple"],
-                "EXPERT": colors.color["purple"]
-                }
-
 SORTS = {
   "title": (lambda x, y: (cmp(x.name.lower(),
                               y.name.lower()))),
@@ -63,10 +40,12 @@ CS_HELP = [
   "F11: Toggle fullscreen - S: Change the sort mode",
   ]
 
+# FIXME: This is redundant with the song selector.
 def folder_name(name, type):
   if type == "mix": return name
   else: return "%s: %s" % (type.capitalize(), name)
 
+# FIXME: This is redundant with the song selector,
 def load_banner(filename):
   banner = pygame.image.load(filename)
   size = banner.get_size()
@@ -138,7 +117,8 @@ class CourseDisplay(object):
       elif name[0] == "DISLIKES":
         song = recordkeys.get(records.dislike(name[1], diff, game))
         if song:
-          subtitle = (song.info["subtitle"] or "") + (" (Dislikes #%d)" % name[1])
+          subtitle = ((song.info["subtitle"] or "") +
+                      (" (Dislikes #%d)" % name[1]))
           name = song.info["title"]
         else:
           name = "Player's Dislikes Unavailable"
@@ -290,7 +270,8 @@ class CourseSelector(InterfaceWindow):
     self._list.set_index(self._index)
     self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
                                                          len(self._courses)))
-    while not (ev == ui.CANCEL and (not self._folders or self._course.isfolder)):
+    while not (ev == ui.CANCEL and
+               (not self._folders or self._course.isfolder)):
       if pid >= len(self._configs): pass # Inactive player
       
       elif ev == ui.UP: self._index -= 1
@@ -356,8 +337,9 @@ class CourseSelector(InterfaceWindow):
         self._coursetitle.set_text(self._course.name)
         self._banner.set_image(self._course.banner)
         self._list_gfx.set_image(self._course.image)
-        self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
-                                                             len(self._courses)))
+        self._title.set_text(self._base_text +
+                             " - %d/%d" % (self._index + 1,
+                                           len(self._courses)))
       self.update()
       pid, ev = ui.ui.poll()
 

@@ -20,6 +20,10 @@ class AbstractCombo(Listener, pygame.sprite.Sprite):
     for x in range(11, 0, -1):
       fonts.append(pygame.font.Font(None, 28+int(x*1.82)))
 
+    # Store each digit individually, to avoid long text rendering
+    # times in the middle of the game. FIXME: This breaks above 9999
+    # combo currently; the PCR has code for the same trick that scales
+    # infinitely.
     self._words = []
     for f in fonts:
       render = []

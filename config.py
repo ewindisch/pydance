@@ -38,7 +38,7 @@ class Config(object):
     else: return self.master.get(key, value)
 
   # Update the config data with a 'key value' filename.
-  # If shouldExist is true, raise exceptions if the file doesn't exist.
+  # If should_exist is true, raise exceptions if the file doesn't exist.
   # Otherwise, we silently ignore it.
   def load(self, filename, master = False, should_exist = False):
     d = self.user

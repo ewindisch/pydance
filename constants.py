@@ -2,15 +2,16 @@
 # This file should be kept as small as possible, probably. (But I seem
 # to be failing at doing that.)
 
-VERSION = "0.8.5"
-
 import config
 import pygame
 import games
 import sys
 import os
+import colors
 
 from pygame.locals import *
+
+VERSION = "0.8.5"
 
 # Detect the name of the OS - Mac OS X is not really UNIX.
 osname = None
@@ -131,3 +132,28 @@ pygame.init()
 FONTS = {}
 for s in (192, 60, 48, 40, 36, 32, 28, 26, 24, 20, 18, 16, 14):
   FONTS[s] = pygame.font.Font(None, s)
+
+# The different colors pydance uses for difficulties in the UI.
+DIFF_COLORS = { "BEGINNER": colors.color["white"],
+                "LIGHT": colors.color["orange"],
+                "EASY": colors.color["orange"],
+                "BASIC": colors.color["orange"],
+                "STANDARD": colors.color["red"],
+                "STANDER": colors.color["red"], # Shit you not, 3 people.
+                "TRICK": colors.color["red"],
+                "MEDIUM": colors.color["red"],
+                "DOUBLE": colors.color["red"],
+                "ANOTHER": colors.color["red"],
+                "PARA": colors.color["blue"],
+                "NORMAL": colors.color["red"],
+                "MANIAC": colors.color["green"],
+                "HARD": colors.color["green"],
+                "HEAVY": colors.color["green"],
+                "HARDCORE": colors.color["purple"],
+                "SMANIAC": colors.color["purple"],
+                "S-MANIAC": colors.color["purple"], # Very common typo
+                "CHALLENGE": colors.color["purple"],
+                "CRAZY": colors.color["purple"],
+                "EXPERT": colors.color["purple"]
+                }
+

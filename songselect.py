@@ -17,29 +17,6 @@ from pygame.mixer import music
 
 NO_BANNER = os.path.join(image_path, "no-banner.png")
 
-DIFF_COLORS = { "BEGINNER": colors.color["white"],
-                "LIGHT": colors.color["orange"],
-                "EASY": colors.color["orange"],
-                "BASIC": colors.color["orange"],
-                "STANDARD": colors.color["red"],
-                "STANDER": colors.color["red"], # Shit you not, 3 people.
-                "TRICK": colors.color["red"],
-                "MEDIUM": colors.color["red"],
-                "DOUBLE": colors.color["red"],
-                "ANOTHER": colors.color["red"],
-                "PARA": colors.color["blue"],
-                "NORMAL": colors.color["red"],
-                "MANIAC": colors.color["green"],
-                "HARD": colors.color["green"],
-                "HEAVY": colors.color["green"],
-                "HARDCORE": colors.color["purple"],
-                "SMANIAC": colors.color["purple"],
-                "S-MANIAC": colors.color["purple"], # Very common typo
-                "CHALLENGE": colors.color["purple"],
-                "CRAZY": colors.color["purple"],
-                "EXPERT": colors.color["purple"]
-                }
-
 SORTS = {
   "subtitle": (lambda x, y: cmp(str(x.info["subtitle"]).lower(),
                                 str(y.info["subtitle"]).lower())),

@@ -380,7 +380,7 @@ class Player(object):
           if spr.endtime == time and spr.dir == dir:
             if not spr.hold: spr.kill()
 
-    arrows.update(curtime, self.bpm, curbeat, steps.lastbpmchangetime, judge)
+    arrows.update(curtime, self.bpm, curbeat, judge)
     self.toparr_group.update(curtime, curbeat)
 
   def should_hold(self, steps, direction, curtime):

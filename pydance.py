@@ -3,10 +3,35 @@
 
 import os
 import sys
+from getopt import getopt
+
+VERSION = "0.8.5"
+
+# fuck you, Python.
+def print_help():
+  print
+  print "Usage: %s [options]" % sys.argv[0]
+  print " -h, --help         display this help text and exit"
+  print " -v, --version      display the version and exit"
+  print " -f, --filename     load and play a step file"
+  print " -m, --mode         the mode to play the file in (default SINGLE)"
+  print " -d, --difficulty   the difficult to play the file (default BASIC)"
+  raise SystemExit
+
+def print_version():
+  print "pydance %s by Joe Wreschnig, Brendan Becker, and others" % VERSION
+  print "pyddr-discuss@icculus.org - http://icculus.org/pyddr"
+  raise SystemExit
+
+if len(sys.argv) < 2: pass 
+elif sys.argv[1] in ["--help", "-h"]: print_help()
+elif sys.argv[1] in ["--version", "-v"]: print_version()
+
+# Don't import anything that initializes the joysticks or config until
+# after we're (reasonable) sure no one wants --help or --version.
 import util
 import games
 import dance
-from getopt import getopt
 import pygame
 import courses
 import colors
@@ -17,32 +42,24 @@ from fileparsers import SongItem
 from pygame.mixer import music
 from fontfx import TextProgress
 from error import ErrorMessage
-from pad import pad
 
+from pad import pad
 from constants import *
 
-def set_display_mode(mainconfig):
+# Set our required display paramters. Currently, this is nothing
+# strange on any platforms, but in the past and likely in the future
+# some platforms need other flags.
+def set_display_mode():
   try:
     flags = 0
     if mainconfig["fullscreen"]: flags |= FULLSCREEN
     screen = pygame.display.set_mode([640, 480], flags, 16)
   except:
-    print "E: Can't get a 16 bit display!" 
-    sys.exit(3)
+    raise SystemExit("E: Can't get a 16 bit display! pydance doesn't work in 8 bit mode.")
   return screen
 
-def print_help():
-  print
-  print "Usage: %s [options]" % sys.argv[0]
-  print " -h, --help         display this help text and exit"
-  print " -v, --version      display the version and exit"
-  print " -f, --filename     load and play a step file"
-  print " -m, --mode         the mode to play the file in (default SINGLE)"
-  print " -d, --difficulty   the difficult to play the file (default BASIC)"
-  sys.exit()
-
-def print_version(): sys.exit()
-
+# Load a single song (given the filename) and then play it on the
+# given difficulty.
 def play_and_quit(fn, mode, difficulty):
   print "Entering debug (play-and-quit) mode."
   screen = set_display_mode(mainconfig)  
@@ -51,8 +68,10 @@ def play_and_quit(fn, mode, difficulty):
   pc = games.GAMES[mode].players
   dance.play(screen, [(fn, [difficulty] * pc)],
              [player_config] * pc, game_config, mode)
-  sys.exit()
+  raise SystemExit
 
+# Pass a list of files to a constructor (Ctr) that takes the filename
+# as the first argument, and the args tuple as the rest.
 def load_files(screen, files, type, Ctr, args):
   if len(files) == 0: return []
 
@@ -68,12 +87,8 @@ def load_files(screen, files, type, Ctr, args):
   r.center = [320, 240]
   for f in files:
     try: objects.append(Ctr(*((f,) + args)))
-    except RuntimeWarning, message:
-      print "W:", f
-      print "W:", message
-      print
     except RuntimeError, message:
-      print "E", f
+      print "E:", f
       print "E:", message
       print
     except Exception, message:
@@ -87,6 +102,7 @@ def load_files(screen, files, type, Ctr, args):
 
   return objects
 
+# Actually start the program running.
 def main():
   print "pydance", VERSION, "<pyddr-discuss@icculus.org> - irc.freenode.net/#pyddr"
 
@@ -95,8 +111,9 @@ def main():
       import psyco
       print "Psyco optimizing compiler found. Using psyco.full()."
       psyco.full()
-    except ImportError: print "Psyco optimizing compiler not found."
+    except ImportError: print "W: Psyco optimizing compiler not found."
 
+  # default settings for play_and_quit.
   mode = "SINGLE"
   difficulty = "BASIC"
   test_file = None
@@ -120,16 +137,20 @@ def main():
     print "Searching for courses in", dir
     course_list.extend(util.find(dir, ['*.crs']))
 
-  screen = set_display_mode(mainconfig)
+  screen = set_display_mode()
   
   pygame.display.set_caption("pydance " + VERSION)
-  pygame.mouse.set_visible(0)
+  pygame.mouse.set_visible(False)
 
   music.load(os.path.join(sound_path, "menu.ogg"))
   music.play(4, 0.0)
 
   songs = load_files(screen, song_list, "songs", SongItem, (False,))
 
+  # Construct the song and record dictionaries for courses. These are
+  # necessary because courses identify songs by title and mix, rather
+  # than filename. The recordkey dictionary is needed for player's
+  # picks courses.
   song_dict = {}
   record_dict = {}
   for song in songs:
@@ -142,10 +163,9 @@ def main():
 
   crs = load_files(screen, course_list, "courses", courses.CourseFile,
                    (song_dict, record_dict))
-
-  crs += courses.make_players(song_dict, record_dict)
-
+  crs.extend(courses.make_players(song_dict, record_dict))
   records.verify(record_dict)
+
   # Let the GC clean these up if it needs to.
   song_list = None
   course_list = None
@@ -155,18 +175,20 @@ def main():
   if len(songs) < 1:
     ErrorMessage(screen,
                  ("You don't have any songs or step files. Check out",
-                  "http://icculus.org/pyddr/get.php",
+                  "http://icculus.org/pyddr/get.php#songs",
                   "and download some free ones."
                   " ", " ", " ",
                   "If you already have some, make sure they're in",
                   mainconfig["songdir"]))
-    print "You don't have any songs. Check http://icculus.org/pyddr/get.php."
-    sys.exit(1)
+    raise SystemExit("You don't have any songs. Check http://icculus.org/pyddr/get.php#songs .")
 
   menudriver.do(screen, (songs, crs, screen))
+
+  # Clean up shit.
   music.stop()
   pygame.quit()
   mainconfig.write(os.path.join(rc_path, "pydance.cfg"))
+  # FIXME -- is this option a good idea?
   if mainconfig["saveinput"]: pad.write(os.path.join(rc_path, "input.cfg"))
   records.write()
 
