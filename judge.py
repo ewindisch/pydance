@@ -4,142 +4,136 @@ from util import toRealTime
 from announcer import Announcer
 from listener import Listener
 
+# The judge is responsible for correlating step times and arrows times,
+# and then rating them (V/P/G/O/B), as well as expiring arrows when
+# they're missed. Listener objects get their information from the judge,
+# which is also a Listener itself.
+
 class AbstractJudge(Listener):
   def __init__ (self, pid, songconf):
-    self.steps = {}
-    self.pid = pid
-    self.scale = songconf["judgescale"]
-    self.failed = False
-    announcer = Announcer(mainconfig["djtheme"])
+    self._pid = pid
+    self._scale = songconf["judgescale"]
+    self._ann = Announcer(mainconfig["djtheme"])
 
   def set_song(self, pid, bpm, difficulty, count, holds, feet):
-    self.tick = toRealTime(bpm, 0.16666666666666666) * self.scale
     self.holdsub = {}
-    self.steps = {}
+    self._steps = {}
     # Hidden steps were first used in Technomotion. They count for points,
     # if you hit them, but you can't miss them.
-    self.hidden_steps = {}
-
-  def _get_rating(self, dir, curtime):
-    raise NotImplementedError("This class should not be instantiated.")
+    self._hidden_steps = {}
 
   def broke_hold(self, pid, curtime, dir, whichone):
-    if pid != self.pid: return
+    if pid != self._pid: return
     if self.holdsub.get(whichone) != -1: self.holdsub[whichone] = -1
 
+  # Handle a key press and see if it can be associated with an upcoming
+  # arrow; rate it if so.
   def handle_key(self, dir, curtime):
-    rating, dir, etime = self._get_rating(dir, curtime)
+    times = self._steps.keys()
+    times.sort()
+    etime = 0.0
+    done = 0
+    rating = None
+    off = -1
+    for t in times:
+      if dir in self._steps[t]:
+        rating = self._get_rating(curtime, t)
+        if rating != None:
+          etime = t
+          self._steps[etime] = self._steps[etime].replace(dir, "")
+          if etime in self._hidden_steps:
+            self._hidden_steps[etime].replace(dir, "")
+          break
 
     return rating, dir, etime
 
+  # Add an arrow to the list of steps to be checked on a keypress.
   def handle_arrow(self, key, etime, is_hidden):
-    if etime in self.steps: self.steps[etime] += key
-    else: self.steps[etime] = key
+    if etime in self._steps: self._steps[etime] += key
+    else: self._steps[etime] = key
 
     if is_hidden:
-      if etime in self.hidden_steps: self.hidden_steps[etime] += key
-      else: self.hidden_steps[etime] = key
+      if etime in self._hidden_steps: self._hidden_steps[etime] += key
+      else: self._hidden_steps[etime] = key
 
+  # Mark arrows that are very old as misses.
   def expire_arrows(self, curtime):
+    times = self._steps.keys()
+    misses = ""
+    for time in times:
+      if self._is_miss(curtime, time) and self._steps[time]:
+        for d in self._hidden_steps.get(time, ""):
+          self._steps[time] = self._steps[time].replace(d, "")
+        misses += self._steps[time]
+        del(self._steps[time])
+    return misses
+
+  # Check whether or not an arrow is a miss.
+  def _is_miss(self, curtime, time):
     raise NotImplementedError("This class should not be instantiated.")
 
+  # Rate a (possible) step.
+  def _get_rating(self, curtime, time):
+    raise NotImplementedError("This class should not be instantiated.")
+
+# This judge rates steps based on constant time offsets (although
+# multiplied by scale).
 class TimeJudge(AbstractJudge):
 
   def __init__ (self, pid, songconf):
     AbstractJudge.__init__(self, pid, songconf)
-    self._v = self.scale * 0.0225
-    self._p = self.scale * 0.045
-    self._g = self.scale * 0.090
-    self._o = self.scale * 0.135
-    self._b = self.scale * 0.180
+    self._v = self._scale * 0.0225
+    self._p = self._scale * 0.045
+    self._g = self._scale * 0.090
+    self._o = self._scale * 0.135
+    self._b = self._scale * 0.180
   
-  def _get_rating(self, dir, curtime):
-    times = self.steps.keys()
-    times.sort()
-    etime = 0.0
-    rating = None
-    for t in times:
-      if dir in self.steps[t]:
-        offset = abs(curtime - t)
-        if offset < self._v: rating = "V"
-        elif offset < self._p: rating = "P"
-        elif offset < self._g: rating = "G"
-        elif offset < self._o: rating = "O"
-        elif offset < self._b: rating = "B"
+  def _get_rating(self, curtime, t):
+    offset = abs(curtime - t)
+    if offset < self._v: return "V"
+    elif offset < self._p: return "P"
+    elif offset < self._g: return "G"
+    elif offset < self._o: return "O"
+    elif offset < self._b: return "B"
+    else: return None
 
-        if rating != None:
-          etime = t
-          self.steps[etime] = self.steps[etime].replace(dir, "")
-          if etime in self.hidden_steps:
-            self.hidden_steps[etime].replace(dir, "")
-          break
+  def _is_miss(self, curtime, time): return time < curtime - self._b
 
-    return rating, dir, etime
-
-  def expire_arrows(self, curtime):
-    times = self.steps.keys()
-    misses = ""
-    for time in times:
-      if (time < curtime - self._b) and self.steps[time]:
-        for d in self.hidden_steps.get(time, ""):
-          self.steps[time] = self.steps[time].replace(d, "")
-        misses += self.steps[time]
-        del(self.steps[time])
-    return misses
-
+# This judge rates steps based on what fraction of a beat they are from
+# the correct time, and therefore makes fast songs much harder, and slow
+# songs easier.
 class BeatJudge(AbstractJudge):
 
   def set_song(self, pid, bpm, difficulty, count, holds, feet):
     AbstractJudge.set_song(self, pid, bpm, difficulty, count, holds, feet)
-    self.tick = toRealTime(bpm, 0.16666666666666666)
-    self._v = self.scale * 1
-    self._p = self.scale * 4
-    self._g = self.scale * 7
-    self._o = self.scale * 9
-    self._b = self.scale * 12
+    self._tick = toRealTime(bpm, 0.16666666666666666)
+    self._v = self._scale * 1
+    self._p = self._scale * 4
+    self._g = self._scale * 7
+    self._o = self._scale * 9
+    self._b = self._scale * 12
+    self._b_ticks = self._b * self._tick
   
   def change_bpm(self, pid, curtime, bpm):
-    if self.pid != pid: return
-    if bpm >= 1: self.tick = toRealTime(bpm, 0.16666666666666666)
+    if self._pid != pid: return
+    if bpm >= 1: self._tick = toRealTime(bpm, 0.16666666666666666)
+    self._v = self._scale * 1
+    self._p = self._scale * 4
+    self._g = self._scale * 7
+    self._o = self._scale * 9
+    self._b = self._scale * 12
+    self._b_ticks = self._b * self._tick
 
-  def _get_rating(self, dir, curtime):
-    times = self.steps.keys()
-    times.sort()
-    etime = 0.0
-    done = 0
-    off = -1
-    for t in times:
-      if (curtime - self.tick * self._b) < t < (curtime + self.tick * self._b):
-        if dir in self.steps[t]:
-          off = (curtime - t) / self.tick
-          done = 1
-          etime = t
-          self.steps[etime] = self.steps[etime].replace(dir, "")
-          if etime in self.hidden_steps:
-            self.hidden_steps[etime].replace(dir, "")
-          break
+  def _get_rating(self, curtime, t):
+    off = abs((curtime - t) / self._tick)
+    if off <= self._v: return "V"
+    elif off <= self._p: return "P"
+    elif off <= self._g: return "G"
+    elif off <= self._o: return "O"
+    elif off < self._b: return "B"
+    else: return None
 
-    rating = None
-    off = abs(off)
-    if done == 1:
-      if off <= self._v: rating = "V"
-      elif off <= self._p: rating = "P"
-      elif off <= self._g: rating = "G"
-      elif off <= self._o: rating = "O"
-      else: rating = "B"
+  def _is_miss(self, curtime, time): return time < curtime - self._b
 
-    return rating, dir, etime
-
-  def expire_arrows(self, curtime):
-    times = self.steps.keys()
-    misses = ""
-    for time in times:
-      if (time < curtime - self.tick * self._b) and self.steps[time]:
-        for d in self.hidden_steps.get(time, ""):
-          self.steps[time] = self.steps[time].replace(d, "")
-        misses += self.steps[time]
-        del(self.steps[time])
-    return misses
-  
 judges = [TimeJudge, BeatJudge]
 judge_opt = [(0, "Time"), (1, "Beat")]
