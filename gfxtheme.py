@@ -7,7 +7,9 @@
 
 import dircache, os, games, zipfile
 
-from StringIO import StringIO
+from cStringIO import StringIO
+
+from listener import Listener
 
 from constants import *
 from util import toRealTime
@@ -123,12 +125,12 @@ class GFXTheme(object):
     return ArrowSet(self.theme_data, self.game, pid)
 
   # FIXME: Can probably be moved to __init__ and stored as members.
-  def toparrows(self, bpm, ypos, pid):
+  def toparrows(self, ypos, pid):
     arrs = {}
     arrfx = {}
     for d in self.game.dirs:
-      arrs[d] = TopArrow(bpm, d, ypos, pid, self.theme_data, self.game)
-      arrfx[d] = ArrowFX(bpm, d, ypos, pid, self.theme_data, self.game)
+      arrs[d] = TopArrow(d, ypos, pid, self.theme_data, self.game)
+      arrfx[d] = ArrowFX(d, ypos, pid, self.theme_data, self.game)
     return arrs, arrfx
 
 # The scrolling arrows for this game mode.
@@ -163,25 +165,25 @@ class ScrollingArrow(object):
 # too much logic for it to be just theming data.
 
 # Sprites for the top flashing arrows.
-class TopArrow(pygame.sprite.Sprite):
+class TopArrow(Listener, pygame.sprite.Sprite):
 
-  def __init__ (self, bpm, direction, ypos, pid, theme, game):
+  def __init__ (self, direction, ypos, pid, theme, game):
     pygame.sprite.Sprite.__init__(self)
+    self.pid = pid
     self.endpresstime = -1
-    self.tick = toRealTime(bpm, 1);
     self.frame = 0
     self.oldframe = -1
     self.adder = 0
-    self.direction = direction
+    self.dir = direction
     self.topimg = []
 
     # The 'n' state is the normal state for the top arrows. After being
     # pressed, they change to the 's' state images for a short time.
     for i in range(4):
-      self.topimg.append(theme.get_arrow("n", self.direction, i).convert())
+      self.topimg.append(theme.get_arrow("n", direction, i).convert())
       self.topimg[i].set_colorkey(self.topimg[i].get_at((0, 0)), RLEACCEL)
     for i in range(4, 8):
-      self.topimg.append(theme.get_arrow("s", self.direction, i).convert())
+      self.topimg.append(theme.get_arrow("s", direction, i).convert())
       self.topimg[i].set_colorkey(self.topimg[i].get_at((0, 0)), RLEACCEL)
 
     self.image = self.topimg[0]
@@ -191,14 +193,26 @@ class TopArrow(pygame.sprite.Sprite):
                       game.dirs.index(direction) * game.width)
 
   # The arrow was pressed, so we have to change it for some time (s state).
-  def stepped(self, modifier, time):
-    if modifier: self.adder = 4
-    else: self.adder = 0
-    self.endpresstime = time + 0.2 # Number of seconds to change it.
+  def stepped(self, pid, dir, time, rating, combo):
+    print "Stepped?", self.pid, pid, self.dir, dir
 
-  def update(self, time):
+    if self.pid != pid or self.dir != dir or rating == "M": return
+
+    print "Did step"
+
+    self.adder = 4
+    self.endpresstime = time + 0.25 # Number of seconds to change it for.
+
+  def set_song(self, bpm, diff, count, holds, feet):
+    self.tick = toRealTime(bpm, 1)
+
+  def change_bpm(self, newbpm):
+    self.tick = toRealTime(newbpm, 1)
+
+  def update(self, time, offset):
     if time > self.endpresstime: self.adder = 0
 
+    time += 1000 * offset
     self.keyf = int(time / (self.tick / 2)) % 8
     if self.keyf > 3: self.keyf = 3
     self.frame = self.adder + self.keyf
@@ -207,15 +221,16 @@ class TopArrow(pygame.sprite.Sprite):
       self.image = self.topimg[self.frame]
       self.oldframe = self.frame
 
-class ArrowFX(pygame.sprite.Sprite):
-  def __init__ (self, bpm, direction, ypos, pid, theme, game):
+class ArrowFX(Listener, pygame.sprite.Sprite):
+  def __init__ (self, direction, ypos, pid, theme, game):
     pygame.sprite.Sprite.__init__(self)
     self.presstime = -1000000
-    self.tick = toRealTime(bpm, 1);
     self.centery = ypos + game.width / 2
     self.centerx = (game.left_off(pid) +
                     game.dirs.index(direction) * game.width + game.width / 2)
     self.pid = pid
+
+    self.dir = direction
 
     self.baseimg = theme.get_arrow("n", direction, 3).convert()
     self.tintimg = pygame.Surface(self.baseimg.get_size())
@@ -227,24 +242,32 @@ class ArrowFX(pygame.sprite.Sprite):
     self.displaying = 1
     self.direction = 1
     self.holdtype = 0
+    self.colors = { "V": [255, 255, 255],
+                    "P": [255, 255, 0],
+                    "G": [0, 255, 0] }
 
     style = mainconfig['explodestyle']
     self.rotating, self.scaling = style & 1, style & 2
     
+  def set_song(self, bpm, diff, count, holds, feet):
+    self.tick = toRealTime(bpm, 1)
+
+  def change_bpm(self, newbpm):
+    self.tick = toRealTime(newbpm, 1)
+
   def holding(self, yesorno):
     self.holdtype = yesorno
   
-  def stepped(self, time, tinttype):
+  def stepped(self, pid, dir, time, tinttype, combo):
+    if pid != self.pid or dir != self.dir: return
+    if tinttype not in self.colors: return
+
+    self.combo = combo
     self.presstime = time
     self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
     self.tintimg.blit(self.baseimg, (0,0))
     tinter = pygame.surface.Surface(self.baseimg.get_size())
-    if tinttype == 'V':
-      tinter.fill((255,255,255))
-    elif tinttype == 'P':
-      tinter.fill((255,255,0))
-    elif tinttype == 'G':
-      tinter.fill((0,255,0))
+    tinter.fill(self.colors[tinttype])
     tinter.set_alpha(127)
     self.tintimg.blit(tinter,(0,0))
     self.tintimg.set_colorkey(self.tintimg.get_at((0,0)))
@@ -252,7 +275,7 @@ class ArrowFX(pygame.sprite.Sprite):
     if self.direction == 1: self.direction = -1
     else: self.direction = 1
 
-  def update(self, time, combo):
+  def update(self, time):
     steptimediff = time - self.presstime
     if (steptimediff < 0.2) or self.holdtype:
       self.displaying = 1
@@ -261,7 +284,7 @@ class ArrowFX(pygame.sprite.Sprite):
         if self.holdtype:
           scale = 1.54
         else:
-          scale = 1.0 + (steptimediff * 4.0) * (1.0+(combo/256.0))
+          scale = 1.0 + (steptimediff * 4.0) * (1.0+(self.combo/256.0))
         newsize = [max(0, int(x*scale)) for x in self.image.get_size()]
         self.image = pygame.transform.scale(self.image, newsize)
       if self.rotating:

@@ -157,7 +157,9 @@ class JudgingDisp(Listener, pygame.sprite.Sprite):
     self.image = self.space
     self.baseimage = self.space
 
-  def stepped(self, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, rating, combo):
+    if rating is None: return
+
     self.laststep = curtime
     self.rating = rating
     self.baseimage = { "V": self.marvelous, "P": self.perfect,
@@ -564,10 +566,22 @@ class Player(object):
     if not game.double:
       self.judge = judge.judges[songconf["judge"]]()
       self.listeners.append(self.judge)
+      arr, arrfx = self.theme.toparrows(self.top, self.pid)
+      self.toparr = arr
+      self.toparrfx = arrfx
+      self.listeners.extend(arr.values() + arrfx.values())
     else:
       Judge = judge.judges[songconf["judge"]]
       self.judge = [Judge(), Judge()]
       self.listeners.extend(self.judge)
+      arr1, arrfx1 = self.theme.toparrows(self.top, self.pid * 2)
+      arr2, arrfx2 = self.theme.toparrows(self.top, self.pid * 2 + 1)
+      self.arrows = [self.theme.arrows(self.pid * 2),
+                     self.theme.arrows(self.pid * 2 + 1)]
+      self.toparr = [arr1, arr2]
+      self.toparrfx = [arrfx1, arrfx2]
+      self.listeners.extend(arr1.values() + arr2.values() +
+                            arrfx1.values() + arrfx2.values())
 
   def set_song(self, song, diff, lyrics):
     self.difficulty = diff
@@ -591,14 +605,6 @@ class Player(object):
 
       self.ready = min(self.steps[0].ready, self.steps[1].ready)
 
-      arr1, arrfx1 = self.theme.toparrows(self.steps[0].bpm,
-                                          self.top, self.pid * 2)
-      arr2, arrfx2 = self.theme.toparrows(self.steps[1].bpm,
-                                          self.top, self.pid * 2 + 1)
-      self.arrows = [self.theme.arrows(self.pid * 2),
-                     self.theme.arrows(self.pid * 2 + 1)]
-      self.toparr = [arr1, arr2]
-      self.toparrfx = [arrfx1, arrfx2]
       self.holdtext = [HoldJudgeDisp(self.pid * 2, self, self.game),
                        HoldJudgeDisp(self.pid * 2 + 1, self, self.game)]
 
@@ -617,10 +623,7 @@ class Player(object):
                                self.game.name)
       self.length = self.steps.length
       self.ready = self.steps.ready
-      arr, arrfx = self.theme.toparrows(self.steps.bpm, self.top, self.pid)
       self.holdtext = HoldJudgeDisp(self.pid, self, self.game)
-      self.toparr = arr
-      self.toparrfx = arrfx
       self.arrows = self.theme.arrows(self.pid)
 
       if self.steps.holdref: holds = len(self.steps.holdref)
@@ -702,8 +705,6 @@ class Player(object):
                        
       arrows.add(newsprites)
 
-
-
   def csl_update(self, curtime, judge, holdtext):
     self.combos.update(curtime)
     self.score.update()
@@ -713,8 +714,9 @@ class Player(object):
     
   def check_sprites(self, curtime, arrows, steps, fx_data, toparr, toparrfx, judge):
     misses = judge.expire_arrows(curtime)
-    for i in range(misses):
-      for l in self.listeners: l.stepped(curtime, "M", self.combos.combo)
+    for d in misses:
+      for l in self.listeners:
+        l.stepped(self.pid, d, curtime, "M", self.combos.combo)
     for rating, dir, time in fx_data:
       if (rating == "V" or rating == "P" or rating == "G"):
         for spr in arrows.sprites():
@@ -726,12 +728,10 @@ class Player(object):
             if (spr.timef1 == time) and (spr.dir == dir):
               spr.broken = 0
           except: pass
-          toparrfx[dir].stepped(curtime, rating)
 
     arrows.update(curtime, judge.bpm, steps.lastbpmchangetime)
-    for d in self.game.dirs:
-      toparr[d].update(curtime + steps.offset * 1000)
-      toparrfx[d].update(curtime, self.combos.combo)
+    for a in toparr.values(): a.update(curtime, steps.offset)
+    for a in toparrfx.values(): a.update(curtime)
 
   def should_hold(self, steps, direction, curtime):
     l = steps.holdinfo
@@ -783,16 +783,14 @@ class Player(object):
 
     if self.game.double:
       pid = ev[0] & 1
-      self.toparr[pid][ev[1]].stepped(1, time + self.steps[pid].soffset)
       rating, dir, etime = self.judge[pid].handle_key(ev[1], time)
-      if rating != None:
-        for l in self.listeners: l.stepped(time, rating, self.combos.combo)
+      for l in self.listeners:
+        l.stepped(ev[0], dir, time, rating, self.combos.combo)
       self.fx_data[pid].append((rating, dir, etime))
     else:
-      self.toparr[ev[1]].stepped(1, time + self.steps.soffset)
       rating, dir, etime = self.judge.handle_key(ev[1], time)
-      if rating != None:
-        for l in self.listeners: l.stepped(time, rating, self.combos.combo)
+      for l in self.listeners:
+        l.stepped(ev[0], dir, time, rating, self.combos.combo)
       self.fx_data.append((rating, dir, etime))
 
   def check_bpm_change(self, time, steps, judge, toparr, toparrfx):
@@ -801,9 +799,7 @@ class Player(object):
         newbpm = steps.lastbpmchangetime[0][1]
         if not self.dark:
           for d in toparr:
-            toparr[d].tick = toRealTime(newbpm, 1)
             toparrfx[d].tick = toRealTime(newbpm, 1)
-        judge.bpm_change(newbpm)
         for l in self.listeners: l.change_bpm(newbpm)
         steps.lastbpmchangetime.pop(0)
 

@@ -60,7 +60,7 @@ class PydanceScore(AbstractScore):
     self.inc = { "V": 4 * score_coeff, "P": 3.5 * score_coeff,
                  "G": 2.5 * score_coeff, "O": 0.5 * score_coeff }
 
-  def stepped(self, cur_time, rating, combo):
+  def stepped(self, pid, dir, cur_time, rating, combo):
     self.score += self.inc.get(rating, 0)
     self.score += combo * self.combo_coeff
 
@@ -72,7 +72,7 @@ class FirstScore(AbstractScore):
     AbstractScore.__init__(self, pid, text, game)
     self.combo = 0
 
-  def stepped(self, cur_time, rating, combo):
+  def stepped(self, pid, dir, cur_time, rating, combo):
     if self.combo == combo == 0: return # No points when combo is 0.
 
     self.combo += 1
@@ -97,14 +97,14 @@ class ThirdScore(AbstractScore):
     p = 1000000.0 / (count * (count + 1) / 2)
     self.inc = { "V": p * 10, "P": p * 10, "G": p * 5, "O": p }
 
-  def stepped(self, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, rating, combo):
     self.arrow += 1
     self.score += self.inc.get(rating, 0) * self.arrow
 
 # L(V) = L(P) = 777, L(G) = 555
 # V(n) = L(r) + C * 333
 class FourthScore(AbstractScore):
-  def stepped(self, cur_time, rating, combo):
+  def stepped(self, pid, dir, cur_time, rating, combo):
     base = {"V": 777, "P": 777, "G": 555 }
     self.score += base.get(rating, 0) + combo * 333
 
@@ -119,7 +119,7 @@ class FifthScore(AbstractScore):
     s = 500000.0 * (feet + 1) / float((count * (count + 1)) / 2)
     self.inc = { "V": 10 * s, "P": 10 * s, "G": 5 * s }
 
-  def stepped(self, cur_time, rating, combo):
+  def stepped(self, pid, dir, cur_time, rating, combo):
     self.arrow += 1
     self.score += self.inc.get(rating, 0) * self.arrow
 
@@ -140,7 +140,7 @@ class ExtremeScore(AbstractScore):
     self.inc = { "V": 10 * score_coeff, "P": 9 * score_coeff,
                  "G": 5 * score_coeff }
 
-  def stepped(self, cur_time, rating, combo):
+  def stepped(self, pid, dir, cur_time, rating, combo):
     self.arrow += 1
     self.score += self.inc.get(rating, 0) * self.arrow
 

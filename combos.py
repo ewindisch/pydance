@@ -11,7 +11,6 @@ class AbstractCombo(Listener, pygame.sprite.Sprite):
     self.sticky = mainconfig['stickycombo']
     self.lowcombo = mainconfig['lowestcombo']
     self.combo = 0
-    self.bestcombo = 0
     self.laststep = 0
     self.centerx = game.sprite_center + (game.player_offset * playernum)
     self.top = 320
@@ -95,18 +94,16 @@ class NormalCombo(AbstractCombo):
   def __init__(self, pid, game):
     AbstractCombo.__init__(self, pid, game)
   
-  def stepped(self, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, rating, combo):
     self.laststep = curtime
     self.combo += { "V": 1, "P": 1, "G": 1 }.get(rating, -self.combo)
-    if self.combo > self.bestcombo: self.bestcombo = self.combo
 
 # Breaks the combo on anything less than a great, but also doesn't
 # increase it for great.
 class OniCombo(AbstractCombo):
-  def stepped(self, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, rating, combo):
     self.laststep = curtime
     self.combo += { "V": 1, "P": 1, "G": 0 }.get(rating, -self.combo)
-    if self.combo > self.bestcombo: self.bestcombo = self.combo
 
 combos = [NormalCombo, OniCombo]
 combo_opt = [(0, "Normal"), (1, "Oni-Style")]

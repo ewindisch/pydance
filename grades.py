@@ -20,7 +20,7 @@ class DancePointsGrade(AbstractGrade):
   def broke_hold(self, dir, whichone):
     self.hold_count += 1
 
-  def stepped(self, cur_time, rating, combo):
+  def stepped(self, pid, dir, cur_time, rating, combo):
     self.arrow_count += 1
     self.score += self.inc.get(rating, 0)
 

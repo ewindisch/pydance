@@ -11,7 +11,9 @@ class Stats(Listener):
     self.steps = { "V": 0, "P": 0, "G": 0, "O": 0, "B": 0, "M": 0 }
     self.early = self.late = self.ontime = 0
 
-  def stepped(self, curtime, rating, combo):
+  def stepped(self, pid, dir, curtime, rating, combo):
+    if rating is None: return
+
     if combo > self.maxcombo: self.maxcombo = combo
     self.steps[rating] += 1
     self.arrow_count += 1

@@ -20,7 +20,7 @@ class Listener(object):
   # (perfect), G (great), O (okay), B (boo), or M (miss).
   # Note that since Combo objects are Listeners, the order Listeners
   # are called in *does* matter in that case.
-  def stepped(self, curtime, rating, combo): pass
+  def stepped(self, pid, dir, curtime, rating, combo): pass
 
   # Received when a new song is started. difficulty is the name as a
   # string; count is the number of arrows in the song; feet is the

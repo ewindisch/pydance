@@ -21,7 +21,7 @@ class AbstractJudge(Listener):
   def get_rating(self, dir, curtime):
     raise NotImplementedError("This class should not be instantiated.")
 
-  def bpm_change(self, bpm):
+  def change_bpm(self, bpm):
     if bpm >= 1: self.tick = toRealTime(bpm, 0.16666666666666666)
     self.bpm = bpm
 
@@ -64,12 +64,11 @@ class TimeJudge(AbstractJudge):
 
   def expire_arrows(self, curtime):
     times = self.steps.keys()
-    misses = 0
+    misses = ""
     for time in times:
       if (time < curtime - 0.180) and self.steps[time]:
-        n = len(self.steps[time]) 
+        misses += self.steps[time]
         del(self.steps[time])
-        misses += n
     return misses
 
 class BeatJudge(AbstractJudge):
@@ -83,9 +82,6 @@ class BeatJudge(AbstractJudge):
       if (curtime - self.tick*12) < t < (curtime + self.tick*12):
         if dir in self.steps[t]:
           off = (curtime-t) / self.tick
-          if off < 1: self.early += 1
-          elif off > 1: self.late += 1
-          else: self.ontime += 1
           done = 1
           etime = t
           self.steps[etime] = self.steps[etime].replace(dir, "")
@@ -104,13 +100,11 @@ class BeatJudge(AbstractJudge):
 
   def expire_arrows(self, curtime):
     times = self.steps.keys()
-    misses = 0
+    misses = ""
     for time in times:
       if (time < curtime - self.tick * 12) and self.steps[time]:
-        n = len(self.steps[time]) 
+        misses += self.steps[time]
         del(self.steps[time])
-        misses += n
-
     return misses
   
 judges = [TimeJudge, BeatJudge]
