@@ -4,15 +4,9 @@ from gfxtheme import GFXTheme
 import fontfx, spritelib, colors
 
 class Player:
-  def __init__(self, pid, holdtext, combos, difflist, mode = "SINGLE"):
+  def __init__(self, pid, POS, holdtext, combos, difflist, mode = "SINGLE"):
     self.theme = GFXTheme(mainconfig["gfxtheme"])
-    if mainconfig["reversescroll"]:
-      self.arrow_top = 408
-      self.arrow_bot = int(-64 - (mainconfig["scrollspeed"] - 1) * 576)
-    else:
-      self.arrow_top = 64
-      self.arrow_bot = int(576 * mainconfig["scrollspeed"])
-    self.arrow_diff = float(self.arrow_top - self.arrow_bot)
+    self.pos = POS
     self.pid = pid
     self.score = ScoringDisp(pid, "Player " + str(pid))
     if mainconfig["maxonilife"] == 0:
@@ -37,7 +31,7 @@ class Player:
 
   def set_song(self, song, diff, Judge): # FIXME factor these out
     self.song = song
-    arr, arrfx = self.theme.toparrows(self.song.bpm, self.arrow_top, self.pid)
+    arr, arrfx = self.theme.toparrows(self.song.bpm, self.pos['top'], self.pid)
     self.toparr = arr
     self.toparrfx = arrfx
     self.judging_list = []

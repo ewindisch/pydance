@@ -1267,18 +1267,8 @@ def find (path, pattern):
           matches.append(filepath)
   return matches
 
-#DCY: Bottom of 640 gives lots of "update rejecting"    
-if mainconfig['reversescroll']:
-  ARROWTOP  = 408
-  ARROWBOT  = int(-64 - (mainconfig['scrollspeed']-1)*576)
-else:
-  ARROWTOP  = 64
-  ARROWBOT  = int(576 * mainconfig['scrollspeed'])
-
-ARROWDIFF = float(ARROWTOP-ARROWBOT)
-
 class ArrowSprite(CloneSprite):
-  def __init__ (self, spr, curtime, endtime, bpm, playernum, zindex=ARROWZINDEX):
+  def __init__ (self, spr, curtime, endtime, bpm, playernum, POS, zindex=ARROWZINDEX):
     CloneSprite.__init__(self,spr,zindex=zindex)
     self.timeo = curtime
     self.timef = endtime
@@ -1292,6 +1282,15 @@ class ArrowSprite(CloneSprite):
     else:
       self.playedsound = 1
     self.r = 0
+    self.pos = copy.copy(POS)
+    if self.pos['mode'] == 'switchy':
+      self.pos = POS
+    if (self.pos['mode'] == 'centered') or (self.pos['mode'] == 'switchy'):
+      if random.choice([0,1]):
+        self.pos['bot']  = int(236 + (mainconfig['scrollspeed']*576))
+      else:
+        self.pos['bot']  = int(236 - (mainconfig['scrollspeed']*576))
+      self.pos['diff'] = float(self.pos['top']-self.pos['bot'])
     self.playernum = playernum
     self.bimage = self.image
     self.arrowspin = float(mainconfig["arrowspin"])
@@ -1312,14 +1311,14 @@ class ArrowSprite(CloneSprite):
     self.rect = self.image.get_rect()
     self.rect.centerx = self.centerx
 
-    self.top = ARROWTOP
+    self.top = self.pos['top']
     finaltime = 0
     
     if len(lbct)<2:
       onebeat = float(60000.0/curbpm)/1000
       doomtime = self.timef - curtime
       beatsleft = float(doomtime / onebeat)
-      self.top = self.top - int( (beatsleft/8.0)*ARROWDIFF )
+      self.top = self.top - int( (beatsleft/8.0)*self.pos['diff'] )
     else:
       oldbpmsub = [curtime,curbpm]
       bpmbeats = 0
@@ -1333,7 +1332,7 @@ class ArrowSprite(CloneSprite):
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           bpmbeats = float(bpmdoom / onefbeat)
 #          print "bpmbeats",bpmbeats
-          self.top = self.top - int(bpmbeats*ARROWDIFF/8.0)
+          self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
           oldbpmsub = bpmsub
       if not finaltime:
 #        print "adjusting for finaltime",
@@ -1342,7 +1341,7 @@ class ArrowSprite(CloneSprite):
         bpmdoom = self.timef - oldbpmsub[0] 
         bpmbeats = float(bpmdoom / onefbeat)
 #        print "bpmbeats",bpmbeats
-        self.top = self.top - int(bpmbeats*ARROWDIFF/8.0)
+        self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
         finaltime = 1
             
     if self.top > 480:
@@ -1378,7 +1377,7 @@ class ArrowSprite(CloneSprite):
       self.image.set_alpha(alp)
 
 class HoldArrowSprite(CloneSprite):
-  def __init__ (self, spr, curtime, times, bpm, lastbpmtime, playernum, zindex=ARROWZINDEX):
+  def __init__ (self, spr, curtime, times, bpm, lastbpmtime, playernum, POS, zindex=ARROWZINDEX):
     CloneSprite.__init__(self,spr,zindex=zindex)
     self.timeo = curtime
     self.timef1 = times[1]
@@ -1387,6 +1386,15 @@ class HoldArrowSprite(CloneSprite):
     self.life  = times[2]-curtime
     self.bpm = bpm
     self.lastbpmtime = lastbpmtime
+    self.pos = copy.copy(POS)
+    if self.pos['mode'] == 'switchy':
+      self.pos = POS
+    if (self.pos['mode'] == 'centered') or (self.pos['mode'] == 'switchy'):
+      if random.choice([0,1]):
+        self.pos['bot']  = int(236 + (mainconfig['scrollspeed']*576))
+      else:
+        self.pos['bot']  = int(236 - (mainconfig['scrollspeed']*576))
+      self.pos['diff'] = float(self.pos['top']-self.pos['bot'])
     self.playernum = playernum
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
@@ -1422,8 +1430,8 @@ class HoldArrowSprite(CloneSprite):
     self.rect = self.image.get_rect()
     self.rect.centerx = self.centerx
 
-    self.top = ARROWTOP
-    self.bottom = ARROWTOP #+ int(ARROWDIFF/8.0)
+    self.top = self.pos['top']
+    self.bottom = self.pos['top'] #+ int(self.pos['diff']/8.0)
 
     finaltime = 0
     if len(lbct)<2: # single run (I hope)
@@ -1432,10 +1440,10 @@ class HoldArrowSprite(CloneSprite):
       if doomtime < 0:
         doomtime = 0
       beatsleft = float(doomtime / onebeat)
-      self.top = self.top - int( (beatsleft/8.0)*ARROWDIFF )
+      self.top = self.top - int( (beatsleft/8.0)*self.pos['diff'] )
       doomtime = self.timef2 - curtime
       beatsleft = float(doomtime / onebeat)
-      self.bottom = self.bottom - int( (beatsleft/8.0)*ARROWDIFF )
+      self.bottom = self.bottom - int( (beatsleft/8.0)*self.pos['diff'] )
     else:
       oldbpmsub = [curtime,curbpm]
       bpmbeats = 0
@@ -1450,9 +1458,9 @@ class HoldArrowSprite(CloneSprite):
           bpmbeats = float(bpmdoom / onefbeat)
 #          print "bpmbeats",bpmbeats
 	  if bpmsub[0] <= self.timef1:
-	    self.top = self.top - int(bpmbeats*ARROWDIFF/8.0)
+	    self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
           if bpmsub[0] <= self.timef2:
-            self.bottom = self.bottom - int(bpmbeats*ARROWDIFF/8.0)
+            self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0)
           oldbpmsub = bpmsub
       if not finaltime:
 #        print "adjusting for finaltime",
@@ -1461,10 +1469,10 @@ class HoldArrowSprite(CloneSprite):
         bpmdoom = self.timef1 - oldbpmsub[0]
         bpmbeats = float(bpmdoom / onefbeat)
 #        print "bpmbeats1=",bpmbeats1," bpmbeats2=",bpmbeats2
-        self.top = self.top - int(bpmbeats*ARROWDIFF/8.0)
+        self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
         bpmdoom = self.timef2 - oldbpmsub[0]
         bpmbeats = float(bpmdoom / onefbeat)
-        self.bottom = self.bottom - int(bpmbeats*ARROWDIFF/8.0)
+        self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0)
         finaltime = 1
 
     if self.bottom > 480:
@@ -1719,9 +1727,30 @@ def blatantplug():
 def playSequence(numplayers, playlist):
   global screen
 
+  ARROWPOS = {}
+  #DCY: Bottom of 640 gives lots of "update rejecting"    
+  if mainconfig['reversescroll'] == 2:
+    ARROWPOS['top']  = 236
+    ARROWPOS['bot']  = int(236 + (mainconfig['scrollspeed']*576))
+    ARROWPOS['mode'] = 'centered'
+  elif mainconfig['reversescroll'] == 3:    # this is more of a bug than a feature but some people might like it
+    ARROWPOS['top']  = 236
+    ARROWPOS['bot']  = int(236 + (mainconfig['scrollspeed']*576))
+    ARROWPOS['mode'] = 'switchy'
+  elif mainconfig['reversescroll']:
+    ARROWPOS['top']  = 408
+    ARROWPOS['bot']  = int(-64 - (mainconfig['scrollspeed']-1)*576)
+    ARROWPOS['mode'] = 'reverse'
+  else:
+    ARROWPOS['top']  = 64
+    ARROWPOS['bot']  = int(576 * mainconfig['scrollspeed'])
+    ARROWPOS['mode'] = 'normal'
+
+  ARROWPOS['diff'] = float(ARROWPOS['top']-ARROWPOS['bot'])
+
   players = []
   for playerID in range(numplayers):
-    plr = Player(playerID, HoldJudgeDisp(playerID), ComboDisp(playerID), DIFFICULTYLIST)
+    plr = Player(playerID, ARROWPOS, HoldJudgeDisp(playerID), ComboDisp(playerID), DIFFICULTYLIST)
     players.append(plr)
     
   for songfn, diff in playlist:
@@ -1733,11 +1762,11 @@ def playSequence(numplayers, playlist):
     for pid in range(len(players)):
       players[pid].set_song(copy.copy(current_song), diff[pid], Judge)
 
-    if dance(current_song, players): break # Failed
+    if dance(current_song, players, ARROWPOS): break # Failed
     
   return [player.judge for player in players]
 
-def dance(song, players):
+def dance(song, players, ARROWPOS):
   global screen,background,playmode
 
   songFailed = True
@@ -2010,12 +2039,12 @@ def dance(song, players):
             for (dir,num) in zip(DIRECTIONS, ev.feet):
               if num & 8:
                 if not (num & 128):
-                  ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr.pid).add([plr.arrow_group, rgroup])
+                  ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
 
               if num & 128:
                 diffnum = DIFFICULTYLIST.index(plr.difficulty)
                 holdindex = song.holdref[diffnum].index((DIRECTIONS.index(dir),ev.when))
-                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr.pid).add([plr.arrow_group, rgroup])
+                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
           
     if len(song.lastbpmchangetime) > 1:
       if (curtime >= song.lastbpmchangetime[1][0]):
