@@ -309,7 +309,7 @@ should be in the same subdirectory).</p>
     <p>.sm and .dwi files are file formats used by other popular PC
 dancing games. These require a little more structure than .dance
 files; they must go in <tt><em>songdir</em>/Mix Name/Song Name/</tt>,
-where "Mix Name" is the name of the folder you want the song to be in
+where "Mix Name" is the name of the folder you want the song to be
 in "Sort by Mix" mode, and "Song Name" is the name of the song itself.
 Like .dance, .dwi and .sm are accompanied by music and image files,
 but unlike .dance, you cannot put multiple .dwi or .sm files in the
@@ -943,7 +943,7 @@ no space before it, ends the description. e.g.</p>
 end</pre>
     <h3 id="dance.text.lyrics">Lyrics</h3>
     <p>The lyrics section contains lyric timing information. The
-format of each line is, an integer, a float, and then a string. The
+format of each line is a float, an integer, and then a string. The
 integer specifies the lyric "channel"; lyrics in the same channel
 should overwrite each other, appear in the same place on the screen,
 etc. The float is the time into the song during which the lyric should
@@ -1039,7 +1039,7 @@ contains six frames of animation (3x2). In the space of one beat, it
 loops over the first three frames, and then over the next beat, it
 goes to the next three frames, and then back to the first three.</p>
     <h2 id="themes.lifebar">The Lifebar</h2>
-    <p>You also need to provide a a lifebar.png, an oni-bar.png, and
+    <p>You also need to provide a lifebar.png, an oni-bar.png, and
 an oni-empty.png. lifebar.png should be 408x28 pixels, at least. This
 is in turn split into two 204x28 images; the left half should be the
 full lifebar, and the right half should be the empty one. If you want
