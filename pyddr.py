@@ -4380,7 +4380,7 @@ def dance(song,players,difficulty):
       for spr in agroup2.sprites():
         spr.update(curtime,dajudge2.getbpm(),song.lastbpmchangetime,hiddenval,suddenval)
 
-    if(int(mainconfig['strobeSquare'])):
+    if(mainconfig['strobe']):
       extbox.update(curtime+(song.offset*1000.0))
 
     # update the top arrows
