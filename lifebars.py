@@ -39,7 +39,7 @@ class AbstractLifeBar(Listener, pygame.sprite.Sprite):
     if self.life < 0: self.life = -1
     elif self.life > self.maxlife: self.life = self.maxlife
 
-    if time - self.last_record_update > 0.5:
+    if time - self.last_record_update > 0.5 and self.life >= 0:
       self.record.append(float(self.life) / float(self.maxlife))
       self.last_record_update = time
 
