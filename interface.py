@@ -55,7 +55,7 @@ def load_banner(filename, box = True):
 class TextDisplay(pygame.sprite.Sprite):
   def __init__(self, font, size, midleft, str = " "):
     pygame.sprite.Sprite.__init__(self)
-    self._text = " "
+    self._text = str
     self._font = font
     self._size = size
     self._midleft = midleft
@@ -338,9 +338,9 @@ class ActiveIndicator(pygame.sprite.Sprite):
 
 # Box to indicate the current difficulty level.
 class DifficultyBox(pygame.sprite.Sprite):
-  def __init__(self, pid, numplayers):
+  def __init__(self, center):
     pygame.sprite.Sprite.__init__(self)
-    self._topleft = [19 + (233 * pid), 414]
+    self._topleft = [center[0]-65, center[1]-20]
 
   def set(self, diff, color, feet, grade):
     f = pygame.font.Font(None, 24)
@@ -437,7 +437,7 @@ class ListBox(pygame.sprite.Sprite):
 # Display the whole banner + surrounding text, with the slowly
 # rotating color.
 class BannerDisplay(pygame.sprite.Sprite):
-  def __init__(self, size, center):
+  def __init__(self, center):
     pygame.sprite.Sprite.__init__(self)
     self.isfolder = False
     self._center = center
@@ -558,3 +558,33 @@ class InterfaceWindow(object):
     self._sprites.clear(self._screen, self._bg)
     self._clock.tick(45)
     return False
+
+NO_BANNER = os.path.join(image_path, "no-banner.png")
+
+class SongItemDisplay(object):
+  no_banner = make_box(size = [256, 80])
+  tmp = pygame.image.load(NO_BANNER)
+  tmp.set_colorkey(tmp.get_at([0, 0]))
+  no_banner.blit(tmp, [4, 4])
+
+  def __init__(self, song): # A SongItem object
+    self._song = song
+    self.difficulty = song.difficulty
+    self.info = song.info
+    self.filename = song.filename
+    self.diff_list = song.diff_list
+    self.banner = None
+    self.isfolder = False
+    self.folder = {}
+    self.banner = None
+    self.clip = None
+
+  def render(self):
+    if self.banner: return
+    elif self.info["banner"]:
+      self.banner, self.clip = load_banner(self.info["banner"])
+    else: self.banner = SongItemDisplay.no_banner
+
+    if self.info["cdtitle"]:
+      self.cdtitle = pygame.image.load(self.info["cdtitle"])
+    else: self.cdtitle = pygame.Surface([0, 0])

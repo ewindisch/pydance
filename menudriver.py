@@ -254,6 +254,10 @@ def do(screen, songdata):
                                       [(0, "Off"), (1, "On"), (2, "Safe")])],
         ["Folders", onoff_opt, ("folders",)],
         ["Timer Display", onoff_opt, ('fpsdisplay',)],
+        ["Song Info Screen", tuple_opt, ('songinfoscreen',
+                                         zip([0, 1, 2],
+                                             ["Never", "Multi-song Only", "Always"]))],
+  
         ["Back", None, None]
         )
        )

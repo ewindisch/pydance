@@ -6,6 +6,7 @@ import error
 import dance
 import util
 import options
+import sys
 from pygame.mixer import music
 from interface import *
 from constants import *
@@ -96,6 +97,12 @@ class FakePlaylist(object):
 
   def __iter__(self):
     return self
+
+  # len(x) returns int(x.__len__()) if x.__len__() > 0 and is numeric,
+  # exception otherwise, so returning float("+inf") or None is
+  # impossible. Thus, the largest regular integer is returned, which
+  # is as close to "infinity" as we can get.
+  def __len__(self): return sys.maxint
 
   def next(self):
     if len(self.songs) == 0:

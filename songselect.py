@@ -15,8 +15,6 @@ from constants import *
 from interface import *
 from pygame.mixer import music
 
-NO_BANNER = os.path.join(image_path, "no-banner.png")
-
 SORTS = {
   "subtitle": (lambda x, y: cmp(str(x.info["subtitle"]).lower(),
                                 str(y.info["subtitle"]).lower())),
@@ -46,34 +44,6 @@ SS_HELP = [
   "Start: Go to the options screen",
   "F11: Toggle fullscreen - S: Change the sort mode",
   ]
-
-class SongItemDisplay(object):
-  no_banner = make_box(size = [256, 80])
-  tmp = pygame.image.load(NO_BANNER)
-  tmp.set_colorkey(tmp.get_at([0, 0]))
-  no_banner.blit(tmp, [4, 4])
-
-  def __init__(self, song): # A SongItem object
-    self._song = song
-    self.difficulty = song.difficulty
-    self.info = song.info
-    self.filename = song.filename
-    self.diff_list = song.diff_list
-    self.banner = None
-    self.isfolder = False
-    self.folder = {}
-    self.banner = None
-    self.clip = None
-
-  def render(self):
-    if self.banner: return
-    elif self.info["banner"]:
-      self.banner, self.clip = load_banner(self.info["banner"])
-    else: self.banner = SongItemDisplay.no_banner
-
-    if self.info["cdtitle"]:
-      self.cdtitle = pygame.image.load(self.info["cdtitle"])
-    else: self.cdtitle = pygame.Surface([0, 0])
 
 class FolderDisplay(object):
   def __init__(self, name, type, count):
@@ -206,7 +176,7 @@ class SongSelect(InterfaceWindow):
       self._diffs.append(0)
       self._configs.append(dict(player_config))
       self._diff_names.append(" ")
-      d = DifficultyBox(i, 2)
+      d = DifficultyBox([84 + (233 * i), 434])
       if not self._song.isfolder:
         diff_name = self._song.diff_list[game][self._diffs[i]]
         rank = records.get(self._song.info["recordkey"],
@@ -219,7 +189,7 @@ class SongSelect(InterfaceWindow):
       self._diff_widgets.append(d)
     
     ActiveIndicator([405, 259], width = 230).add(self._sprites)
-    self._banner = BannerDisplay([350, 300], [210, 230])
+    self._banner = BannerDisplay([205, 230])
     self._banner.set_song(self._song)
     self._sprites.add(HelpText(SS_HELP, [255, 255, 255], [0, 0, 0],
                                pygame.font.Font(None, 22), [206, 20]))

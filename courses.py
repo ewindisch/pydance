@@ -24,6 +24,8 @@ class AbstractCourse(object):
     self.all_songs = all_songs
     self.recordkeys = recordkeys
 
+  def __len__(self): return len(self.songs)
+
   # This course has been started. This means we need to set up some
   # appropriate variables with values we can't get elsewhere.
   def setup(self, screen, player_configs, game_config, gametype):

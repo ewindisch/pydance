@@ -93,6 +93,7 @@ default_conf = {
   "usepsyco": 1,
   "autogen": 1,
   "centerconfirm": 1,
+  "songinfoscreen": 1,
 
   # Player config
   "spin": 0,
@@ -144,6 +145,34 @@ game_config = dict([(k, mainconfig[k]) for k in
                     ["battle", "scoring", "combo", "grade", "judge",
                      "judgescale", "life", "secret", "lifebar", "onilives"]])
 
+
+# The list of options that are safe to change between songs on a
+# playlist
+# Each tuple has the following entries:
+# 0. Option "key", like the one used in the options.OPTIONS dictionary
+# 1. A dictionary of option values that require special displaying:
+#    the key is the value of the option and the value is a string that
+#    should be shown on the song info screen if that option is
+#    selected.  If there is no key for a particular option, the string
+#    that is displayed for that value in the option menu is used.
+#    E.g. for the "jumps" option, value 0 will map to "No Jumps" while
+#    value 2 is not in the dictionary so will display "Wide".
+
+changeable_between = [('speed', {}),
+                      ('transform', {}),
+                      ('size', {}),
+                      ('fade', {}),
+                      ('accel', {}),
+                      ('scale', {}),
+                      ('scrollstyle', {}),
+                      ('jumps', {0:"No Jumps"}),
+                      ('spin', {1:"Spin"}),
+                      ('colortype', {}),
+                      ('dark', {1:"Dark"}),
+                      ('holds', {0:"No Holds"})
+                      ]
+
+
 pygame.init()
 
 # Fonts
@@ -174,4 +203,3 @@ DIFF_COLORS = { "BEGINNER": colors.color["white"],
                 "CRAZY": colors.color["purple"],
                 "EXPERT": colors.color["purple"]
                 }
-

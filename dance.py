@@ -10,6 +10,7 @@ from player import Player
 from announcer import Announcer
 
 from pygame.sprite import RenderUpdates
+from interface import *
 
 from pygame.mixer import music
 import fontfx
@@ -20,6 +21,8 @@ import games
 import error
 import colors
 import records
+import ui
+import options
 
 import os
 
@@ -174,6 +177,95 @@ class ReadyGoSprite(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.center = (320, 240)
 
+
+class SongInfoScreen(InterfaceWindow):
+  def __init__(self, song, diffs, playmode, songconf, configs, screen):
+    self.song = song
+    self.diffs = diffs
+    self.playmode = playmode
+    self.configs = configs
+    self.songconf = songconf
+    InterfaceWindow.__init__(self, screen, "songinfoscreen-bg.png")
+    self._banner = BannerDisplay([190, 240])
+    self._banner.set_song(SongItemDisplay(self.song))
+    self.end = pygame.time.get_ticks() + 6000
+    self._countdown = WrapTextDisplay(50, 68, [285,429], centered=True)
+    
+    self._player_widgets = []
+    self._player_opts = []
+    
+    for pid in range(len(self.diffs)):
+      self._player_widgets += self.player_widgets(pid)
+      self._player_opts += self.player_opts(pid)
+
+    self._other_widgets=[TextDisplay(50, [400, 50], [15, 35], "Next Song"),
+                         TextDisplay(30, [263, 37], [15, 450], "Confirm: Begin   Cancel: Stop"),
+                         TextDisplay(30, [263, 37], [380, 450], "Start: Change Options")]
+    
+    self._sprites.add([self._banner, self._countdown] +
+                      self._player_widgets + self._player_opts +
+                      self._other_widgets)
+    
+    pygame.display.update()
+    ui.ui.clear()
+    self.loop()
+    
+  def loop(self):
+    ev = (0, ui.PASS)
+    while ev not in [ui.CONFIRM, ui.CANCEL] and pygame.time.get_ticks() < self.end:
+      self._countdown.set_text("%02d" % ((self.end - pygame.time.get_ticks()) / 1000,))
+      self.update()
+      pygame.time.wait(20)
+
+      pid, ev = ui.ui.poll()
+      if ev == ui.START:
+        options.OptionScreen(self.configs, self.songconf, self._screen)
+        
+        for pid in range(len(self.diffs)):
+          self._player_opts[pid].set_text(self.opt_summary(pid))
+          
+        self.end = pygame.time.get_ticks() + 11000
+        self._screen.blit(self._bg, [0, 0])
+        pygame.display.update()
+        self.update()
+          
+      elif ev == ui.SCREENSHOT:
+        self.update(screenshot=True)
+        
+    self.proceed_to_song = (ev != ui.CANCEL)
+
+  def player_widgets(self, pid):
+    v_top = 11 + pid * 210
+    pname = WrapTextDisplay(50, 248, [380, v_top], "Player %d" % (pid+1,), centered=True)
+    d=DifficultyBox([504, v_top+65])
+    d.set(self.diffs[pid], DIFF_COLORS.get(self.diffs[pid], [127, 127, 127]),
+          self.song.difficulty[self.playmode][self.diffs[pid]], "")
+    return [pname, d]
+  
+  def player_opts(self,pid):
+    v_top = 11 + pid * 210
+    return [WrapTextDisplay(30, 248, [380, v_top+95],
+                            self.opt_summary(pid), centered=True)]
+
+  def opt_summary(self, pid):
+    summary = []
+    for opt, special_display in changeable_between:
+      if self.configs[pid][opt] == default_conf[opt]: continue
+      
+      i_choice = [x[0] for x in options.OPTIONS[opt][3]].index(self.configs[pid][opt])
+      if self.configs[pid][opt] in special_display:
+        summary.append(special_display[self.configs[pid][opt]])
+      else:
+        summary.append(options.OPTIONS[opt][3][i_choice][1])
+
+    if len(summary) == 0:
+      summary = "Default Settings"
+    else:
+      summary = ", ".join(summary)
+      
+    return summary
+      
+      
 # Run through a playlist of songs and play each one until people quit.
 def play(screen, playlist, configs, songconf, playmode):
   numplayers = len(configs)
@@ -184,6 +276,9 @@ def play(screen, playlist, configs, songconf, playmode):
   # Decides whether or not the Ready?/Go! should be displayed before
   # the song.
   first = True
+
+  display_songinfo = (mainconfig['songinfoscreen'] == 2 or
+                      (mainconfig['songinfoscreen'] == 1 and len(playlist) != 1 ))
 
   songdata = None
 
@@ -203,6 +298,13 @@ def play(screen, playlist, configs, songconf, playmode):
     songs_played += 1
     prevscr = pygame.transform.scale(screen, (640,480))
     songdata = steps.SongData(current_song, songconf)
+
+    if display_songinfo:
+      if not SongInfoScreen(current_song, diff, playmode, songconf,
+                            configs, screen).proceed_to_song: break
+      for playerID in range(numplayers):
+        for opt, dummy in changeable_between:
+          players[playerID].__dict__[opt] = configs[playerID][opt]
 
     for pid, player in enumerate(players):
       player.set_song(current_song, diff[pid], songdata.lyricdisplay)
