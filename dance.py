@@ -227,13 +227,14 @@ def dance(screen, song, players, prevscr, ready_go, game):
   # lyric display group
   lgroup = RenderUpdates()
 
+  background = pygame.Surface((640, 480))
+
   if song.movie != None:
     backmovie = BGmovie(song.movie)
     background.fill(colors.BLACK)
   else:
     backmovie = BGmovie(None)
     
-  background = pygame.Surface((640, 480))
   background.fill(colors.BLACK)
 
   ready_go_time = 100
@@ -368,17 +369,17 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
     rectlist = []
 
+    if backmovie.filename:
+      backmovie.update(curtime)
+      if backmovie.changed or (fpstext.fps() > 30):
+        backmovie.resetchange()
+        screen.blit(backmovie.image,(0,0))
+
     for plr in players: rectlist.extend(plr.game_loop(curtime, screen))
 
     if strobe: extbox.update(curtime + song.soffset)
 
     song.lyricdisplay.update(curtime)
-
-    if backmovie.filename:
-      backmovie.update(curtime)
-      if backmovie.changed or (fpstext.fpsavg > 30):
-        backmovie.resetchange()
-        screen.blit(backmovie.image,(0,0))
 
     songtext.update()
     grptext.update()

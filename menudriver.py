@@ -178,9 +178,9 @@ def do(screen, songdata):
 
   sprites = pygame.sprite.RenderUpdates()
   try:
-    Credits(["pydance %s" % VERSION] +
-            file(os.path.join(pydance_path, "CREDITS")).read().split("\n")
-            ).add(sprites)
+    lines = file(os.path.join(pydance_path, "CREDITS")).read().split("\n")
+    lines = [l.decode("utf-8") for l in lines]
+    Credits(["pydance %s" % VERSION] + lines).add(sprites)
   except:
     Credits(["pydance %s" % VERSION,
              "http://icculus.org/pyddr",
