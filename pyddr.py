@@ -1797,7 +1797,7 @@ class Song:
     return self.isValid
     
   def __repr__ (self):
-    return '<song song=%r group=%r bpm=%r file=%r>'%(self.song,self.group,self.bpm,self.file)
+    return '<song song=%r group=%r bpm=%s file=%r>'%(self.song,self.group,repr(self.bpm)[:7],self.file)
 
 #  def __getattr__ (self,attr):
 #    # act like a pygame.movie instance
@@ -2007,7 +2007,7 @@ class fastSong:
     return self.isValid
     
   def __repr__ (self):
-    return '<song song=%r group=%r bpm=%r file=%r>'%(self.song,self.group,self.bpm,self.file)
+    return '<song song=%r group=%r bpm=%s file=%r>'%(self.song,self.group,repr(self.bpm)[:7],self.file)
 
 class ArrowSet: 
   def __init__ (self, path, prefix='arr', imgtype='png', separator='_'):
@@ -2133,8 +2133,8 @@ class ArrowSprite(CloneSprite):
     self.bpm = bpm
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
-    self.playedsound = None
-    if mainconfig.get_value('assist',default='0'):
+    if int(mainconfig.get_value('assist',default='0')):
+      self.playedsound = None
       if self.dir == 'u':
         self.sample = pygame.mixer.Sound("assist-u.wav")
       elif self.dir == 'd':
@@ -2143,6 +2143,8 @@ class ArrowSprite(CloneSprite):
         self.sample = pygame.mixer.Sound("assist-l.wav")
       elif self.dir == 'r':
         self.sample = pygame.mixer.Sound("assist-r.wav")
+    else:
+      self.playedsound = 1
     self.r = 0
     self.playernum = playernum-1
     self.bimage = self.image
@@ -2241,7 +2243,7 @@ class HoldArrowSprite(CloneSprite):
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
     self.playedsound = None
-    if mainconfig.get_value('assist',default='0'):
+    if int(mainconfig.get_value('assist',default='0')):
       if self.dir == 'u':
         self.sample = pygame.mixer.Sound("assist-u.wav")
       elif self.dir == 'd':
@@ -2250,6 +2252,8 @@ class HoldArrowSprite(CloneSprite):
         self.sample = pygame.mixer.Sound("assist-l.wav")
       elif self.dir == 'r':
         self.sample = pygame.mixer.Sound("assist-r.wav")
+    else:
+      self.playedsound = 1
     self.r = 0
     self.oimage = pygame.surface.Surface((64,32))
     self.oimage.blit(self.image,(0,-32))
@@ -3510,6 +3514,12 @@ def songSelect(songs,fooblah):
 
   realdiff = realdiff2 = -1
   songidx = scrolloff = s = difficulty = difficulty2 = 0
+  helpfiles = ["keyboard-ik.png","mat-updn.png","keyboard-s.png","keyboard-jl.png","mat-leftright.png","keyboard-scroll.png","mat-scroll.png","random.png","start.png"]
+  oldhelp = CloneSprite(pygame.surface.Surface((1,1)))
+  oldhelp.set_colorkey(oldhelp.get_at((0,0)))
+  oldhelp.set_alpha(0)
+  curhelp = copy.copy(oldhelp)
+  helptime = pygame.time.get_ticks()
   fontdisp = dozoom = 1
   idir = -8
   i = 192
@@ -3787,6 +3797,26 @@ def songSelect(songs,fooblah):
     if i > 240:
       idir = -8
     ii = 256-i
+
+    if oldhelp.get_alpha() > 8:
+      oldhelp.set_alpha(oldhelp.get_alpha()-8)
+    if curhelp.get_alpha() < 244:
+      curhelp.set_alpha(curhelp.get_alpha()+8)
+      
+    eraseRects.append(oldhelp.rect)
+    eraseRects.append(curhelp.rect)
+    dirtyRects.append(oldhelp.draw(screen))
+    dirtyRects.append(curhelp.draw(screen))
+
+    if helptime+4000 < pygame.time.get_ticks():
+      helptime = pygame.time.get_ticks()
+      oldhelp = copy.copy(curhelp)
+      curhelp = CloneSprite(pygame.image.load(os.path.join("menuhelp",helpfiles[0])).convert())
+      helpfiles.append(helpfiles.pop(0))
+      curhelp.rect.left = 128
+      curhelp.rect.top = 400
+      oldhelp.set_alpha(255)
+      curhelp.set_alpha(0)
 
     scale = (0.5+float(i)/240.0)/2
     arrow = TransformSprite(arrowTextMax,scale=scale)
@@ -4174,7 +4204,7 @@ def dance(song,players,difficulty):
   if players == 2:
     song2.play(playmode, difficulty[1],0)
 
-  if mainconfig.get_value('assist',default='0'):
+  if int(mainconfig.get_value('assist',default='0')):
     pygame.mixer.music.set_volume(0.6)
   else:
     pygame.mixer.music.set_volume(1.0)
