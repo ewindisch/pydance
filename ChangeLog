@@ -19,6 +19,7 @@ Legend:
 + Best grades for songs are now stored (in ~/.pydance/records).
 + Arrow animations have been tweaked to make songs with lots of 24th notes
   (like bag) easier to read.
++ Rewrite of findbpm by Paul Crowley to do least-squares estimation.
 + Non-EMSUSB2 adapters work again.
 
 0.8.2 - I"M GONNA EAT YOU!!!1					[2003.11.16]
