@@ -14,7 +14,7 @@ In all installations, you need the following things:
  - The [currently] latest SDL_mixer (1.2.5), with Vorbis support.
  - SMPEG, if you want bad MP3 support.
  - Libvorbis.
- - Python 2.3 or higher (2.2 might run, but is unsupported; 2.1 won't).
+ - Python 2.3 or higher.
  - Pygame 1.5.6 or higher (1.5.5 is acceptable but may crash on some files).
 
 If you are running a Unix distribution, all these probably come with

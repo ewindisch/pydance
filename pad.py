@@ -230,7 +230,7 @@ class Pad(object):
     while ev[1] != PASS: ev = self.poll()
 
   def write(self, fn):
-    pickle.dump(self.events, file(fn, "w"))
+    pickle.dump(self.events, file(fn, "w"), proto = 2)
 
   def set_repeat(*args): pass
 
