@@ -96,6 +96,9 @@ class QuitGame:
 #  narray*=array(color).astype(Float32)
 #  _blit_array(surf,narray.astype(Int8))
 
+MAXPLAYERS = 2
+DIRECTIONS = ['l', 'd', 'u', 'r']
+
 #MAIN CONFIG FILE
 
 mainconfig = Config({ # Wow we have a lot of options
@@ -220,11 +223,16 @@ class BGmovie(pygame.sprite.Sprite):
     pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
     self.filename = filename
     self.image = pygame.surface.Surface((640,480))
-    if filename:
+    
+    if filename and not os.path.isfile(filename): #make sure the file's there
+      print "The movie file for this song is missing."
+      self.filename = None
+    
+    if self.filename:
       self.movie = pygame.movie.Movie(filename)
       self.movie.set_display(self.image,[(0,0),(640,480)])
     else:
-      self.image.set_alpha(0, RLEACCEL)    
+      self.image.set_alpha(0, RLEACCEL) 
     self.rect = self.image.get_rect()
     self.rect.top = 0
     self.rect.left = 0
@@ -244,7 +252,7 @@ class BGmovie(pygame.sprite.Sprite):
 
 class keykludge:
   def __init__ (self):
-    self.directionlist = ['l','d','u','r']
+    self.directionlist = DIRECTIONS
     self.holdingstates = [ 0 , 0 , 0 , 0 ]
   
   def pressed(self,direction):
@@ -412,11 +420,9 @@ class Judge:
       self.actualtimes[curtick] = etime
       if curtick in self.times:
         self.steps[curtick] += key
-        match = 1
       else:
         self.steps[curtick] = key
         self.times = self.steps.keys()
-        match = 1
         
       self.times.sort()
       isdl = 0
@@ -586,8 +592,7 @@ class GradingScreen:
 
       # Combo
       for j in range(4):
-        text = "%d (%d%%)" % (judge.bestcombo,
-                              judge.bestcombo * 100 / totalsteps)
+        text = "%d (%d%%)" % (judge.bestcombo, judge.bestcombo * 100 / totalsteps)
         gradetext = fontfx.shadefade(text,28,j,(testf.size(text)[0]+8,32), (fc,fc,fc))
         gradetext.set_colorkey(gradetext.get_at((0,0)))
         graderect = gradetext.get_rect()
@@ -702,8 +707,8 @@ class ComboDisp(pygame.sprite.Sprite):
     self.sticky = mainconfig['stickycombo']
     self.lowcombo = mainconfig['lowestcombo']
 
-    self.trect = 296+(mainconfig['totaljudgings'])*24
-    self.playernum = playernum - 1
+    self.trect = 296+(mainconfig['totaljudgings'] *24)
+    self.playernum = playernum
     self.centerx = (320*self.playernum) + 160
     
     fonts = []
@@ -771,7 +776,7 @@ class ComboDisp(pygame.sprite.Sprite):
 class HoldJudgeDisp(pygame.sprite.Sprite):
     def __init__(self,playernum):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-        self.playernum = playernum-1
+        self.playernum = playernum
 
         self.space = pygame.surface.Surface((48,24))
         self.space.fill((0,0,0))
@@ -929,7 +934,7 @@ class TopArrow(pygame.sprite.Sprite):
     self.adder = 0
     self.direction = direction
     self.topimg = []
-    self.playernum = playernum-1
+    self.playernum = playernum
     self.ypos = ypos
 
     for i in range(8):
@@ -1002,7 +1007,7 @@ class ArrowFX(pygame.sprite.Sprite):
     self.tick = toRealTime(bpm, 1);
     self.centery = ypos + 32
     self.centerx = {'l':44, 'd':120, 'u':196, 'r':272}[direction]
-    self.playernum = playernum-1
+    self.playernum = playernum
     
     fn = os.path.join('themes','gfx',theme,'arr_n_') + direction + '_3.png'
     self.baseimg = pygame.image.load(fn).convert(16)
@@ -1073,7 +1078,7 @@ class ArrowFX(pygame.sprite.Sprite):
 class LifeBarDisp(pygame.sprite.Sprite):
     def __init__(self,playernum):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-        self.playernum = playernum-1
+        self.playernum = playernum
         self.oldlife = self.failed = 0
         self.life = 25
         self.image = pygame.Surface((204,28))
@@ -1124,57 +1129,51 @@ class LifeBarDisp(pygame.sprite.Sprite):
        return self.failed
        
     def update(self, judges):
-      tstmp = judges.marvelous + judges.perfect + judges.great + judges.ok + judges.crap + judges.shit + judges.miss
-      if tstmp: 
-        self.life += judges.combo*8 / tstmp
-        self.life += judges.bestcombo*8 / tstmp
+      #I assume this is for testing stuff, but seeing as it's essentially an expensive NOP, I disabling it --DS
+      #tstmp = judges.marvelous + judges.perfect + judges.great + judges.ok + judges.crap + judges.shit + judges.miss
+      #if tstmp: 
+        #self.life += judges.combo*8 / tstmp
+        #self.life += judges.bestcombo*8 / tstmp
+      
+      if self.life > 0: #If you failed, you failed. You can't gain more life afterwards
+        self.life = 25 + (judges.marvelous * self.vamt) + (judges.perfect * self.pamt) + (judges.great * self.gamt) + (judges.ok * self.oamt) + (judges.crap * self.camt) + (judges.shit * self.samt) + (judges.miss * self.mamt)
+        
+        if self.life < 0: #FAILED but we don't do anything yet
+          self.failed = 1
+          self.life = 0
+        elif self.life > 52:
+          self.life = 52
+        
+        self.life = int(self.life)
+        if self.life != self.oldlife:
+          self.oldlife = self.life
+#          print "life went to",self.life
+          for j in range(52-self.life-1):
+            self.image.blit(self.blkbar, ((2+int(self.life+j)*4), 2) )
 
-      self.life = 25
-      self.life += judges.marvelous * self.vamt
-      self.life += judges.perfect * self.pamt
-      self.life += judges.great * self.gamt
-      self.life += judges.ok * self.oamt
-      self.life += judges.crap * self.camt
-      self.life += judges.shit * self.samt
-      self.life += judges.miss * self.mamt
+          self.image.blit(self.bugbar,(202,2))   # because the damn bar eraser bugs out all the time
 
-      if self.life < 0:
-        #FAILED but we don't do anything yet
-        self.failed = 1
-        self.life = 0
+          for j in range(self.life):
+            barpos = int(self.life-(j+1))
+            if barpos <= 10:
+              self.redbar_pos.left = 2+ barpos*4
+              self.redbar_pos.top = 2
+              self.image.blit(self.redbar,self.redbar_pos)
+            if barpos > 10 and barpos <= 20:
+              self.orgbar_pos.left = 2+ barpos*4
+              self.orgbar_pos.top = 2
+              self.image.blit(self.orgbar,self.orgbar_pos)
+            if barpos > 20 and barpos <= 35:
+              self.yelbar_pos.left = 2+ barpos*4
+              self.yelbar_pos.top = 2
+              self.image.blit(self.yelbar,self.yelbar_pos)
+            if barpos > 35 and barpos < 50:
+              self.grnbar_pos.left = 2+ barpos*4
+              self.grnbar_pos.top = 2
+              self.image.blit(self.grnbar,self.grnbar_pos)
 
-      if self.life > 52:
-        self.life = 52
-      if int(self.life) != int(self.oldlife):
-#        print "life went to",self.life
-        for j in range(52-self.life-1):
-          self.image.blit(self.blkbar, ((2+int(self.life+j)*4), 2) )
-
-        self.image.blit(self.bugbar,(202,2))   # because the damn bar eraser bugs out all the time
-
-        for j in range(self.life):
-          barpos = int(self.life-(j+1))
-          if barpos <= 10:
-            self.redbar_pos.left = 2+ barpos*4
-            self.redbar_pos.top = 2
-            self.image.blit(self.redbar,self.redbar_pos)
-          if barpos > 10 and barpos <= 20:
-            self.orgbar_pos.left = 2+ barpos*4
-            self.orgbar_pos.top = 2
-            self.image.blit(self.orgbar,self.orgbar_pos)
-          if barpos > 20 and barpos <= 35:
-            self.yelbar_pos.left = 2+ barpos*4
-            self.yelbar_pos.top = 2
-            self.image.blit(self.yelbar,self.yelbar_pos)
-          if barpos > 35 and barpos < 50:
-            self.grnbar_pos.left = 2+ barpos*4
-            self.grnbar_pos.top = 2
-            self.image.blit(self.grnbar,self.grnbar_pos)
-
-      if self.failed:
-        self.image.blit(self.failtext, (70, 2) )
-
-      self.oldlife = self.life
+          if self.failed:
+            self.image.blit(self.failtext, (70, 2) )
 
 class JudgingDisp(pygame.sprite.Sprite):
     def __init__(self,playernum):
@@ -1183,7 +1182,7 @@ class JudgingDisp(pygame.sprite.Sprite):
         self.total = mainconfig['totaljudgings']
         self.sticky = mainconfig['stickyjudge']
         self.needsupdate = 1
-        self.playernum = playernum-1
+        self.playernum = playernum
         self.stepped = 0
         self.oldzoom = -1
         
@@ -1250,7 +1249,7 @@ class JudgingDisp(pygame.sprite.Sprite):
 class ScoringDisp(pygame.sprite.Sprite):
     def __init__(self,playernum,playmode):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-        self.playernum = playernum-1
+        self.playernum = playernum
         
         # prerender the baseimage
         self.font = pygame.font.Font(None, 28)
@@ -1285,7 +1284,7 @@ class TimeDisp(pygame.sprite.Sprite):
         
     def update(self, time):
       nowtime = repr(time)[:repr(time).index('.')+3]
-      if (nowtime != self.oldtime) and (self.blahmod > 3):
+      if (nowtime != self.oldtime) and (self.blahmod > 1):
         self.image = self.font.render(nowtime,1,(224,224,224))
         self.image.set_colorkey(self.image.get_at((0,0)),RLEACCEL)
         self.oldtime = nowtime
@@ -1629,7 +1628,7 @@ class Song:
         nevents_append(fhead)
         fhead=fhead.next
       self.fhead=fhead
-    return events,nevents,time,arrowtime,bpm
+    return events,nevents,time,bpm
 
   def isOver(self):
     if (not pygame.mixer.music.get_busy()) or (self.endtime>0 and self.curtime>=self.endtime):
@@ -1992,7 +1991,7 @@ class ArrowSprite(CloneSprite):
     else:
       self.playedsound = 1
     self.r = 0
-    self.playernum = playernum-1
+    self.playernum = playernum
     self.bimage = self.image
     self.arrowspin = float(mainconfig["arrowspin"])
     self.arrowscale = float(mainconfig["arrowscale"])
@@ -2086,7 +2085,7 @@ class HoldArrowSprite(CloneSprite):
     self.life  = times[2]-curtime
     self.bpm = bpm
     self.lastbpmtime = lastbpmtime
-    self.playernum = playernum-1
+    self.playernum = playernum
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
     self.playedsound = None
@@ -2418,14 +2417,14 @@ class EventManager:
 #      print "pressed",
     if blah < 0:
 #      print "released",
-      if blah == -2: holdkey.letgo('l')
-      if blah == -3: holdkey.letgo('r')
-      if blah == -4: holdkey.letgo('u')
-      if blah == -5: holdkey.letgo('d')
-      if blah == -13: holdkey2.letgo('l')
-      if blah == -14: holdkey2.letgo('r')
-      if blah == -15: holdkey2.letgo('u')
-      if blah == -16: holdkey2.letgo('d')
+      if blah == -2: holdkey[0].letgo('l')
+      if blah == -3: holdkey[0].letgo('r')
+      if blah == -4: holdkey[0].letgo('u')
+      if blah == -5: holdkey[0].letgo('d')
+      if blah == -13: holdkey[1].letgo('l')
+      if blah == -14: holdkey[1].letgo('r')
+      if blah == -15: holdkey[1].letgo('u')
+      if blah == -16: holdkey[1].letgo('d')
  #   if blah != E_PASS:
  #     print ['E_PASS','E_QUIT','E_LEFT','E_RIGHT','E_UP','E_DOWN','E_FULLSCREEN','E_START','E_SCREENSHOT','E_HCENTER','E_VCENTER','E_PGUP','E_PGDN','E_LEFT2','E_RIGHT2','E_UP2','E_DOWN2','E_START2','E_SELECT'][blah]
     return blah
@@ -2742,12 +2741,13 @@ def main():
       ox = x-1
       n.renderListText(totalsongs,fuxor)
       fuxor += 1
-
-  p1combo = ComboDisp(1)
-  holdkey = keykludge()
-  p2combo = ComboDisp(2)
-  holdkey2 = keykludge()
-  global p1combo, p2combo, holdkey, holdkey2, sortmode
+  
+  global holdkey, sortmode
+  
+  holdkey = {}
+  for playerID in range(MAXPLAYERS):
+    holdkey[playerID] = keykludge()
+    
   text_fadeoff(screen, font, "Prerendering....", (320, 240))
 
 #  pygame.time.delay(500)
@@ -3519,8 +3519,7 @@ def songSelect(songs, players):
       except:
         pass
 
-      biggerdifflist = []
-      biggerdifflist.append(diffList[difficulty])
+      biggerdifflist = [diffList[difficulty]]
       if players == 2:
         biggerdifflist.append(diffList[difficulty2])
 
@@ -3794,9 +3793,10 @@ def songSelect(songs, players):
 
 def dance(song,players,difficulty):
   global screen,background,eventManager,currentTheme,playmode
-
-  if players == 2:
-    song2 = copy.copy(song)
+  
+  songL = [song]
+  for i in range(1, players):
+    songL.append(copy.copy(song))
 
   pygame.mixer.init()
 
@@ -3814,10 +3814,7 @@ def dance(song,players,difficulty):
   sgroup = RenderLayered()
   # special group for arrowfx
   fgroup = RenderLayered()
-  # moving arrows group
-  agroup = RenderLayered()
-  agroup2 = RenderLayered()
-
+  
   # lyric display group
   lgroup = RenderLayered()
 
@@ -3825,10 +3822,11 @@ def dance(song,players,difficulty):
   bgroup = RenderLayered()
 
   # dancer group
-  dgroup = RenderLayered()
+  #dgroup = RenderLayered()
 
   if song.moviefile != ' ':
     backmovie = BGmovie(os.path.join(songdir,song.moviefile))
+    backmovie.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
   else:
     backmovie = BGmovie(None)
     
@@ -3864,30 +3862,40 @@ def dance(song,players,difficulty):
   hiddenval = float(mainconfig['hidden'])
   
   # so the current combos get displayed
-  global p1combo
   global holdkey
-  p1list0 = JudgingDisp(1)
-  p1list1 = JudgingDisp(1)
-  p1list2 = JudgingDisp(1)
-  p1score = ScoringDisp(1,difficulty[0])
-  lifebar = LifeBarDisp(1)
-  holdtext = HoldJudgeDisp(1)
-
-  holdtext.add(tgroup)
-  lifebar.add(tgroup)  
-  p1score.add(tgroup)
   
-  if players == 2:
-    p2list0 = JudgingDisp(2)
-    p2list1 = JudgingDisp(2)
-    p2list2 = JudgingDisp(2)
-    p2score = ScoringDisp(2,difficulty[1])
-    lifebar2 = LifeBarDisp(2)
-    holdtext2 = HoldJudgeDisp(2)
+  tj = mainconfig['totaljudgings']
+  if tj > 3:
+    tj = 3
+  elif tj < 0 :
+    tj = 0
+  
+  playerContents = []
+  for playerID in range(players):
+    plr = {
+      'playerID': playerID,
+      'score': ScoringDisp(playerID, difficulty[playerID]),
+      'lifebar': LifeBarDisp(playerID),
+      'holdtext': HoldJudgeDisp(playerID),
+      'arrowGroup': RenderLayered(),
+      
+      'judgingList': [JudgingDisp(playerID), JudgingDisp(playerID), JudgingDisp(playerID)],
+      
+      'tempholding': [-1, -1, -1, -1],
 
-    holdtext2.add(tgroup)
-    lifebar2.add(tgroup)  
-    p2score.add(tgroup)
+      'combos': ComboDisp(playerID),
+      'holdkey': holdkey[playerID],
+      'song': songL[playerID],
+      'difficulty': difficulty[playerID]
+    }
+    
+    plr['score'].add(tgroup)
+    plr['lifebar'].add(tgroup)
+    plr['holdtext'].add(tgroup)
+    
+    for i in range(tj):
+      plr['judgingList'][i].add(tgroup)
+    playerContents.append(plr)
   
   fpstext = fpsDisp()
 
@@ -3905,22 +3913,7 @@ def dance(song,players,difficulty):
     song.transdisplay.add(lgroup)
 
   showcombo = mainconfig['showcombo']
-
-  if mainconfig['totaljudgings'] > 0:
-    p1list0.add(tgroup)
-  if mainconfig['totaljudgings'] > 1:
-    p1list1.add(tgroup)
-  if mainconfig['totaljudgings'] > 2:
-    p1list2.add(tgroup)
-
-  if players == 2:
-    if mainconfig['totaljudgings'] > 0:
-      p2list0.add(tgroup)
-    if mainconfig['totaljudgings'] > 1:
-      p2list1.add(tgroup)
-    if mainconfig['totaljudgings'] > 2:
-      p2list2.add(tgroup)
-
+  
   bg = pygame.Surface(screen.get_size())
   bg.fill((0,0,0))
 
@@ -3944,16 +3937,13 @@ def dance(song,players,difficulty):
   totalmiss=bestcombo=combo=failed=0
   oldet=0
   fps=0
-  tempholding = [-1,-1,-1,-1]
-  tempholding2 = [-1,-1,-1,-1]
   i,j,k=1,0,0
   screenshot=fontdisp=0
   
   song.cache()
   if song.crapout == 0:
     song.init()
-
-  if song.crapout:
+  else:
     font = None
     text = None
     font = pygame.font.Font(None, 192)
@@ -3969,7 +3959,7 @@ def dance(song,players,difficulty):
 
     if song.crapout == 1:
       text = font.render("The type of music file this song is in isn't recognised", 1, (224,224,224))
-    if song.crapout == 2:
+    elif song.crapout == 2:
       text = font.render("The music file ("+song.file+") for this song wasn't found", 1, (224,224,224))
 
     text.set_colorkey(text.get_at((0,0)))
@@ -3992,7 +3982,6 @@ def dance(song,players,difficulty):
       if (event.type == KEYDOWN and (event.key==13 or event.key==271)) or (event.type==JOYBUTTONDOWN and event.button==9):
         break
 
-
   tick=brokecombo=drawmiss=0   
   stepj = " "
   beatnum = bar = arroff = 0
@@ -4008,117 +3997,70 @@ def dance(song,players,difficulty):
 
 #  print "playmode: %r difficulty %r modes %r" % (playmode,difficulty,song.modes)
 #  print "Total arrows are %d " % song.totarrows[difficulty]
-  song.play(playmode, difficulty[0],1)
-
-  # second instance of song created JUST to manage player 2's arrows/etc, that's it
-  if players == 2:
-    song2.play(playmode, difficulty[1],0)
-
   if mainconfig['assist']:
     pygame.mixer.music.set_volume(0.6)
   else:
     pygame.mixer.music.set_volume(1.0)
 
-  holds = len(song.holdref[song.modediff[playmode].index(difficulty[0])])
-  if players == 2:
-    holds2 = len(song.holdref[song.modediff[playmode].index(difficulty[1])])
   difflist = song.modediff[playmode]
-  diffnum = difflist.index(difficulty[0])
-  dajudge = Judge(song.bpm, holds, song.modeinfo[playmode][diffnum][1],
-                  song.totarrows[difficulty[0]],difficulty[0])
-  if players == 2:
-    diffnum2 = difflist.index(difficulty[1])
-    dajudge2 = Judge(song.bpm, holds2, song.modeinfo[playmode][diffnum2][1],
-                     song.totarrows[difficulty[1]],difficulty[1])
-
+  
   if (mainconfig['strobe']):
     extbox = Blinky(song.bpm)
     extbox.add(tgroup)
-
-  toparr1_l = TopArrow(song.bpm,'l',ARROWTOP,1)
-  toparr1_d = TopArrow(song.bpm,'d',ARROWTOP,1)
-  toparr1_u = TopArrow(song.bpm,'u',ARROWTOP,1)
-  toparr1_r = TopArrow(song.bpm,'r',ARROWTOP,1)
-
-  toparrfx1_l = ArrowFX(song.bpm,'l',ARROWTOP,1)
-  toparrfx1_d = ArrowFX(song.bpm,'d',ARROWTOP,1)
-  toparrfx1_u = ArrowFX(song.bpm,'u',ARROWTOP,1)
-  toparrfx1_r = ArrowFX(song.bpm,'r',ARROWTOP,1)
-
-  if players == 2:
-    toparr2_l = TopArrow(song.bpm,'l',ARROWTOP,2)
-    toparr2_d = TopArrow(song.bpm,'d',ARROWTOP,2)
-    toparr2_u = TopArrow(song.bpm,'u',ARROWTOP,2)
-    toparr2_r = TopArrow(song.bpm,'r',ARROWTOP,2)
- 
-    toparrfx2_l = ArrowFX(song.bpm,'l',ARROWTOP,2)
-    toparrfx2_d = ArrowFX(song.bpm,'d',ARROWTOP,2)
-    toparrfx2_u = ArrowFX(song.bpm,'u',ARROWTOP,2)
-    toparrfx2_r = ArrowFX(song.bpm,'r',ARROWTOP,2)
-
-  if mainconfig['explodestyle'] > -1:
-    toparrfx1_l.add(fgroup)
-    toparrfx1_d.add(fgroup)
-    toparrfx1_u.add(fgroup)
-    toparrfx1_r.add(fgroup)
-
-    if players == 2:
-      toparrfx2_l.add(fgroup)
-      toparrfx2_d.add(fgroup)
-      toparrfx2_u.add(fgroup)
-      toparrfx2_r.add(fgroup)
-
-  if mainconfig['showtoparrows']:
-    toparr1_l.add(sgroup)
-    toparr1_d.add(sgroup)
-    toparr1_u.add(sgroup)
-    toparr1_r.add(sgroup)
-
-    if players == 2:
-      toparr2_l.add(sgroup)
-      toparr2_d.add(sgroup)
-      toparr2_u.add(sgroup)
-      toparr2_r.add(sgroup)
-  
+    
+  for plr in playerContents:
+    plr['song'].play(playmode, plr['difficulty'], plr['playerID'] == 0)
+    plr['holds'] = len(song.holdref[song.modediff[playmode].index(plr['difficulty'])])
+    plr['judge'] = Judge(song.bpm, plr['holds'], song.modeinfo[playmode][difflist.index(plr['difficulty'])][1], song.totarrows[plr['difficulty']], plr['difficulty'])
+    plr['toparr'] = {}
+    plr['toparrfx'] = {}
+    for arrowID in DIRECTIONS:
+      plr['toparr'][arrowID] = TopArrow(song.bpm, arrowID, ARROWTOP, plr['playerID'])
+      plr['toparrfx'][arrowID] = ArrowFX(song.bpm, arrowID, ARROWTOP, plr['playerID'])
+      
+      if mainconfig['explodestyle'] > -1:
+        plr['toparrfx'][arrowID].add(fgroup)
+      if mainconfig['showtoparrows']:
+        plr['toparr'][arrowID].add(sgroup)
+      
   oldbpm = song.playingbpm
   bpmchanged = 0
   
-  lastt=0
   while 1:
-    #grab an event
-    ee = song.get_events()
-    if mainconfig['killsongonfail'] and lifebar.failed:
-      song.kill()
-    if ee is not None: 
-#      print ee
-      events,nevents,curtime,arrowtime,bpm = ee
-    else:
-      if song.isOver():
-        break
-
-    if players == 2:
-      ee2 = song2.get_events()
-      if ee2 is not None: 
-        events2,nevents2,curtime2,arrowtime2,bpm2 = ee2
+    if mainconfig['killsongonfail']:
+      songFailed = 1
+      for plr in playerContents:
+        if plr['lifebar'].failed == 0:
+          songFailed = 0
+          break;
+      if songFailed:
+        song.kill()
     
     # ticks is current ticks for joy history, state is joypad state, delta is change in joy state
     ticks, state, delta = joypad.poll()
+    
+    for plr in playerContents:
+      plr['evt'] = plr['song'].get_events()
+      plr['fxData'] = None
+    
+    if playerContents[0]['evt'] is None:
+      if song.isOver():
+        break
+    else:
+      # we need the current time for a few things, and it should be the same for all players
+      curtime = playerContents[0]['evt'][2]
+    
     # nstate is the set of bits that were just turned on
     nstate = state&delta
-
-#    print "nstate", nstate, "  state", state, "  delta",delta
-
-    keys = 0
+    
+    key = []
 
     if delta:
-#      print state
-      key = []
-      
       if nstate&G_START:
-        if holdkey.checkstate('r'):
+        if holdkey[0].checkstate('r'):
           print "holding right plus start quits. pyDDR now exiting."
           sys.exit()
-        elif holdkey.checkstate('l'):
+        elif holdkey[0].checkstate('l'):
           break
         else:
           pass
@@ -4129,213 +4071,97 @@ def dance(song,players,difficulty):
       if nstate&G_SCREENSHOT: 
         screenshot = 1
       if nstate&J_LEFT:
-        key.append('l1')
-        toparr1_l.stepped(1,curtime+(song.offset*1000))
-        keys += 1
+        key.append('l0')
       if nstate&J_RIGHT:
-        key.append('r1')
-        toparr1_r.stepped(1,curtime+(song.offset*1000))
-        keys += 1
+        key.append('r0')
       if nstate&J_UP:
-        key.append('u1')
-        toparr1_u.stepped(1,curtime+(song.offset*1000))
-        keys += 1
+        key.append('u0')
       if nstate&J_DOWN:
-        key.append('d1')
-        toparr1_d.stepped(1,curtime+(song.offset*1000))
-        keys += 1
+        key.append('d0')
       if players == 2:
         if nstate&J_LEFT2:
-          key.append('l2')
-          toparr2_l.stepped(1,curtime+(song.offset*1000))
-          keys += 1
+          key.append('l1')
         if nstate&J_RIGHT2:
-          key.append('r2')
-          toparr2_r.stepped(1,curtime+(song.offset*1000))
-          keys += 1
+          key.append('r1')
         if nstate&J_UP2:
-          key.append('u2')
-          toparr2_u.stepped(1,curtime+(song.offset*1000))
-          keys += 1
+          key.append('u1')
         if nstate&J_DOWN2:
-          key.append('d2')
-          toparr2_d.stepped(1,curtime+(song.offset*1000))
-          keys += 1
-
-    fxdir = fxtext = fxdir2 = fxtext2 = ' '
-    fxtime = fxtime2 = 0.0
-            
-    if keys:
-      for checkkey in range(keys):
-        if key[checkkey][1] == '1':
-          holdkey.pressed(key[checkkey][0])
-          fxtext, fxdir, fxtime = dajudge.handle_key(key[checkkey][0], curtime)
-        if players == 2 and (key[checkkey][1] == '2'):
-          holdkey2.pressed(key[checkkey][0])
-          fxtext2, fxdir2, fxtime2 = dajudge2.handle_key(key[checkkey][0], curtime)
-
-    directions = ['l','d','u','r']
-    for checkhold in directions:
-      if checkhold == 'l':
-        toparrfx1_l.holding(0)
-      if checkhold == 'd':
-        toparrfx1_d.holding(0)
-      if checkhold == 'u':
-        toparrfx1_u.holding(0)
-      if checkhold == 'r':
-        toparrfx1_r.holding(0)
-      currenthold = holdkey.shouldhold(checkhold,curtime,song.holdinfo[song.modediff[playmode].index(difficulty[0])],song.playingbpm)
-      if currenthold is not None:
-        if holdkey.checkstate(checkhold):
-          if dajudge.holdsub[tempholding[directions.index(checkhold)]] != -1:
-            if checkhold == 'l':
-              toparrfx1_l.holding(1)
-            if checkhold == 'd':
-              toparrfx1_d.holding(1)
-            if checkhold == 'u':
-              toparrfx1_u.holding(1)
-            if checkhold == 'r':
-              toparrfx1_r.holding(1)
-          tempholding[directions.index(checkhold)] = currenthold
-        else:
-          dajudge.botchedhold(currenthold)
-          holdtext.fillin(curtime,directions.index(checkhold),"NG")
-      else:
-        if tempholding[directions.index(checkhold)] > -1:
-          if dajudge.holdsub[tempholding[directions.index(checkhold)]] != -1:
-            tempholding[directions.index(checkhold)] = -1
-            holdtext.fillin(curtime,directions.index(checkhold),"OK")
-
-    if players == 2:
-      for checkhold in directions:
-        if checkhold == 'l':
-          toparrfx2_l.holding(0)
-        if checkhold == 'd':
-          toparrfx2_d.holding(0)
-        if checkhold == 'u':
-          toparrfx2_u.holding(0)
-        if checkhold == 'r':
-          toparrfx2_r.holding(0)
-        currenthold = holdkey2.shouldhold(checkhold,curtime,song.holdinfo[song.modediff[playmode].index(difficulty[1])],song.playingbpm)
+          key.append('d1')
+  
+    for keyAction in key:
+      playerID = int(keyAction[1])
+      if playerID <= players:
+        keyPress = keyAction[0]
+        playerContents[playerID]['toparr'][keyPress].stepped(1, curtime+(song.offset*1000))
+        holdkey[playerID].pressed(keyPress)
+        playerContents[playerID]['fxData'] = playerContents[playerID]['judge'].handle_key(keyPress, curtime)
+    
+    for plr in playerContents:
+      for checkhold in DIRECTIONS:
+        plr['toparrfx'][checkhold].holding(0)
+        currenthold = plr['holdkey'].shouldhold(checkhold, curtime, song.holdinfo[song.modediff[playmode].index(plr['difficulty'])], song.playingbpm)
+        dirID = DIRECTIONS.index(checkhold)
         if currenthold is not None:
-          if holdkey2.checkstate(checkhold):
-            if dajudge2.holdsub[tempholding2[directions.index(checkhold)]] != -1:
-              if checkhold == 'l':
-                toparrfx2_l.holding(1)
-              if checkhold == 'd':
-                toparrfx2_d.holding(1)
-              if checkhold == 'u':
-                toparrfx2_u.holding(1)
-              if checkhold == 'r':
-                toparrfx2_r.holding(1)
-            tempholding2[directions.index(checkhold)] = currenthold
+          if plr['holdkey'].checkstate(checkhold):
+            if plr['judge'].holdsub[plr['tempholding'][dirID]] != -1:
+              plr['toparrfx'][checkhold].holding(1)
+            plr['tempholding'][dirID] = currenthold
           else:
-            dajudge2.botchedhold(currenthold)
-            holdtext2.fillin(curtime,directions.index(checkhold),"NG")
+            plr['judge'].botchedhold(currenthold)
+            plr['holdtext'].fillin(curtime, dirID, "NG")
         else:
-          if tempholding2[directions.index(checkhold)] > -1:
-            if dajudge2.holdsub[tempholding2[directions.index(checkhold)]] != -1:
-              tempholding2[directions.index(checkhold)] = -1
-              holdtext2.fillin(curtime,directions.index(checkhold),"OK")
-
-    if ee is not None:
-      # handle events that are happening now
-      for ev in events:
-#        print "current event: %r"%ev
-        if ev.extra == 'CHBPM':
-          if (bpm != dajudge.getbpm()):
-            dajudge.changingbpm(ev.bpm)
-            if players == 2:
-              dajudge2.changingbpm(ev.bpm)
-        if ev.extra == 'TSTOP':
-          pygame.time.wait(ev.bpm)
-        if ev.feet:
-          for (dir,num) in zip(['l','d','u','r'],ev.feet):
-            if num & 8:
-              dajudge.handle_arrow(dir, curtime, ev.when)
-
-    if players == 2:
-      if ee2 is not None:
-        for ev in events2:
+          if plr['tempholding'][dirID] > -1:
+            if plr['judge'].holdsub[plr['tempholding'][dirID]] != -1:
+              plr['tempholding'][dirID] = -1
+              plr['holdtext'].fillin(curtime,dirID,"OK")
+    
+      if plr['evt'] is not None:
+        # handle events that are happening now
+        events,nevents,curtime,bpm = plr['evt']
+        
+        for ev in events:
+          #print "current event: %r"%ev
+          if ev.extra == 'CHBPM':
+            if (bpm != plr['judge'].getbpm()):
+              plr['judge'].changingbpm(ev.bpm)
+          elif ev.extra == 'TSTOP' and plr['playerID'] == 0:
+            #only pause for the first player
+            pygame.time.wait(ev.bpm)
           if ev.feet:
-            for (dir,num) in zip(['l','d','u','r'],ev.feet):
+            for (dir,num) in zip(DIRECTIONS,ev.feet):
               if num & 8:
-                dajudge2.handle_arrow(dir, curtime, ev.when)
-              
-    # handle only new arrows
-    for ev in nevents:
-#        print "future event: %r"%ev
-      if ev.extra == 'CHBPM':
-        song.lastbpmchangetime.append([ev.when,ev.bpm])
-        print [ev.when,ev.bpm],"was added to the bpm changelist"
-      if ev.feet:
-        for (dir,num) in zip(directions,ev.feet):
-          if num & 8:
-            if not (num & 128):
-              ArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c,curtime,ev.when,ev.bpm,1).add([agroup,rgroup])
+                plr['judge'].handle_arrow(dir, curtime, ev.when)
+         
+        for ev in nevents:
+          #print "future event: %r"%ev
+          if ev.extra == 'CHBPM' and plr['playerID'] == 0:
+            song.lastbpmchangetime.append([ev.when,ev.bpm])
+            print [ev.when,ev.bpm],"was added to the bpm changelist"
+          
+          if ev.feet:
+            for (dir,num) in zip(DIRECTIONS, ev.feet):
+              if num & 8:
+                if not (num & 128):
+                  ArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr['playerID']).add([plr['arrowGroup'], rgroup])
 
-          if num & 128:
-            diffnum = song.modediff[playmode].index(difficulty[0])
-            holdindex = song.holdref[diffnum].index((directions.index(dir),ev.when))
-            HoldArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c,curtime,song.holdinfo[diffnum][holdindex],ev.bpm,song.lastbpmchangetime[0],1).add([agroup,rgroup])
-
-    if players == 2:
-      for ev in nevents2:
-        if ev.feet:
-          for (dir,num) in zip(directions,ev.feet):
-            if num & 8:
-              if not (num & 128):
-                ArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c,curtime,ev.when,ev.bpm,2).add([agroup2,rgroup])
-
-            if num & 128:
-              diffnum = song.modediff[playmode].index(difficulty[1])
-              holdindex = song.holdref[diffnum].index((directions.index(dir),ev.when))
-              HoldArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c,curtime,song.holdinfo[diffnum][holdindex],ev.bpm,song.lastbpmchangetime[0],2).add([agroup2,rgroup])
-
+              if num & 128:
+                diffnum = song.modediff[playmode].index(plr['difficulty'])
+                holdindex = song.holdref[diffnum].index((DIRECTIONS.index(dir),ev.when))
+                HoldArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr['playerID']).add([plr['arrowGroup'], rgroup])
+          
     if len(song.lastbpmchangetime)>1:
       if (curtime >= song.lastbpmchangetime[1][0]):
         nbpm = song.lastbpmchangetime[1][1]
         print "BPM tried to change from ",oldbpm, " to ", nbpm, " at ",curtime,"..",
         if song.lastbpmchangetime[1][1] is not None:
-          if mainconfig['showtoparrows']:
-            toparr1_l.remove(sgroup)
-            toparr1_d.remove(sgroup)
-            toparr1_u.remove(sgroup)
-            toparr1_r.remove(sgroup)
-
-          toparr1_l = TopArrow(nbpm,'l',ARROWTOP,1)
-          toparr1_d = TopArrow(nbpm,'d',ARROWTOP,1)
-          toparr1_u = TopArrow(nbpm,'u',ARROWTOP,1)
-          toparr1_r = TopArrow(nbpm,'r',ARROWTOP,1)
-
-          if mainconfig['showtoparrows']:
-            toparr1_l.add(sgroup)
-            toparr1_d.add(sgroup)
-            toparr1_u.add(sgroup)
-            toparr1_r.add(sgroup)
-
-          # PLAYER 2
-          if players == 2:
-            if mainconfig['showtoparrows']:
-              toparr2_l.remove(sgroup)
-              toparr2_d.remove(sgroup)
-              toparr2_u.remove(sgroup)
-              toparr2_r.remove(sgroup)
-
-            toparr2_l = TopArrow(nbpm,'l',ARROWTOP,2)
-            toparr2_d = TopArrow(nbpm,'d',ARROWTOP,2)
-            toparr2_u = TopArrow(nbpm,'u',ARROWTOP,2)
-            toparr2_r = TopArrow(nbpm,'r',ARROWTOP,2)
-
-            if mainconfig['showtoparrows']:
-              toparr2_l.add(sgroup)
-              toparr2_d.add(sgroup)
-              toparr2_u.add(sgroup)
-              toparr2_r.add(sgroup)
-
-          dajudge.changebpm(nbpm)
-          if players == 2:
-            dajudge2.changebpm(nbpm)
+          for plr in playerContents:
+            for arrID in DIRECTIONS:
+              if mainconfig['showtoparrows']:
+                plr['toparr'][arrID].remove(sgroup)
+              plr['toparr'][arrID] = TopArrow(nbpm, arrID, ARROWTOP, plr['playerID'])
+              if mainconfig['showtoparrows']:
+                plr['toparr'][arrID].add(sgroup)
+            plr['judge'].changebpm(nbpm)
           oldbpm = nbpm
           print "succeeded."
         else:
@@ -4343,105 +4169,53 @@ def dance(song,players,difficulty):
         song.lastbpmchangetime = song.lastbpmchangetime[1:]
         print "lastbpmchangetime is now",song.lastbpmchangetime
         bpmchanged = 0
+     
+    for plr in playerContents:
+      if plr['fxData'] is not None:
+        fxtext, fxdir, fxtime = plr['fxData']
         
-    if fxtext != ' ':
-      if (fxtext == 'MARVELOUS') or (fxtext == 'PERFECT') or (fxtext == 'GREAT'):
-        for checkspr in agroup.sprites():
-          try:  #because holds and other sprites will cause this to break
-            if (checkspr.timef == fxtime) and (checkspr.dir == fxdir):
-              checkspr.kill()  #they hit this arrow, kill it
-          except:
-            nothing = None  #dummy
-        if fxdir == 'l':
-          toparrfx1_l.stepped(curtime,fxtext)
-        if fxdir == 'd':
-          toparrfx1_d.stepped(curtime,fxtext)
-        if fxdir == 'u':
-          toparrfx1_u.stepped(curtime,fxtext)
-        if fxdir == 'r':
-          toparrfx1_r.stepped(curtime,fxtext)
-    if fxtext2 != ' ':
-      if (fxtext2 == 'MARVELOUS') or (fxtext2 == 'PERFECT') or (fxtext2 == 'GREAT'):
-        for checkspr in agroup2.sprites():
-          try:  #because holds and other sprites will cause this to break
-            if (checkspr.timef == fxtime2) and (checkspr.dir == fxdir2):
-              checkspr.kill()  #they hit this arrow, kill it
-          except:
-            nothing = None  #dummy
-        if fxdir2 == 'l':
-          toparrfx2_l.stepped(curtime,fxtext2)
-        if fxdir2 == 'd':
-          toparrfx2_d.stepped(curtime,fxtext2)
-        if fxdir2 == 'u':
-          toparrfx2_u.stepped(curtime,fxtext2)
-        if fxdir2 == 'r':
-          toparrfx2_r.stepped(curtime,fxtext2)
+        if (fxtext == 'MARVELOUS') or (fxtext == 'PERFECT') or (fxtext == 'GREAT'):
+          for checkspr in plr['arrowGroup'].sprites():
+            try:  #because holds and other sprites will cause this to break
+              if (checkspr.timef == fxtime) and (checkspr.dir == fxdir):
+                checkspr.kill()  #they hit this arrow, kill it
+            except:
+              nothing = None  #dummy
+          plr['toparrfx'][fxdir].stepped(curtime, fxtext)
     
-    dajudge.expire_arrows(curtime)
-    for spr in agroup.sprites():
-      spr.update(curtime,dajudge.getbpm(),song.lastbpmchangetime,hiddenval,suddenval)
-
-    if players == 2:
-      dajudge2.expire_arrows(curtime)
-      for spr in agroup2.sprites():
-        spr.update(curtime,dajudge2.getbpm(),song.lastbpmchangetime,hiddenval,suddenval)
-
+      plr['judge'].expire_arrows(curtime)
+      for spr in plr['arrowGroup'].sprites():
+        spr.update(curtime, plr['judge'].getbpm(), song.lastbpmchangetime, hiddenval, suddenval)
+      for arrowID in DIRECTIONS:
+        plr['toparr'][arrowID].update(curtime+(song.offset*1000.0))
+        plr['toparrfx'][arrowID].update(curtime, plr['judge'].combo)
+    
     if(mainconfig['strobe']):
       extbox.update(curtime+(song.offset*1000.0))
-
-    # update the top arrows
-    toparr1_l.update(curtime+(song.offset*1000.0))
-    toparr1_d.update(curtime+(song.offset*1000.0))
-    toparr1_u.update(curtime+(song.offset*1000.0))
-    toparr1_r.update(curtime+(song.offset*1000.0))
-    
-    toparrfx1_l.update(curtime,dajudge.combo)
-    toparrfx1_d.update(curtime,dajudge.combo)
-    toparrfx1_u.update(curtime,dajudge.combo)
-    toparrfx1_r.update(curtime,dajudge.combo)
-
-    if players == 2:
-      toparr2_l.update(curtime+(song.offset*1000.0))
-      toparr2_d.update(curtime+(song.offset*1000.0))
-      toparr2_u.update(curtime+(song.offset*1000.0))
-      toparr2_r.update(curtime+(song.offset*1000.0))
-
-      toparrfx2_l.update(curtime,dajudge2.combo)
-      toparrfx2_d.update(curtime,dajudge2.combo)
-      toparrfx2_u.update(curtime,dajudge2.combo)
-      toparrfx2_r.update(curtime,dajudge2.combo)
     
     song.lyricdisplay.update(curtime)
     song.transdisplay.update(curtime)
 
+    for plr in playerContents:
+      plr['combos'].update(plr['judge'].combo, curtime-plr['judge'].steppedtime)
+    
     # make sure the combo displayed at the bottom is current and the correct size
-    p1combo.update(dajudge.combo,curtime-dajudge.steppedtime)
-    p1score.update(dajudge.score)
-    p1list0.update(0, curtime-dajudge.steppedtime, dajudge.recentsteps[0])
-    p1list1.update(1, curtime-dajudge.steppedtime, dajudge.recentsteps[1])
-    p1list2.update(2, curtime-dajudge.steppedtime, dajudge.recentsteps[2])
-    lifebar.update(dajudge)
-    holdtext.update(curtime)
-    if players == 2:
-      p2combo.update(dajudge2.combo,curtime-dajudge2.steppedtime)
-      p2score.update(dajudge2.score)
-      p2list0.update(0, curtime-dajudge2.steppedtime, dajudge2.recentsteps[0])
-      p2list1.update(1, curtime-dajudge2.steppedtime, dajudge2.recentsteps[1])
-      p2list2.update(2, curtime-dajudge2.steppedtime, dajudge2.recentsteps[2])
-      lifebar2.update(dajudge2)
-      holdtext2.update(curtime)
-
+      plr['score'].update(plr['judge'].score)
+      for i in range(3):
+        plr['judgingList'][i].update(i, curtime - plr['judge'].steppedtime, plr['judge'].recentsteps[i])
+      plr['lifebar'].update(plr['judge'])
+      plr['holdtext'].update(curtime)
+    
     fpstext.update(curtime)
     timewatch.update(curtime)
 
 #    dancer.update()
     backimage.update()
-    backmovie.update(curtime)
-
+    
     if backmovie.filename:
+      backmovie.update(curtime)
       if backmovie.changed or (fpstext.fpsavg > 30):
         backmovie.resetchange()
-        backmovie.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
         background.fill(BLACK)
         screen.blit(background.image,(0,0))
         screen.blit(backmovie.image,(0,0))
@@ -4452,38 +4226,37 @@ def dance(song,players,difficulty):
     # more than one display.update will cause flicker
 #    bgroup.draw(screen)
     sgroup.draw(screen)
-    dgroup.draw(screen)
+    #dgroup.draw(screen)
 #    rgroup.draw(screen)
-    agroup.draw(screen)
-    agroup2.draw(screen)
+
+    for plr in playerContents:
+      plr['arrowGroup'].draw(screen)
+    
     fgroup.draw(screen)
     tgroup.draw(screen)
     lgroup.draw(screen)
     if showcombo:
-      p1combo.draw(screen)
-      if players == 2:
-        p2combo.draw(screen)
-
+      for plr in playerContents:
+        plr['combos'].draw(screen)
+    
     pygame.display.update()
 
     if screenshot:
       pygame.image.save(pygame.transform.scale(screen, (640,480)), "screenshot.bmp")
       screenshot = 0
 
-    trippy = 1
-
     if not backmovie.filename:
       if showcombo:
-        p1combo.clear(screen, background.image)
-        if players == 2:
-          p2combo.clear(screen, background.image)
+        for plr in playerContents:
+          plr['combos'].clear(screen, background.image)
+      
       lgroup.clear(screen,background.image)
       tgroup.clear(screen,background.image)
       fgroup.clear(screen,background.image)
   #    rgroup.clear(screen,background.image)
-      agroup.clear(screen,background.image)
-      agroup2.clear(screen,background.image)
-      dgroup.clear(screen,background.image)
+      for plr in playerContents:
+        plr['arrowGroup'].clear(screen,background.image)
+      #dgroup.clear(screen,background.image)
       sgroup.clear(screen,background.image)
 
 #    time.sleep(0.0066667)
@@ -4491,12 +4264,11 @@ def dance(song,players,difficulty):
 
   # GRADES
   if mainconfig['grading']:
-
     grade = None
     if players == 2:
-      grade = GradingScreen([dajudge, dajudge2]).make_gradescreen(screen)
+      grade = GradingScreen([playerContents[0]['judge'], playerContents[1]['judge']]).make_gradescreen(screen)
     else:
-      grade = GradingScreen([dajudge]).make_gradescreen(screen)
+      grade = GradingScreen([playerContents[0]['judge']]).make_gradescreen(screen)
 
     if not grade:
       song.kill()
