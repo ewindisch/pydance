@@ -48,8 +48,10 @@ class Steps(object):
 
     holdlist = []
     holdtimes = []
+    holdbeats = []
     releaselist = []
     releasetimes = []
+    releasebeats = []
     self.numholds = 1
     holding = [0] * len(games.GAMES[playmode].dirs)
     coloring_mod = 0
@@ -116,14 +118,17 @@ class Steps(object):
           for hold in range(len(feetstep)):
             if feetstep[hold] & 2 and holding[hold] == 0:
               holdtimes.insert(self.numholds, time_to_add)
+              holdbeats.insert(self.numholds, cur_beat)
               holdlist.insert(self.numholds, hold)
               releasetimes.append(None)
+              releasebeats.append(None)
               releaselist.append(None)
               holding[hold] = self.numholds
               self.numholds += 1
 
             elif (feetstep[hold] and holding[hold]):
               releasetimes[holding[hold] - 1] = time_to_add
+              releasebeats[holding[hold] - 1] = cur_beat
               releaselist[holding[hold] - 1] = hold
               feetstep[hold] = 0
               holding[hold] = 0
@@ -178,6 +183,7 @@ class Steps(object):
 
     self.holdinfo = zip(holdlist, holdtimes, releasetimes)
     self.holdref = zip(holdlist, holdtimes)
+    self.holdbeats = zip(holdbeats, releasebeats)
 
     if self.ready == None:
       if len(self.events) > 1:

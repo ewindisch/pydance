@@ -336,11 +336,6 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
     while ev[1] != pad.PASS:
       if ev[1] == pad.QUIT: break
-      elif ev[1] == pad.FULLSCREEN:
-        pygame.display.toggle_fullscreen()
-        mainconfig["fullscreen"] ^= 1
-      elif ev[1] == pad.SCREENSHOT:
-        screenshot = 1
       elif ev[1] == pad.LEFT: key.append((ev[0], 'l'))
       elif ev[1] == pad.DOWNLEFT: key.append((ev[0], 'w'))
       elif ev[1] == pad.UPLEFT: key.append((ev[0], 'k'))

@@ -353,20 +353,22 @@ class Player(object):
             if not num & 4 or self.secret_kind == 2:
               dirstr = dir + repr(int(ev.color) % self.colortype)
               if num & 1 and not num & 2:
-                ns = arrows.ArrowSprite(arrow_gfx[dirstr], time, num & 4,
+                ns = arrows.ArrowSprite(arrow_gfx[dirstr], ev.beat, num & 4,
                                         ev.when, self, song)
                 newsprites.append(ns)
               elif num & 2:
                 holdindex = steps.holdref.index((self.game.dirs.index(dir),
                                                  ev.when))
-                ns = arrows.HoldArrowSprite(arrow_gfx[dirstr], time, num & 4,
+                ns = arrows.HoldArrowSprite(arrow_gfx[dirstr],
+                                            steps.holdbeats[holdindex],
+                                            num & 4,
                                             steps.holdinfo[holdindex],
                                             self, song)
                 newsprites.append(ns)
 
       arrow_grp.add(newsprites)
 
-  def check_sprites(self, curtime, arrows, steps, fx_data, judge):
+  def check_sprites(self, curtime, curbeat, arrows, steps, fx_data, judge):
     misses = judge.expire_arrows(curtime)
     for d in misses:
       for l in self.listeners:
@@ -378,7 +380,7 @@ class Player(object):
             if spr.hold: spr.broken = False
             else: spr.kill()
 
-    arrows.update(curtime, self.bpm, steps.lastbpmchangetime)
+    arrows.update(curtime, self.bpm, curbeat, steps.lastbpmchangetime)
     self.toparr_group.update(curtime, steps.offset)
 
   def should_hold(self, steps, direction, curtime):
@@ -439,34 +441,58 @@ class Player(object):
       self.fx_data.append((rating, dir, etime))
 
   def check_bpm_change(self, pid, time, steps, judge):
-    if len(steps.lastbpmchangetime) > 0:
-      if time >= steps.lastbpmchangetime[0][0]:
-        newbpm = steps.lastbpmchangetime[0][1]
-        self.bpm = newbpm
-        for l in self.listeners: l.change_bpm(pid, time, newbpm)
-        steps.lastbpmchangetime.pop(0)
+    newbpm = self.bpm
+    for bpm in steps.lastbpmchangetime:
+      if time >= bpm[0]: newbpm = bpm[1]
 
+    if newbpm != self.bpm:
+      self.bpm = newbpm
+      for l in self.listeners: l.change_bpm(pid, time, newbpm)
+        
   def clear_sprites(self, screen, bg):
     for g in self.sprite_groups: g.clear(screen, bg)
 
   def game_loop(self, time, screen):
     if self.game.double:
       for i in range(2):
+        if len(self.steps[i].lastbpmchangetime) == 0:
+          cur_beat = (time - steps[i].offset) / 60.0 / self.bpm
+        else:
+          cur_beat = 0
+          oldbpmsub = [self.steps[i].offset, self.steps[i].bpm]
+          for bpmsub in self.steps[i].lastbpmchangetime:
+            if bpmsub[0] <= time:
+              cur_beat += (bpmsub[0] - oldbpmsub[0]) / (60.0 / oldbpmsub[1])
+              oldbpmsub = bpmsub
+            else: break
+          cur_beat += (time - oldbpmsub[0]) / (60.0 / oldbpmsub[1])
+            
         self.check_holds(self.pid * 2 + i, time, self.arrow_group[i],
                          self.steps[i], self.judge[i], self.toparrfx[i],
                          self.holding[i])
         self.check_bpm_change(self.pid * 2 + i, time, self.steps[i],
                               self.judge[i])
-        self.check_sprites(time, self.arrow_group[i], self.steps[i],
-                           self.fx_data[i],
-                           self.judge[i])
+        self.check_sprites(time, cur_beat, self.arrow_group[i],
+                           self.steps[i], self.fx_data[i], self.judge[i])
 
     else:
+      if len(self.steps.lastbpmchangetime) == 0:
+        cur_beat = (time - self.steps.offset) / (60.0 / self.bpm)
+      else:
+        cur_beat = 0
+        oldbpmsub = [self.steps.offset, self.steps.bpm]
+        for bpmsub in self.steps.lastbpmchangetime:
+          if bpmsub[0] <= time:
+            cur_beat += (bpmsub[0] - oldbpmsub[0]) / (60.0 / oldbpmsub[1])
+            oldbpmsub = bpmsub
+          else: break
+        cur_beat += (time - oldbpmsub[0]) / (60.0 / oldbpmsub[1])
+
       self.check_holds(self.pid, time, self.arrow_group, self.steps,
                        self.judge, self.toparrfx, self.holding)
       self.check_bpm_change(self.pid, time, self.steps, self.judge)
-      self.check_sprites(time, self.arrow_group, self.steps, self.fx_data,
-                         self.judge)
+      self.check_sprites(time, cur_beat, self.arrow_group, self.steps,
+                         self.fx_data, self.judge)
 
 
     self.fx_group.update(time)

@@ -9,9 +9,12 @@ Legend:
 ----- - CURRENT
 0.8.2 - I"M GONNA EAT YOU!!!1					[2003.09.XX]
 + Input keys/buttons can now be remapped in the game.
+ + Default keys are the numeric pad for player 1 and uiojklnm, for player 2.
+ + Arrow keys, if unmapped, work for player 1 as well.
  - The 'keyboard' option is gone.
  ! The 'saveinput' option saves an input.cfg file (in . or ~/.pydance) on
    exit. Delete this file to reset your mappings to defaults.
+* Several crashes were fixed.
 
 0.8.1 - Standard caution on the Probulator			[2003.09.12]
 + pydance, DDR 1st/2nd, 3rd, 4th, 5th/Max2/Ex, Ex Oni, or Ex Nonstop scoring.

@@ -11,10 +11,11 @@ class AbstractArrow(pygame.sprite.Sprite):
     samples[d] = pygame.mixer.Sound(os.path.join(sound_path,
                                                  "assist-" + d + ".ogg"))
 
-  def __init__(self, arrow, curtime, secret, player, song):
+  def __init__(self, arrow, beat, secret, player, song):
     pygame.sprite.Sprite.__init__(self)
 
     self.dir = arrow.dir
+    self.endbeat = beat / 4
 
     # NB - Making a new surface, then blitting the image in place, is 20%
     # slower than calling image.convert() (and is longer to type).
@@ -91,28 +92,6 @@ class AbstractArrow(pygame.sprite.Sprite):
       self.origcenterx = self.centerx = self.rect.centerx
     else: self.centerx = self.rect.centerx = self.goalcenterx
 
-  def calculate_beats(self, curtime, endtime, curbpm, lbct):
-    beatsleft = 0
-    if len(lbct) == 0:
-      onebeat = 60.0 / curbpm
-      doomtime = endtime - curtime
-      beatsleft = doomtime / onebeat
-    else:
-      oldbpmsub = [curtime, curbpm]
-      for bpmsub in lbct:
-        if bpmsub[0] <= endtime:
-          onefbeat = 60.0 / oldbpmsub[1]
-          bpmdoom = bpmsub[0] - oldbpmsub[0]
-          beatsleft += bpmdoom / onefbeat
-          oldbpmsub = bpmsub
-        else: break
-
-      onefbeat = 60.0 / oldbpmsub[1]
-      bpmdoom = endtime - oldbpmsub[0]
-      beatsleft += bpmdoom / onefbeat
-
-    return beatsleft
-
   def get_alpha(self, curtime, beatsleft, top):
     alp = 256
 
@@ -138,7 +117,7 @@ class AbstractArrow(pygame.sprite.Sprite):
 
     return alp
 
-  def update(self, curtime, curbpm, lbct):
+  def update(self, curtime, curbpm, beat, lbct):
     if self.sample and curtime >= self.endtime:
       self.sample.play()
       self.sample = None
@@ -177,24 +156,20 @@ class AbstractArrow(pygame.sprite.Sprite):
     if self.sample: self.sample.play()
 
 class ArrowSprite(AbstractArrow):
-  def __init__ (self, arrow, secret, curtime, endtime, player, song):
-    AbstractArrow.__init__(self, arrow, secret, curtime, player, song)
+  def __init__ (self, arrow, beat, secret, endtime, player, song):
+    AbstractArrow.__init__(self, arrow, beat, secret, player, song)
     self.hold = False
     self.endtime = endtime
 
-  def update(self, curtime, curbpm, lbct):
-    AbstractArrow.update(self, curtime, curbpm, lbct)
+  def update(self, curtime, curbpm, curbeat, lbct):
+    AbstractArrow.update(self, curtime, curbpm, curbeat, lbct)
 
     if curtime > self.endtime + (240.0/curbpm):
       self.kill()
       return
 
-    if curbpm < 0.0001: return # We're stopped
-    # We can't just keep going if we're stopped, because the bpm change to
-    # 0 is out of lbct, and so we only use curbpm, which is 0, meaning
-    # we always end up at the top.
-
-    beatsleft = self.calculate_beats(curtime, self.endtime, curbpm, lbct)
+    if curbpm == 1e-127: return # We're stopped
+    beatsleft = self.endbeat - curbeat
 
     if self.accel == 1:
       p = max(0, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats))
@@ -218,11 +193,13 @@ class ArrowSprite(AbstractArrow):
     self.image.set_alpha(self.get_alpha(curtime, beatsleft, top))
 
 class HoldArrowSprite(AbstractArrow):
-  def __init__ (self, arrow, secret, curtime, times, player, song):
-    AbstractArrow.__init__(self, arrow, secret, curtime, player, song)
+  def __init__ (self, arrow, beats, secret, times, player, song):
+    AbstractArrow.__init__(self, arrow, beats[1], secret, player, song)
     self.timef1 = self.endtime = times[1]
     self.hold = True
     self.timef2 = times[2]
+    self.endbeat1 = beats[0] / 4
+    self.endbeat2 = beats[1] / 4
     if self.timef2 is None: self.timef2 = self.timef1
 
     self.broken = True
@@ -238,17 +215,17 @@ class HoldArrowSprite(AbstractArrow):
     self.center_image = pygame.surface.Surface([self.width, 1])
     self.center_image.blit(self.image, [0, -self.width / 2 + 1])
 
-  def update(self, curtime, curbpm, lbct):
-    AbstractArrow.update(self, curtime, curbpm, lbct)
+  def update(self, curtime, curbpm, beat, lbct):
+    AbstractArrow.update(self, curtime, curbpm, beat, lbct)
 
     if curtime > self.timef2:
       self.kill()
       return
 
-    if curbpm < 0.0001: return # We're stopped
+    if curbpm == 1e-127: return # We're stopped
 
-    beatsleft_top = self.calculate_beats(curtime, self.timef1, curbpm, lbct)
-    beatsleft_bot = self.calculate_beats(curtime, self.timef2, curbpm, lbct)
+    beatsleft_top = self.endbeat1 - beat
+    beatsleft_bot = self.endbeat2 - beat
 
     if self.accel == 1:
       p = max(0, -1 / self.totalbeats * (beatsleft_top * self.speed - self.totalbeats))
