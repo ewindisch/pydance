@@ -1604,7 +1604,13 @@ def dance(song, players, ARROWPOS):
 
   if mainconfig['showbackground'] > 0:
     if backmovie.filename == None:
-      bgkludge = pygame.transform.scale(pygame.image.load(bifn),(640,480)).convert()
+      bgkludge = pygame.image.load(bifn).convert()
+      bgkrect = bgkludge.get_rect()
+      if (bgkrect.size[0] == 320) and (bgkrect.size[1] == 240):
+        print "attempting to smooth background a little bit"
+        bgkludge = pygame.transform.scale2x(bgkludge)
+      else:
+        bgkludge = pygame.transform.scale(bgkludge,(640,480))
       bgkludge.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
       background.image = pygame.surface.Surface((640,480))
       background.image.blit(bgkludge,(0,0))
