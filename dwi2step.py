@@ -135,6 +135,8 @@ def main():
         stepfile.writelines("offset "+repr(-gap)+"\n")
       if fileline[0:14] == '#SINGLE:BASIC:':
         onbeat = 0
+        bpmidx = 0
+        delayidx = 0
         diff = int(fileline[14])
         print "\ndifficulty SINGLE BASIC,",diff,"feet. reading steps.."
         stepfile.writelines("SINGLE\n"+"BASIC "+repr(diff)+"\n")
@@ -144,6 +146,8 @@ def main():
         rar = 1
       if fileline[0:14] == '#SINGLE:TRICK:':
         onbeat = 0
+        bpmidx = 0
+        delayidx = 0
         diff = int(fileline[14])
         print "\ndifficulty SINGLE TRICK,",diff,"feet. reading steps.."
         stepfile.writelines("SINGLE\n"+"TRICK "+repr(diff)+"\n")
@@ -153,6 +157,8 @@ def main():
         rar = 1
       if fileline[0:15] == '#SINGLE:MANIAC:':
         onbeat = 0
+        bpmidx = 0
+        delayidx = 0
         diff = int(fileline[15])
         print "\ndifficulty SINGLE MANIAC,",diff,"feet. reading steps.."
         stepfile.writelines("SINGLE\n"+"MANIAC "+repr(diff)+"\n")
@@ -162,6 +168,8 @@ def main():
         rar = 1
       if fileline[0:16] == '#SINGLE:ANOTHER:':
         onbeat = 0
+        bpmidx = 0
+        delayidx = 0
         diff = int(fileline[16])
         print "\ndifficulty SINGLE TRICK,",diff,"feet. reading steps.."
         stepfile.writelines("SINGLE\n"+"TRICK "+repr(diff)+"\n")
@@ -171,17 +179,21 @@ def main():
         rar = 1
       
       i = 0
+
       while rar:
         steps = []
+        print "beat"+repr(onbeat),
 
-        for xyz in bpmchange_beats:    #check to see if we need to change the bpm
-          if xyz == onbeat:
-            stepfile.writelines("chbpm "+repr(bpms[bpmchange_beats.index(onbeat)])+"\n")
-            print "-- chbpm to",bpms[bpmchange_beats.index(onbeat)],"at beat",xyz,"--",
-        for xyz in delay_beats:    #check to see if we need to wait some time
-          if xyz == onbeat:
-            stepfile.writelines("waits "+repr(delay_times[delay_beats.index(onbeat)]/1000)+"\n")
-            print "-- dalay of",delay_times[delay_beats.index(onbeat)]/1000,"sec. at beat",xyz,"--",
+        for xyz in bpmchange_beats[bpmidx:]:    #check to see if we need to change the bpm
+          if xyz <= onbeat:
+            stepfile.writelines("chbpm "+repr(bpms[bpmchange_beats.index(xyz)])+"\n")
+            print "-- chbpm to",bpms[bpmchange_beats.index(xyz)],"at beat",onbeat,"--",
+            bpmidx += 1
+        for xyz in delay_beats[delayidx:]:    #check to see if we need to wait some time
+          if xyz <= onbeat:
+            stepfile.writelines("waits "+repr(delay_times[delay_beats.index(xyz)]/1000)+"\n")
+            print "-- delay of",delay_times[delay_beats.index(xyz)]/1000,"sec. at beat",onbeat,"--",
+            delayidx += 1
 
         dc = fileline[i]
         dc1 = dc2 = ''       #initialized here so that they are declared even on EOF/EOL
