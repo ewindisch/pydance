@@ -508,14 +508,22 @@ class SMFile(GenericFile):
     self.bpms = []
     self.freezes = []
 
+    lines = []
     f = open(filename)
-    tokens = "".join([self.strip_line(line) for line in f])
-    tokens = tokens.replace(";", "")
-    tokens = tokens.split("#")
 
-    for token in tokens:
-      if len(token) == 0: continue
-      parts = token.split(":")
+    for line in f:
+      if line.find("//") != -1:
+        line = line[:line.find("//")]
+      
+      line = line.strip()
+      if len(line) == 0: continue
+      elif line[0] == "#": lines.append(line[1:])
+      else: lines[-1] += line
+
+    for line in lines:
+      while line[-1] == ";": line = line[:-1] # Some lines have two ;s.
+      parts = line.split(":")
+
       if parts[0] == "OFFSET": self.info["gap"] = float(parts[1]) * 1000
       elif parts[0] == "TITLE": self.info["title"] = ":".join(parts[1:])
       elif parts[0] == "SUBTITLE": self.info["subtitle"] = ":".join(parts[1:])
