@@ -1,3 +1,6 @@
+Optimizations
+ - clear one huge sprite group
+
 UI Fixes & Improvements
  - In-game help (menu context help, mostly)
  - Up/down indicators on menus (smaller menus => not needed?)

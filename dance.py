@@ -358,15 +358,13 @@ def dance(screen, song, players, prevscr, ready_go, game):
       pid = ev[0]
       if pid < len(players): players[pid].handle_key(ev, curtime)
 
-    for plr in players: plr.check_holds(curtime)
-    for plr in players: plr.check_bpm_change(curtime)
-    for plr in players: plr.check_sprites(curtime)
+    rectlist = []
+
+    for plr in players: rectlist.extend(plr.game_loop(curtime, screen))
 
     if strobe: extbox.update(curtime+(players[0].steps.soffset))
     
     song.lyricdisplay.update(curtime)
-
-    for plr in players: plr.combo_update(curtime)
 
     if backmovie.filename:
       backmovie.update(curtime)
@@ -381,9 +379,6 @@ def dance(screen, song, players, prevscr, ready_go, game):
     if fpsdisplay:
       fpstext.update(curtime)
       timewatch.update(curtime)
-
-    rectlist = []
-    for plr in players: rectlist.extend(plr.update_sprites(screen))
 
     rectlist.extend(tgroup.draw(screen))
     rectlist.extend(lgroup.draw(screen))

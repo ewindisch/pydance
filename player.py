@@ -896,3 +896,11 @@ class Player:
 
   def clear_sprites(self, screen, bg):
     for g in self.sprite_groups: g.clear(screen, bg)
+
+  def game_loop(self, curtime, screen):
+    self.check_holds(curtime)
+    self.check_bpm_change(curtime)
+    self.check_sprites(curtime)
+    self.combo_update(curtime)
+    return self.update_sprites(screen)
+
