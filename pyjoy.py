@@ -2,7 +2,6 @@
 
 import os, pygame, pygame.font, pygame.image, pygame.mixer, pygame.movie, time, sys
 from pygame.locals import *
-from Numeric import *
 
 def main():
   # init

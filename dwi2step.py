@@ -5,7 +5,6 @@
 
 import os, pygame, pygame.font, pygame.image, pygame.mixer, pygame.movie, time, sys
 from pygame.locals import *
-from Numeric import *
 
 VERSION = "0.51"
 
@@ -39,7 +38,6 @@ def main():
   bpmchange_beats = []
   delay_beats = []
 
-#  arrstat = zeros((4,1024,3))
   print sys.argv[0]
 
   if len(sys.argv) > 1:

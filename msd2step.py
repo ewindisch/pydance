@@ -5,7 +5,6 @@
 
 import os, pygame, pygame.font, pygame.image, pygame.mixer, pygame.movie, time, sys
 from pygame.locals import *
-from Numeric import *
 
 # so it's currently in one routine. shut up, I'm learning python =]
 def main():
@@ -47,8 +46,6 @@ def main():
 
   rar = 0
   i = -1
-
-#  arrstat = zeros((4,1024,3))
 
   if len(sys.argv) > 1:
     print "Opening MSD file:",sys.argv[1],".."
