@@ -75,14 +75,15 @@ class SongItemDisplay:
         # A postcondition of file parsers is that this is a valid filename
         banner = pygame.image.load(info["banner"]).convert()
         if banner.get_rect().size[0] > banner.get_rect().size[1] * 2:
-          self.banner = banner
+          self.banner = pygame.transform.scale(banner, BANNER_SIZE)
         else:
           # One of the older banners that we need to rotate
           # Don't scale, because it's hard to calculate and looks bad
           self.banner = pygame.transform.rotate(banner,-45)
+          self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
       else:
         self.banner = NO_BANNER
-      self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
+        self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
     if self.menuimage == None:
       colors = ["cyan", "aqua", "orange", "yellow", "red", "white"]
       # Start with a random color, but...
@@ -289,7 +290,7 @@ class SongSelect:
 
       elif ev[1] == E_SELECT:
         self.index = random.randint(0, self.numsongs - 1)
-        needs_update = True
+        song_changed = True
 
       # Change sort modes - FIXME: terrible event name
       elif ev[1] == E_SCREENSHOT:
@@ -360,10 +361,14 @@ class SongSelect:
     self.screen.blit(self.bg, (0,0))
 
     # The song list
+
+    item_x_loc = [240, 250, 270, 300, 340]
+
+
     for i in range(-4, 5):
       idx = (self.index + i) % self.numsongs
       self.songs[idx].render()
-      x = 640 - 30 * (2 - abs(i)) - ITEM_SIZE[0]
+      x = item_x_loc[abs(i)]
       y = 210 + i * 60
       img = self.songs[idx].menuimage
       img.set_alpha(226 - (40 * abs(i)))
