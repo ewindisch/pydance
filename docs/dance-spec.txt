@@ -34,7 +34,7 @@ Almost primitives:
 <Comment> ::= [("#" <LongString>) | <Whitespace>] <Newline>
 
 Basic Structure:
-<File> :: <Metadata> [<TextSection>+] <StepSection>+
+<File> ::= <Metadata> [<TextSection>+] <StepSection>+
 
 Metadata Storage:
 <Metadata> ::= (<Comment> | <MetadataLine>)+ <EndToken>
@@ -264,6 +264,9 @@ DOUBLE - Doubles DDR
 
 Changes:
 --------
+2003.06.29
+ - Fix a typo ("::" => "::=").
+
 2003.06.27
  - Add EBNF for COUPLE-style modes (spaces in Buttons)
 
