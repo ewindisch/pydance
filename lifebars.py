@@ -5,11 +5,13 @@ import os, pygame, fontfx
 from listener import Listener
 from constants import *
 
+LIVING, FAILED, WON = range(3)
+
 # The base lifebar class from which most other ones inherit.
 class AbstractLifeBar(Listener, pygame.sprite.Sprite):
   def __init__(self, playernum, maxlife, songconf, game):
     pygame.sprite.Sprite.__init__(self)
-    self.gameover = False
+    self.gameover = LIVING
     self.maxlife = int(maxlife * songconf["diff"])
     self.image = pygame.Surface((204, 28))
     self.deltas = {}
@@ -29,16 +31,11 @@ class AbstractLifeBar(Listener, pygame.sprite.Sprite):
       self.life += self.deltas.get(rating, 0)
       self.life = min(self.life, self.maxlife)
 
-  # Inform the judge if we've failed, and adjust life.
-  def update(self, judge):
+  def update(self, time):
     if self.gameover: return False
     
-    if self.life < 0:
-      # Don't set self.failed; the child does that when the graphic is updated.
-      judge.failed = True
-      self.life = -1
-    elif self.life > self.maxlife:
-      self.life = self.maxlife
+    if self.life < 0: self.life = -1
+    elif self.life > self.maxlife: self.life = self.maxlife
         
     return True
 
@@ -55,7 +52,7 @@ class LifeBarDisp(AbstractLifeBar):
     self.empty = theme.theme_data.get_image('lifebar-empty.png')
     self.full = theme.theme_data.get_image('lifebar-full.png')
 
-  def update(self, judges):
+  def update(self, time):
     if self.gameover and self.displayed_life <= 0: return
 
     if self.displayed_life < self.life:  self.displayed_life += 1
@@ -64,9 +61,9 @@ class LifeBarDisp(AbstractLifeBar):
     if abs(self.displayed_life - self.life) < 1:
       self.displayed_life = self.life
 
-    AbstractLifeBar.update(self, judges)
+    AbstractLifeBar.update(self, time)
 
-    if self.life < 0: self.gameover = True
+    if self.life < 0: self.gameover = FAILED
 
     if self.displayed_life < 0: self.displayed_life = 0
     self.image.blit(self.empty, (0, 0))
@@ -110,7 +107,7 @@ class TugLifeBarDisp(LifeBarDisp):
   def update_life_opponent(self, rating):
     if self.life >= 0: self.life -= self.deltas.get(rating, 0)
 
-  def update(self, judges):
+  def update(self, time):
     if self.gameover and self.displayed_life <= 0: return
 
     if self.displayed_life < self.life:  self.displayed_life += 1
@@ -119,9 +116,9 @@ class TugLifeBarDisp(LifeBarDisp):
     if abs(self.displayed_life - self.life) < 1:
       self.displayed_life = self.life
 
-    AbstractLifeBar.update(self, judges)
+    AbstractLifeBar.update(self, time)
 
-    if self.life < 0: self.gameover = True
+    if self.life < 0: self.gameover = FAILED
 
     if self.displayed_life < 0: self.displayed_life = 0
     self.image.blit(self.empty, (0, 0))
@@ -129,12 +126,12 @@ class TugLifeBarDisp(LifeBarDisp):
     self.image.blit(self.full, (0, 0))
     self.image.set_clip()
 
-    if self.gameover == 2:
+    if self.gameover == WON:
       self.image.blit(self.wontext, (70, 2))
-    elif self.gameover:
+    elif self.gameover == FAILED:
       self.image.blit(self.failtext, (70, 2))
       for lifebar in TugLifeBarDisp.active_bars:
-        if lifebar != self and not lifebar.gameover: lifebar.gameover = 2
+        if lifebar != self and not lifebar.gameover: lifebar.gameover = WON
 
 # Lifebar where doing too good also fails you.
 class MiddleLifeBarDisp(AbstractLifeBar):
@@ -148,14 +145,12 @@ class MiddleLifeBarDisp(AbstractLifeBar):
     self.image = pygame.surface.Surface([202, 28])
     self.image.fill([255, 255, 255])
 
-  def update(self, judges):
+  def update(self, time):
     if self.gameover: return
 
-    AbstractLifeBar.update(self, judges)
+    AbstractLifeBar.update(self, time)
 
-    if self.life == self.maxlife:
-      self.gameover = True
-      judges.failed_out = True
+    if self.life == self.maxlife: self.gameover = FAILED
 
     pct = 1 - abs(self.life - 10) / 10.0
     self.image.fill([int(255 * pct)] * 3)
@@ -191,18 +186,17 @@ class OniLifeBarDisp(AbstractLifeBar):
     AbstractLifeBar.stepped(self, pid, dir, curtime, rating, combo)
     if self.deltas.get(rating, 0) < 0: OniLifeBarDisp.lose_sound.play()
 
-  def update(self, judges):
+  def update(self, time):
     if self.gameover: return
 
-    AbstractLifeBar.update(self, judges)
+    AbstractLifeBar.update(self, time)
 
-    self.image.blit(self.empty, (0, 0))
-    if self.life > 0:
-      for i in range(self.life):
-        self.image.blit(self.bar, (6 + self.width * i, 4))
-    elif self.life < 0: self.gameover = True
+    self.image.blit(self.empty, [0, 0])
+    for i in range(self.life):
+      self.image.blit(self.bar, [6 + self.width * i, 4])
+    if self.life < 0: self.gameover = FAILED
 
-    if self.gameover: self.image.blit(self.failtext, (70, 2) )
+    if self.gameover: self.image.blit(self.failtext, [70, 2])
 
 bars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp,
         TugLifeBarDisp]

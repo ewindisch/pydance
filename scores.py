@@ -20,13 +20,13 @@ class AbstractScore(Listener, pygame.sprite.Sprite):
   def __init__(self, pid, text, game):
     pygame.sprite.Sprite.__init__(self)
     self.score = 0
-    self.set_text(text)
+    self._set_text(text)
     self.image = pygame.surface.Surface((160, 48))
     self.rect = self.image.get_rect()
     self.rect.bottom = 484
     self.rect.centerx = game.sprite_center + pid * game.player_offset
 
-  def set_text(self, text):
+  def _set_text(self, text):
     tx = FONTS[28].size(text)[0] + 2
     txt = fontfx.embfade(text, 28, 2, (tx, 24), colors.color["gray"])
     basemode = pygame.transform.scale(txt, (tx, 48))
@@ -35,9 +35,9 @@ class AbstractScore(Listener, pygame.sprite.Sprite):
     self.oldscore = -1 # Force a refresh
 
   def set_song(self, pid, bpm, difficulty, count, holds, feet):
-    self.set_text(difficulty)
+    self._set_text(difficulty)
 
-  def update(self):
+  def update(self, curtime):
     if self.score != self.oldscore:
       self.image.blit(self.baseimage, (0,0))
       scoretext = FONTS[28].render(str(int(self.score)), 1, (192,192,192))

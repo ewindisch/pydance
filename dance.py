@@ -207,15 +207,11 @@ def play(screen, playlist, configs, songconf, playmode):
                                   os.path.split(songfn)[0]])
       first = True
 
-  judges = [player.get_judge() for player in players]
-
   if mainconfig['grading']:
     grade = gradescreen.GradingScreen(players)
     background = pygame.transform.scale(screen, (640,480))
     if grade.make_gradescreen(screen, background):
       grade.make_waitscreen(screen)
-
-  return judges
 
 def dance(screen, song, players, prevscr, ready_go, game):
   songFailed = False
@@ -310,9 +306,11 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
   song.play()
   for plr in players: plr.start_song()
-      
+
+  autofail = mainconfig['autofail']
+
   while 1:
-    if mainconfig['autofail']:
+    if autofail:
       songFailed = True
       for plr in players:
         if not plr.lifebar.gameover:

@@ -196,6 +196,7 @@ class ArrowSprite(pygame.sprite.Sprite):
   
   def __init__ (self, arrow, curtime, endtime, player, song):
     pygame.sprite.Sprite.__init__(self)
+    self.hold = False
     self.endtime = endtime
     self.life  = endtime - curtime
     self.curalpha = -1
@@ -339,7 +340,8 @@ class ArrowSprite(pygame.sprite.Sprite):
 class HoldArrowSprite(pygame.sprite.Sprite):
   def __init__ (self, arrow, curtime, times, player, song):
     pygame.sprite.Sprite.__init__(self)
-    self.timef1 = times[1]
+    self.timef1 = self.endtime = times[1]
+    self.hold = True
     self.timef2 = times[2]
     if self.timef2 is None: self.timef2 = self.timef1
     self.image = arrow.image.convert()
@@ -542,6 +544,7 @@ class Player(object):
     self.theme = GFXTheme(mainconfig.get("%s-theme" % game.theme, "default"),
                           pid, game)
     self.pid = pid
+    self.failed = False
 
     self.__dict__.update(config)
 
@@ -605,17 +608,16 @@ class Player(object):
                                   lyrics, self.game.name),
                       steps.Steps(song, diff, self, self.pid * 2 + 1,
                                   lyrics, self.game.name)]
-
       self.length = max(self.steps[0].length, self.steps[1].length)
-
       self.ready = min(self.steps[0].ready, self.steps[1].ready)
+      self.bpm = self.steps[0].bpm
 
       count = self.steps[0].totalarrows + self.steps[1].totalarrows
 
       total_holds = 0
       for i in range(2):  total_holds += len(self.steps[i].holdref)
 
-      args = (self.pid, self.steps[0].bpm, diff, count, total_holds,
+      args = (self.pid, self.bpm, diff, count, total_holds,
               self.steps[0].feet)
       for l in self.listeners: l.set_song(*args)
 
@@ -625,17 +627,14 @@ class Player(object):
                                self.game.name)
       self.length = self.steps.length
       self.ready = self.steps.ready
+      self.bpm = self.steps.bpm
       self.arrows = self.theme.arrows(self.pid)
 
       holds = len(self.steps.holdref)
 
-      args = (self.pid, self.steps.bpm, diff, self.steps.totalarrows,
+      args = (self.pid, self.bpm, diff, self.steps.totalarrows,
               holds, self.steps.feet)
       for l in self.listeners: l.set_song(*args)
-
-  def get_judge(self):
-    if self.game.double: return self.judge[0]
-    else: return self.judge
 
   def start_song(self):
     self.toparr_group = RenderUpdates()
@@ -705,14 +704,7 @@ class Player(object):
                        
       arrows.add(newsprites)
 
-  def csl_update(self, curtime, judge, holdtext):
-    self.combos.update(curtime)
-    self.score.update()
-    self.judging_disp.update(curtime)
-    self.lifebar.update(judge)
-    holdtext.update(curtime)
-    
-  def check_sprites(self, curtime, arrows, steps, fx_data, toparr, toparrfx, judge):
+  def check_sprites(self, curtime, arrows, steps, fx_data, judge):
     misses = judge.expire_arrows(curtime)
     for d in misses:
       for l in self.listeners:
@@ -720,18 +712,12 @@ class Player(object):
     for rating, dir, time in fx_data:
       if (rating == "V" or rating == "P" or rating == "G"):
         for spr in arrows.sprites():
-          try:     # kill normal arrowsprites
-            if (spr.endtime == time) and (spr.dir == dir):
-              spr.kill()
-          except: pass
-          try:     # unbreak hold arrows.
-            if (spr.timef1 == time) and (spr.dir == dir):
-              spr.broken = 0
-          except: pass
+          if spr.endtime == time and spr.dir == dir:
+            if spr.hold: spr.broken = 0
+            else: spr.kill()
 
-    arrows.update(curtime, judge.bpm, steps.lastbpmchangetime)
-    for a in toparr.values(): a.update(curtime, steps.offset)
-    for a in toparrfx.values(): a.update(curtime)
+    arrows.update(curtime, self.bpm, steps.lastbpmchangetime)
+    self.toparr_group.update(curtime, steps.offset)
 
   def should_hold(self, steps, direction, curtime):
     l = steps.holdinfo
@@ -761,14 +747,10 @@ class Player(object):
             args = (pid, curtime, dir, current_hold)
             for l in self.listeners: l.broke_hold(*args)
             botchdir, timef1, timef2 = steps.holdinfo[current_hold]
-            # FIXME it's slow.
             for spr in arrows.sprites():
-              try:
-                if (spr.timef1 == timef1 and
-                    self.game.dirs.index(spr.dir) == dir_idx):
+              if (spr.endtime == timef1 and spr.dir == dir):
                   spr.broken = True
                   break
-              except: pass
       else:
         if holding[dir_idx] > -1:
           if judge.holdsub.get(holding[dir_idx]) != -1:
@@ -798,6 +780,7 @@ class Player(object):
     if len(steps.lastbpmchangetime) > 0:
       if time >= steps.lastbpmchangetime[0][0]:
         newbpm = steps.lastbpmchangetime[0][1]
+        self.bpm = newbpm
         for l in self.listeners: l.change_bpm(pid, time, newbpm)
         steps.lastbpmchangetime.pop(0)
 
@@ -813,16 +796,22 @@ class Player(object):
         self.check_bpm_change(self.pid * 2 + i, time, self.steps[i],
                               self.judge[i])
         self.check_sprites(time, self.arrow_group[i], self.steps[i],
-                           self.fx_data[i], self.toparr[i], self.toparrfx[i],
+                           self.fx_data[i],
                            self.judge[i])
-        self.csl_update(time, self.judge[i], self.holdtext[i])
+
     else:
       self.check_holds(self.pid, time, self.arrow_group, self.steps,
                        self.judge, self.toparrfx, self.holding)
       self.check_bpm_change(self.pid, time, self.steps, self.judge)
       self.check_sprites(time, self.arrow_group, self.steps, self.fx_data,
-                         self.toparr, self.toparrfx, self.judge)
-      self.csl_update(time, self.judge, self.holdtext)
+                         self.judge)
+
+
+    self.fx_group.update(time)
+    self.text_group.update(time)
+    if self.lifebar.gameover == lifebars.FAILED and not self.failed:
+      print "I failed."
+      self.failed = True
 
     rects = []
     for g in self.sprite_groups: rects.extend(g.draw(screen))
