@@ -132,11 +132,13 @@ class Steps(object):
               releaselist[holding[hold] - 1] = hold
               feetstep[hold] = 0
               holding[hold] = 0
-              
+
+          if coloring_mod == int(coloring_mod): color = coloring_mod % 4
+          else: color = 1
           self.events.append(SongEvent(when = time_to_add, bpm = cur_bpm,
                                        feet = feetstep, extra = words[0],
                                        beat = cur_beat,
-                                       color = coloring_mod % 4))
+                                       color = color))
 
           for arrowadder in feetstep:
             if arrowadder & 1 and not arrowadder & 4:
@@ -145,7 +147,6 @@ class Steps(object):
         # Even if there are no steps in the event, we don't want to
         # propogate the freeze.
         else: last_event_was_freeze = False
-
 
         beat = words[0]
 
