@@ -50,6 +50,8 @@ class BPMDisplay(pygame.sprite.Sprite):
     self._center = center
     self.set_song(song)
     self._render()
+    self._color = [255, 255, 255]
+    self._bpm_range = [0, 1]	# normally [min, range]
 
   def _render(self):
     if self._bpm:
@@ -58,7 +60,7 @@ class BPMDisplay(pygame.sprite.Sprite):
       self.image = pygame.Surface([w, h], SRCALPHA, 32)
       self.image.fill([0, 0, 0, 0])
       t1 = fontfx.shadow("BPM:", self._font, [255, 255, 255])
-      t2 = fontfx.shadow("%d" % int(self._bpm), self._font, [255, 255, 255])
+      t2 = fontfx.shadow("%d" % int(self._bpm), self._font, self._color)
       r1 = t1.get_rect()
       r1.midtop = [50, 0]
       r2 = t2.get_rect()
@@ -80,6 +82,12 @@ class BPMDisplay(pygame.sprite.Sprite):
         self._bpm = bpms[0]
         self._bpms = bpms
         self._bpm_idx = 1 % len(self._bpms)
+        self._bpm_range = [min(bpms), max(bpms) - min(bpms)]
+        if len(bpms) > 1:
+          p = (self._bpm - self._bpm_range[0]) / self._bpm_range[1]
+          self._color = [255 * math.sqrt(p), 255 * math.sqrt(1 - p), 0]
+        else:
+          self._color = [255, 255, 255]
       self._last_update = pygame.time.get_ticks()
       self._render()
     else:
@@ -106,6 +114,9 @@ class BPMDisplay(pygame.sprite.Sprite):
       p = t / 1000.0
       self._bpm = (p * self._bpms[self._bpm_idx] +
                    (1 - p) * self._bpms[self._bpm_idx - 1])
+      if len(self._bpms) > 1: # and self._bpm_range[0] > 0:
+        p = (self._bpm - self._bpm_range[0]) / self._bpm_range[1]
+        self._color = [255 * math.sqrt(p), 255 * math.sqrt(1 - p), 0]
       self._render()
 
 class ScrollingImage(pygame.sprite.Sprite):
