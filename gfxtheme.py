@@ -115,14 +115,14 @@ class ArrowFX(pygame.sprite.Sprite):
     pygame.sprite.Sprite.__init__(self)
     self.presstime = -1000000
     self.tick = toRealTime(bpm, 1);
-    self.centery = ypos + 32
+    self.centery = ypos + game.width / 2
     self.centerx = (game.left_off(pid) +
                     game.dirs.index(direction) * game.width + game.width / 2)
     self.pid = pid
     
     fn = os.path.join(path, 'arr_n_' + direction + '_3.png')
     self.baseimg = pygame.image.load(fn).convert(16)
-    self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
+    self.tintimg = pygame.Surface(self.baseimg.get_size())
 
     self.blackbox = pygame.surface.Surface([game.width] * 2)
     self.blackbox.set_colorkey(0)

@@ -355,13 +355,6 @@ class MSDFile(GenericFile):
   def find_audio(self):
     return self.find_files([".ogg", ".mp3", ".wav", ".xm"])
 
-  # Find all step files
-  # Don't look for KSFs here - KSFFile uses this function to see if it should
-  # be ignored, in favor of a .SM. Since KSFs are inherently multiple files,
-  # it can't find itself.
-  def find_othersteps(self):
-    return self.find_files([".sm", ".dwi", ".dance", ".step"])
-
   # DWI finds files based on their image size, not on any naming conventions.
   # However, naming conventions combined with file size appears to be a
   # useful and accurate heuristic.
@@ -435,14 +428,6 @@ class DWIFile(MSDFile):
 
     self.bpms = []
     self.freezes = []
-
-    # SM and dance files will always be larger than an equivalent DWI,
-    # so using the file size to determine which to load works.
-    othersteps = self.find_othersteps()
-    if othersteps[-1] != self.filename:
-      err = "Ignoring %s in favor of %s." % (os.path.split(filename)[1],
-                                             os.path.split(othersteps[-1])[1])
-      raise RuntimeWarning(err)
 
     for parts in lines:
       if len(parts) > 3:
@@ -687,9 +672,6 @@ class KSFFile(MSDFile):
 
   def __init__(self, filename, need_steps):
     GenericFile.__init__(self, filename, need_steps)
-
-    if len(self.find_othersteps()) != 0:
-      raise RuntimeWarning("Ignoring %s in favor of other files." % filename)
 
     self.info = {"artist": "Unknown", "title": "Unknown"}
     self.difficulty = {}
