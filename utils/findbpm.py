@@ -10,7 +10,7 @@ import os
 import pygame, pygame.font, pygame.image, pygame.mixer
 from pygame.locals import *
 
-VERSION = "0.9"
+VERSION = "0.10"
 
 def usage():
   print "findbpm " + VERSION + " - find the bpm of a song"
@@ -30,7 +30,10 @@ def main():
   if len(args) != 1:
     usage()
     sys.exit(2)
-    
+
+  try: pygame.mixer.pre_init(44100, -16, 2)
+  except: pygame.mixer.pre_init()
+
   pygame.init()
   screen = pygame.display.set_mode((400, 48), HWSURFACE|DOUBLEBUF)
   pygame.display.set_caption('Tap to find Start, BPM')
