@@ -778,8 +778,8 @@ def dance(screen, song, players, prevscr, ready_go, game):
     if ev[1] == E_QUIT: return False
   
     for keyAction in key:
-      playerID = keyAction[0]
-      if playerID < len(players):
+      playerID, keyPress = keyAction
+      if playerID < len(players) and keyPress in game.dirs:
         keyPress = keyAction[1]
         players[playerID].toparr[keyPress].stepped(1, curtime+(players[playerID].steps.soffset))
         players[playerID].fx_data.append(players[playerID].judge.handle_key(keyPress, curtime) )

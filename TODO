@@ -15,6 +15,10 @@ Song Selector Improvements
   - Weighted randomize
  - Savable courses
 
+Input
+ - Configurable layouts (JZig?)
+ - Rethink the whole default keyboard layout, doesn't work with > 4 panel
+
 Menus
  - Credits screen
  - Player profiles?
