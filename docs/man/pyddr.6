@@ -1,0 +1,45 @@
+.TH pyddr 6 "March 28th, 2003"
+.SH NAME
+pyddr \- a Dance Dance Revolution simulator using Pygame
+.SH SYNOPSIS
+\fBpyddr
+.SH DESCRIPTION
+pyDDR is much like the popular arcade game "Dance Dance Revolution", in
+which you stand on a mat on the floor, with 4 buttons pointing forward,
+backwards, left, and right. Arrows scroll across the screen, and you must
+step on the arrows on the mat when they reach the top. These steps
+happen in time with music in the background, causing a rough approximation
+of dancing.
+.PP
+pyDDR supports most of the features of similar games, such as background
+and banner images for each song, multiple difficulty levels, freeze
+arrows (arrows you have to remain standing on for a length of time),
+and lyric display. pyDDR also allows you to use a real DDR mat if you have
+a Playstation to PC joystick adapter supported by ddrmat kernel module (which
+is a modified version of the gamecon kernel module), or a Playstation to
+USB joystick adapter and the USB joystick driver. If you lack a mat, you
+can play on the keyboard using the arrows as well, but it's much less fun.
+.PP
+You can also make your own step files to new music. \fIstepfile.txt\fR
+included with pyDDR documents the format, or you can use the program
+\fBinstep\fR(1).
+.SH FILES
+.IP /usr/share/games/pyddr/songs,\ /usr/local/share/games/pyddr/songs,\ ~/.pyddr/songs
+By default, pyDDR will look in these directories for your songs, step files,
+and other game data. You can configure this with the \fBsongdir\fR
+option in your pyddr.cfg file.
+.IP /etc/pyddr.cfg,\ ~/.pyddr/pyddr.cfg
+pyDDR configuration files. The settings in your local one override
+the system-wide settings.
+.IP /usr/share/games/pyddr
+Various data needed by pyDDR, such as background music and Python modules.
+.SH AUTHOR
+Brendan Becker <tgz@orotech.net> is the primary author of pyDDR. Joe
+Wreschnig <piman@debian.org> is the maintainer of pyDDR for Debian and the
+author of this manual page. Konami wrote the original "Dance Dance
+Revolution" game.
+.SH SEE ALSO
+\fBdwi2step\fR(1),
+\fBfindbpm\fR(1),
+\fBlyrictag\fR(1),
+\fBstepshrink\fR(1)

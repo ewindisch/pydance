@@ -1,0 +1,23 @@
+.TH stepshrink 1 "January 16th, 2003"
+.SH NAME
+stepshrink - reduce the size of pyDDR step files
+.SH SYNOPSIS
+\fBstepshrink \fR[\fB\-o \fInewfilename.step\fR] \fIfilename.step\fR
+.SH DESCRIPTION
+Most step files contain a lot of redundancy; rows of empty notes, eighth
+notes where there could be half notes, and so on. Stepshrink examines the
+steps present in a file, and reduces the size by using more appropriate
+directives in the file. No information in the file is lost doing this.
+.PP
+Stepshrink also reduces the accuracy of lyrics timings to the nearest
+1/100th of a second, rather than the hyperaccurate 16 digits that is the
+default. This does lose information, but not noticably.
+.PP
+By default, stepshrink outputs to standard output (your terminal), but
+the \-o command line option can make it output to a file. It is safe to
+specify the same file as both the input and output file.
+.SH AUTHOR
+Joe Wreschnig <piman@debian.org> is the author of stepshrink, the
+maintainer of pyDDR for Debian, and the author of this manual page.
+.SH SEE ALSO
+\fBpyddr\fR(6)

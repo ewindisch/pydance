@@ -1,0 +1,43 @@
+.TH lyrictag 1 "January 16th, 2003"
+.SH NAME
+lyrictag \- graphically enter a step pattern
+.SH SYNOPSIS
+\fBlyrictag \-s \fIsongfile\fB \-l \fIlyricfile\fR [\fB\-o \fIoutput\fR] | [\fIfilename\fR]
+.SH DESCRIPTION
+This script will play an MP3 or Ogg file while it displays text from
+a file, containing the lyrics of the song playing. As the lyric
+comes up, press enter or space when it should be displayed during the song.
+If you make a mistake and need to go back in the display, backspace will
+go back one lyric. However, there is no way to go back in the song.
+.PP
+The 'a' key switches between outputting in terms of "atsec" and "waits"
+(the default is "atsec"). This is probably unimportant unless you intend
+to do a lot of post-lyrictag editing. The "waits" mode makes it easier to
+copy and paste the resulting text (for e.g. refrains).
+.PP
+If, in the lyrics file, a line is enclosed with parentheses ( ( and ) )
+then it will be considered a "translated" lyric, meaning it will appear
+below regular lyrics, and in a different color.
+.PP
+.SH USAGE
+.IP \-\-song\, \-s
+Specify the song file to play when displaying the lyrics. This should
+be MPEG Layer 3 or Ogg Vorbis (strongly preferred) format.
+.IP \-\-lyrics,\ \-l
+Read song lyrics to display from this file.
+.IP \-\-output,\ \-o
+Specify the file to output the lyrics to. If this is a pyDDR step file,
+the lyrics will be appended if none exist; otherwise, a new file will
+be created. The default output file is \fIlyricfile\fR.lyric.
+.PP
+\fBlyrictag\fR may also be invoked with only one argument (\fIfilename\fR).
+If this is the case, that argument will be used as the file to read lyrics
+from, \fIfilename\fR.step will be the output file, and \fIfilename\fR.ogg
+will be the song file.
+.SH AUTHOR
+Brendan Becker <tgz@orotech.net> is the primary author of pyDDR. Joe
+Wreschnig <piman@debian.org> is the maintainer of pyDDR for Debian and the
+author of this manual page, and also hacked extensively on the current
+lyrictag.
+.SH SEE ALSO
+\fBpyddr\fR(6)
