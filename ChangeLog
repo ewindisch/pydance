@@ -10,6 +10,16 @@ legend:
 + New options:
  + "Wide" to add jumps.
  + Holds on/off.
++ 5 panel (Pump It Up) support (single, versus, couple, double).
+ - Actual PIU pads may or may not work; none were available for testing.
++ New game type selector, so you can do e.g. Double/Endless.
+* DWI parsing for braindead constructs like "2!(2".
+* Arrows now always draw in order.
+* Many crashes fixed:
+ * Stops + holds works again.
+ * Oni lifebar works again.
+- any2dance removed, it won't work anymore with this version.
+- In-game menu help removed, due to inaccuracies.
 
 0.7.4 - In My Pants						[2003.07.28]
 + 6 panel ("solo") and 8 panel support.

@@ -65,7 +65,12 @@ GAMES = {
   "8PANEL": GameType(players = 1, dirs = "wlkduzrg"),
   }
 
+SINGLE = [mode for mode in GAMES if (GAMES[mode].players == 1 and
+                                     not GAMES[mode].double)]
+VERSUS = [mode for mode in GAMES if (GAMES[mode].players == 2 and
+                                     not GAMES[mode].couple)]
 COUPLE = [mode for mode in GAMES if GAMES[mode].couple]
 DOUBLE = [mode for mode in GAMES if GAMES[mode].double]
+
 
 for game in GAMES: GAMES[game].name = game

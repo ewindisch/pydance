@@ -4,6 +4,7 @@ from constants import *
 from songselect import SongSelect
 from endless import Endless
 
+import colors
 import games
 
 SELECTORS = {
@@ -11,16 +12,20 @@ SELECTORS = {
   "Endless": Endless,
   }
 
+# Descriptions to output on the screen for each mode.
 DESCRIPTIONS = {
   "4P": "The standard up, down, left, and right arrows.",
   "5P": "Diagonals and the center.",
   "6P": "4 panel with a twist.",
   "8P": "Dance around the whole pad.",
-  "SINGLE": "Play by yourself.",
-  "VERSUS": "Challenge an opponent to the same steps.",
   "Normal": "One song at a time, or set up a playlist.",
   "Endless": "Keep dancing until you fail."
   }
+
+for mode in games.SINGLE: DESCRIPTIONS[mode] = "Play by yourself."
+
+for mode in games.VERSUS:
+  DESCRIPTIONS[mode] = "Challenge an opponent to the same steps."
 
 for mode in games.COUPLE:
   DESCRIPTIONS[mode] = "Two people dance complementary steps."
@@ -73,6 +78,9 @@ class GameSelect(object):
 
     ev = E_PASS
     while ev != E_QUIT:
+
+      # FIXME: If the player ID is > 0, limit the available game types
+      # to 2 player modes.
       pid, ev = event.poll()
 
       if ev == E_LEFT: index -= 1
@@ -82,10 +90,18 @@ class GameSelect(object):
 
       index %= len(choices)
 
+      # Update the screen
       self.screen.blit(self.bg, [0, 0])
+
       r = images[choices[index]].get_rect()
       r.center = [320, 240]
       self.screen.blit(images[choices[index]], r)
+
+      text = FONTS[28].render(DESCRIPTIONS[choices[index]], 1, colors.BLACK)
+      r = text.get_rect()
+      r.center = [320, 420]
+      self.screen.blit(text, r)
+
       pygame.display.update()
       clock.tick(10)
 
