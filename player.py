@@ -935,9 +935,9 @@ class Player(object):
 
   def check_holds(self, curtime, arrows, steps, judge, toparrfx, holding, holdtext, pid):
     # FIXME THis needs to go away
-    keymap_kludge = ({"u": E_UP, "k": E_UPLEFT, "z": E_UPRIGHT,
+    keymap_kludge = { "u": E_UP, "k": E_UPLEFT, "z": E_UPRIGHT,
                       "d": E_DOWN, "l": E_LEFT, "r": E_RIGHT,
-                      "g": E_DOWNRIGHT, "w": E_DOWNLEFT} )
+                      "g": E_DOWNRIGHT, "w": E_DOWNLEFT, "c": E_CENTER }
 
     for dir in self.game.dirs:
       toparrfx[dir].holding(0)

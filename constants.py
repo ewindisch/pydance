@@ -68,7 +68,7 @@ if not sys.stdout.isatty():
 
 # Set up the configuration file
 mainconfig = config.Config({ # Wow we have a lot of options
-  "gfxtheme": "classic", "djtheme": "none", "songdir": ".",
+  "djtheme": "none", "songdir": ".", "gfxtheme": "classic",
   "stickycombo": 1,  "lowestcombo": 4, "stickyjudge": 1,
   "lyriccolor": "cyan/aqua",
   "onboardaudio": 0, "masteroffset": 0,

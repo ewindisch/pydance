@@ -13,7 +13,7 @@ class GFXTheme(object):
       checkpath = os.path.join(path, "themes", "gfx")
       if os.path.isdir(checkpath):
         for name in dircache.listdir(checkpath):
-          if os.path.isfile(os.path.join(checkpath, name, "arr_c_d_0.png")):
+          if os.path.isfile(os.path.join(checkpath, name, "is-theme")):
             theme_list.append(name)
     return theme_list
 
@@ -24,6 +24,7 @@ class GFXTheme(object):
     self.game = game
     self.path = None
     self.pid = pid
+    size = "%dx%d" % (game.width, game.width)
     for path in search_paths:
       if os.path.isdir(os.path.join(path, "themes", "gfx", name)):
         self.path = os.path.join(path, "themes", "gfx", name)
@@ -31,15 +32,17 @@ class GFXTheme(object):
       print "Error: Cannot load graphics theme '%s'." % name
       sys.exit(1)
 
+    self.fullpath = os.path.join(self.path, size)
+
   def arrows(self, pid):
-    return ArrowSet(self.path, self.game, pid)
+    return ArrowSet(self.fullpath, self.game, pid)
 
   def toparrows(self, bpm, ypos, pid):
     arrs = {}
     arrfx = {}
     for d in self.game.dirs:
-      arrs[d] = TopArrow(bpm, d, ypos, pid, self.path, self.game)
-      arrfx[d] = ArrowFX(bpm, d, ypos, pid, self.path, self.game)
+      arrs[d] = TopArrow(bpm, d, ypos, pid, self.fullpath, self.game)
+      arrfx[d] = ArrowFX(bpm, d, ypos, pid, self.fullpath, self.game)
     return arrs, arrfx
 
   def __repr__(self):
@@ -188,5 +191,7 @@ class ScrollingArrow(object):
     self.dir = dir
     self.left = left
     fn = "_".join(["arr", "c", dir, color]) + ".png"
+    if not os.path.exists(os.path.join(path, fn)):
+      fn = "_".join(["arr", "c", dir, "0"]) + ".png"
     self.image = pygame.image.load(os.path.join(path, fn)).convert()
     self.image.set_colorkey(self.image.get_at([0, 0]), RLEACCEL)

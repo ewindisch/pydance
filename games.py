@@ -9,7 +9,7 @@ class GameType(object):
     self.width = 64
 
     # The directions to be displayed for each player.
-    self.dirs = ["l", "d", "u", "r"]
+    self.dirs = "ldur"
 
     # The maximum number of players for this game mode.
     self.players = 2
@@ -24,10 +24,15 @@ class GameType(object):
 
     self.__dict__.update(args)
 
+    self.dirs = list(self.dirs)
+
     # The spacing between each field's edge; therefore, the width of
     # each player's field as well.
     if self.double: self.player_offset = 640 / (2 * self.players)
     else: self.player_offset = 640 / self.players
+
+    # There isn't a double mode that we shouldn't parse as a coupled mode...
+    if self.double: self.couple = True
 
     # The offset to start drawing the arrows at, centered within the field
     # (Unless the mode isdoubled - see left_offset(self,pid) below.
@@ -51,9 +56,12 @@ class GameType(object):
 GAMES = {
   "SINGLE": GameType(),
   "COUPLE": GameType(couple = True),
-  "DOUBLE": GameType(couple = True, double = True, players = 1),
-  "6PANEL": GameType(players = 1, dirs = ["l", "k", "d", "u", "z", "r"]),
-  "8PANEL": GameType(players = 1, dirs = ["w", "l", "k", "d", "u", "z", "r", "g"]),
+  "DOUBLE": GameType(double = True, players = 1),
+  "5PANEL": GameType(players = 2, dirs = "wkczg", width = 56),
+  "5COUPLE": GameType(players = 2, couple = True, dirs = "wkczg", width = 56),
+  "5DOUBLE": GameType(players = 2, double = True, dirs = "wkczg", width = 56),
+  "6PANEL": GameType(players = 1, dirs = "lkduzr"),
+  "8PANEL": GameType(players = 1, dirs = "wlkduzrg"),
   }
 
 COUPLE = [mode for mode in GAMES if GAMES[mode].couple]

@@ -43,9 +43,11 @@ class GenericFile(object):
       # for making me write all the code below this.
       fullfile = os.path.join(dir, file)
       if lfile[-3:] == "mp3" and not self.info.has_key("filename"):
-        self.info["filename"] = fullfile
+        if lfile[0:5] != "intro": self.info["filename"] = fullfile
+      elif lfile[-3:] == "wav" and not self.info.has_key("filename"):
+        if lfile[0:5] != "intro": self.info["filename"] = fullfile
       elif lfile[-3:] == "ogg":
-        self.info["filename"] = fullfile
+        if lfile[0:5] != "intro": self.info["filename"] = fullfile
       elif lfile[-3:] == "lrc":
         self.parse_lyrics(fullfile)
       elif lfile[-3:] == "jpg" or lfile[-3:] == "png":
@@ -499,8 +501,11 @@ class DWIFile(GenericFile):
 class SMFile(GenericFile):
 
   gametypes = { "dance-single": "SINGLE", "dance-double": "DOUBLE",
-                "dance-couple": "COUPLE", "dance-solo": "6PANEL" }
-  notecount = { "SINGLE": 4, "DOUBLE": 8, "COUPLE": 8, "6PANEL": 6 }
+                "dance-couple": "COUPLE", "dance-solo": "6PANEL",
+                "pump-single": "5PANEL", "pump-couple": "5COUPLE",
+                "pump-double": "5DOUBLE" }
+  notecount = { "SINGLE": 4, "DOUBLE": 8, "COUPLE": 8,
+                "5PANEL": 5, "6PANEL": 6, "5COUPLE": 10, "5DOUBLE": 10 }
 
   step = [0, 1, 3, 1]
 
@@ -679,9 +684,13 @@ class SongItem(object):
     for k in SongItem.defaults:
       if not self.info.has_key(k): self.info[k] = SongItem.defaults[k]
 
-    for k in ("filename", "background", "banner"):
+    for k in ("filename",):
       if self.info[k] and not os.path.isfile(self.info[k]):
-        raise RuntimeError
+        raise RuntimeError("Missing %s" % k)
+
+    for k in ("banner", "background"):
+      if self.info[k] and not os.path.isfile(self.info[k]):
+        self.info[k] == None
 
     for k in ("startat", "endat", "gap", "bpm"):
       self.info[k] = float(self.info[k])

@@ -110,8 +110,8 @@ SINGLE
 BASIC 0
 q 1010
 q 0101
-q 2020
 q 3030
+q 1010
 end
 
 Metadata Section:
@@ -131,7 +131,7 @@ important data about the file. An explanation of the keys follow:
 
 'gap': The millisecond offset into the song at which the arrows should
        start. If the first beat is 0.3 seconds into the song, for example,
-       this should be 300. This can be negative. Default 0.
+       this should be -300. This can be negative. Default 0.
 
 'background': A background image (to display while the song is playing).
               Default none.
@@ -210,7 +210,7 @@ x   64th note
 n   192nd note (not recommended, only here because DWI uses it)
 
 After the note comes a string of buttons. All these strings should be
-the same length across game modes. Example strings might "1001" or "0020".
+the same length across game modes. Example strings might "1001" or "0030".
 
 0   No button at this time
 1   A regular press at this time
@@ -264,6 +264,10 @@ DOUBLE - Doubles DDR
 
 Changes:
 --------
+2003.07.30
+ - Fix example of 'gap' attribute (-300 instead of 300).
+ - Fix nonsensical hold arrow example.
+
 2003.06.29
  - Fix a typo ("::" => "::=").
 

@@ -18,17 +18,19 @@ KEYCONFIG = {
   K_ESCAPE: E_QUIT,
   K_f: E_FULLSCREEN,
   K_s: E_SCREENSHOT,
-  K_r: E_SELECT,
   K_PAGEUP: E_PGUP,
   K_PAGEDOWN: E_PGDN,
-  K_m: E_MARK,
   K_BACKSPACE: E_UNMARK,
   K_TAB: E_SELECT,
-  K_DELETE: E_CLEAR
-}
+  K_DELETE: E_CLEAR,
+  K_RETURN: E_START,
+  K_UP: E_UP,
+  K_DOWN: E_DOWN,
+  K_LEFT: E_LEFT,
+  K_RIGHT: E_RIGHT,
+  }
 
-# Hardcode numeric pad to player 1 for now... Grah.
-P1_KEYS = {
+NUM_KEYS = {
   K_KP7: E_UPLEFT,
   K_KP8: E_UP,
   K_KP9: E_UPRIGHT,
@@ -41,6 +43,34 @@ P1_KEYS = {
   K_RETURN: E_START,
   K_KP_ENTER: E_START,
   K_KP0: E_SELECT,
+  }
+
+QWERTY_KEYS = {
+  K_u: E_UPLEFT,
+  K_i: E_UP,
+  K_o: E_UPRIGHT,
+  K_j: E_LEFT,
+  K_k: E_CENTER,
+  K_l: E_RIGHT,
+  K_m: E_DOWNLEFT,
+  K_COMMA: E_DOWN,
+  K_PERIOD: E_DOWNRIGHT,
+  K_7: E_SELECT,
+  K_9: E_START,
+  }
+
+DVORAK_KEYS = {
+  K_g: E_UPLEFT,
+  K_c: E_UP,
+  K_r: E_UPRIGHT,
+  K_h: E_LEFT,
+  K_t: E_CENTER,
+  K_n: E_RIGHT,
+  K_m: E_DOWNLEFT,
+  K_w: E_DOWN,
+  K_v: E_DOWNRIGHT,
+  K_7: E_SELECT,
+  K_9: E_START,
   }
 
 # 16 buttons, 4 axis
@@ -67,7 +97,7 @@ A6B12 = { 1: E_PGUP, 3: E_PGDN, 8: E_SELECT, 4: E_LEFT, 5: E_RIGHT,
 # 4: L1, 5: R1, 6: L2, 7: R2
 # 8: Select, 9: Start
 A2B10 = { 0: E_LEFT, 1: E_DOWN, 2: E_RIGHT, 3: E_UP,
-         5: E_PGUP, 7: E_PGDN, 8: E_SELECT, 9: E_START }
+         5: E_PGUP, 7: E_PGDN, 8: E_SELECT, 9: E_START}
   
 # This is some sort of natively USB mat, I guess...
 # FIXME: I don't think it works.
@@ -153,28 +183,20 @@ class EventManager(object):
     self.setupKeys()
 
   def setupKeys(self):
-    keys = [P1_KEYS, {K_2: E_START, K_KP_PLUS: E_START}]
     dirs = (E_UP, E_DOWN, E_LEFT, E_RIGHT)
   
     # Keymap settings. The 'r' varieties are just swapped.
-    if mainconfig["keyboard"] == "qwerty":
-      keys[0][K_i], keys[0][K_k], keys[0][K_j], keys[0][K_l] = dirs
-      keys[1][K_UP], keys[1][K_DOWN], keys[1][K_LEFT], keys[1][K_RIGHT] = dirs
-    elif mainconfig["keyboard"] == "rqwerty":
-      keys[0][K_UP], keys[0][K_DOWN], keys[0][K_LEFT], keys[0][K_RIGHT] = dirs
-      keys[1][K_i], keys[1][K_k], keys[1][K_j], keys[1][K_l] = dirs
-    elif mainconfig["keyboard"] == "dvorak":
-      keys[0][K_c], keys[0][K_t], keys[0][K_h], keys[0][K_n] = dirs
-      keys[1][K_UP], keys[1][K_DOWN], keys[1][K_LEFT], keys[1][K_RIGHT] = dirs
-    elif mainconfig["keyboard"] == "rdvorak":
-      keys[0][K_UP], keys[0][K_DOWN], keys[0][K_LEFT], keys[0][K_RIGHT] = dirs
-      keys[1][K_c], keys[1][K_t], keys[1][K_h], keys[1][K_n] = dirs
+    if mainconfig["keyboard"] == "qwerty": keys = [QWERTY_KEYS, NUM_KEYS]
+    elif mainconfig["keyboard"] == "rqwerty": keys = [NUM_KEYS, QWERTY_KEYS]
+    elif mainconfig["keyboard"] == "dvorak": keys = [DVORAK_KEYS, NUM_KEYS]
+    elif mainconfig["keyboard"] == "rdvorak": keys = [NUM_KEYS, DVORAK_KEYS]
     else:
       print "Error! Unknown keyboard type", mainconfig["keyboard"]
       sys.exit(1)
 
-    for i in range(len(keys)):
-      self.mergeEvents(keys[i], i, "kb")
+    keys[1][K_KP_PLUS] = E_START
+
+    for i in range(len(keys)): self.mergeEvents(keys[i], i, "kb")
     self.mergeEvents(KEYCONFIG, 0, "kb")
 
   def mergeEvents(self, events, player, type):
