@@ -77,7 +77,7 @@ default_conf = { # Wow we have a lot of options
   "showcombo": 1,
   "autofail": 1,
   "grading": 1,
-  "keyboard": "qwerty",
+  "saveinput": 1,
   "strobe": 0,
   "usemad": 1, "usepsyco": 1,
   "autogen": 1,

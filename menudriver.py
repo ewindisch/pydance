@@ -173,7 +173,8 @@ def do(screen, songdata):
         ["Back", None, None]
         ),
        ("Interface Options",
-        ["Configure pads", {pad.START: wrap_ctr}, (pad.PadConfig, (screen,))],
+        ["Map Keys", {pad.START: wrap_ctr}, (pad.PadConfig, (screen,))],
+        ["Save Input", onoff_opt, ('saveinput',)],
         ["Song Previews", onoff_opt, ('previewmusic',)],
         ["Folders", onoff_opt, ("folders",)],
         ["Timer Display", onoff_opt, ('fpsdisplay',)],

@@ -89,6 +89,7 @@ def main():
   audio.stop()
   pygame.display.quit()
   mainconfig.write(os.path.join(rc_path, "pydance.cfg"))
-  pad.write(os.path.join(rc_path, "input.cfg"))
+  if mainconfig["saveinput"]:
+    pad.write(os.path.join(rc_path, "input.cfg"))
 
 if __name__ == '__main__': main()

@@ -167,6 +167,7 @@ class Pad(object):
       print "you'll have to map its button manually once to use it."
 
   def add_event(self, device, key, pid, event):
+    
     self.events[(device, key)] = (pid, event)
     self.states[(pid, event)] = False
 
@@ -257,11 +258,38 @@ class PadConfig(object):
     ev = pygame.event.poll()
     while ev.type != KEYDOWN or ev.key != K_ESCAPE:
       self.render()
+      self.render_message("Left: Map pad 1 - Esc: Quit - Right: Map pad 2")
       ev = pygame.event.poll()
-      pygame.display.update()
+
+      if ev.type == KEYDOWN:
+        if ev.key in [K_LEFT, K_KP4]: self.map_key(0)
+        elif ev.key in [K_RIGHT, K_KP6]: self.map_key(1)
+
       pygame.time.delay(10)
 
+  def map_key(self, pid):
+    pad.delete_events(pid)
+
+    for i in PadConfig.directions:
+      self.render()
+      self.render_message("Key for "+NAMES[i]+" (Esc to skip)?")
+
+      ev = pygame.event.poll()
+      while ev.type != KEYDOWN: ev = pygame.event.poll()
+      if ev.key != K_ESCAPE: pad.add_event(-1, ev.key, pid, i)
+
+      self.render()
+      self.render_message("Joystick button for "+NAMES[i]+" (Esc to skip)?")
+
+      while (ev.type != JOYBUTTONDOWN and
+             (ev.type != KEYDOWN or ev.key != K_ESCAPE)):
+        ev = pygame.event.poll()
+      if ev.type == JOYBUTTONDOWN:
+        pad.add_event(ev.joy, ev.button, pid, i)
+
   def render(self):
+    self.screen.fill([0, 0, 0])
+    PadConfig.bg.set_alpha(192)
     self.screen.blit(PadConfig.bg, [0, 0])
     for i in range(2):
       pgfx = pygame.Surface(PadConfig.pad.get_size())
@@ -279,3 +307,10 @@ class PadConfig(object):
       r = pgfx.get_rect()
       r.center = [160 + 320 * i, 240]
       self.screen.blit(pgfx, r)
+
+  def render_message(self, text):
+    text = FONTS[32].render(text, 1, [255, 255, 255])
+    r = text.get_rect()
+    r.midtop = [320, 10]
+    self.screen.blit(text, r)
+    pygame.display.update()
