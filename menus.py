@@ -1,7 +1,6 @@
 import pygame, colors
 from constants import *
 from fontfx import TextZoomer
-from spritelib import BGimage, SimpleSprite
 
 # Hooray! Less magic numbers
 LIGHT_GRAY = (128, 128, 128)

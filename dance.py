@@ -564,9 +564,9 @@ class ReadyGoSprite(pygame.sprite.Sprite):
 def play(screen, playlist, configs, songconf, playmode):
   numplayers = len(configs)
 
-  first = True
-
   game = games.GAMES[playmode]
+
+  first = True
 
   players = []
   for playerID in range(numplayers):
@@ -607,8 +607,6 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
   pygame.mixer.init()
 
-  # render group, almost[?] every sprite that gets rendered
-  rgroup = RenderUpdates()
   # text group, EG. judgings and combos
   tgroup =  RenderUpdates()  
   # special group for top arrows
@@ -619,16 +617,14 @@ def dance(screen, song, players, prevscr, ready_go, game):
   # lyric display group
   lgroup = RenderUpdates()
 
-  # background group
-  bgroup = RenderUpdates()
-
   if song.movie != None:
     backmovie = BGmovie(song.movie)
     background.fill(colors.BLACK)
   else:
     backmovie = BGmovie(None)
     
-  backimage = BGimage(song.background)
+  background = pygame.Surface((640, 480))
+  background.fill(colors.BLACK)
 
   ready_go_time = 100
   for player in players:
@@ -645,9 +641,6 @@ def dance(screen, song, players, prevscr, ready_go, game):
       else:
         bgkludge = pygame.transform.scale(bgkludge,(640,480))
       bgkludge.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
-      background.image = pygame.surface.Surface((640,480))
-      background.image.blit(bgkludge,(0,0))
-      backimage.add(bgroup)
       
       q = mainconfig['bgbrightness'] / 256.0
       for i in range(0, 101, 5):
@@ -659,6 +652,8 @@ def dance(screen, song, players, prevscr, ready_go, game):
         screen.blit(bgkludge,(0,0))
         pygame.display.flip()
         pygame.time.delay(1)
+
+      background.blit(bgkludge, (0, 0))
     else:
       background.fill(colors.BLACK)
       screen.fill(colors.BLACK)
@@ -676,23 +671,22 @@ def dance(screen, song, players, prevscr, ready_go, game):
     players[pid].judging_list.append(pj)
     pj.add(tgroup)
 
+  # Store these values so we don't look them up during the main loop
   strobe = mainconfig["strobe"]
   if strobe:
     extbox = Blinky(song.bpm)
     extbox.add(tgroup)
 
   fpsdisplay = mainconfig["fpsdisplay"]
-  if mainconfig['fpsdisplay']:
+  if fpsdisplay:
     fpstext = fpsDisp()
     timewatch = TimeDisp()
-    tgroup.add(fpstext)
-    tgroup.add(timewatch)
+    tgroup.add([fpstext, timewatch])
 
   if mainconfig['showlyrics']:
     lgroup.add(song.lyricdisplay.channels.values())
 
-  showcombo = mainconfig['showcombo']
-  if showcombo:
+  if mainconfig['showcombo']:
     for plr in players:
       tgroup.add(plr.combos)
   
@@ -707,8 +701,8 @@ def dance(screen, song, players, prevscr, ready_go, game):
   song.init()
 
   if song.crapout != 0:
-    error.ErrorMessage(screen, ("The audio file for this song", song.filename,
-                               "could not be found."))
+    error.ErrorMessage(screen, ["The audio file for this song", song.filename,
+                               "could not be found."])
     return False # The player didn't fail.
 
   screenshot = 0
@@ -799,7 +793,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
           if ev.feet:
             for (dir,num) in zip(game.dirs, ev.feet):
               dirstr = dir + repr(int(ev.color) % plr.colortype)
-              groups = (plr.arrow_group, rgroup)
+              groups = (plr.arrow_group)
               if num & 1:
                 if not (num & 2):
                   ArrowSprite(plr.theme.arrows[dirstr].c,
@@ -816,7 +810,6 @@ def dance(screen, song, players, prevscr, ready_go, game):
         if (curtime >= plr.steps.lastbpmchangetime[0][0]):
           nbpm = plr.steps.lastbpmchangetime[0][1]
           plr.change_bpm(nbpm)
-          #print "Last changed BPM at", plr.steps.lastbpmchangetime[0]
           plr.steps.lastbpmchangetime.pop(0)
      
     for plr in players: plr.check_sprites(curtime)
@@ -827,12 +820,11 @@ def dance(screen, song, players, prevscr, ready_go, game):
     song.lyricdisplay.update(curtime)
 
     for plr in players: plr.combo_update(curtime)
-        
+
     if backmovie.filename:
       backmovie.update(curtime)
       if backmovie.changed or (fpstext.fpsavg > 30):
         backmovie.resetchange()
-#        screen.blit(background.image,(0,0))
         screen.blit(backmovie.image,(0,0))
 
     songtext.update()
@@ -843,15 +835,14 @@ def dance(screen, song, players, prevscr, ready_go, game):
       fpstext.update(curtime)
       timewatch.update(curtime)
 
-    # more than one display.update will cause flicker
-    rectlist = sgroup.draw(screen) #rectlist = list of changed rectangles
+    rectlist = sgroup.draw(screen)
 
     for plr in players:
       rectlist.extend( plr.arrow_group.draw(screen))
     
-    rectlist.extend( fgroup.draw(screen))
-    rectlist.extend( tgroup.draw(screen))
-    rectlist.extend( lgroup.draw(screen))
+    rectlist.extend(fgroup.draw(screen))
+    rectlist.extend(tgroup.draw(screen))
+    rectlist.extend(lgroup.draw(screen))
 
     if not backmovie.filename: pygame.display.update(rectlist)
     else: pygame.display.update()
@@ -862,12 +853,11 @@ def dance(screen, song, players, prevscr, ready_go, game):
       screenshot = 0
 
     if not backmovie.filename:
-      lgroup.clear(screen,background.image)
-      tgroup.clear(screen,background.image)
-      fgroup.clear(screen,background.image)
-      for plr in players:
-        plr.arrow_group.clear(screen,background.image)
-      sgroup.clear(screen,background.image)
+      lgroup.clear(screen,background)
+      tgroup.clear(screen,background)
+      fgroup.clear(screen,background)
+      for plr in players: plr.arrow_group.clear(screen, background)
+      sgroup.clear(screen, background)
 
     if (curtime > players[0].steps.length - 1) and (songtext.zdir == 0) and (songtext.zoom > 0):
       songtext.zout()
