@@ -71,6 +71,8 @@ class Steps(object):
 
     song_steps = song.steps[playmode][difficulty]
     if playmode in games.COUPLE: song_steps = song_steps[pid]
+    # Copy the steps so transformations don't affect both players.
+    song_steps = [list(s) for s in song_steps]
 
     if player.transform:
       stepfilters.rotate(song_steps, player.transform, playmode)

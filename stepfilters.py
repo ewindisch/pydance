@@ -15,8 +15,15 @@ NOT_STEPS = ["D", "S", "L", "W", "B", "R"]
 
 STEP_MAPPINGS = {
   "SINGLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
+  "VERSUS": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
   "DOUBLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
   "COUPLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
+  "5PANEL": [[0, 1, 2, 3, 4], [3, 4, 2, 0, 1], [4, 0, 2, 1, 3],
+             [1, 3, 2, 4, 5]],
+  "5VERSUS": [[0, 1, 2, 3, 4], [3, 4, 2, 0, 1], [4, 0, 2, 1, 3],
+             [1, 3, 2, 4, 5]],
+  "5COUPLE": [[0, 1, 2, 3, 4], [3, 4, 2, 0, 1], [4, 0, 2, 1, 3],
+             [1, 3, 2, 4, 5]],
   "6PANEL": [[0, 1, 2, 3, 4, 5], [4, 5, 3, 2, 0, 1], [2, 0, 5, 1, 3, 4],
              [1, 3, 0, 4, 5, 2]],
   "8PANEL": [[0, 1, 2, 3, 4, 5, 6, 7], [5, 6, 7, 4, 3, 0, 1, 2],
@@ -26,7 +33,9 @@ STEP_MAPPINGS = {
 # Rotate the steps according the player's rotation mode
 # Random and shuffle aren't really rotations but... whatever.
 def rotate(steps, opt, mode):
-  if opt == -1:
+  # Don't crash if we haven't implemented transforms for a mode yet.
+  if mode not in STEP_MAPPINGS: return
+  elif opt == -1:
     mapping = list(STEP_MAPPINGS[mode][0])
     random.shuffle(mapping)
   elif opt >= 0: mapping = STEP_MAPPINGS[mode][opt]
