@@ -4,13 +4,13 @@ add to it.
 0.6.3
  - better help in game (context-sensitive menu help, key maps)
  - Clean up the main select/dance/judge loop. (half done)
- - Player-as-object patch (possible 0.6.2).
+ - Player-as-object patch
+   - Removal of keykludge
  - Separate Song (makes arrow events out of patterns), and SongFile.
    (loads file, gets metadata, creates Song given a difficulty)
    - This should remove fastSong.
-   - Possible 0.6.3.
  - DWI loader natively using the SongFile interface.
- - New song select, if I get bored?
+ - New song select
  - Themable menus?
 
 Misc:
