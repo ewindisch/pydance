@@ -61,13 +61,13 @@ NUM_SORTS = len(SORT_NAMES)
 
 
 SS_HELP = [
-  "Up / Down changes song selection",
-  "Left / Right changes difficulty setting",
-  "Confirm / O / Up Right opens a folder or starts a song",
-  "Escape / X / Up Left closes a folder or backs up",
-  "Select / Tab takes you to a random song",
-  "Start / Enter switches between screens",
-  "F11 toggles fullscreen - S changes the sort mode.",
+  "Up / Down: Change song selection",
+  "Left / Right: Change difficulty setting",
+  "Enter / Up Right: Open a folder or start a song",
+  "Escape / Up Left: Closes  folder or exit",
+  "Tab / Select: Go to a random song",
+  "Start: Go to the options screen",
+  "F11: Toggle fullscreen - S: Change the sort mode",
   ]
 
 def folder_name(name, type):
