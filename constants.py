@@ -59,8 +59,8 @@ search_paths = (pyddr_path, rc_path)
 mainconfig = config.Config({ # Wow we have a lot of options
   "gfxtheme": "classic", "djtheme": "none", "songdir": ".",
   "stickycombo": 1,  "lowestcombo": 4,  "totaljudgings": 1,  "stickyjudge": 1,
-  "lyriccolor": "cyan",  "transcolor": "aqua",
-  "mixerclock": 1, "onboardaudio": 0, "masteroffset": 0,
+  "lyriccolor": "cyan/aqua",
+  "onboardaudio": 0, "masteroffset": 0,
   "reversescroll": 0, "scrollspeed": 1,
   "explodestyle": 3, "arrowspin": 0, "arrowscale" : 1,
   "vesacompat": 0, "fullscreen": 0,

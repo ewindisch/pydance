@@ -6,7 +6,7 @@ from constants import *
 RESOLUTION = (640, 480)
 BACKGROUND = os.path.join(image_path, "endless-bg.png")
 
-DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "TRICK", "ANOTHER", "STANDARD",
+DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "ANOTHER", "STANDARD", "TRICK",
                 "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI"]
 
 def python_sucks_sort(a, b):

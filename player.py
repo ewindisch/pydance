@@ -220,6 +220,7 @@ class OniLifeBarDisp(AbstractLifeBar):
     self.life = min(self.maxlife, self.life + 1)
 
   def broke_hold(self):
+    OniLifeBarDisp.lose_sound.play()
     self.life -= 1
        
   def update_life(self, rating):

@@ -2,6 +2,7 @@
 
 color = {
   'red': (255, 0, 0),
+  'pink': (255, 127, 127),
   'yellow': (255, 255, 0),
   'green': (0, 255, 0),
   'cyan':(0, 255, 255),
@@ -27,5 +28,5 @@ def darken(color, diff = 64):
 def darken_div(color, div = 3.5):
   return tuple([x / div for x in color])
 
-def average(color1, color2):
-  return tuple([(c1 + c2) / 2 for c1, c2 in zip(color1, color2)])
+def average(clr1, clr2, w = 0.5):
+  return [int((c1 * w + c2 * (1 - w))) / 2 for c1, c2 in zip(clr1, clr2)]

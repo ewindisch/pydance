@@ -190,16 +190,13 @@ class SongData:
 
     self.crapout = 0
 
-    self.lyricdisplay = Lyrics([colors.color[mainconfig['transcolor']],
-                                colors.color[mainconfig['lyriccolor']]])
+    clrs = [colors.color[c] for c in mainconfig["lyriccolor"].split("/")]
+    clrs.reverse()
+    self.lyricdisplay = Lyrics(clrs)
+
     atsec = 0
     for lyr in song.lyrics:
-      lsplit = lyr.split()
-      if lsplit[0] == "atsec": atsec = float(lsplit[1])
-      elif lsplit[0] == "lyric":
-        self.lyricdisplay.addlyric(atsec - 0.4, " ".join(lsplit[1:]), 1)
-      elif lsplit[0] == "trans":
-        self.lyricdisplay.addlyric(atsec - 0.4, " ".join(lsplit[1:]), 0)
+      self.lyricdisplay.addlyric(*lyr)
 
   def init(self):
     try: pygame.mixer.music.load(self.filename)

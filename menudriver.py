@@ -85,6 +85,7 @@ def get_tuple(name, list):
 
 def switch_tuple(name, list):
   next = False
+  orig = mainconfig[name]
   for item in list:
     if next:
       mainconfig[name] = item[0]
@@ -93,6 +94,7 @@ def switch_tuple(name, list):
     elif item[0] == mainconfig[name]:
       next = True
   if next: mainconfig[name] = list[0][0]
+  elif mainconfig[name] == orig: mainconfig[name] = list[0][0]  
   return get_tuple(name, list)
 
 def switch_tuple_back(name, list):
@@ -170,8 +172,10 @@ def do(screen, songdata):
                                     (192, 'bright'),
                                     (255, 'very bright')])],
         ["Lyrics", onoff_opt, ("showlyrics",)],
-        ["Main Lyrics", rotate_opt, ("lyriccolor", colors.color.keys())],
-        ["Other Lyrics", rotate_opt, ("transcolor", colors.color.keys())],
+        ["Lyrics Color", rotate_opt, ("lyriccolor",
+                                     ["pink/purple", "purple/cyan",
+                                      "cyan/aqua", "aqua/yellow",
+                                      "yellow/pink"])],
         ["Back", None, None]
         ),
        ("Interface Options",

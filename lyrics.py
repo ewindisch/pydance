@@ -3,8 +3,8 @@ from constants import *
 import colors
 
 class LyricChannel(pygame.sprite.Sprite):
-  def __init__(self, top, clrs):
-      pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+  def __init__(self, top, color):
+      pygame.sprite.Sprite.__init__(self)
       self.lyrics = []
       self.times = []
       self.prender = []
@@ -14,8 +14,8 @@ class LyricChannel(pygame.sprite.Sprite):
  
       self.oldlyric = -1
       self.oldalp = 0
-      self.colors = clrs
-      self.darkcolors = colors.darken_div(clrs)
+      self.color = color
+      self.darkcolor = colors.darken_div(color)
       self.topimg = top
 
       self.rect = self.image.get_rect()
@@ -26,8 +26,8 @@ class LyricChannel(pygame.sprite.Sprite):
     self.lyrics.append(lyric)
     self.times.append(time)
  
-    image1 = FONTS[32].render(lyric,1,self.darkcolors)
-    image2 = FONTS[32].render(lyric,1,self.colors)
+    image1 = FONTS[32].render(lyric,1,self.darkcolor)
+    image2 = FONTS[32].render(lyric,1,self.color)
     rimage = pygame.Surface(image1.get_size(), 0, 16)
     rimage.fill((64,64,64))
     rimage.blit(image1,(-2,-2))
@@ -71,11 +71,11 @@ class Lyrics:
     self.channels = {}
     self.colors = clrs
     
-  def addlyric(self, time, lyric, chan = 0):
+  def addlyric(self, time, chan, lyric):
     if not self.channels.has_key(chan):
-      self.channels[chan] = LyricChannel(480 - (chan + 1) * 32,
-                                         self.colors[chan % len(self.colors)])
-    self.channels[chan].addlyric(time, lyric)
+      color = self.colors[chan % len(self.colors)]
+      self.channels[chan] = LyricChannel(480 - (chan + 1) * 32, color)
+    self.channels[chan].addlyric(time - 0.4, lyric)
 
   def update(self, curtime):
     for i in self.channels.values(): i.update(curtime)

@@ -52,6 +52,8 @@ class StepFile:
     del(self.info["file"])
     del(self.info["offset"])
 
+    if self.info.has_key("version"): del(self.info["version"])
+
     if self.info.has_key("bg"):
       self.info["background"] = self.info["bg"]
       del(self.info["bg"])
@@ -71,7 +73,7 @@ class StepFile:
             break
 
   def parse_metadata(self, line, data):
-    if line == "LYRICS": return StepFile.LYRICS, data
+    if line == "LYRICS": return StepFile.LYRICS, [None, None]
     else:
       parts = line.split()
       if len(parts) == 1:
@@ -113,20 +115,27 @@ class StepFile:
 
   def parse_lyrics(self, line, data):
     if line == "end": return StepFile.WAITING, data
-    self.lyrics.append(line)
+    else:
+      parts = line.split()
+      if parts[0] == "atsec": data[0] = float(parts[1])
+      elif parts[0] == "waits": data[0] += float(parts[1])
+      elif parts[0] == "lyric":
+        self.lyrics.append((data[0], 1, " ".join(parts[1:])))
+      elif parts[0] == "trans":
+        self.lyrics.append((data[0], 0, " ".join(parts[1:])))
     return StepFile.LYRICS, data
 
   def parse_waiting(self, line, data):
     if line == "LYRICS": return StepFile.LYRICS, data
     elif line == line.upper():
-      self.sec = line
+      data[0] = line
       if not self.steps.has_key(data[0]): self.steps[data[0]] = {}
       if not self.difficulty.has_key(data[0]): self.difficulty[data[0]] = {}
       return StepFile.GAMETYPE, data
 
 formats = ((".step", StepFile), )
 
-DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "TRICK", "ANOTHER", "STANDARD",
+DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "ANOTHER", "STANDARD", "TRICK",
                 "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI"]
 
 def order_sort(a, b):
@@ -159,7 +168,7 @@ class SongItem:
 
     # Default values
     for k in ("subtitle", "mix", "background", "banner",
-                "author", "reivison", "md5sum", "movie"):
+                "author", "revision", "md5sum", "movie"):
       if not self.info.has_key(k): self.info[k] = None
 
     for k, v in (("valid", 1), ("endat", 0.0), ("preview", (45.0, 10.0)),
