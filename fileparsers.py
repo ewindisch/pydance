@@ -355,7 +355,7 @@ class DWIFile(GenericFile):
                 },
     }
 
-  steps["DOUBLE"] = steps["COOUPLE"] = steps["SINGLE"]
+  steps["DOUBLE"] = steps["COUPLE"] = steps["SINGLE"]
 
   diff_map = { "ANOTHER": "TRICK", "SMANIAC": "HARDCORE",
                "S-MANIAC": "HARDCORE" }
