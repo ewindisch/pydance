@@ -1,16 +1,16 @@
 pydance INSTALLATION INSTRUCTIONS
 ---------------------------------
 
-pydance currently is known to run on Windows, UNIX and GNU/Linux, and
+pydance currently is known to run on Windows, Unix and GNU/Linux, and
 Mac OS X systems. In theory, it will run anywhere Pygame and Python do.
-pydance can be gotten from http://www.icculus.org/pyddr.
+pydance can be gotten from http://www.icculus.org/pyddr/get.php.
 
 In all installations, you need the following things:
  - A sufficiently recent SDL.
  - The [currently] latest SDL_mixer (1.2.5).
  - SMPEG, if you want MP3 support.
- - Libvorbis, if you want Ogg Vorbis support (you need this or SMPEG).
- - Python 2.2 or higher (2.1 is NOT new enough anymore).
+ - Libvorbis, if you want Ogg Vorbis support (you need this).
+ - Python 2.3 or higher (2.2 might run, but is unsupported; 2.1 won't).
  - Pygame 1.5.6 or higher (1.5.5 is acceptable but may crash on some files).
 
 If you are running a Unix distribution, all these probably come with
@@ -24,7 +24,7 @@ Installing under Unix or GNU/Linux
 
 The first step checks to make sure you have appropriate versions of
 Python and Pygame installed. The second one copies files into the
-appropriate places on your system (according to the FHS).
+appropriate places on your system (according to the GNU/Linux FHS).
 
 If you need to install it somewhere else, you can set DESTDIR (to
 install to an alternate root entirely), or PREFIX (which is /usr/local
@@ -55,18 +55,16 @@ pydance will use it by default. Set 'usepsyco' to 0 to turn it off, which
 you'll need to do to report bugs. Psyco may give pydance a good speed boost,
 but it is IA32-only currently.
 
-If you install the 'pymad' and 'pyao' packages, Python will try to play
-MP3s using them instead of SMPEG. This is usually a bad idea - SMPEG is
-terrible, but pymad and pyao don't necessarily play nicely with Pygame.
-This is only recommended on GNU/Linux IA32 systems using the ALSA drivers.
-
 Troubleshooting
 ---------------
 If you are having trouble with pydance, first check your OS distributor
 for updates. Debian and Gentoo GNU/Linux both have packages for pydance,
 and this is the recommended installation method for these systems.
-Also, visit http://www.icculus.org/pyddr and see if a new version has
-been released, or if there is a package for your platform. If that
+Also, visit http://www.icculus.org/pyddr/get.php and see if a new version
+has been released, or if there is a package for your platform. If that
 fails, drop by #pyddr on irc.freenode.net and see if anyone knows how
 to help you. However, if you ask for help, expect to answer a lot of
-questions about your OS and the software on it.
+questions about your OS and the software on it. In addition, if your
+OS is non-free (Microsoft Windows, Mac OS X, BeOS, or any of the non-free
+Linux distributions), and the problem is OS-specific, we won't be able to
+help.
