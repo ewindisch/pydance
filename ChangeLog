@@ -6,11 +6,12 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
-0.7.5 -
+0.7.5 - That's the second largest ChangeLog I've ever seen!	[2003.XX.XX]
 + New options: "Wide" to add jumps, holds on/off.
 + 5 panel (Pump It Up) support (single, versus/unison, couple, and double).
  + Support for KSF, SM, and .dance files with 5 panel steps.
  - Actual PIU pads may or may not work; none were available for testing.
++ Versus, couple, and double 6 panel mode.
 + New game type selector, so you can do e.g. Double/Endless.
 + A document on the KSF file format has been added in docs/.
 + The .dance specification has been updated with new modes and corrections.
@@ -18,6 +19,8 @@ legend:
 + New theming code.
  + Brings back oldschool and bryan themes.
  + Autodetect what game modes a theme will work for.
+* Support the Thrustmaster USB mats (probably), and X-Box controllers.
+ + We suspect that pydance will run on GNU/Linux on an X-Box now.
 * Correctly encode/decode KSF, SM, DWI, and .dance file metadata.
  * KSF requires the Python Koco codecs package.
 * DWI parsing for braindead constructs like "2!(2".
@@ -27,6 +30,7 @@ legend:
  * Oni lifebar works again.
  * Obscure edge case in 2 player endless mode works correctly.
 * Parsing for all files is now more informative and less error-prone.
+- Assist mode is broken for non-4 panel modes, we need more sounds.
 - any2dance removed, it won't work anymore with this version.
 - In-game menu help removed, due to inaccuracies.
 
