@@ -114,7 +114,8 @@ mainconfig = Config({ # Wow we have a lot of options
   "showcombo": 1, "showtoparrows": 1,
   "killsongonfail": 0,
   "grading": 1,
-  "keyboard": "qwerty"
+  "keyboard": "qwerty",
+  "strobe": 0
   })
 
 if osname == "posix":
@@ -4024,8 +4025,9 @@ def dance(song,players,difficulty):
     dajudge2 = Judge(song.bpm, holds2, song.modeinfo[playmode][diffnum2][1],
                      song.totarrows[difficulty[1]],difficulty[1])
 
-  extbox = Blinky(song.bpm)
-#  extbox.add(tgroup)
+  if (mainconfig['strobe']):
+    extbox = Blinky(song.bpm)
+    extbox.add(tgroup)
 
   toparr1_l = TopArrow(song.bpm,'l',ARROWTOP,1)
   toparr1_d = TopArrow(song.bpm,'d',ARROWTOP,1)
@@ -4378,7 +4380,8 @@ def dance(song,players,difficulty):
       for spr in agroup2.sprites():
         spr.update(curtime,dajudge2.getbpm(),song.lastbpmchangetime,hiddenval,suddenval)
 
-    extbox.update(curtime+(song.offset*1000.0))
+    if(int(mainconfig['strobeSquare'])):
+      extbox.update(curtime+(song.offset*1000.0))
 
     # update the top arrows
     toparr1_l.update(curtime+(song.offset*1000.0))
