@@ -57,7 +57,7 @@ class EventManager:
   def __init__(self, handler = pygame.event):
     self.handler = handler
     self.handler.set_blocked(range(NUMEVENTS))
-    self.handler.set_allowed((KEYUP, KEYDOWN))
+    self.handler.set_allowed((KEYUP, KEYDOWN, ACTIVEEVENT, VIDEOEXPOSE))
     self.states = {} # States of buttons
     # Tuples of events, key is tuple: (from, event)
     # Types are "kb" or "jsX" where X is a joystick number.
@@ -163,7 +163,9 @@ class EventManager:
     ev = self.handler.poll()
     t = ''
     v = 0
-    if ev.type == QUIT: return E_QUIT
+    if ev.type == QUIT: return (0, E_QUIT)
+    elif ev.type == ACTIVEEVENT: return (0, E_EXPOSE)
+    elif ev.type == VIDEOEXPOSE: return (0, E_EXPOSE)
     elif ev.type == JOYBUTTONDOWN or ev.type == JOYBUTTONUP:
       t = "js" + str(ev.joy)
       v = ev.button
