@@ -388,7 +388,13 @@ class MSDFile(GenericFile):
 
     if not (os.path.exists(self.info.get("filename", ""))):
       audio = self.find_audio()
-      if len(audio) > 0: self.info["filename"] = audio[-1]
+      if len(audio) > 0:
+        for fn in audio:
+          if fn.lower()[-3:] == "ogg":
+            self.info["filename"] = fn
+          elif (fn.lower()[-3:] in ["mp3", "wav"] and
+                self.info.get("filename", "").lower()[-3:] != "ogg"):
+            self.info["filename"] = fn
 
     lyrics = self.find_files([".lrc"])
     if len(lyrics) > 0: self.parse_lyrics(lyrics[0])
