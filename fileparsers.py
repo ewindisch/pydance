@@ -18,10 +18,9 @@ class GenericFile:
     if not self.info.has_key("subtitle"):
       for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
         if pair[0] in self.info["title"] and self.info["title"][-1] == pair[1]:
-          l = self.info["title"].index(pair[0])
-          r = self.info["title"].rindex(pair[1])
-          if l != 0 and r > l + 1:
-            self.info["subtitle"] = self.info["title"][l+1:r]
+          l = self.info["title"][0:-1].rindex(pair[0])
+          if l != 0:
+            self.info["subtitle"] = self.info["title"][l+1:-1]
             self.info["title"] = self.info["title"][:l]
             break
 
@@ -452,13 +451,32 @@ class DWIFile(GenericFile):
           if current_time >= xyz[0]:
             steplist.append(["S", float(xyz[1])])
             freezeidx += 1
-      elif steps[0] == " ": steps.pop(0)
+      elif steps[0] == "<":
+        steps.pop(0)
+        tomerge = []
+        while steps[0] != ">": tomerge.append(steps.pop(0))
+        steps.pop(0)
+        steplist.append([step_type] + self.parse_merge(tomerge))
       else: steps.pop(0)
 
     if mode in DWIFile.SINGLETYPES: self.steps[mode][diff] = steplist
     elif mode in DWIFile.COUPLETYPES:
       if self.steps[mode].get(diff) == None: self.steps[mode][diff] = []
       self.steps[mode][diff].append(steplist)
+
+  def parse_merge(self, steps):
+    ret = [0] * 20
+    while len(steps) != 0:
+      if steps[0] == "!":
+        steps.pop(0)
+        val = DWIFile.steps[steps[0]]
+        ret = [a | (2 * b) for a, b in zip(ret, val)]
+      else:
+        val = DWIFile.steps[steps[0]]
+        ret = [a | b for a, b in zip(ret, val)]
+      steps.pop(0)
+      
+    return ret
 
 class SMFile(GenericFile):
 
