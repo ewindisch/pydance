@@ -4,8 +4,6 @@ E_PASS,E_QUIT,E_FULLSCREEN,E_SCREENSHOT,E_PGUP,E_PGDN,E_SELECT,E_MARK,E_UP,E_DOW
 DIRECTIONS = ['l', 'd', 'u', 'r']
 MAXPLAYERS = 2
 
-COUPLE_MODES = ["COUPLE"]
-
 VERSION = "0.7.2"
 
 import sys, os, config, pygame

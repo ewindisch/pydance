@@ -1,5 +1,7 @@
 import os, stat, util, string
 
+import games
+
 class GenericFile:
   def __init__(self, filename, need_steps):
     self.filename = filename
@@ -121,8 +123,6 @@ class GenericFile:
 class DanceFile(GenericFile):
   WAITING,METADATA,DESCRIPTION,LYRICS,BACKGROUND,GAMETYPE,STEPS = range(7)
 
-  COUPLEMODES = ["COUPLE"]
-
   def __init__(self, filename, need_steps):
     GenericFile.__init__(self, filename, need_steps)
     self.comment = "#"
@@ -171,7 +171,7 @@ class DanceFile(GenericFile):
   def parse_gametype(self, line, data):
     data[1], diff = line.split()
     self.difficulty[data[0]][data[1]] = int(diff)
-    if data[0] in DanceFile.COUPLEMODES:
+    if data[0] in games.COUPLE:
       self.steps[data[0]][data[1]] = [[], []]
     else: self.steps[data[0]][data[1]] = []
     return DanceFile.STEPS
@@ -180,7 +180,7 @@ class DanceFile(GenericFile):
     if not self.need_steps: return DanceFile.STEPS
 
     parts = line.split()
-    if data[0] in DanceFile.COUPLEMODES:
+    if data[0] in games.COUPLE:
       steps = [[parts[0]], [parts[0]]]
       if parts[0] in ("B", "W", "S", "D"):
         steps[0].append(float(parts[1]))
@@ -350,9 +350,6 @@ class DWIFile(GenericFile):
     "B": [1, 0, 0, 1]
     }
 
-  SINGLETYPES = ["SINGLE", "DOUBLE", "SOLO"]
-  COUPLETYPES = ["COUPLE"]
-
   def __init__(self, filename, need_steps):
     GenericFile.__init__(self, filename, need_steps)
     self.comment = "//"
@@ -368,14 +365,14 @@ class DWIFile(GenericFile):
     for token in tokens:
       if len(token) == 0: continue
       parts = token.split(":")
-      if len(parts) == 4 and parts[0] in DWIFile.SINGLETYPES:
+      if len(parts) == 4 and parts[0] in games.SINGLE:
         if not self.difficulty.has_key(parts[0]):
           self.difficulty[parts[0]] = {}
           self.steps[parts[0]] = {}
         self.difficulty[parts[0]][parts[1]] = int(parts[2])
         if need_steps: self.parse_steps(parts[0], parts[1], parts[3])
 
-      elif len(parts) == 5 and parts[0] in DWIFile.COUPLETYPES:
+      elif len(parts) == 5 and parts[0] in games.COUPLE:
         if not self.difficulty.has_key(parts[0]):
           self.difficulty[parts[0]] = {}
           self.steps[parts[0]] = {}
@@ -463,8 +460,8 @@ class DWIFile(GenericFile):
         steplist.append([step_type] + self.parse_merge(tomerge))
       else: steps.pop(0)
 
-    if mode in DWIFile.SINGLETYPES: self.steps[mode][diff] = steplist
-    elif mode in DWIFile.COUPLETYPES:
+    if mode in games.SINGLE: self.steps[mode][diff] = steplist
+    elif mode in games.COUPLE:
       if self.steps[mode].get(diff) == None: self.steps[mode][diff] = []
       self.steps[mode][diff].append(steplist)
 
@@ -490,7 +487,6 @@ class SMFile(GenericFile):
   notetypes = { 192: "n", 64: "x", 48: "u", 32: "t", 24: "f",
                 16: "s", 12: "w", 8: "e", 4: "q", 2: "h", 1: "o" }
 
-  coupletypes = ["COUPLE"]
   step = [0, 1, 3, 1]
 
   def __init__(self, filename, need_steps):
@@ -556,7 +552,7 @@ class SMFile(GenericFile):
 
   def parse_steps(self, steps, gametype):
     stepdata = []
-    if gametype in SMFile.coupletypes: stepdata = [[], []]
+    if gametype in games.COUPLE: stepdata = [[], []]
     beat = 0
     count = SMFile.notecount[gametype]
     bpmidx = 0
@@ -571,7 +567,7 @@ class SMFile(GenericFile):
       while len(measure) != 0:
         sd = measure[0:count]
         measure = measure[count:]
-        if gametype in SMFile.coupletypes:
+        if gametype in games.COUPLE:
           step1 = [note]
           step2 = [note]
           step1.extend([SMFile.step[int(s)] for s in sd[0:count/2]])
@@ -587,7 +583,7 @@ class SMFile(GenericFile):
 
         for xyz in self.bpms[bpmidx:]:
           if beat >= xyz[0]:
-            if gametype in SMFile.coupletypes:
+            if gametype in games.COUPLE:
               stepdata[0].append(["B", float(xyz[1])])
               stepdata[1].append(["B", float(xyz[1])])
             else:
@@ -595,7 +591,7 @@ class SMFile(GenericFile):
             bpmidx += 1
         for xyz in self.freezes[freezeidx:]:
           if beat >= xyz[0]:
-            if gametype in SMFile.coupletypes:
+            if gametype in games.COUPLE:
               stepdata[0].append(["S", float(xyz[1])])
               stepdata[1].append(["S", float(xyz[1])])
             else:
@@ -702,14 +698,12 @@ class SongItem:
       for lyr in self.lyrics:  f.write(" ".join([str(l) for l in lyr]) + "\n")
       f.write("end\n")
 
-    couplemodes = ["COUPLE"]
-
     for game in self.difficulty:
       for diff in self.difficulty[game]:
         f.write(game + "\n")
         f.write(diff + " " + str(self.difficulty[game][diff]) + "\n")
 
-        if not game in couplemodes:
+        if not game in games.COUPLE:
           for step in self.steps[game][diff]:
             extra = ""
             if step[0] in ("B", "W", "S", "D"): extra = str(step[1])

@@ -140,7 +140,7 @@ class MiddleLifeBarDisp(AbstractLifeBar):
     if (AbstractLifeBar.update(self, judges) == False and
         self.displayed_life <= 0): return
 
-    if self.life == 20:
+    if self.life == self.maxlife:
       self.failed = True
       judges.failed_out = True
 
