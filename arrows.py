@@ -1,7 +1,6 @@
 import os
 import random
 import pygame
-from math import sin, cos
 
 # FIXME: Mark hidden attributes appropriately.
 
@@ -113,7 +112,10 @@ class AbstractArrow(pygame.sprite.Sprite):
     alp = 256
 
     # Blinking
-    if self.fade == 4: alp = int(alp * sin(beatsleft * 1.5708) ** 2)
+    # V*V*(3-V-V), V is a value 0-1, flattens out the curve around 0 and 1
+    if self.fade == 4:
+      a = abs((beatsleft % 2) - 1) # Python supports % for floats. Crazy.
+      alp = int(alp * (a * a * (3 - a - a)))
 
     # Sudden/hidden checking.
     if self.top < self.bottom: 
