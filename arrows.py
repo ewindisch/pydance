@@ -66,14 +66,6 @@ class AbstractArrow(pygame.sprite.Sprite):
     self.scale = player.scale
     self.speed = player.speed
 
-    if self.speed == 0.444:
-      # 0.444 signifies random speed. The value needs to be lower than
-      # 0.5 so arrow queue up in time if they're given a 0.5 speed, and
-      # also needs to not conflict with an actual possible speed. So,
-      # 0.444 was good enough.
-      self.speed = random.choice([0.5, 1.0, 1.0, 1.0, 1.0,
-                                  1.5, 1.5, 1.5, 2.0, 2.0, 4.0, 8.0])
-
     self.accel = player.accel
     self.battle = song.battle
 

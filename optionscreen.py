@@ -12,10 +12,10 @@ def player_opt_driver(screen, configs):
   start = pygame.time.get_ticks()
   clrs = [colors.color["cyan"], colors.color["yellow"]]
   menu = [
-    ("Speed", "speed", [(0.25, ".25x"), (0.33, "0.33x"), (0.5, "0.5x"),
-                        (0.75, "0.75x"), (1, "1x"), (1.5, "1.5x"), (2, "2x"),
-                        (3, "3x"), (4, "4x"), (5, "5x"), (8, "8x"),
-                        (0.444, "Random")]),
+    ("Speed", "speed", [(0.25, "0.25x"), (0.33, "0.33x"), (0.5, "0.5x"),
+                        (0.75, "0.75x"), (1, "1.0x"), (1.5, "1.5x"),
+                        (2, "2.0x"), (3, "3.0x"), (4, "4.0x"), (5, "5.0x"),
+                        (8.0, "8x")]),
     ("Steps", "transform", [(0, "Normal",), (1, "Mirror"), (2, "Left"),
                          (3, "Right"), (-1, "Shuffle"), (-2, "Random")]),
     ("Size", "size", [(1, "Tiny"), (2, "Little"), (0, "Off"), (3, "Big"),
