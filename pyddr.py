@@ -203,7 +203,7 @@ class BGimage(pygame.sprite.Sprite):
   def __init__ (self, filename):
     pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
     self.image = pygame.transform.scale(pygame.image.load(filename),(640,480)).convert()
-    self.image.set_alpha(int(mainconfig['bgbrightness']), RLEACCEL)
+    self.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
     self.rect = self.image.get_rect()
     self.rect.top = 0
     self.rect.left = 0
@@ -236,7 +236,7 @@ class BGmovie(pygame.sprite.Sprite):
 
   def update(self,curtime):
     if self.filename:
-      curframe = int( (curtime * 29.97) )
+      curframe = int((curtime * 29.97) )
       if self.oldframe != curframe:
         self.changed = 1
         self.movie.render_frame(curframe)
@@ -699,10 +699,10 @@ class DancerAnim(pygame.sprite.Sprite):
 class ComboDisp(pygame.sprite.Sprite):
   def __init__(self,playernum):
     pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-    self.sticky = int(mainconfig['stickycombo'])
-    self.lowcombo = int(mainconfig['lowestcombo'])
+    self.sticky = mainconfig['stickycombo']
+    self.lowcombo = mainconfig['lowestcombo']
 
-    self.trect = 296+(int(mainconfig['totaljudgings'])*24)
+    self.trect = 296+(mainconfig['totaljudgings'])*24
     self.playernum = playernum - 1
     self.centerx = (320*self.playernum) + 160
     
@@ -1016,7 +1016,7 @@ class ArrowFX(pygame.sprite.Sprite):
     self.direction = 1
     self.holdtype = 0
 
-    style = int(mainconfig['explodestyle'])
+    style = mainconfig['explodestyle']
     self.rotating, self.scaling = {3:(1,1), 2:(0,1), 1:(1,0), 0:(0,0)}[style]
     
   def holding(self, yesorno):
@@ -1180,8 +1180,8 @@ class JudgingDisp(pygame.sprite.Sprite):
     def __init__(self,playernum):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
 
-        self.total = int(mainconfig['totaljudgings'])
-        self.sticky = int(mainconfig['stickyjudge'])
+        self.total = mainconfig['totaljudgings']
+        self.sticky = mainconfig['stickyjudge']
         self.needsupdate = 1
         self.playernum = playernum-1
         self.stepped = 0
@@ -1335,10 +1335,10 @@ class Song:
     self.moviefile = ' '
     self.mixname = 'unspecified mix'
     self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
-    self.mixerclock = int(mainconfig['mixerclock'])
+    self.mixerclock = mainconfig['mixerclock']
     self.lyricdisplay = LyricDispKludge(400, map((lambda x: int(x)), mainconfig['lyriccolor'].split(',')))
     self.transdisplay = LyricDispKludge(428, map((lambda x: int(x)), mainconfig['transcolor'].split(',')))
-    little = int(mainconfig["little"])
+    little = mainconfig["little"]
     coloringmod = 0
     self.totarrows = {}
     self.holdinfo = []
@@ -1473,7 +1473,7 @@ class Song:
       elif firstword == 'group':       self.group = " ".join(rest)
       elif firstword == 'bpm':
         self.bpm = float(nextword) 
-        if int(mainconfig['onboardaudio']):
+        if mainconfig['onboardaudio']:
           self.bpm = self.bpm * float(48000/44128.0)
         self.playingbpm = self.bpm
       elif firstword in modes.keys():  chompNext=(modes[firstword],)
@@ -1483,8 +1483,8 @@ class Song:
       elif firstword == 'startat':     self.startsec = float(nextword)
       elif firstword == 'endat':       self.endsec = float(nextword)
       elif firstword == 'offset':      
-        self.offset = float(-int(nextword)-int(mainconfig['masteroffset']))/1000.0
-        if int(mainconfig['onboardaudio']):
+        self.offset = float(-int(nextword)-mainconfig['masteroffset'])/1000.0
+        if mainconfig['onboardaudio']:
           self.offset = self.offset * float(48000/44128.0)
       elif firstword == 'version':     self.version = float(nextword)
     for mkey,mval in modes.items():
@@ -1715,10 +1715,10 @@ class fastSong:
     self.bgfile = ' '
     self.mixname = '---'
     self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
-    self.mixerclock = int(mainconfig['mixerclock'])
+    self.mixerclock = mainconfig['mixerclock']
 #    self.lyricdisplay = LyricDispKludge(400)
 #    self.transdisplay = LyricDispKludge(428)
-    little = int(mainconfig['little'])
+    little = mainconfig['little']
     self.totarrows = 0
     chompNext = None
     self.variablecreationtime = pygame.time.get_ticks()
@@ -1959,12 +1959,12 @@ class TransformSprite(BlankSprite):
     self.rect = self.image.get_rect()
 
 #DCY: Bottom of 640 gives lots of "update rejecting"    
-if int(mainconfig['reversescroll']):
+if mainconfig['reversescroll']:
   ARROWTOP  = 408
-  ARROWBOT  = int(-64 - (float(mainconfig['scrollspeed'])-1)*576)
+  ARROWBOT  = int(-64 - (mainconfig['scrollspeed']-1)*576)
 else:
   ARROWTOP  = 64
-  ARROWBOT  = int(576 * float(mainconfig['scrollspeed']))
+  ARROWBOT  = int(576 * mainconfig['scrollspeed'])
 
 ARROWDIFF = float(ARROWTOP-ARROWBOT)
 
@@ -1977,7 +1977,7 @@ class ArrowSprite(CloneSprite):
     self.bpm = bpm
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
-    if int(mainconfig['assist']):
+    if mainconfig['assist']:
       self.playedsound = None
       if self.dir == 'u':
         self.sample = pygame.mixer.Sound("assist-u.wav")
@@ -2088,7 +2088,7 @@ class HoldArrowSprite(CloneSprite):
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
     self.playedsound = None
-    if int(mainconfig['assist']):
+    if mainconfig['assist']:
       if self.dir == 'u':
         self.sample = pygame.mixer.Sound("assist-u.wav")
       elif self.dir == 'd':
@@ -2277,19 +2277,19 @@ EMS2CONFIG= { E_QUIT:       [],
               E_START2:     [joyEvent( button=25)],
               E_SELECT:     [joyEvent( button=8 )],
             }
-J2CONFIG  = { E_LEFT2:      [joyEvent( button=int(mainconfig["joy_left"]))],
-              E_RIGHT2:     [joyEvent( button=int(mainconfig['joy_right']))],
-              E_UP2:        [joyEvent( button=int(mainconfig['joy_up']))],
-              E_DOWN2:      [joyEvent( button=int(mainconfig['joy_down']))],
+J2CONFIG  = { E_LEFT2:      [joyEvent( button=mainconfig["joy_left"])],
+              E_RIGHT2:     [joyEvent( button=mainconfig['joy_right'])],
+              E_UP2:        [joyEvent( button=mainconfig['joy_up'])],
+              E_DOWN2:      [joyEvent( button=mainconfig['joy_down'])],
             }
-JOYCONFIG = { E_LEFT:       [joyEvent( button=int(mainconfig['joy_left']))],
-              E_RIGHT:      [joyEvent( button=int(mainconfig['joy_right']))],
-              E_UP:         [joyEvent( button=int(mainconfig['joy_up']))],
-              E_DOWN:       [joyEvent( button=int(mainconfig['joy_down']))],
-              E_SELECT:     [joyEvent( button=int(mainconfig['joy_select']))],
-              E_START:      [joyEvent( button=int(mainconfig['joy_start']))],
-              E_PGUP:       [joyEvent( button=int(mainconfig['joy_pgup']))],
-              E_PGDN:       [joyEvent( button=int(mainconfig['joy_pgdn']))],
+JOYCONFIG = { E_LEFT:       [joyEvent( button=mainconfig['joy_left'])],
+              E_RIGHT:      [joyEvent( button=mainconfig['joy_right'])],
+              E_UP:         [joyEvent( button=mainconfig['joy_up'])],
+              E_DOWN:       [joyEvent( button=mainconfig['joy_down'])],
+              E_SELECT:     [joyEvent( button=mainconfig['joy_select'])],
+              E_START:      [joyEvent( button=mainconfig['joy_start'])],
+              E_PGUP:       [joyEvent( button=mainconfig['joy_pgup'])],
+              E_PGDN:       [joyEvent( button=mainconfig['joy_pgdn'])],
             }
 
 class EventManager:
@@ -2309,8 +2309,8 @@ class EventManager:
     for i in range(totaljoy):
       ddrmat = pygame.joystick.Joystick(i)
       ddrmat.init()
-      matbuttons = int(mainconfig['mat_buttons'])
-      mataxes = int(mainconfig['mat_axes'])
+      matbuttons = mainconfig['mat_buttons']
+      mataxes = mainconfig['mat_axes']
       if ddrmat.get_numbuttons() == 32 and ((ddrmat.get_numaxes() == 11) or (ddrmat.get_numaxes() == 8)):
         emsusb2 = i
       elif ddrmat.get_numbuttons() == matbuttons and ddrmat.get_numaxes() == mataxes:
@@ -2617,10 +2617,10 @@ def SetDisplayMode(mainconfig):
   global screen
   
   try:
-    if int(mainconfig["vesacompat"]):
+    if mainconfig["vesacompat"]:
       screen = pygame.display.set_mode((640, 480), 16)
     
-    elif int(mainconfig["fullscreen"]):
+    elif mainconfig["fullscreen"]:
       if osname == "macosx":
         screen = pygame.display.set_mode((640, 480), FULLSCREEN, 16)
       else:
@@ -2797,11 +2797,11 @@ def domenu(songs):
         new_val = None
         if current_val == None: new_val = 0
         else:
-          new_val = str((int(current_val) + 1) % len(options))
+          new_val = (current_val + 1) % len(options)
           mainconfig[option_name] = new_val
-        return options[int(new_val)]
+        return options[new_val]
       else:
-        return options[int(mainconfig[option_name])]
+        return options[mainconfig[option_name]]
 
     # For settings with a range of values - divide into 25 discrete values,
     # cycle through them
@@ -2817,12 +2817,12 @@ def domenu(songs):
           else:
             delta /= (sign * min(delta, 20))
           try:
-            val = int(mainconfig[option_name]) + delta
+            val = mainconfig[option_name] + delta
           except ValueError:
-            val = float(mainconfig[option_name]) + delta
-          val = str(max(self.extras["min"], min(self.extras["max"], val)))
+            val = mainconfig[option_name] + delta
+          val = max(self.extras["min"], min(self.extras["max"], val))
           mainconfig[option_name] = val
-          self.add_text = val
+          self.add_text = str(val)
           self.render()
           return val
         except KeyError:
@@ -2871,7 +2871,7 @@ def domenu(songs):
       self.rgb = (224, 224, 224)
       self.add_text = None
       if type(self.extras) == types.DictionaryType:
-        self.add_text = self.extras["function"](self, 1)
+        self.add_text = str(self.extras["function"](self, 1))
       else:
         self.add_text = None
 
@@ -2880,7 +2880,7 @@ def domenu(songs):
         self.extras()
         return None, None
       elif type(self.extras) == types.DictionaryType:
-          self.add_text = self.extras["function"](self)
+          self.add_text = str(self.extras["function"](self))
           self.render()
           return None, None
       elif type(self.extras) == types.ListType:
@@ -3102,7 +3102,7 @@ def domenu(songs):
                ]]
 
   def fullscreen_toggle():
-    mainconfig["fullscreen"] = int(mainconfig["fullscreen"]) ^ 1
+    mainconfig["fullscreen"] = mainconfig["fullscreen"] ^ 1
     if mainconfig["fullscreen"] == 1:
       if osname == "macosx":
         screen = pygame.display.set_mode((640, 480), FULLSCREEN, 16)
@@ -3322,7 +3322,7 @@ def songSelect(songs, players):
       fontdisp = dozoom = 1
       idir = -8
       i = 192
-      sortmode = int(mainconfig["sortmode"])
+      sortmode = mainconfig["sortmode"]
       s = 1
       # filter out songs that don't support the current mode (e.g. 'SINGLE')
       songs = filter(lambda song,mode=playmode: song.modes.has_key(mode),songs)
@@ -3347,7 +3347,7 @@ def songSelect(songs, players):
       arrowTextMax      = TextSprite(size=32*2, bkgcolor=BLACK, text='>')
       songSelectTextMax = TextSprite(size=47*2, bkgcolor=BLACK, text='SONG SELECT')
       prevsong = songs[0]
-      previewMusic = int(mainconfig['previewmusic'])
+      previewMusic = mainconfig['previewmusic']
       sortmode -= 1
       songChanged = 1
 
@@ -3414,7 +3414,7 @@ def songSelect(songs, players):
     elif event == E_PASS:                            pass
     elif event == E_FULLSCREEN:
       pygame.display.toggle_fullscreen()
-      mainconfig["fullscreen"] = int(mainconfig["fullscreen"]) ^ 1
+      mainconfig["fullscreen"] = mainconfig["fullscreen"] ^ 1
     elif event == E_SCREENSHOT:                      s = 1
     elif (event == E_LEFT):    difficulty -= 1
     elif (event == E_RIGHT):   difficulty += 1
@@ -3775,7 +3775,7 @@ def songSelect(songs, players):
           for sorti in songs:
             newlist.append(sorti.mixname)
 
-        if int(mainconfig["sortpersist"]) == 1:
+        if mainconfig["sortpersist"] == 1:
           mainconfig["sortmode"] = sortmode
 
         print sortbytext
@@ -3837,10 +3837,10 @@ def dance(song,players,difficulty):
       bifn = 'bg.png'
       backimage = BGimage('bg.png')
 
-  if int(mainconfig['showbackground']) > 0:
+  if mainconfig['showbackground'] > 0:
     if song.moviefile == ' ':
       bgkludge = pygame.transform.scale(pygame.image.load(bifn),(640,480)).convert()
-      bgkludge.set_alpha(int(mainconfig['bgbrightness']), RLEACCEL)
+      bgkludge.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
       background.image = pygame.surface.Surface((640,480))
       background.image.blit(bgkludge,(0,0))
       backimage.add(bgroup)
@@ -3850,9 +3850,9 @@ def dance(song,players,difficulty):
   else:
     background.fill(BLACK)
 
-  suddenval = float(mainconfig['sudden'])
+  suddenval = mainconfig['sudden']
 
-  if int(64.0*float(mainconfig['hidden'])): hidden = 1
+  if int(64.0*mainconfig['hidden']): hidden = 1
   else: hidden = 0
   
   hiddenval = float(mainconfig['hidden'])
@@ -3888,31 +3888,31 @@ def dance(song,players,difficulty):
 #  dancer = DancerAnim(200,400)
 #  dancer.add(dgroup)
   
-  colortype = int(mainconfig['arrowcolors'])
+  colortype = mainconfig['arrowcolors']
   if colortype == 0:
     colortype = 1
 
-  if int(mainconfig['fpsdisplay']):
+  if mainconfig['fpsdisplay']:
     fpstext.add(tgroup)
-  if int(mainconfig['showlyrics']):
+  if mainconfig['showlyrics']:
     song.lyricdisplay.add(lgroup)
     song.transdisplay.add(lgroup)
 
-  showcombo = int(mainconfig['showcombo'])
+  showcombo = mainconfig['showcombo']
 
-  if int(mainconfig['totaljudgings']) > 0:
+  if mainconfig['totaljudgings'] > 0:
     p1list0.add(tgroup)
-  if int(mainconfig['totaljudgings']) > 1:
+  if mainconfig['totaljudgings'] > 1:
     p1list1.add(tgroup)
-  if int(mainconfig['totaljudgings']) > 2:
+  if mainconfig['totaljudgings'] > 2:
     p1list2.add(tgroup)
 
   if players == 2:
-    if int(mainconfig['totaljudgings']) > 0:
+    if mainconfig['totaljudgings'] > 0:
       p2list0.add(tgroup)
-    if int(mainconfig['totaljudgings']) > 1:
+    if mainconfig['totaljudgings'] > 1:
       p2list1.add(tgroup)
-    if int(mainconfig['totaljudgings']) > 2:
+    if mainconfig['totaljudgings'] > 2:
       p2list2.add(tgroup)
 
   bg = pygame.Surface(screen.get_size())
@@ -4008,7 +4008,7 @@ def dance(song,players,difficulty):
   if players == 2:
     song2.play(playmode, difficulty[1],0)
 
-  if int(mainconfig['assist']):
+  if mainconfig['assist']:
     pygame.mixer.music.set_volume(0.6)
   else:
     pygame.mixer.music.set_volume(1.0)
@@ -4050,7 +4050,7 @@ def dance(song,players,difficulty):
     toparrfx2_u = ArrowFX(song.bpm,'u',ARROWTOP,2)
     toparrfx2_r = ArrowFX(song.bpm,'r',ARROWTOP,2)
 
-  if int(mainconfig['explodestyle']) > -1:
+  if mainconfig['explodestyle'] > -1:
     toparrfx1_l.add(fgroup)
     toparrfx1_d.add(fgroup)
     toparrfx1_u.add(fgroup)
@@ -4062,7 +4062,7 @@ def dance(song,players,difficulty):
       toparrfx2_u.add(fgroup)
       toparrfx2_r.add(fgroup)
 
-  if int(mainconfig['showtoparrows']):
+  if mainconfig['showtoparrows']:
     toparr1_l.add(sgroup)
     toparr1_d.add(sgroup)
     toparr1_u.add(sgroup)
@@ -4081,7 +4081,7 @@ def dance(song,players,difficulty):
   while 1:
     #grab an event
     ee = song.get_events()
-    if int(mainconfig['killsongonfail']) and lifebar.failed:
+    if mainconfig['killsongonfail'] and lifebar.failed:
       song.kill()
     if ee is not None: 
 #      print ee
@@ -4291,7 +4291,7 @@ def dance(song,players,difficulty):
         nbpm = song.lastbpmchangetime[1][1]
         print "BPM tried to change from ",oldbpm, " to ", nbpm, " at ",curtime,"..",
         if song.lastbpmchangetime[1][1] is not None:
-          if int(mainconfig['showtoparrows']):
+          if mainconfig['showtoparrows']:
             toparr1_l.remove(sgroup)
             toparr1_d.remove(sgroup)
             toparr1_u.remove(sgroup)
@@ -4302,7 +4302,7 @@ def dance(song,players,difficulty):
           toparr1_u = TopArrow(nbpm,'u',ARROWTOP,1)
           toparr1_r = TopArrow(nbpm,'r',ARROWTOP,1)
 
-          if int(mainconfig['showtoparrows']):
+          if mainconfig['showtoparrows']:
             toparr1_l.add(sgroup)
             toparr1_d.add(sgroup)
             toparr1_u.add(sgroup)
@@ -4310,7 +4310,7 @@ def dance(song,players,difficulty):
 
           # PLAYER 2
           if players == 2:
-            if int(mainconfig['showtoparrows']):
+            if mainconfig['showtoparrows']:
               toparr2_l.remove(sgroup)
               toparr2_d.remove(sgroup)
               toparr2_u.remove(sgroup)
@@ -4321,7 +4321,7 @@ def dance(song,players,difficulty):
             toparr2_u = TopArrow(nbpm,'u',ARROWTOP,2)
             toparr2_r = TopArrow(nbpm,'r',ARROWTOP,2)
 
-            if int(mainconfig['showtoparrows']):
+            if mainconfig['showtoparrows']:
               toparr2_l.add(sgroup)
               toparr2_d.add(sgroup)
               toparr2_u.add(sgroup)
@@ -4435,7 +4435,7 @@ def dance(song,players,difficulty):
     if backmovie.filename:
       if backmovie.changed or (fpstext.fpsavg > 30):
         backmovie.resetchange()
-        backmovie.image.set_alpha(int(mainconfig['bgbrightness']), RLEACCEL)
+        backmovie.image.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
         background.fill(BLACK)
         screen.blit(background.image,(0,0))
         screen.blit(backmovie.image,(0,0))
@@ -4484,7 +4484,7 @@ def dance(song,players,difficulty):
 #    time.sleep(0.0096066)
 
   # GRADES
-  if int(mainconfig['grading']):
+  if mainconfig['grading']:
 
     grade = None
     if players == 2:
