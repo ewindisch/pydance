@@ -6,6 +6,11 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
+0.7.5 -
++ New options:
+ + "Wide" to add jumps.
+ + Holds on/off.
+
 0.7.4 - In My Pants						[2003.07.28]
 + 6 panel ("solo") and 8 panel support.
 + Double (1 player, both sides) support.

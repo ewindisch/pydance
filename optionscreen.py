@@ -19,13 +19,14 @@ def player_opt_driver(screen, configs):
     ("Hidden", "hidden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
                           (3, "Hide 3")]),
     ("Accel", "accel", [(0, "None"), (1, "Boost"), (2, "Brake")]),
-    ("Size", "scale", [(1, "Normal"), (0, "Shrink"), (2, "Grow")]),
-    ("Little", "little", [(0, "Off"), (1, "No 16ths"), (3, "No 16ths/8ths")]),
+    ("Scale", "scale", [(1, "Normal"), (0, "Shrink"), (2, "Grow")]),
+    ("Size", "size", [(0, "Off"), (1, "On Beat"), (2, "Beat & Half Beat")]),
     ("Scroll", "scrollstyle", [(0, "Normal"), (1, "Reverse"), (2, "Center")]),
+    ("Jumps", "jumps", [(0, "On"), (1, "Off"), (2, "Wide")]),
     ("Spin", "spin", [(0, "Off"), (1, "On")]),
     ("Flat", "colortype", [(4, "Off"), (1, "On")]),
     ("Dark", "dark", [(0, "Off"), (1, "On")]),
-    ("Jumps", "jumps", [(1, "On"), (0, "Off")]),
+    ("Holds", "holds", [(1, "On"), (0, "Off")]),
     ]
 
   while (event.states[(0, E_START)] and
@@ -61,7 +62,7 @@ class OptionScreen(object):
 
   bg = pygame.image.load(os.path.join(pyddr_path, "images", "option-bg.png"))
   bg.set_colorkey(bg.get_at((0, 0)))
-  bg.set_alpha(200)
+  bg.set_alpha(220)
 
   # Players is a list of hashes, not Player objects; it should have all
   # config information set to some value already (player_config in constants)
@@ -83,7 +84,7 @@ class OptionScreen(object):
         p = float(pygame.time.get_ticks() - t) / 300
         eyecandyimage.blit(baseimage, (0,0))
         scaledbg = pygame.transform.scale(OptionScreen.bg,(int(580 * p), 480))
-        scaledbg.set_alpha(200)
+        scaledbg.set_alpha(220)
         r = scaledbg.get_rect()
         r.center = (320, 240)
         up = eyecandyimage.blit(scaledbg, r)
@@ -158,7 +159,7 @@ class OptionScreen(object):
       item = self.menu[i]
       name, opt, values = item
       text = FONTS[26].render(name, 1, color)
-      blankimage.blit(text, (10, 70 + 32 * i))
+      blankimage.blit(text, (10, 70 + 28 * i))
       width = 480 / (len(values) + 1)
       for k in range(len(values)):
         color = None
@@ -174,7 +175,7 @@ class OptionScreen(object):
             color = colors.WHITE
 
         text = FONTS[26].render(values[k][1], 1, color)
-        blankimage.blit(text, (120 + width * k, 70 + 32 * i))
+        blankimage.blit(text, (120 + width * k, 70 + 28 * i))
 
       FONTS[26].set_underline(False)
 

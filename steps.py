@@ -1,7 +1,7 @@
 # These parse various file formats describing steps.
 # Please read docs/fileparsers.txt and docs/dance-spec.txt
 
-import colors, audio, random, copy, games
+import colors, audio, games, stepfilters
 
 from lyrics import Lyrics
 from util import toRealTime
@@ -11,24 +11,7 @@ BEATS = { 'x': 0.25, 't': 0.5, 'u': 1.0/3.0, 'f': 2.0/3.0,
           's': 1.0, 'w': 4.0/3.0, 'e': 2.0,
           'q': 4.0, 'h': 8.0, 'o': 16.0, 'n': 1/12.0 }
 
-# FIXME These should be in games
-# 0 - Normal
-# 1 - Mirror
-# 2 - Left
-# 3 - Right
-# -1 - Shuffle, -2 - random (calculated elsewhere)
-STEP_MAPPINGS = {
-  "SINGLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
-  "DOUBLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
-  "COUPLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
-  "6PANEL": [[0, 1, 2, 3, 4, 5], [4, 5, 3, 2, 0, 1], [2, 0, 5, 1, 3, 4],
-             [1, 3, 0, 4, 5, 2]],
-  "8PANEL": [[0, 1, 2, 3, 4, 5, 6, 7], [5, 6, 7, 4, 3, 0, 1, 2],
-             [3, 0, 1, 7, 2, 4, 5, 6], [1, 2, 4, 0, 5, 6, 7, 3]],
-  }
-
 # FIXME: This can probably be replaced by something smaller, like a tuple.
-
 class SongEvent(object):
   def __init__ (self, bpm, when=0.0, beat = 0, feet=None, next=None,
                 extra=None, color=None):
@@ -67,25 +50,19 @@ class Steps(object):
     self.totalarrows = 0
     self.ready = None
 
-    if player.transform == -1:
-      self.mapping = copy.copy(STEP_MAPPINGS[playmode][0])
-      random.shuffle(self.mapping)
-    elif player.transform >= 0:
-      self.mapping = STEP_MAPPINGS[playmode][player.transform]
-
     holdlist = []
     holdtimes = []
     releaselist = []
     releasetimes = []
     self.numholds = 1
     holding = [0] * len(games.GAMES[playmode].dirs)
-    little = player.little
     coloring_mod = 0
     cur_time = float(self.offset)
     last_event_was_freeze = False
     cur_beat = 0
     cur_bpm = self.bpm
     self.speed = player.speed
+
     # If too small, arrows don't appear fast enough
     if player.accel: self.nbeat_offset = 104 / player.speed
     else:  self.nbeat_offset = 64 / player.speed
@@ -99,6 +76,13 @@ class Steps(object):
     song_steps = song.steps[playmode][difficulty]
     if playmode in games.COUPLE: song_steps = song_steps[pid]
 
+    if player.transform:
+      stepfilters.rotate(song_steps, player.transform, playmode)
+
+    if player.size: stepfilters.size(song_steps, player.size)
+    if player.jumps: stepfilters.jumps(song_steps, player.jumps)
+    if not player.holds: stepfilters.remove_holds(song_steps, player.holds)
+
     for words in song_steps:
 
       if words[0] == 'W':
@@ -110,33 +94,12 @@ class Steps(object):
         last_event_was_freeze = False
         coloring_mod = 0
       elif words[0] in BEATS or isinstance(words[0], int):
-        cando = True # FIXME: Do little correctly for 24th etc notes
-        if ((little == 1 and (coloring_mod % 4 == 1 or
-                              coloring_mod % 4 == 3)) or
-            (little == 2 and (coloring_mod % 4 == 2)) or
-            (little == 3 and (coloring_mod % 4 != 0))): cando = False
-
         # Don't create arrow events with no arrows
         arrowcount = 0
         for i in words[1:]: arrowcount += int(i)
 
-        if cando and arrowcount != 0:
-          origsteps = words[1:]
-          if player.transform == -2:
-            feetstep = list(origsteps)
-            random.shuffle(feetstep)
-          else:
-            feetstep = copy.copy(origsteps)
-            for i in range(len(origsteps)):
-              feetstep[self.mapping[i]] = origsteps[i]
-          # Check for jumps on this note
-          arrowcount = 0
-          for jump in range(len(feetstep)):
-            if (feetstep[jump] & 1):
-              if (arrowcount != 0 and not player.jumps and
-                  holding[jump] == 0):
-                feetstep[jump] = 0
-              arrowcount += 1
+        if arrowcount != 0:
+          feetstep = words[1:]
 
           # Check for holds
           for hold in range(len(feetstep)):

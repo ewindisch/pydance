@@ -5,7 +5,7 @@ E_UPLEFT, E_UPRIGHT, E_DOWNLEFT, E_DOWNRIGHT = E_UNMARK, E_PGUP, E_MARK, E_PGDN
 
 DIRECTIONS = ['l', 'd', 'u', 'r']
 
-VERSION = "0.7.3"
+VERSION = "0.7.4"
 
 import sys, os, config, pygame
 
@@ -96,9 +96,9 @@ player_config = {"spin": 0,
                  "speed": 1.0,
                  "sudden": 0,
                  "hidden": 0,
-                 "little": 0,
+                 "size": 0,
                  "dark": 0,
-                 "jumps": 1,
+                 "jumps": 0,
                  "holds": 1,
                  "colortype": 4,
                  "scrollstyle": 0 }

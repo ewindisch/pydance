@@ -353,7 +353,6 @@ class ComboDisp(pygame.sprite.Sprite):
   def update(self, curtime):
     self.laststep = min(curtime, self.laststep)
     steptimediff = curtime - self.laststep
-    if self.combo > self.bestcombo: self.bestcombo = self.combo
 
     if steptimediff < 0.36 or self.sticky:
       self.drawcount = self.combo
@@ -888,10 +887,10 @@ class Player(object):
         if ev.feet:
           for (dir, num) in zip(self.game.dirs, ev.feet):
             dirstr = dir + repr(int(ev.color) % self.colortype)
-            if num & 1 and not (num & 2 and self.holds):
+            if num & 1 and not num & 2:
               ns = ArrowSprite(arrow_gfx[dirstr], time, ev.when, self, song)
               newsprites.append(ns)
-            elif num & 2 and self.holds:
+            elif num & 2:
               holdindex = steps.holdref.index((self.game.dirs.index(dir),
                                                ev.when))
               ns = HoldArrowSprite(arrow_gfx[dirstr], time,

@@ -203,8 +203,7 @@ def play(screen, playlist, configs, songconf, playmode):
         break # Failed
       first = False
     except:
-      error.ErrorMessage(screen ["There was an error playing",
-                                 os.path.split(songfn)[1]])
+      error.ErrorMessage(screen ["There was an error playing", songfn])
       first = True
 
   judges = [player.get_judge() for player in players]

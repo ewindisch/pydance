@@ -119,7 +119,6 @@ class GenericFile(object):
           self.info[t] = os.path.join(dir, self.info[t])
           if not os.path.isfile(self.info[t]): del(self.info[t])
 
-
 class DanceFile(GenericFile):
   WAITING,METADATA,DESCRIPTION,LYRICS,BACKGROUND,GAMETYPE,STEPS = range(7)
 
