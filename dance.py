@@ -58,10 +58,10 @@ class FPSDisp(pygame.sprite.Sprite):
   def update(self, time):
     self.clock.tick()
 
+    loops = int(self.clock.get_fps())
     self.totalcount += loops
     self.cycles += 1
 
-    loops = int(self.clock.get_fps())
     if (time - self.oldtime) > 1:
       text = repr(loops) + " fps"
       self.image = FONTS[16].render(text, True, [160, 160, 160])

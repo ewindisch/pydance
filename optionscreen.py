@@ -153,6 +153,8 @@ class OptionScreen(object):
     blankimage = pygame.surface.Surface(rect[1]).convert_alpha()
     blankimage.fill([0, 0, 0, 0])
 
+    width = 200
+
     for i in range(len(self.menu)):
       color = None
       for j in range(len(self.current)):
@@ -165,24 +167,33 @@ class OptionScreen(object):
       name, opt, values = item
       text = FONTS[24].render(name, 1, color)
       blankimage.blit(text, (10, 70 + 28 * i))
-      width = 480 / (len(values) + 1)
       for k in range(len(values)):
         color = None
         for plr in range(len(self.players)):
           self.players[plr]
           if values[k][0] == self.players[plr][opt]:
-            FONTS[24].set_underline(True)
-            newcolor = self.colors[plr]
-            if not color: color = newcolor
-            else: color = colors.average(color, newcolor)
-        if not color:
+            color = self.colors[plr]
+
+            x = width * (plr + 1)
+            y = 70 + 28 * i
+
+            if i == self.current[plr]: FONTS[24].set_underline(True)
+            text = FONTS[24].render(values[k][1], 1, color)
             FONTS[24].set_underline(False)
-            color = colors.WHITE
+            r = text.get_rect()
+            r.midtop = [x, y]
 
-        text = FONTS[24].render(values[k][1], 1, color)
-        blankimage.blit(text, (120 + width * k, 70 + 28 * i))
+            blankimage.blit(text, r)
 
-      FONTS[24].set_underline(False)
+            if k != 0:
+              left = FONTS[24].render("< ", 1, color)
+              r = left.get_rect()
+              r.topright = [x - text.get_size()[0] / 2, y]
+              blankimage.blit(left, r)
+            if k != len(values) - 1:
+              right = FONTS[24].render(" >", 1, color)
+              r.topleft = [x + text.get_size()[0] / 2, y]
+              blankimage.blit(right, r)
 
     if len(self.current) > 1:
       faketext = " / ".join([str(i+1) for i in range(len(self.current))])
