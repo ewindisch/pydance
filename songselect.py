@@ -37,7 +37,6 @@ SORT_NAMES = ["mix", "title", "artist", "bpm"]
 
 NUM_SORTS = len(SORT_NAMES)
 
-
 SS_HELP = [
   "Up / Down: Change song selection",
   "Left / Right: Change difficulty setting",
@@ -316,7 +315,6 @@ class SongSelect(InterfaceWindow):
           music.fadeout(500) # The just-played song
           self._screen.blit(self._bg, [0, 0])
           pygame.display.update()
-          ui.ui.empty()
           ui.ui.clear()
 
       elif ev == ui.CANCEL:

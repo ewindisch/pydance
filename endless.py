@@ -1,18 +1,65 @@
 # Support for endless song playing!
 
-import random, copy, colors, error, dance, util, options
+import random
+import colors
+import error
+import dance
+import util
+import options
 from pygame.mixer import music
+from interface import *
 from constants import *
 
 import ui
 
-RESOLUTION = (640, 480)
-BACKGROUND = os.path.join(image_path, "endless-bg.png")
+ENDLESS_HELP = [
+  "Left: Make the songs that will be played easier",
+  "Right: Make the songs that will be played harder",
+  "Up: Select difficulty by name",
+  "Down: Select difficulty by rating",
+  "Enter / Up Right: Start playing songs until you fail",
+  "Escape / Up Left: Go back to the game selection screen",
+  "Start: Go to the options screen / F11: Toggle fullscreen",
+  ]
 
 def check_constraints(constraints, diff):
   for c in constraints:
     if not c.meets(diff): return False
   return True
+
+class EndlessDiffDisplay(pygame.sprite.Sprite):
+  def __init__(self, pid, constraint):
+    pygame.sprite.Sprite.__init__(self)
+    self._c = constraint
+    self._ptext = fontfx.shadow("Player %d" % (pid + 1), 60, colors.WHITE)
+    self._pr = self._ptext.get_rect()
+    self._centerx = 160 + 320 * pid
+    self._oldval = None
+    self.update(0)
+
+  def update(self, time):
+    if self._oldval != (self._c.kind, self._c.value):
+      if self._c.kind == "name":
+        ctext = fontfx.shadow("Select by Difficulty", 48, colors.WHITE)
+        vtext = fontfx.shadow(self._c.value.capitalize(), 40, colors.WHITE)
+      elif self._c.kind == "number":
+        ctext = fontfx.shadow("Select by Rating", 48, colors.WHITE)
+        vtext = fontfx.shadow("Between %d and %d" % self._c.value, 40,
+                                 colors.WHITE)
+      self.image = pygame.Surface([300, 400])
+      cr = ctext.get_rect()
+      vr = vtext.get_rect()
+      self._pr.centerx = cr.centerx = vr.centerx = 150
+      self._pr.top = 0
+      cr.top = 100
+      vr.top = 200
+      self.image.blit(self._ptext, self._pr)
+      self.image.blit(ctext, cr)
+      self.image.blit(vtext, vr)
+      self.image.set_colorkey(self.image.get_at([0, 0]))
+
+      self.rect = self.image.get_rect()
+      self.rect.center = [self._centerx, 340]
 
 # For selecting songs
 class Constraint(object):
@@ -56,23 +103,26 @@ class FakePlaylist(object):
                          "The difficulty settings you chose result " +
                          "in no songs being available to play.")
       raise StopIteration
-    elif len(self.working) == 0: self.working = copy.copy(self.songs)
+    elif len(self.working) == 0: self.working = self.songs[:]
     i = random.randint(0, len(self.working) - 1)
     song = self.working[i]
     del(self.working[i])
     return (song.filename,
             [c.diff(song.difficulty[self.mode]) for c in self.constraints])
 
-class Endless(object):
+class Endless(InterfaceWindow):
   def __init__(self, songitems, courses, screen, gametype):
+    InterfaceWindow.__init__(self, screen, "endless-bg.png");
+    pygame.display.update()
 
-    self.player_configs = [copy.copy(player_config)]
+    self.player_configs = [dict(player_config)]
 
     if games.GAMES[gametype].players == 2:
-      self.player_configs.append(copy.copy(player_config))
+      self.player_configs.append(dict(player_config))
 
-    self.game_config = copy.copy(game_config)
+    self.game_config = dict(game_config)
     songitems = [s for s in songitems if s.difficulty.has_key(gametype)]
+    # Autofail always has to be on for endless, so back up the old value.
     oldaf = mainconfig["autofail"]
     diffs = []
     diff_count = {} # if we see a difficulty 2 times or more, use it
@@ -101,100 +151,69 @@ class Endless(object):
         c = Constraint("name", songitems[0].difficulty[gametype].keys()[0])
         self.constraints.append(c)
 
-    self.bg = pygame.image.load(BACKGROUND)
-    self.screen = screen
-    self.firsttime = True
+    for i in range(len(self.constraints)):
+      c = self.constraints[i]
+      EndlessDiffDisplay(i, c).add(self._sprites)
+
+    self._sprites.add(HelpText(ENDLESS_HELP, [255, 255, 255], [0, 0, 0],
+                               pygame.font.Font(None, 22), [320, 20]))
 
     music.load(os.path.join(sound_path, "menu.ogg"))
     music.play(4, 0.0)
 
-    self.render()
+    pid, ev = 0, ui.PASS
 
-    ev = (0, ui.PASS)
+    while ev != ui.QUIT:
+      pid, ev = ui.ui.poll()
 
-    while ev[1] != ui.QUIT:
-      ev = ui.ui.wait()
-
-      if ev[1] == ui.START:
+      if ev == ui.START:
         options.OptionScreen(self.player_configs, self.game_config, screen)
+        self._screen.blit(self._bg, [0, 0])
+        pygame.display.update()
 
       # Start game
-      elif ev[1] == ui.CONFIRM:
+      elif ev == ui.CONFIRM:
         dance.play(screen, FakePlaylist(songitems, self.constraints,
-                                  screen, gametype),
-                     self.player_configs, self.game_config, gametype)
+                                        screen, gametype),
+                   self.player_configs, self.game_config, gametype)
 
+        self._screen.blit(self._bg, [0, 0])
+        pygame.display.update()
         music.load(os.path.join(sound_path, "menu.ogg"))
         music.play(4, 0.0)
-
         ui.ui.clear()
 
       # Ignore unknown events
-      elif ev[0] >= len(self.constraints): pass
+      elif pid >= len(self.constraints): pass
 
-      elif ev[1] == ui.LEFT and self.constraints[ev[0]].kind != "name":
-        self.constraints[ev[0]].kind = "name"
-        self.constraints[ev[0]].value = diffs[0]
-      elif ev[1] == ui.RIGHT and self.constraints[ev[0]].kind != "number":
-        self.constraints[ev[0]].kind = "number"
-        self.constraints[ev[0]].value = [1, 3]
-      elif ev[1] == ui.UP: # easier
-        if self.constraints[ev[0]].kind == "name":
-          newi = max(0, diffs.index(self.constraints[ev[0]].value) - 1)
-          self.constraints[ev[0]].value = diffs[newi]
-        elif self.constraints[ev[0]].kind == "number":
-          newmin = max(self.constraints[ev[0]].value[0] - 1, 1)
-          self.constraints[ev[0]].value = [newmin, newmin + 2]
+      elif ev == ui.DOWN and self.constraints[pid].kind != "name":
+        self.constraints[pid].kind = "name"
+        self.constraints[pid].value = diffs[0]
+      elif ev == ui.UP and self.constraints[pid].kind != "number":
+        self.constraints[pid].kind = "number"
+        self.constraints[pid].value = (1, 3)
+      elif ev == ui.LEFT: # easier
+        if self.constraints[pid].kind == "name":
+          newi = max(0, diffs.index(self.constraints[pid].value) - 1)
+          self.constraints[pid].value = diffs[newi]
+        elif self.constraints[pid].kind == "number":
+          newmin = max(self.constraints[pid].value[0] - 1, 1)
+          self.constraints[pid].value = (newmin, newmin + 2)
 
-      elif ev[1] == ui.DOWN: # harder
-        if self.constraints[ev[0]].kind == "name":
+      elif ev == ui.RIGHT: # harder
+        if self.constraints[pid].kind == "name":
           newi = min(len(diffs) - 1,
-                     diffs.index(self.constraints[ev[0]].value) + 1)
-          self.constraints[ev[0]].value = diffs[newi]
-        elif self.constraints[ev[0]].kind == "number":
-          newmin = min(self.constraints[ev[0]].value[0] + 1, 9)
-          self.constraints[ev[0]].value = [newmin, newmin + 2]
+                     diffs.index(self.constraints[pid].value) + 1)
+          self.constraints[pid].value = diffs[newi]
+        elif self.constraints[pid].kind == "number":
+          newmin = min(self.constraints[pid].value[0] + 1, 9)
+          self.constraints[pid].value = (newmin, newmin + 2)
 
-      elif ev[1] == ui.FULLSCREEN:
+      elif ev == ui.FULLSCREEN:
         pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
 
-      self.render()
+      self.update()
 
     mainconfig["autofail"] = oldaf
     player_config.update(self.player_configs[0])
-
-  # FIXME - Calculate rects instead?
-  def render(self):
-    self.screen.blit(self.bg, (0,0))
-
-    for i in range(len(self.constraints)):
-      c = self.constraints[i]
-      ptext = FONTS[60].render("Player " + str(i + 1), 1, colors.WHITE)
-      ctext = vtext = None
-      if c.kind == "name":
-        ctext = FONTS[48].render("Select by Difficulty", 1, colors.WHITE)
-        vtext = FONTS[40].render(c.value.capitalize(), 1, colors.WHITE)
-      elif c.kind == "number":
-        ctext = FONTS[48].render("Select by Rating", 1, colors.WHITE)
-        vtext = FONTS[40].render("Between " + str(c.value[0]) + " and " +
-                                 str(c.value[1]), 1, colors.WHITE)
-
-        vtext.set_colorkey(vtext.get_at((0,0)), RLEACCEL)
-        ctext.set_colorkey(ctext.get_at((0,0)), RLEACCEL)
-
-      ptext_r = ptext.get_rect()
-      ptext_r.center = (RESOLUTION[0] / 4 + 2 * i * (RESOLUTION[0] / 4),
-                        50)
-      ctext_r = ctext.get_rect()
-      ctext_r.center = (RESOLUTION[0] / 4 + 2 * i * (RESOLUTION[0] / 4),
-                        RESOLUTION[1] / 3)
-      vtext_r = vtext.get_rect()
-      vtext_r.center = (RESOLUTION[0] / 4 + 2 * i * (RESOLUTION[0] / 4),
-                        RESOLUTION[1] / 2)
-
-      self.screen.blit(ptext, ptext_r)
-      self.screen.blit(ctext, ctext_r)
-      self.screen.blit(vtext, vtext_r)
-
-    pygame.display.update()
