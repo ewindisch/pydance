@@ -43,7 +43,7 @@ EMSUSB2 = {
   }
 
 class EventManager:
-  def __init__(self, config, handler = pygame.event):
+  def __init__(self, handler = pygame.event):
     self.handler = handler
     self.handler.set_blocked(range(NUMEVENTS))
     self.handler.set_allowed((KEYUP, KEYDOWN))
@@ -102,31 +102,31 @@ class EventManager:
         print "DDR mat 2 initialized: js", mat2
     else:
       print "No DDR mats found. Not initializing joystick support."
-    self.setupKeys(config)
+    self.setupKeys()
 
-  def setupKeys(self, config):
+  def setupKeys(self):
     keys = {}
     # Keymap settings. The 'r' varieties are just swapped.
-    if config["keyboard"] == "qwerty":
+    if mainconfig["keyboard"] == "qwerty":
       keys[K_i], keys[K_k], keys[K_j], keys[K_l] = E_UP1, E_DOWN1, E_LEFT1, E_RIGHT1
       keys[K_UP], keys[K_DOWN], keys[K_LEFT], keys[K_RIGHT] = E_UP2, E_DOWN2, E_LEFT2, E_RIGHT2
-    elif config["keyboard"] == "rqwerty":
+    elif mainconfig["keyboard"] == "rqwerty":
       keys[K_UP], keys[K_DOWN], keys[K_LEFT], keys[K_RIGHT] = E_UP1, E_DOWN1, E_LEFT1, E_RIGHT1
       keys[K_i], keys[K_k], keys[K_j], keys[K_l] = E_UP2, E_DOWN2, E_LEFT2, E_RIGHT2
-    elif config["keyboard"] == "dvorak":
+    elif mainconfig["keyboard"] == "dvorak":
       keys[K_c], keys[K_t], keys[K_h], keys[K_n] = E_UP1, E_DOWN1, E_LEFT1, E_RIGHT1
       keys[K_UP], keys[K_DOWN], keys[K_LEFT], keys[K_RIGHT] = E_UP2, E_DOWN2, E_LEFT2, E_RIGHT2
-    elif config["keyboard"] == "rdvorak":
+    elif mainconfig["keyboard"] == "rdvorak":
       keys[K_UP], keys[K_DOWN], keys[K_LEFT], keys[K_RIGHT] = E_UP1, E_DOWN1, E_LEFT1, E_RIGHT1
       keys[K_c], keys[K_t], keys[K_h], keys[K_n] = E_UP2, E_DOWN2, E_LEFT2, E_RIGHT2
-    else: print "Error! Unknown keyboard type", config["keyboard"]
+    else: print "Error! Unknown keyboard type", mainconfig["keyboard"]
 
     # Custom bindings for player keys.
-    if config["p1_keys"]:
-      ks = eval(config["p1_keys"])
+    if mainconfig["p1_keys"]:
+      ks = eval(mainconfig["p1_keys"])
       keys[ks[0]], keys[ks[1]], keys[ks[2]], keys[ks[3]] = E_UP1, E_DOWN1, E_LEFT1, E_RIGHT1
-    if config["p2_keys"]:
-      ks = eval(config["p2_keys"])
+    if mainconfig["p2_keys"]:
+      ks = eval(mainconfig["p2_keys"])
       keys[ks[0]], keys[ks[1]], keys[ks[2]], keys[ks[3]] = E_UP2, E_DOWN2, E_LEFT1, E_RIGHT1
 
     self.mergeEvents(keys, "kb")
@@ -134,7 +134,6 @@ class EventManager:
 
   def mergeEvents(self, events, type):
     for key in events:
-      print "adding event", type, key
       self.events[(type, key)] = events[key]
       if not self.states.has_key(events[key]):
         self.states[events[key]] = 0

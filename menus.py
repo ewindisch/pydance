@@ -46,9 +46,15 @@ class MenuItem:
 
   # Event IDs are those in constants.py.
   def activate(self, ev_id):
+    if ev_id == E_START1 or ev_id == E_START2: ev_id = E_START
+    if ev_id == E_LEFT1 or ev_id == E_LEFT2: ev_id = E_LEFT
+    if ev_id == E_RIGHT1 or ev_id == E_RIGHT2: ev_id = E_RIGHT
+    if self.callbacks == None:
+      if ev_id == E_START:
+        return E_QUIT # This is a back button
+      else: return E_PASS # Shouldn't happen
     if callable(self.callbacks.get(ev_id)):
       text, subtext, rgb = self.callbacks[ev_id](*self.args)
-      print text, subtext, rgb
       if text: self.text = text
       if subtext: self.subtext = subtext
       if rgb: self.rgb = rgb
@@ -80,7 +86,7 @@ class Menu:
     self.render()
     for i in itemlist:
       if type(i) == type([]): # Menuitems are lists
-        self.items.append(MenuItem(i[0], i[1], i[2:]))
+        self.items.append(MenuItem(i[0], i[1], i[2]))
         self.items[-1].activate("initial")
       elif type(i) == type((0,0)): # New submenus are tuples
         self.items.append(Menu(i[0], i[1:]))
@@ -94,7 +100,7 @@ class Menu:
 
   # Render and start navigating the menu.
   # Postcondition: Screen buffer is in an unknown state!
-  def display(self, screen, handler):
+  def display(self, screen):
     screen.fill((0,0,0))
     top_offset = 80
     curitem = 0
@@ -106,7 +112,7 @@ class Menu:
 
     ev = E_PASS
     while ev != E_QUIT:
-      ev = handler.poll()
+      ev = event.poll()
 
       # Scroll down through the menu
       if ev == E_DOWN1 or ev == E_DOWN2:
@@ -135,13 +141,15 @@ class Menu:
         except AttributeError: pass
 
       # Otherwise, if the event actually happened, pass it on to the button.
-      elif ev != E_PASS:
-        try: self.items[curitem].activate(ev)
+      elif ev != E_PASS and ev != E_QUIT:
+        try:
+          ev = self.items[curitem].activate(ev)
         except AttributeError:
           if ev == E_START1 or ev == E_START2:
             # Except if we're not a button and the event was START, go to
             # the new menu.
             self.items[curitem].display(screen, handler)
+            changed = 1
             screen.fill((0,0,0)) # Reset buffer.
 
       time_to_zoom = (time_to_zoom + 1) % 3
