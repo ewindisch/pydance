@@ -23,7 +23,7 @@ def check_constraints(constraints, diff):
 
 # For selecting songs
 class Constraint(object):
-  def __init__(self, kind = "name", value = "BASIC"):
+  def __init__(self, kind, value):
     self.kind = kind
     self.value = value
 
@@ -93,7 +93,7 @@ class Endless(object):
 
     mainconfig["autofail"] = 1
 
-    self.constraints = [Constraint()]
+    self.constraints = [Constraint("name", songitems[0].difficulty[gametype].keys()[0])]
     self.bg = pygame.image.load(BACKGROUND)
     self.screen = screen
     self.firsttime = True
@@ -125,8 +125,10 @@ class Endless(object):
         optionscreen.game_opt_driver(screen, self.game_config)
 
       # Player 2 on
-      elif ev[0] == len(self.constraints) and ev[1] == E_START:
-        self.constraints.append(Constraint())
+      elif (ev[0] == len(self.constraints) and ev[1] == E_START and
+            ev[0] < games.GAMES[gametype].players):
+        self.constraints.append(Constraint(self.constraints[0].kind,
+                                           self.constraints[0].value))
         self.player_configs.append(copy.copy(player_config))
 
       # Player 2 off

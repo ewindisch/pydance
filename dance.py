@@ -199,9 +199,9 @@ def play(screen, playlist, configs, songconf, playmode):
     print songdata.title.encode("ascii", "replace"), "by", songdata.artist.encode("ascii", "replace")
 
     try:
+      first = False
       if dance(screen, songdata, players, prevscr, first, game):
         break # Failed
-      first = False
     except None:
       error.ErrorMessage(screen, ["There was an error playing",
                                   os.path.split(songfn)[0]])

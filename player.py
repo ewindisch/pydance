@@ -891,7 +891,8 @@ class Player(object):
 
   def get_judge(self):
     if self.game.double:
-      self.judge[0].munch(self.judge[1])
+      # judge[0] may be None, if no songs were found in Endless mode.
+      if self.judge[0]: self.judge[0].munch(self.judge[1])
       return self.judge[0]
     else: return self.judge
 
