@@ -29,8 +29,13 @@ class Player:
     self.evt = None
     self.mode = mode
 
+    # Various display options - these should be in player rather than
+    # global or the sprites, so we can have per-player options
     self.sudden = mainconfig['sudden']
     self.hidden = mainconfig['hidden']
+    self.spin = mainconfig['arrowspin']
+    self.speed = mainconfig['scrollspeed']
+    self.scale = mainconfig['arrowscale']
 
   def set_song(self, steps, Judge): # FIXME factor these out
     self.steps = steps
@@ -91,8 +96,7 @@ class Player:
         self.toparrfx[dir].stepped(curtime, text)
 
     for spr in self.arrow_group.sprites():
-      spr.update(curtime, self.judge.bpm, self.steps.lastbpmchangetime,
-                 self.hidden, self.sudden)
+      spr.update(curtime, self.judge.bpm, self.steps.lastbpmchangetime)
     for d in DIRECTIONS:
       self.toparr[d].update(curtime + self.steps.offset * 1000)
       self.toparrfx[d].update(curtime, self.judge.combo)

@@ -598,14 +598,16 @@ class ArrowSprite(CloneSprite):
     samples[d] = pygame.mixer.Sound(os.path.join(sound_path,
                                                  "assist-" + d + ".ogg"))
   
-  def __init__ (self, spr, curtime, endtime, playernum):
+  def __init__ (self, spr, curtime, endtime, player):
     CloneSprite.__init__(self, spr, ARROWZINDEX)
     self.endtime = endtime
     self.life  = endtime - curtime
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
+
     if mainconfig['assist']: self.sample = ArrowSprite.samples[self.dir]
     else: self.sample = None
+
     self.pos = {}
     if mainconfig['scrollstyle'] == 2:
       self.top = 236
@@ -619,15 +621,21 @@ class ArrowSprite(CloneSprite):
 
     self.diff = self.top - self.bottom
 
-    self.playernum = playernum
     self.bimage = self.image
-    self.arrowspin = mainconfig["arrowspin"]
-    self.arrowscale = mainconfig["arrowscale"]
-    self.speed = mainconfig["scrollspeed"]
+    self.arrowspin = player.spin
+    self.arrowscale = player.scale
+    self.speed = player.speed
     
-    self.centerx = self.rect.centerx+(self.playernum*320)
+    self.centerx = self.rect.centerx + 320 * player.pid
+
+    if self.top < self.bottom:
+      self.hiddenzone = self.top + int(64 * player.hidden)
+      self.suddenzone = 64 + self.bottom - int(64.0 * player.sudden)
+    else:
+      self.hiddenzone = self.bottom + int(64.0 * player.hidden)
+      self.suddenzone = 64 + self.top - int(64.0 * player.sudden)
     
-  def update (self,curtime,curbpm,lbct,hidden,sudden):
+  def update (self, curtime, curbpm, lbct):
     if (self.sample) and (curtime >= self.endtime -0.0125):
       self.sample.play()
       self.sample = None
@@ -663,8 +671,7 @@ class ArrowSprite(CloneSprite):
       bpmbeats = float(bpmdoom / onefbeat)
       top = top - int(bpmbeats*self.diff/8.0 * self.speed)
 
-    if top > 480:
-      top = 480
+    if top > 480: top = 480
     self.rect.top = top
     
     self.cimage = self.bimage
@@ -681,30 +688,20 @@ class ArrowSprite(CloneSprite):
     else:
       self.image = self.cimage
 
-    alp = 0
-    self.curalpha = self.get_alpha()
+    if self.top < self.bottom: atest = self.rect.top
+    else: atest = self.rect.bottom - 64
 
-    if self.top < self.bottom:
-      hiddenzone = ( (self.top) + int(64.0*hidden) )
-      suddenzone = ( (64+self.bottom) - int(64.0*sudden) )
-      atest = self.rect.top
-    else:    # test for alpha using the bottom of the arrow instead of the top in the case of reverse scrolling
-      hiddenzone = ( (self.bottom) + int(64.0*hidden) )
-      suddenzone = ( (64+self.top) - int(64.0*sudden) )
-      atest = self.rect.bottom-64
+    if atest < self.hiddenzone: alp = 256 - 4 * (self.hiddenzone - atest)
+    # FIXME: Sudden is broken
+    else: alp = 256
 
-    if atest < hiddenzone:
-      alp = 255-(hiddenzone-atest)*4
-    elif atest > hiddenzone:
-      if atest < suddenzone:
-        alp = (suddenzone-atest)*4
-    if alp > 255:    alp = 255
-    elif alp < 0:    alp = 0
-    if alp != self.curalpha:
-      self.image.set_alpha(alp)
+    if alp > 256: alp = 256
+    elif alp < 0: alp = 0
+
+    if alp != self.image.get_alpha():  self.image.set_alpha(alp)
 
 class HoldArrowSprite(CloneSprite):
-  def __init__ (self, spr, curtime, times, playernum):
+  def __init__ (self, spr, curtime, times, player):
     CloneSprite.__init__(self, spr, zindex=ARROWZINDEX)
     self.timef1 = times[1]
     self.timef2 = times[2]
@@ -722,7 +719,6 @@ class HoldArrowSprite(CloneSprite):
       self.bottom = 576
 
     self.diff = self.top - self.bottom
-    self.playernum = playernum
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
     self.playedsound = None
@@ -740,13 +736,21 @@ class HoldArrowSprite(CloneSprite):
     self.oimage2.set_colorkey(self.oimage.get_at((0,0)))
     self.bimage = pygame.surface.Surface((64,1))
     self.bimage.blit(self.image,(0,-31))
-    self.arrowspin = mainconfig["arrowspin"]
-    self.arrowscale = mainconfig["arrowscale"]
-    self.speed = mainconfig["scrollspeed"]
+
+    self.arrowspin = player.spin
+    self.arrowscale = player.scale
+    self.speed = player.speed
+
+    if self.top < self.bottom:
+      self.hiddenzone = self.top + int(64 * player.hidden)
+      self.suddenzone = 64 + self.bottom - int(64.0 * player.sudden)
+    else:
+      self.hiddenzone = self.bottom + int(64.0 * player.hidden)
+      self.suddenzone = 64 + self.top - int(64.0 * player.sudden)
     
-    self.centerx = self.rect.centerx+(self.playernum*320)
+    self.centerx = self.rect.centerx + 320 * player.pid
     
-  def update (self,curtime,curbpm,lbct,hidden,sudden):
+  def update (self,curtime,curbpm,lbct):
     if (self.playedsound is None) and (curtime >= self.timef1 -0.0125):
       self.sample.play()
       self.playedsound = 1
@@ -835,29 +839,20 @@ class HoldArrowSprite(CloneSprite):
     else:
       self.image = self.cimage
 
-    alp = 255
-    self.curalpha = self.get_alpha()
+    if self.top < self.bottom: atest = self.rect.top
+    else: atest = self.rect.bottom-64
 
-    if self.top < self.bottom:
-      hiddenzone = ( (self.top) + int(64.0*hidden) )
-      suddenzone = ( (64+self.bottom) - int(64.0*sudden) )
-      atest = self.rect.top
-    else:    # test for alpha using the bottom of the arrow instead of the top in the case of reverse scrolling
-      hiddenzone = ( (self.bottom) + int(64.0*hidden) )
-      suddenzone = ( (64+self.top) - int(64.0*sudden) )
-      atest = self.rect.bottom-64
+    if atest < self.hiddenzone: alp = 256 - 4 * (self.hiddenzone - atest)
+    # FIXME: sudden is broken
+    else: alp = 256
 
-    if atest < hiddenzone:
-      alp = 255-(hiddenzone-atest)*4
-    elif atest > hiddenzone:
-      if atest < suddenzone:
-        alp = (suddenzone-atest)*4
-    if alp > 255:    alp = 255
-    elif alp < 0:    alp = 0
+    if alp > 256: alp = 256
+    elif alp < 0: alp = 0
+
     if self.broken and (curtime > self.timef1+(0.00025*(60000.0/curbpm))):
       alp /= 2
-    if alp != self.curalpha:
-      self.image.set_alpha(alp)
+
+    if alp != self.image.get_alpha(): self.image.set_alpha(alp)
 
 def SetDisplayMode(mainconfig):
   global screen
@@ -1286,11 +1281,11 @@ def dance(song, players, prevscr):
             for (dir,num) in zip(DIRECTIONS, ev.feet):
               if num & 1:
                 if not (num & 2):
-                  ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, plr.pid).add([plr.arrow_group, rgroup])
+                  ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, plr).add([plr.arrow_group, rgroup])
 
               if num & 2:
                 holdindex = plr.steps.holdref.index((DIRECTIONS.index(dir),ev.when))
-                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, plr.steps.holdinfo[holdindex], plr.pid).add([plr.arrow_group, rgroup])
+                HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, plr.steps.holdinfo[holdindex], plr).add([plr.arrow_group, rgroup])
 
     for plr in players:
       if len(plr.steps.lastbpmchangetime) > 0:
