@@ -276,7 +276,60 @@
       <dd><p>This makes pyDDR (try to) work with the old, buggy, obsolete
 	  SVGAlib library and drivers on UNIX.</p></dd>
     </dl>
-    <!-- FIXME - "Using a Mat" and "Other Programs" should go here-->
+    <h1>Using a Mat</h1>
+    <p>The recommended adapter for pyDDR is the <a
+    href="http://levelsix.com/products/pc/EMSUSB2.shtml">EMSUSB2</a>
+    from Level Six. pyDDR easily supports two player with it, and it
+    works on all operating systems. Also known to work is the parallel
+    port adapter that comes with <a href="http://www.buynshop.com">BNS
+    pads</a>. Any other 6 axis, 12 button or 4 axis, 16 button
+    joysticks that behave like those two adapters will also work.</p>
+    <h2>GNU/Linux</h2>
+    <p>For parallel adapters, you can use the ddrmat.o driver included
+    with pyDDR (which is a modified gamecon.o from the 2.4
+    kernel). Once compiled, just run <tt>insmod ddrmat gc=0,7</tt>
+    (where 7 is the IRQ of your parallel port, which is probably
+    7). Note that your <tt>lp</tt> (parallel printer) module cannot be
+    loaded at the same time.</p>
+    <p>USB drivers are much easier. If your kernel has USB joystick
+    support, just plug it in and it should work. If it doesn't, make
+    sure the input, hid, and joydev modules are loaded (the first two
+    are required for any USB input device).</p>
+    <h2>MacOS X</h2>
+    <p>Plug-and-play, or so I've heard. Just plug in your pad using
+    the USB adapter, and off you go.</p>
+    <h2>Windows</h2>
+    <p>This OS's hardware support is too unreliable and inconsistent
+    to describe the process here. All we can say is "make sure the
+    appropriate driver is installed".</p>
+    <h2>Other</h2>
+    <p>As long as <a href="http://www.pygame.org">Pygame</a> supports
+    your OS's joysticks, pyDDR will too. pyDDR specifically is looking
+    for 4 axis 16 button, or 6 axis 12 button joysticks (and also the
+    32 button EMSUSB2).</p>
+    <h1>Other Programs</h1>
+    <p>pyDDR comes with a handful of miscellaneous programs to
+    manipulate its step file format, and to help time songs.</p>
+    <h2>dwi2step, msd2step, and step2dwi</h2>
+    <p>These programs convert to and from the popular MSD and DWI file
+    formats. Just run <tt>dwi2step file.dwi</tt> and it should convert
+    the file nicely. If a DWI file works in Dance With Intensity but
+    not after conversion, let us know.</p>
+    <h2>findbpm</h2>
+    <p>This program plays a song and lets you tap a key along with the
+    beat. It averages the number of times you tap over the length of
+    the song, and calculates a BPM. This method sounds crude, but if
+    you have a good sense of rhythm, it's actually highly
+    accurate. Run it using <tt>findbpm song.ogg</tt>.</p>
+    <h2>lyrictag</h2>
+    <p>This program helps you add lyrics to step files. To run it, use
+    <tt>lyrictag -s song.ogg -l lyrics.txt -o song.step</tt>. When the
+      highlighted lyric is said in the song, press space to advance
+    the display. If you press a key too early, press backspace to go
+    back in the list.</p>
+    <p>lyrictag will not overwrite lyrics already in a file, so you
+    need to open up the step file and delete the LYRICS section if you
+    want to add new lyrics.</p>
     <h1>FAQ</h1>
       <p>The official FAQ is currently at <a
     href="http://www.icculus.org/pyddr/faq.php">http://www.icculus.org/pyddr/faq.php</a>.</p>
@@ -292,7 +345,7 @@
     to talk about pyDDR. If you want to see about having pyDDR at a
     convention or show, contact <a
     href="mailto:tgz@orotech.net">Brendan Becker
-    &lt;tgz@orotech.net&gt;</a>.</p>
+    &lt;tgz@orotech.net&gt;</a>, or show up on the IRC channel.</p>
     <h2>IRC</h2>
     <p>If you need a bit more real-time help than email offers, pyDDR
       has an <acronym title="Internet Relayed Chat">IRC</a> channel on

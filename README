@@ -273,10 +273,79 @@ pyddr.cfg
           This makes pyDDR (try to) work with the old, buggy, obsolete
           SVGAlib library and drivers on UNIX.
 
+                                  Using a Mat
+
+   The recommended adapter for pyDDR is the [1]EMSUSB2 from Level Six.
+   pyDDR easily supports two player with it, and it works on all
+   operating systems. Also known to work is the parallel port adapter
+   that comes with [2]BNS pads. Any other 6 axis, 12 button or 4 axis, 16
+   button joysticks that behave like those two adapters will also work.
+
+GNU/Linux
+
+   For parallel adapters, you can use the ddrmat.o driver included with
+   pyDDR (which is a modified gamecon.o from the 2.4 kernel). Once
+   compiled, just run insmod ddrmat gc=0,7 (where 7 is the IRQ of your
+   parallel port, which is probably 7). Note that your lp (parallel
+   printer) module cannot be loaded at the same time.
+
+   USB drivers are much easier. If your kernel has USB joystick support,
+   just plug it in and it should work. If it doesn't, make sure the
+   input, hid, and joydev modules are loaded (the first two are required
+   for any USB input device).
+
+MacOS X
+
+   Plug-and-play, or so I've heard. Just plug in your pad using the USB
+   adapter, and off you go.
+
+Windows
+
+   This OS's hardware support is too unreliable and inconsistent to
+   describe the process here. All we can say is "make sure the
+   appropriate driver is installed".
+
+Other
+
+   As long as [3]Pygame supports your OS's joysticks, pyDDR will too.
+   pyDDR specifically is looking for 4 axis 16 button, or 6 axis 12
+   button joysticks (and also the 32 button EMSUSB2).
+
+                                Other Programs
+
+   pyDDR comes with a handful of miscellaneous programs to manipulate its
+   step file format, and to help time songs.
+
+dwi2step, msd2step, and step2dwi
+
+   These programs convert to and from the popular MSD and DWI file
+   formats. Just run dwi2step file.dwi and it should convert the file
+   nicely. If a DWI file works in Dance With Intensity but not after
+   conversion, let us know.
+
+findbpm
+
+   This program plays a song and lets you tap a key along with the beat.
+   It averages the number of times you tap over the length of the song,
+   and calculates a BPM. This method sounds crude, but if you have a good
+   sense of rhythm, it's actually highly accurate. Run it using findbpm
+   song.ogg.
+
+lyrictag
+
+   This program helps you add lyrics to step files. To run it, use
+   lyrictag -s song.ogg -l lyrics.txt -o song.step. When the highlighted
+   lyric is said in the song, press space to advance the display. If you
+   press a key too early, press backspace to go back in the list.
+
+   lyrictag will not overwrite lyrics already in a file, so you need to
+   open up the step file and delete the LYRICS section if you want to add
+   new lyrics.
+
                                       FAQ
 
    The official FAQ is currently at
-   [1]http://www.icculus.org/pyddr/faq.php.
+   [4]http://www.icculus.org/pyddr/faq.php.
 
                                    Contacts
 
@@ -287,23 +356,26 @@ Email
 
    The primary email address is the pyddr-discuss mailing list on
    icculus.org. To subscribe, email
-   [2]pyddr-discuss-subscribe@icculus.org. You can then send email to
-   [3]pyddr-discuss@icculus.org to talk about pyDDR. If you want to see
-   about having pyDDR at a convention or show, contact [4]Brendan Becker
-   <tgz@orotech.net>.
+   [5]pyddr-discuss-subscribe@icculus.org. You can then send email to
+   [6]pyddr-discuss@icculus.org to talk about pyDDR. If you want to see
+   about having pyDDR at a convention or show, contact [7]Brendan Becker
+   <tgz@orotech.net>, or show up on the IRC channel.
 
 IRC
 
    If you need a bit more real-time help than email offers, pyDDR has an
-   IRC channel on the [5]Freenode IRC network. Surprisingly, the channel
+   IRC channel on the [8]Freenode IRC network. Surprisingly, the channel
    is named #pyddr. The main developers are often in the channel as P2E
    (Brendan) and piman (Joe). Jerub and DShadow may also be able to
    answer questions about bugs.
 
 References
 
-   1. http://www.icculus.org/pyddr/faq.php
-   2. mailto:pyddr-discuss-subscribe@icculus.org
-   3. mailto:pyddr-discuss@icculus.org
-   4. mailto:tgz@orotech.net
-   5. http://www.freenode.net/
+   1. http://levelsix.com/products/pc/EMSUSB2.shtml
+   2. http://www.buynshop.com/
+   3. http://www.pygame.org/
+   4. http://www.icculus.org/pyddr/faq.php
+   5. mailto:pyddr-discuss-subscribe@icculus.org
+   6. mailto:pyddr-discuss@icculus.org
+   7. mailto:tgz@orotech.net
+   8. http://www.freenode.net/
