@@ -127,7 +127,7 @@ class Endless(object):
 
         ui.ui.clear()
 
-      if ev[1] == ui.SELECT:
+      elif ev[1] == ui.SELECT:
         optionscreen.game_opt_driver(screen, self.game_config)
 
       # Ignore unknown events

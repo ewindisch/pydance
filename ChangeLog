@@ -16,6 +16,9 @@ Legend:
    exit. Delete this file to reset your mappings to defaults.
 + Animated arrows in the 'ddresque' and 'soloesque' themes.
  - This release may be slower, especially for animated arrows.
++ Courses (Oni/Nonstop) support; put the files in ~/.pydance/courses
+  courses/ under your pydance installation directory. Currently only
+  DWI/SM-style .crs files are supported.
 + Gentoo's install system will no longer work for this release.
 * Several crashes were fixed.
 

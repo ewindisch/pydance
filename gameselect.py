@@ -3,6 +3,7 @@
 from constants import *
 from songselect import SongSelect
 from endless import Endless
+from courses import CourseSelector
 
 import ui
 
@@ -12,6 +13,8 @@ import games
 SELECTORS = {
   "Normal": SongSelect,
   "Endless": Endless,
+  "Nonstop": CourseSelector,
+  
   }
 
 # We can probably autogenerate this list somehow.
@@ -69,7 +72,8 @@ DESCRIPTIONS = {
   "DOUBLE": "Try playing on both sides at once.",
 
   "Normal": "One song at a time, or set up a playlist.",
-  "Endless": "Keep dancing until you fail."
+  "Endless": "Keep dancing until you fail.",
+  "Nonstop": "Several songs in a row.",
 
   }
 
@@ -118,7 +122,7 @@ class GameSelect(object):
     return self.select_general(1, ["SINGLE", "VERSUS", "COUPLE", "DOUBLE"])
 
   def select_selector(self):
-    return self.select_general(2, ["Normal", "Endless"])
+    return self.select_general(2, ["Normal", "Endless", "Nonstop"])
 
   # idx is the index in self.images to modify with this choice.
   def select_general(self, idx, choices):
