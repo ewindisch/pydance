@@ -310,7 +310,6 @@ class CourseSelector(InterfaceWindow):
         self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
                                                              len(self._courses)))
       self.update()
-      self._clock.tick(60)
       pid, ev = ui.ui.poll()
 
   def _create_folders(self):

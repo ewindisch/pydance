@@ -3,16 +3,26 @@
 import os
 import pygame
 import fontfx
+import math
 import colors
 import ui
+import scores
+import combos
+import grades
+import judge
+import lifebars
 
 from constants import *
 from interface import *
 
 ON_OFF = [(0, "Off", ""), (1, "On", "")]
 
+# Description gets assigned 2 both times.
+PP, NAME, DESCRIPTION, VALUES = range(4)
+VALUE, NAME, DESCRIPTION = range(3)
+
 OPTIONS = {
-  # Option specifier list:
+  # Option specifier tuple:
   # 0. a boolean indicating whether the option is per-player (True) or not.
   # 1. The name of the option.
   # 2. A description of the option.
@@ -31,9 +41,9 @@ OPTIONS = {
                 zip([0, 1, 2, 3, -1, -2],
                     ["Normal", "Mirror", "Left", "Right", "Shuffle", "Random"],
                     ["", "Rotate the steps 180 degrees.",
-                     "Rotate the steps 90 degrees to the left."
-                     "Rotate the steps 90 degrees to the right."
-                     "Swap all arrows from one direction to another."
+                     "Rotate the steps 90 degrees to the left.",
+                     "Rotate the steps 90 degrees to the right.",
+                     "Swap all arrows from one direction to another.",
                      "Use totally random directions."])
                 ),
   "size": (True, "Add/Remove Steps",
@@ -74,7 +84,7 @@ OPTIONS = {
                   zip([0, 1, 2],
                       ["Normal", "Reverse", "Center"],
                       ["Arrows go from bottom to top.",
-                       "Arrows go from top to bottom."
+                       "Arrows go from top to bottom.",
                        "Arrows go from the top and bottom to the center."])
                   ),
   "jumps": (True, "Jumps",
@@ -89,7 +99,7 @@ OPTIONS = {
            ON_OFF),
   "colortype": (True, "Colors",
                 "Use colors of arrows to indicate the beat.",
-                zip([0, 1],
+                zip([0, 4],
                     ["Flat", "Normal"],
                     ["All arrows are the same.",
                      "Different arrows have different colors."])
@@ -99,12 +109,66 @@ OPTIONS = {
            ON_OFF),
   "holds": (True, "Holds",
             "Allow hold ('freeze') arrows in songs.",
-            ON_OFF)
+            ON_OFF),
+  "scoring": (False, "Scoring",
+              "The scoring algorithm.",
+              scores.score_opt),
+  "grade": (False, "Grades",
+            "The gradinging algorithm.",
+            grades.grade_opt),
+  "combo": (False, "Combos",
+             "How your combo increases.",
+             combos.combo_opt),
+  "judge": (False, "Judging Method",
+            "How your steps are judged.",
+            judge.judge_opt),
+  "judgescale": (False, "Judging Windows",
+                 "The margin of error for your steps.",
+                 zip([2.0 - 0.2 * i for i in range(10)],
+                     [str(i) for i in range(10)],
+                     ["Window is twice normal size.",
+                      "Window is 9/5 normal size.",
+                      "Window is 8/5 normal size.",
+                      "Window is 7/5 normal size.",
+                      "Window is 6/5 normal size.", ""
+                      "Window is 4/5 normal size.",
+                      "Window is 3/5 normal size.",
+                      "Window is 2/5 normal size.",
+                      "Window is 1/5 normal size."])
+                 ),
+
+  "life": (False, "Life",
+                 "Increase or decrease your amount of (non-battery) life.",
+                 [(0.25, "Undead", "Life is 1/4 the usual amount."),
+                  (0.50, "Very Low", "Life is 1/2 the usual amount."),
+                  (0.75, "Low", "Life is 3/4 the usual amount."),
+                  (1, "Normal", ""),
+                  (1.25, "High", "Life is 5/4 the usual amount."),
+                  (1.50, "Very High", "Life is 3/2 the usual amount."),
+                  (1.75, "Lazarus", "Life is 7/4 the usual amount.")]
+                 ),
+  "lifebar": (False, "Lifebar",
+              "The kind of lifebar used.",
+              lifebars.lifebar_opt),
+  "onilives": (False, "Oni Lives",
+               "The initial / maximum life in Battery mode.",
+               [(i, str(i), "") for i in range(1, 9)]),
+  "secret": (False, "Secret Arrows",
+             "Secret arrow display",
+             [(0, "Off", "Disable secret arrows."),
+              (1, "Invisible", "Enable but don't display them."),
+              (2, "Faint", "Show secret arrows faintly.")]
+             ),
+  "battle": (False, "Battle Mode",
+             "Arrows start in the center and float outwards.",
+             ON_OFF),
   }
             
 OPTS = [ "speed", "transform", "size", "fade", "accel", "scale",
-         "scrollstyle", "jumps", "spin", "colortype", "dark", "holds"
-            ]
+         "scrollstyle", "jumps", "spin", "colortype", "dark", "holds",
+         "scoring", "combo", "grade", "judge", "lifebar", "judgescale",
+         "life", "onilives", "secret", "battle"
+         ]
 
 O_HELP = [
   "Up / Down: Select option",
@@ -113,15 +177,67 @@ O_HELP = [
   "F11: Toggle fullscreen"
   ]
 
+def index_of(value, name):
+  values = OPTIONS[name][VALUES]
+  for i, v in zip(range(len(values)), values):
+    if v[VALUE] == value: return i
+  return None
+
+def value_of(index, name):
+  return OPTIONS[name][VALUES][index][VALUE]
+
+class OptionSelect(pygame.sprite.Sprite):
+  def __init__(self, possible, center, index):
+    pygame.sprite.Sprite.__init__(self)
+    self._index = index
+    self._possible = possible
+    self._center = center
+    self._end_time = pygame.time.get_ticks()
+    self._needs_update = True
+    self._render(pygame.time.get_ticks())
+
+  def update(self, time):
+    if self._needs_update: self._render(time)
+
+  def set_possible(self, possible, index = 0):
+    self._possible = possible
+    self._oldindex = self._index = index
+    self._end_time = pygame.time.get_ticks()
+    self._needs_update = True
+
+  def set_index(self, index):
+    self._oldindex = self._index
+    self._index = index
+    self._end_time = pygame.time.get_ticks()
+    self._needs_update = True
+
+  def _render(self, time):
+    self.image = pygame.Surface([430, 40], SRCALPHA, 32)
+    self.image.fill([0, 0, 0, 0])
+    self.rect = self.image.get_rect()
+    self.rect.center = self._center
+
+    if time >= self._end_time:
+      self._needs_update = False
+      t = fontfx.shadow(self._possible[self._index],
+                        pygame.font.Font(None, 30), [255, 255, 255])
+      r = t.get_rect()
+      r.center = [self.image.get_width() / 2, self.image.get_height() / 2]
+      self.image.blit(t, r)
+
 class OptionScreen(InterfaceWindow):
   def __init__(self, player_configs, game_config, screen):
-    InterfaceWindow.__init__(self, screen, "optionscreen-bg.png")
+    InterfaceWindow.__init__(self, screen, "option-bg.png")
     self._configs = player_configs
     self._config = game_config
     self._players = len(self._configs)
 
     self._lists = [ListBox(pygame.font.Font(None, 24), [255, 255, 255],
                            25, 9, 176, [10, 10])]
+    val = self._configs[0][OPTS[0]]
+    names = [v[NAME] for v in OPTIONS[OPTS[0]][VALUES]]
+    self._displayers = [OptionSelect(names, [415, 40],
+                                     index_of(val, OPTS[0]))]
     self._index = [0]
     ActiveIndicator([5, 110]).add(self._sprites)
     if self._players == 2:
@@ -129,10 +245,13 @@ class OptionScreen(InterfaceWindow):
                                  25, 9, 176, [453, 246]))
       self._index.append(0)
       ActiveIndicator([448, 345]).add(self._sprites)
+      val = self._configs[1][OPTS[0]]
+      self._displayers.append(OptionSelect(names, [220, 440],
+                                           index_of(val, OPTS[0])))
 
     HelpText(O_HELP, [255, 255, 255], [0, 0, 0],
              pygame.font.Font(None, 22), [320, 241]).add(self._sprites)
-    self._sprites.add(self._lists)
+    self._sprites.add(self._lists + self._displayers)
 
     for l in self._lists: l.set_items([OPTIONS[k][1] for k in OPTS])
     self._screen.blit(self._bg, [0, 0])
@@ -143,6 +262,9 @@ class OptionScreen(InterfaceWindow):
   def loop(self):
     pid, ev = ui.ui.poll()
     for i in range(len(self._lists)): self._lists[i].set_index(self._index[i])
+    for i in range(self._players):
+      opt = OPTS[self._index[i]]
+      self._displayers[i].set_index(index_of(self._configs[i][opt], opt))
 
     while ev not in [ui.START, ui.CANCEL, ui.CONFIRM]:
       if pid >= self._players: pass
@@ -153,10 +275,44 @@ class OptionScreen(InterfaceWindow):
       elif ev == ui.DOWN:
         self._index[pid] = (self._index[pid] + 1) % len(OPTS)
         self._lists[pid].set_index(self._index[pid], 1)
+
+      elif ev == ui.LEFT:
+        opt = OPTS[self._index[pid]]
+        if OPTIONS[opt][PP]: index = index_of(self._configs[pid][opt], opt)
+        else: index = index_of(self._config[opt], opt)
+        if index > 0: index -= 1
+        if OPTIONS[opt][PP]: self._configs[pid][opt] = value_of(index, opt)
+        else: self._config[opt] = value_of(index, opt)
+      elif ev == ui.RIGHT:
+        opt = OPTS[self._index[pid]]
+        if OPTIONS[opt][PP]: index = index_of(self._configs[pid][opt], opt)
+        else: index = index_of(self._config[opt], opt)
+        if index != len(OPTIONS[opt][VALUES]) - 1: index += 1
+        if OPTIONS[opt][PP]: self._configs[pid][opt] = value_of(index, opt)
+        else: self._config[opt] = value_of(index, opt)
+          
       elif ev == ui.FULLSCREEN:
         pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
 
+      if ev in [ui.UP, ui.DOWN]:
+        values = OPTIONS[OPTS[self._index[pid]]][VALUES]
+        names = [v[NAME] for v in values]
+        self._displayers[pid].set_possible(names)
+
+      if ev in [ui.LEFT, ui.RIGHT, ui.UP, ui.DOWN]:
+        opt = OPTS[self._index[pid]]
+        if OPTIONS[opt][PP]:
+          val = self._configs[pid][opt]
+          self._displayers[pid].set_index(index_of(val, opt))
+        elif self._players > 1 and self._index[0] == self._index[1]:
+          # If both players have the same non-per-player option
+          # selected, we need to update both displayers.
+          val = self._config[opt]
+          for i in range(self._players):
+            self._displayers[i].set_index(index_of(val, opt))
+        else:
+          val = self._config[opt]
+          self._displayers[pid].set_index(index_of(val, opt))
       self.update()
-      self._clock.tick(60)
       pid, ev = ui.ui.poll()

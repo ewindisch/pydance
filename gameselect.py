@@ -5,7 +5,7 @@ from interface import *
 from pygame.font import Font
 
 import ui
-import newss, endless, songselect, courseselect
+import newss, endless, courseselect
 
 GS_HELP = [
   "Up / Down moves through list",
@@ -18,7 +18,7 @@ GS_HELP = [
 GAMES = ["4 panel", "5 panel", "6 panel", "8 panel", "9 panel",
          "Parapara", "DMX", "3 panel"]
 TYPES = ["Single", "Versus", "Double", "Couple"]
-SS = ["Normal", "Nonstop", "Endless", "Testing"]
+SS = ["Normal", "Nonstop", "Endless"]
 
 VALUES = [GAMES, TYPES, SS]
 
@@ -34,10 +34,9 @@ IMAGES = {
     }
 
 SELECTORS = {
-  "Normal": songselect.SongSelect,
   "Endless": endless.Endless,
   "Nonstop": courseselect.CourseSelector,
-  "Testing": newss.SongSelect,
+  "Normal": newss.SongSelect,
   }
 
 MODES = {
@@ -100,7 +99,6 @@ DESCRIPTIONS = {
   "Normal": "One song at a time.",
   "Endless": "Keep dancing until you fail.",
   "Nonstop": "Several songs in a row.",
-  "Testing": "Try out the incomplete new song selector.",
   }
 
 class MainWindow(InterfaceWindow):
@@ -189,6 +187,5 @@ class MainWindow(InterfaceWindow):
         self._description.set_text(DESCRIPTIONS[text])
         self._image.set_image(IMAGES.get(text))
 
-      self._clock.tick(45)
       self.update()
       pid, ev = ui.ui.poll()

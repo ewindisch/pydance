@@ -40,7 +40,7 @@ class DancePointsGrade(AbstractGrade):
     else: return (self.score / max_score)
 
   def grade(self, failed):
-    if failed == True: return "E"
+    if failed == True: return "F"
     else: return DancePointsGrade.grade_by_rank(self.rank())
 
 # Appropriate for endless mode, it doesn't return E on failure (since
@@ -49,4 +49,6 @@ class EndlessGrade(DancePointsGrade):
   def grade(self, failed): return DancePointsGrade.grade(self, False)
 
 grades = [DancePointsGrade, EndlessGrade]
-grade_opt = [(0, "Dance Points"), (1, "Endless")]
+grade_opt = [(0, "Dance Points", ""),
+             (1, "Endless",
+              "Like dance points, but failing doesn't result in an F.")]

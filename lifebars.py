@@ -198,5 +198,8 @@ class OniLifeBarDisp(AbstractLifeBar):
 bars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MediocreLifeBarDisp,
         TugLifeBarDisp]
 
-lifebar_opt = [(0, "Normal"), (1, "Battery"), (2, "Power Drop"),
-               (3, "Mediocre"), (4, "Tug of War")]
+lifebar_opt = [(0, "Normal", ""),
+               (1, "Battery", "A few points of life, increasing each song."),
+               (2, "Power Drop", "Like normal, but never goes back up."),
+               (3, "Mediocre", "Fail if you do too poorly or too well."),
+               (4, "Tug of War", "Fight with the other player for life.")]

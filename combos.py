@@ -111,4 +111,5 @@ class PumpCombo(AbstractCombo):
     self.combo += { "V": 1, "P": 1, "G": 1, "O": 1 }.get(rating, -self.combo)
 
 combos = [NormalCombo, OniCombo, PumpCombo]
-combo_opt = [(0, "Normal"), (1, "Oni-style"), (2, "Pump It Up-style")]
+combo_opt = [(0, "Normal", ""), (1, "Oni-style", ""),
+             (2, "Pump It Up", "")]

@@ -54,7 +54,7 @@ def load_files(screen, files, type, Ctr, args):
     except Exception, message:
       print "E: Unknown error loading", f
       print "E:", message
-      print "E: Please contact the developers (pydance-devel@icculus.org)."
+      print "E: Please contact the developers (pyddr-devel@icculus.org)."
       print
     pct += inc
     img = pbar.render(pct)
@@ -64,7 +64,7 @@ def load_files(screen, files, type, Ctr, args):
 
 
 def main():
-  print "pydance", VERSION, "<pydance-discuss@icculus.org> - irc.freenode.net/#pyddr"
+  print "pydance", VERSION, "<pyddr-discuss@icculus.org> - irc.freenode.net/#pyddr"
 
   if mainconfig["usepsyco"]:
     try:

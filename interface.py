@@ -455,4 +455,5 @@ class InterfaceWindow(object):
     self._sprites.update(pygame.time.get_ticks())
     pygame.display.update(self._sprites.draw(self._screen))
     self._sprites.clear(self._screen, self._bg)
-    
+    self._clock.tick(45)
+
