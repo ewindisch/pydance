@@ -2,7 +2,7 @@ pydance INSTALLATION INSTRUCTIONS
 ---------------------------------
 
 pydance currently is known to run on Windows, UNIX and GNU/Linux, and
-MacOS X systems. In theory, it will run anywhere Pygame and Python do.
+Mac OS X systems. In theory, it will run anywhere Pygame and Python do.
 pydance can be gotten from http://www.icculus.org/pyddr.
 
 In all installations, you need the following things:
@@ -11,13 +11,13 @@ In all installations, you need the following things:
  - SMPEG, if you want MP3 support.
  - Libvorbis, if you want Ogg Vorbis support (you need this or SMPEG).
  - Python 2.2 or higher (2.1 is NOT new enough anymore).
- - Pygame 1.5.5 or higher.
+ - Pygame 1.5.6 or higher (1.5.5 is acceptable but may crash on some files).
 
-If you are running a UNIX distribution, all these probably come with
+If you are running a Unix distribution, all these probably come with
 your OS. Otherwise, you can find them at http://www.libsdl.org,
 http://www.xiph.org, http://www.python.org, and http://www.pygame.org.
 
-Installing under UNIX or GNU/Linux
+Installing under Unix or GNU/Linux
 ----------------------------------
  $ python setup.py
  $ su -c 'make install'
@@ -40,6 +40,25 @@ Installing under Windows
 
 That's it. Copy your song and step files to the same directory as pydance,
 or to a ..\songs directory.
+
+Optional Stuff
+--------------
+pydance needs to convert a few odd encodings, like CP949, that aren't
+in the base Python installation. pydance will run without it, but your fonts
+will render incorrectly (they probably will anyway, since good free
+Korean/Japanese fonts are lacking). This means you should install
+http://sourceforge.net/projects/koco, which contains the CP949 iconv
+codec.
+
+If you have the Psyco optimizing compiler installed (http://psyco.sf.net),
+pydance will use it by default. Set 'usepsyco' to 0 to turn it off, which
+you'll need to do to report bugs. Psyco may give pydance a good speed boost,
+but it is IA32-only currently.
+
+If you install the 'pymad' and 'pyao' packages, Python will try to play
+MP3s using them instead of SMPEG. This is usually a bad idea - SMPEG is
+terrible, but pymad and pyao don't necessarily play nicely with Pygame.
+This is only recommended on GNU/Linux IA32 systems using the ALSA drivers.
 
 Troubleshooting
 ---------------

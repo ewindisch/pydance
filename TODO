@@ -20,7 +20,6 @@ Song Selector Improvements
 
 Input
  - Configurable layouts (JZig?)
- - Rethink the whole default keyboard layout, doesn't work with > 4 panel
 
 Menus
  - Credits screen
@@ -29,7 +28,6 @@ Menus
 Gameplay
  - "Tug of war" lifebar in addition to the regular one.
  - Disney-style versus
- - Option for classic or Max style judging of jumps.
  - Modifiers: "solo" (needs animation in the first place...)
   - Fix shrink/grow holds
 
