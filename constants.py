@@ -7,7 +7,7 @@ E_PASS,E_QUIT,E_FULLSCREEN,E_SCREENSHOT,E_PGUP,E_PGDN,E_SELECT,E_MARK,E_UP,E_DOW
 DIRECTIONS = ['l', 'd', 'u', 'r']
 MAXPLAYERS = 2
 
-VERSION = "0.6.6"
+VERSION = "0.7.0"
 
 import sys, os, config, pygame
 

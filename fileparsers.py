@@ -269,13 +269,12 @@ class DWIFile:
       else: # This is some sort of metadata key
         # FIXME : Support samplestart and samplelength
         # don't support filenames. They're useless cross-platform.
+        # Don't support genre, it's a dumbass tag
         if parts[0] == "GAP": self.info["gap"] = -int(parts[1])
         elif parts[0] == "TITLE": self.info["title"] = ":".join(parts[1:])
         elif parts[0] == "ARTIST": self.info["artist"] = ":".join(parts[1:])
         elif parts[0] == "MD5": self.info["md5sum"] = parts[1]
         elif parts[0] == "BPM": self.info["bpm"] = float(parts[1])
-        elif parts[0] == "GENRE":
-          self.info["mix"] = ":".join(parts[1:]).split(",")[0]
         elif parts[0] == "CHANGEBPM":
           for change in parts[1].split(","):
             beat, bpm = change.split("=")
@@ -317,15 +316,10 @@ class DWIFile:
               if self.info.has_key("background"):
                 self.info["banner"] = self.info["background"]
               self.info["background"] = fullfile
-            elif not self.info.has_key("banner"):
-              self.info["banner"] = fullfile
+            else: self.info["banner"] = fullfile
 
       self.find_subtitle()
 
-      # This is how DWI finds its stupid mix name. I hate it.
-      if self.info.get("mix", "").lower() == "all music!": # we don't do this
-        del(self.info["mix"])
-        
       if not self.info.has_key("mix"):
         mixname = os.path.split(os.path.split(dir)[0])[1]
         if mixname != "songs": self.info["mix"] = mixname
@@ -368,6 +362,7 @@ class DWIFile:
     bpmidx = 0
     freezeidx = 0
     self.steps[mode][diff] = []
+    steps = steps.replace(" ", "")
     steps = list(steps)
     while len(steps) != 0:
       if steps[0] in DWIFile.modes: step_type = DWIFile.modes[steps.pop(0)]
@@ -390,7 +385,7 @@ class DWIFile:
             self.steps[mode][diff].append(["S", float(xyz[1])])
             freezeidx += 1
       elif steps[0] == " ": steps.pop(0)
-      else: print "Unknown token", steps.pop(0)
+      else: steps.pop(0)
 
 formats = ((".step", StepFile),
            (".dance", DanceFile),
