@@ -230,20 +230,14 @@ class Judge:
           self.lifebar.update_life("B")
           text = "BOO"
           anncrange = (20, 39)
-#      else:
-#        text = "woah"
-#        print "Ack! off is", off
 
-      if random.randrange(15) == 1:
-        self.announcer.say('ingame', anncrange)
-        #    print self.text, 'at', time
+      if random.randrange(15) == 1: self.announcer.say('ingame', anncrange)
+
       self.recentsteps.insert(0, text)
       self.recentsteps.pop()
 
     return text, dir, etime
 
-  def trytime(self, dir, time):
-    return time in self.times and dir in self.steps[time]
 
   def expire_arrows(self, time):
     curtick = round((time - 2*self.tick) / (self.tick / 6))
@@ -652,14 +646,15 @@ class ArrowSprite(CloneSprite):
       self.pos = POS
     if (self.pos['mode'] == 'centered') or (self.pos['mode'] == 'switchy'):
       if random.choice([True, False]):
-        self.pos['bot'] = int(236 + (mainconfig['scrollspeed']*512))
+        self.pos['bot'] = 639
       else:
-        self.pos['bot'] = int(236 - (mainconfig['scrollspeed']*512))
+        self.pos['bot'] = -276
       self.pos['diff'] = float(self.pos['top']-self.pos['bot'])
     self.playernum = playernum
     self.bimage = self.image
     self.arrowspin = mainconfig["arrowspin"]
     self.arrowscale = mainconfig["arrowscale"]
+    self.speed = mainconfig["scrollspeed"]
     
     self.centerx = self.rect.centerx+(self.playernum*320)
     
@@ -681,7 +676,7 @@ class ArrowSprite(CloneSprite):
       onebeat = float(60000.0/curbpm)/1000
       doomtime = self.endtime - curtime
       beatsleft = float(doomtime / onebeat)
-      self.top = self.top - int( (beatsleft/8.0)*self.pos['diff'] )
+      self.top = self.top - int( (beatsleft/8.0*self.speed)*self.pos['diff'])
     else:
       oldbpmsub = [curtime,curbpm]
       bpmbeats = 0
@@ -690,14 +685,14 @@ class ArrowSprite(CloneSprite):
           onefbeat = float(60000.0/oldbpmsub[1])/1000
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           bpmbeats = float(bpmdoom / onefbeat)
-          self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
+          self.top = self.top - int(bpmbeats*self.pos['diff']/8.0 * self.speed)
           oldbpmsub = bpmsub
         else: break
 
       onefbeat = float(60000.0/oldbpmsub[1])/1000
       bpmdoom = self.endtime - oldbpmsub[0]
       bpmbeats = float(bpmdoom / onefbeat)
-      self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
+      self.top = self.top - int(bpmbeats*self.pos['diff']/8.0 * self.speed)
 
     if self.top > 480:
       self.top = 480
@@ -751,9 +746,9 @@ class HoldArrowSprite(CloneSprite):
       self.pos = POS
     if (self.pos['mode'] == 'centered') or (self.pos['mode'] == 'switchy'):
       if random.choice([0,1]):
-        self.pos['bot'] = int(236 + (mainconfig['scrollspeed']*512))
+        self.pos['bot'] = 639
       else:
-        self.pos['bot'] = int(236 - (mainconfig['scrollspeed']*512))
+        self.pos['bot'] = -276
       self.pos['diff'] = float(self.pos['top']-self.pos['bot'])
     self.playernum = playernum
     self.curalpha = -1
@@ -773,8 +768,9 @@ class HoldArrowSprite(CloneSprite):
     self.oimage2.set_colorkey(self.oimage.get_at((0,0)))
     self.bimage = pygame.surface.Surface((64,1))
     self.bimage.blit(self.image,(0,-31))
-    self.arrowspin = float(mainconfig["arrowspin"])
-    self.arrowscale = float(mainconfig["arrowscale"])
+    self.arrowspin = mainconfig["arrowspin"]
+    self.arrowscale = mainconfig["arrowscale"]
+    self.speed = mainconfig["scrollspeed"]
     
     self.centerx = self.rect.centerx+(self.playernum*320)
     
@@ -798,11 +794,11 @@ class HoldArrowSprite(CloneSprite):
       doomtime = self.timef1 - curtime
       if self.broken == 0 and doomtime < 0: doomtime = 0
       beatsleft = float(doomtime / onebeat)
-      self.top = self.top - int( (beatsleft/8.0)*self.pos['diff'] )
+      self.top = self.top - int( (beatsleft/8.0)*self.pos['diff'] * self.speed)
 
       doomtime = self.timef2 - curtime
       beatsleft = float(doomtime / onebeat)
-      self.bottom = self.bottom - int( (beatsleft/8.0)*self.pos['diff'] )
+      self.bottom = self.bottom - int( (beatsleft/8.0)*self.pos['diff'] *self.speed)
     else:
       oldbpmsub = [curtime, curbpm]
       bpmbeats = 0
@@ -811,14 +807,14 @@ class HoldArrowSprite(CloneSprite):
           onefbeat = float(60000.0/oldbpmsub[1])/1000
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           bpmbeats = float(bpmdoom / onefbeat)
-          self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
+          self.top = self.top - int(bpmbeats*self.pos['diff']/8.0 * self.speed)
           oldbpmsub = bpmsub
         else: break
 
       onefbeat = float(60000.0/oldbpmsub[1])/1000
       bpmdoom = self.timef1 - oldbpmsub[0]
       bpmbeats = float(bpmdoom / onefbeat)
-      self.top = self.top - int(bpmbeats*self.pos['diff']/8.0)
+      self.top = self.top - int(bpmbeats*self.pos['diff']/8.0 * self.speed)
 
       oldbpmsub = [curtime, curbpm]
       bpmbeats = 0
@@ -827,14 +823,14 @@ class HoldArrowSprite(CloneSprite):
           onefbeat = float(60000.0/oldbpmsub[1])/1000
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           bpmbeats = float(bpmdoom / onefbeat)
-          self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0)
+          self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0 * self.speed)
           oldbpmsub = bpmsub
         else: break
 
       onefbeat = float(60000.0/oldbpmsub[1])/1000
       bpmdoom = self.timef2 - oldbpmsub[0]
       bpmbeats = float(bpmdoom / onefbeat)
-      self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0)
+      self.bottom = self.bottom - int(bpmbeats*self.pos['diff']/8.0 * self.speed)
 
     if self.bottom > 480:
       self.bottom = 480
@@ -1045,19 +1041,19 @@ def playSequence(numplayers, playlist):
   #DCY: Bottom of 640 gives lots of "update rejecting"    
   if mainconfig['reversescroll'] == 2:
     ARROWPOS['top']  = 236
-    ARROWPOS['bot']  = int(236 + (mainconfig['scrollspeed']*512))
+    ARROWPOS['bot']  = 639
     ARROWPOS['mode'] = 'centered'
   elif mainconfig['reversescroll'] == 3:    # this is more of a bug than a feature but some people might like it
     ARROWPOS['top']  = 236
-    ARROWPOS['bot']  = int(236 + (mainconfig['scrollspeed']*512))
+    ARROWPOS['bot']  = 639
     ARROWPOS['mode'] = 'switchy'
   elif mainconfig['reversescroll']:
     ARROWPOS['top']  = 408
-    ARROWPOS['bot']  = int(-64 - (mainconfig['scrollspeed']-1)*576)
+    ARROWPOS['bot']  = -64
     ARROWPOS['mode'] = 'reverse'
   else:
     ARROWPOS['top']  = 64
-    ARROWPOS['bot']  = int(576 * mainconfig['scrollspeed'])
+    ARROWPOS['bot']  = 576
     ARROWPOS['mode'] = 'normal'
 
   ARROWPOS['diff'] = float(ARROWPOS['top']-ARROWPOS['bot'])

@@ -157,19 +157,18 @@ class Steps:
     fhead = self.fhead
     arrowtime = None
     bpm = None
-    events_append, nevents_append = events.append, nevents.append
     while (head and head.when <= (time + 2 * toRealTime(head.bpm, 1))):
-      events_append(head)
+      events.append(head)
       head = head.next
     self.head = head
 
     if head and fhead:
       bpm = self.playingbpm
       arrowtime = 512.0 / bpm
-      ntime = time + arrowtime * 1.5
+      ntime = time + arrowtime * 3
       while fhead and fhead.when <= ntime:
         self.playingbpm = fhead.bpm
-        nevents_append(fhead)
+        nevents.append(fhead)
         fhead = fhead.next
       self.fhead = fhead
     return events, nevents, time, bpm

@@ -27,15 +27,16 @@ KEYCONFIG = {
   K_DELETE: E_CLEAR
 }
 
+# 16 buttons, 4 axis
+# The EMSUSB2, one adapter, two joysticks - +16 to get p2, uses this too
+# Apparently, there are two possible start buttons, 9 and 11
+A4B16 = { 0: E_MARK, 1: E_PGUP, 3: E_PGDN, 8: E_SELECT, 9: E_START,
+          15: E_LEFT, 13: E_RIGHT, 12: E_UP, 14: E_DOWN, 11: E_START }
+
+
 # 6 axis, 12 button joystick (BNS parallel adapter)
 A6B12 = { 1: E_PGUP, 3: E_PGDN, 8: E_SELECT, 4: E_LEFT, 5: E_RIGHT,
           6: E_DOWN, 7: E_UP, 9: E_START }
-
-# 16 buttons, 4 axis
-# The EMSUSB2, one adapter, two joysticks - +16 to get p2, uses this too
-A4B16 = { 0: E_MARK, 1: E_PGUP, 3: E_PGDN, 8: E_SELECT, 9: E_START,
-          15: E_LEFT, 13: E_RIGHT, 12: E_UP, 14: E_DOWN }
-
 
 # Gravis Gamepad Pro USB
 # 0: Square, 1: X, 2: O, 3: Triangle
