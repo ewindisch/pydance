@@ -1,23 +1,25 @@
-#! /usr/bin/env python
-# pydance - dancing game written in Python
+#!/usr/bin/env python
+# pydance - a dancing game written in Python
 
+import os
+import sys
+import util
+import getopt
 import pygame
-from constants import *
+import colors
+import records
+import menudriver
 
-from ui import ui
+from fileparses import SongItem
+from courses import CRSFile
+from pygame.mixer import music
+from fontfx import TextProgress
+from error import ErrorMessage
 from pad import pad
 
-import fontfx, menudriver, fileparsers, colors
-from courses import CRSFile
-import records
+from constants import *
 
-from pygame.mixer import music
-
-import os, sys, error, util, getopt
-
-os.chdir(pydance_path)
-
-def SetDisplayMode(mainconfig):
+def set_display_mode(mainconfig):
   try:
     flags = HWSURFACE | DOUBLEBUF
     if mainconfig["vesacompat"]: flags = 0
@@ -25,7 +27,7 @@ def SetDisplayMode(mainconfig):
     screen = pygame.display.set_mode([640, 480], flags, 16)
   except:
     print "E: Can't get a 16 bit display!" 
-    sys.exit()
+    sys.exit(3)
   return screen
 
 def load_files(screen, files, type, Ctr, args):
@@ -38,9 +40,9 @@ def load_files(screen, files, type, Ctr, args):
   files = list(dict(map(None, files, [])).keys())
   objects = []
   message = "Found %d %s. Loading..." % (len(files), type)
-  pbar = fontfx.TextProgress(FONTS[60], message, colors.WHITE, colors.BLACK)
+  pbar = TextProgress(FONTS[60], message, colors.WHITE, colors.BLACK)
   r = pbar.render(0).get_rect()
-  r.center = (320, 240)
+  r.center = [320, 240]
   for f in files:
     try: objects.append(Ctr(*((f,) + args)))
     except RuntimeWarning, message:
@@ -78,23 +80,22 @@ def main():
   song_list = []
   course_list = []
   for dir in mainconfig["songdir"].split(os.pathsep):
-    print "Searching", dir
+    print "Searching for songs in", dir
     song_list.extend(util.find(dir, ['*.step', '*.dance', '*.dwi',
                                      '*.sm', '*/song.*']))
   for dir in mainconfig["coursedir"].split(os.pathsep):
-    print "Searching", dir
+    print "Searching for courses in", dir
     course_list.extend(util.find(dir, ['*.crs']))
 
-  screen = SetDisplayMode(mainconfig)
+  screen = set_display_mode(mainconfig)
   
-  pygame.display.set_caption('pydance ' + VERSION)
+  pygame.display.set_caption("pydance " + VERSION)
   pygame.mouse.set_visible(0)
 
   music.load(os.path.join(sound_path, "menu.ogg"))
   music.play(4, 0.0)
 
-  songs = load_files(screen, song_list, "songs",
-                     fileparsers.SongItem, (False,))
+  songs = load_files(screen, song_list, "songs", SongItem, (False,))
 
   song_dict = {}
   for song in songs:
@@ -106,19 +107,21 @@ def main():
 
   courses = load_files(screen, course_list, "courses", CRSFile, (song_dict,))
 
+  # Let the GC clean these up if it needs to.
   song_list = None
   course_list = None
-  ui.empty()
+
+  pad.empty()
 
   if len(songs) < 1:
-    error.ErrorMessage(screen,
-                      ("You don't have any songs or step files. Check out",
-                       "http://icculus.org/pyddr/get.php",
-                       "and download some free ones."
-                       " ", " ", " ",
-                       "If you already have some, make sure they're in",
-                       mainconfig["songdir"]))
-    print "You don't have any songs. http://icculus.org/pyddr/get.php."
+    ErrorMessage(screen,
+                 ("You don't have any songs or step files. Check out",
+                  "http://icculus.org/pyddr/get.php",
+                  "and download some free ones."
+                  " ", " ", " ",
+                  "If you already have some, make sure they're in",
+                  mainconfig["songdir"]))
+    print "You don't have any songs. Check http://icculus.org/pyddr/get.php."
     sys.exit(1)
 
   menudriver.do(screen, (songs, courses, screen))

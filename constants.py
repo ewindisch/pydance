@@ -1,5 +1,6 @@
 # Constants used in the game and some simple initialization routines
-# This file should be kept as small as possible, probably.
+# This file should be kept as small as possible, probably. (But I seem
+# to be failing at doing that.)
 
 VERSION = "0.8.3"
 
@@ -11,17 +12,18 @@ import os
 
 from pygame.locals import *
 
-# Detect the name of the OS - MacOS X is not really UNIX.
+# Detect the name of the OS - Mac OS X is not really UNIX.
 osname = None
 if os.name == "nt": osname = "win32"
 elif os.name == "posix":
   if os.path.islink("/System/Library/CoreServices/WindowServer"):
     osname = "macosx"
-  elif os.environ.has_key("HOME"):
+  elif "HOME" in os.environ:
     osname = "posix"
 else:
-  print "Your platform is not supported by pydance. We're going to call it"
-  print "POSIX, and then just let it crash."
+  print "Your platform is not supported by pydance. In particular, it"
+  print "doesn't seem to be Win32, Mac OS X, or a Unix that sets $HOME."
+  sys.exit(2)
 
 # SDL_mixer is the bane of my existance.
 if osname == 'posix': # We need to force stereo in many cases.
@@ -35,11 +37,11 @@ if osname == "posix":
 else: pydance_path = os.path.split(os.path.abspath(pydance_path))[0]
 sys.path.append(pydance_path)
 
-# Set up some bindings for common directories
+# Set up some names for commonly referenced directories
 image_path = os.path.join(pydance_path, "images")
 sound_path = os.path.join(pydance_path, "sound")
 
-# Set a binding for our savable resource directory
+# Set a name for our savable resource directory
 rc_path = None
 if osname == "posix":
   rc_path = os.path.join(os.environ["HOME"], ".pydance")
@@ -51,11 +53,9 @@ elif osname == "win32": rc_path = "."
 if not os.path.isdir(rc_path): os.mkdir(rc_path)
 
 search_paths = (pydance_path, rc_path)
-#if pydance_path != "." and rc_path != ".":
-#  search_paths += (".",)
 
 if not sys.stdout.isatty():
-  sys.stdout = open(os.path.join(rc_path, "pydance.log"), "w")
+  sys.stdout = file(os.path.join(rc_path, "pydance.log"), "w")
   sys.stderr = sys.stdout
 
 # Set up the configuration file
