@@ -197,6 +197,9 @@ class LifeBarDisp(AbstractLifeBar):
 
 # Oni mode lifebar
 class OniLifeBarDisp(AbstractLifeBar):
+
+  lose_sound = pygame.mixer.Sound(os.path.join(sound_path, "loselife.ogg"))
+
   def __init__(self, playernum, theme):
     AbstractLifeBar.__init__(self, playernum, mainconfig["maxonilife"])
 
@@ -215,6 +218,10 @@ class OniLifeBarDisp(AbstractLifeBar):
   def broke_hold(self):
     self.life -= 1
        
+  def update_life(self, rating):
+    AbstractLifeBar.update_life(self, rating)
+    if self.life < self.oldlife: OniLifeBarDisp.lose_sound.play()
+
   def update(self, judges):
     if AbstractLifeBar.update(self, judges) == False: return
     

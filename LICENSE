@@ -5,7 +5,7 @@ If you didn't notice, my new license is the "MIT" or X11 license. I would
 still very much like to know if you use pyDDR in any constructive way or 
 put it on any sort of game disc, but it's not required. 
 
-The file "clicked.wav" in the sounds/ directory was taken from the GNOME
+The file "clicked.ogg" in the sounds/ directory was taken from the GNOME
 audio package, and is in the public domain.
 
 The TextProgress object is by Pete Shinners, and is in the public domain.

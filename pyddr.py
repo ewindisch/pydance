@@ -227,14 +227,14 @@ class Judge:
         if self.combo > self.bestcombo:
           self.bestcombo = self.combo 
 
-        if off <= 1:
+        if off == 1:
           self.marvelous += 1
           self.score += 10 * self.score_coeff * self.arrow_count
           self.dance_score += 2
           self.lifebar.update_life("V")
           text = "MARVELOUS"
           anncrange = (80, 100)
-        elif 1 < off <= 4:
+        elif off <= 4:
           self.perfect += 1
           self.score += 9 * self.score_coeff * self.arrow_count
           self.dance_score += 2

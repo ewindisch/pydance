@@ -6,7 +6,7 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
-0.6.3 - Reasonable Starting Times!				[2003.05.14]
+0.6.3 - Reasonable Starting Times!				[2003.05.17]
 + New song loading display and algorithm (at least 4-5 times faster).
 + New song selector based roughly on DDR 5th Mix.
   + Nonstop help and playlist display.
