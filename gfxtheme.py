@@ -113,8 +113,10 @@ class ThemeFile(object):
   def get_arrow(self, type, dir, num):
     rotate = 0
     fn = "arr_%s_%s_%d.png" % (type, dir, num)
+    realnum = num
     if not self.has_image(fn):
       fn = "arr_%s_%s_%d.png" % (type, dir, 0)
+      realnum = 0
     if not self.has_image(fn):
       for dirset in ["ldur", "kzwg", "c"]:
         if dir in dirset:
@@ -122,10 +124,14 @@ class ThemeFile(object):
             rotate = (ThemeFile.rotate[dirset][dir] -
                       ThemeFile.rotate[dirset][d])
             fn = "arr_%s_%s_%d.png" % (type, d, num)
-            if self.has_image(fn): break
+            if self.has_image(fn):
+                  realnum = num
+                  break
             fn = "arr_%s_%s_%d.png" % (type, d, 0)
-            if self.has_image(fn): break
-    return self.get_image(fn), rotate
+            if self.has_image(fn):
+              realnum = 0
+              break
+    return self.get_image(fn), rotate, realnum
 
 # An even higher-level interface than ThemeFile, that sets up the sprites
 # for many of the images.
@@ -185,7 +191,7 @@ class Arrow(object):
   def __init__(self, theme, type, dir, color, left):
     self.left = left
     self.dir = dir
-    self._image, rotate = theme.get_arrow(type, dir, color)
+    self._image, rotate, realnum = theme.get_arrow(type, dir, color)
     # This arrow is animated
     if (self._image.get_width() != theme.size or
         self._image.get_height() != theme.size):
@@ -210,6 +216,10 @@ class Arrow(object):
     else:
       self._image.set_colorkey(self._image.get_at([0, 0]))
       self._image = pygame.transform.rotate(self._image, rotate)
+
+    if realnum != color and self._beatcount >= color:
+      self._images = (self._images[self._fpb * color:] +
+                      self._images[:self._fpb * color])
 
     if not mainconfig["animation"] and not self._image and type == "c":
       self._image = self._images[0]
