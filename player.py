@@ -419,6 +419,7 @@ class ArrowSprite(pygame.sprite.Sprite):
     self.curalpha = -1
     self.dir = arrow.dir
     self.image = arrow.image.convert()
+    self.width = player.game.width
     self.battle = song.battle
     self.rect = arrow.image.get_rect()
     self.rect.left = arrow.left
@@ -508,9 +509,10 @@ class ArrowSprite(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     if top > 480: top = 480
     self.rect.top = top
+
+    pct = abs(float(self.rect.top - self.top) / self.diff)
     
     if self.battle:
-      pct = abs(float(self.rect.top - self.top) / self.diff)
       if pct > 4.5 / 6: self.rect.centerx = self.origcenterx
       elif pct > 2.0 / 6:
         p = (pct - 2.0/6) / (2.5 / 6)
@@ -519,10 +521,10 @@ class ArrowSprite(pygame.sprite.Sprite):
     else: self.rect.centerx = self.centerx
 
     if self.arrowscale != 1:
-      arrscale = int(float((self.rect.top-64)/416.0)*64)
-      arrscale = min(64, max(0, arrscale))
+      arrscale = int(pct * self.width)
+      arrscale = min(self.width, max(0, arrscale))
       if self.arrowscale > 1: # grow
-      	arrscale = 64 - arrscale
+      	arrscale = self.width - arrscale
       self.cimage = pygame.transform.scale(self.bimage, (arrscale, arrscale))
     
     if self.arrowspin:
@@ -558,6 +560,7 @@ class HoldArrowSprite(pygame.sprite.Sprite):
     self.rect.left = arrow.left
     self.life  = self.timef2 - curtime
     self.battle = song.battle
+    self.width = player.game.width
     if player.scrollstyle == 2:
       self.top = 236
       self.bottom = random.choice((748, -276))
@@ -588,14 +591,14 @@ class HoldArrowSprite(pygame.sprite.Sprite):
       self.playedsound = 1
     self.r = 0
     self.broken = 1
-    self.oimage = pygame.surface.Surface((64,32))
-    self.oimage.blit(self.image,(0,-32))
+    self.oimage = pygame.surface.Surface((self.width, self.width / 2))
+    self.oimage.blit(self.image, (0, -self.width / 2))
     self.oimage.set_colorkey(self.oimage.get_at((0,0)), RLEACCEL)
-    self.oimage2 = pygame.surface.Surface((64,32))
-    self.oimage2.blit(self.image,(0,0))
+    self.oimage2 = pygame.surface.Surface((self.width, self.width / 2))
+    self.oimage2.blit(self.image, (0,0))
     self.oimage2.set_colorkey(self.oimage.get_at((0,0)), RLEACCEL)
-    self.bimage = pygame.surface.Surface((64,1))
-    self.bimage.blit(self.image,(0,-31))
+    self.bimage = pygame.surface.Surface((self.width, 1))
+    self.bimage.blit(self.image,(0,-self.width / 2 + 1))
 
     self.arrowspin = player.spin
     self.arrowscale = player.scale
@@ -690,18 +693,21 @@ class HoldArrowSprite(pygame.sprite.Sprite):
     holdsize = abs(bottom - top)
     if holdsize < 0:
       holdsize = 0
-    self.cimage = pygame.surface.Surface((64,holdsize+64))
-    self.cimage.set_colorkey(self.cimage.get_at((0,0)), RLEACCEL)
-    self.cimage.blit( pygame.transform.scale(self.bimage, (64,holdsize)), (0,32) )
+    self.cimage = pygame.surface.Surface((self.width, holdsize + self.width))
+    self.cimage.set_colorkey(self.cimage.get_at((0, 0)), RLEACCEL)
+    self.cimage.blit(pygame.transform.scale(self.bimage,
+                                            (self.width, holdsize)),
+                     (0, self.width / 2))
     self.cimage.blit(self.oimage2,(0,0))
-    self.cimage.blit(self.oimage,(0,holdsize+32))
+    self.cimage.blit(self.oimage,(0,holdsize + self.width / 2))
 
     self.rect = self.image.get_rect()
     if top > 480: top = 480
     self.rect.top = top
+
+    pct = abs(float(self.rect.top - self.top) / self.diff)
     
     if self.battle:
-      pct = abs(float(self.rect.top - self.top) / self.diff)
       if pct > 4.5 / 6: self.rect.centerx = self.origcenterx
       elif pct > 2.0 / 6:
         p = (pct - 2.0/6) / (2.5 / 6)
@@ -710,14 +716,14 @@ class HoldArrowSprite(pygame.sprite.Sprite):
     else: self.rect.centerx = self.centerx
 
     if self.arrowscale != 1:
-      arrscale = int(float((self.rect.top-64)/416.0)*64)
+      arrscale = int(pct * self.width)
       if self.arrowscale > 1: # grow
-      	arrscale = 64 - arrscale
-      arrscale = max(0, arrscale)
+      	arrscale = self.width - arrscale
+      arrscale = min(self.width, max(0, arrscale))
       self.cimage = pygame.transform.scale(self.bimage, (arrscale, arrscale))
     
     if self.arrowspin:
-      self.image = pygame.transform.rotate(self.cimage,(self.rect.top-64)/self.arrowspin)
+      self.image = pygame.transform.rotate(self.cimage,(self.rect.top - 64)/self.arrowspin)
     else:
       self.image = self.cimage
 

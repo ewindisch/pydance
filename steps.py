@@ -167,8 +167,6 @@ class Steps(object):
     if self.ready == None:
       self.ready = self.events[1].when - toRealTime(self.events[1].bpm, 16)
 
-    print self.holdinfo, self.holdref
-
   def play(self):
     self.curtime = 0.0
     self.event_idx = self.nevent_idx = 0

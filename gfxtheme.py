@@ -124,7 +124,7 @@ class ArrowFX(pygame.sprite.Sprite):
     self.baseimg = pygame.image.load(fn).convert(16)
     self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
 
-    self.blackbox = pygame.surface.Surface((64,64))
+    self.blackbox = pygame.surface.Surface([game.width] * 2)
     self.blackbox.set_colorkey(0)
     self.image = self.blackbox
     self.rect = self.image.get_rect()
@@ -142,7 +142,7 @@ class ArrowFX(pygame.sprite.Sprite):
     self.presstime = time
     self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
     self.tintimg.blit(self.baseimg, (0,0))
-    tinter = pygame.surface.Surface((64,64))
+    tinter = pygame.surface.Surface(self.baseimg.get_size())
     if tinttype == 'MARVELOUS':
       tinter.fill((255,255,255))
     elif tinttype == 'PERFECT':
