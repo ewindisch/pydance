@@ -7,7 +7,11 @@ legend:
 
 ----- - CURRENT
 0.8.0 - That's the second largest ChangeLog I've ever seen!	[2003.XX.XX]
-+ New options: "Wide" to add jumps, holds on/off.
++ New options:
+ + "Wide" to add jumps
+ + Holds on/off.
+ + Big (add 8ths), quick (add 16ths), skippy (add gallops).
+  - Adds steps during double holds, so 3-steps are possible.
 + 5 panel (Pump It Up), 9 panel, and parapara support.
  + Support for KSF file for 5 panel steps.
  + Support for SM files with 5 panel or PPP steps.

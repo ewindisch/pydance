@@ -86,8 +86,11 @@ def rotate(steps, opt, mode):
 # FIXME: Return a list rather than in-place modify.
 # FIXME: Big, quick, skippy.X
 def size(steps, opt):
-  if opt == 1: little(steps, 4)
-  elif opt == 2: little(steps, 2)
+  if opt == 1: little(steps, 4) # Tiny
+  elif opt == 2: little(steps, 2) # Little
+  elif opt == 3: insert_taps(steps, 4.0, 2.0, False) # Big
+  elif opt == 4: insert_taps(steps, 2.0, 1.0, False) # Quick
+  elif opt == 5: insert_taps(steps, 4.0, 3.0, True) # Skippy
 
 # Remove steps that aren't on the beat
 def little(steps, mod):
@@ -97,6 +100,57 @@ def little(steps, mod):
       if beat % mod != 0: s[1:] = [0] * (len(s) - 1)
       beat += s[0]
     elif s[0] == "D": beat += s[1]
+
+# Insert taps if a note falls on a interval-even beat, and the next step
+# is interval-away. Insert the new step offset away from the original step
+# (and therefore the time for the offset set is interval - offset).
+# not_same makes sure the random tap inserted isn't the same as either of
+# the surrounding ones.
+
+# Inspired by Stepmania's function of the same name, in src/NoteData.cpp.
+def insert_taps(steps, interval, offset, not_same):
+  new_steps = []
+  beat = 0.0
+  rand = NonRandom(int(interval * offset * len(steps)))
+  for i in range(len(steps) - 1):
+    if isinstance(steps[i][0], float): # This is a note...
+      if not isinstance(steps[i + 1][0], float):
+        new_steps.append(steps[i]) # Next isn't a note.
+
+      elif (steps[i][1:].count(0) == len(steps[i][1:]) or
+            steps[i + 1][1:].count(0) == len(steps[i + 1][1:])):
+        # The surrounding notes are both empty.
+        new_steps.append(steps[i])
+
+      elif steps[i][0] == interval and beat % interval == 0: # Bingo!
+        steps[i][0] = offset
+        beat += offset
+        new_steps.append(steps[i])
+
+        if not_same:
+          start = rand.randint(0, len(steps[i][1:]) -1)
+          empty = [0] * len(steps[i][1:])
+          for j in range(len(steps[i][1:])):
+            checking = (start + j) % len(steps[i][1:])
+            if not (steps[i][checking + 1] or steps[i + 1][checking + 1]):
+              empty[checking] = 1
+              break
+          new_steps.append([interval - offset] + empty)
+        else:
+          new_step = [1] + ([0] * (len(steps[i][1:]) - 2))
+          rand.shuffle(new_step)
+          new_steps.append([interval - offset] + new_step)
+
+      else: new_steps.append(steps[i])
+
+      beat += new_steps[-1][0]
+      # Stupid inaccurate floating point.
+      if int(beat + 0.0000001) > int(beat): beat = int(beat + 0.0000001)
+    else:
+      if steps[i][0] == "D": beat += steps[i][1]
+      new_steps.append(steps[i])
+
+  steps[0:-1] = new_steps # Copy into place.
 
 # Pretty obvious.
 def remove_holds(steps, jump):
