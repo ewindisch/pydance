@@ -1542,12 +1542,12 @@ def playSequence(numplayers, playlist):
     current_song = Song(songfn)
     pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
-    screen.fill(colors.BLACK)
+#    screen.fill(colors.BLACK)
 
     for pid in range(len(players)):
       players[pid].set_song(copy.copy(current_song), diff[pid], Judge)
 
-    if dance(current_song, players, ARROWPOS): break # Failed
+    if dance(current_song, players, ARROWPOS, prevscr): break # Failed
 
   judges = [player.judge for player in players]
 
@@ -1559,7 +1559,7 @@ def playSequence(numplayers, playlist):
 
   return judges
 
-def dance(song, players, ARROWPOS):
+def dance(song, players, ARROWPOS, prevscr):
   global screen
 
   songFailed = False
@@ -1615,6 +1615,16 @@ def dance(song, players, ARROWPOS):
       background.image = pygame.surface.Surface((640,480))
       background.image.blit(bgkludge,(0,0))
       backimage.add(bgroup)
+      
+      q = mainconfig['bgbrightness'] / 256.0
+      for i in range(0, 101, 5):
+        p = i / 100.0
+        bgkludge.set_alpha(256 * p * q, RLEACCEL)
+        prevscr.set_alpha(256 * (1 - p) * q, RLEACCEL)
+        screen.fill(colors.BLACK)
+        screen.blit(prevscr,(0,0))
+        screen.blit(bgkludge,(0,0))
+        pygame.display.flip()
     else:
       background.fill(colors.BLACK)
 #      backmovie.add(bgroup)
@@ -1663,8 +1673,6 @@ def dance(song, players, ARROWPOS):
   tgroup.add(songtext)
   tgroup.add(grptext)
   tgroup.add(timewatch)
-
-  bgroup.draw(screen)
 
   screenshot=0
 

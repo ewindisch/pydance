@@ -274,18 +274,6 @@ class SongSelect:
         ann = announcer.Announcer(mainconfig["djtheme"])
         ann.say("menu")
 
-        # Fade out the background
-        background.blit(self.screen,(0,0))
-        for n in range(63):
-          background.set_alpha(255-(n*4))
-          self.screen.fill(colors.BLACK)
-          background.draw(self.screen)
-          pygame.display.flip()
-          pygame.time.wait(1)
-          if (event.poll()[1] == E_QUIT): break
-        background.set_alpha()
-        self.screen.fill(colors.BLACK)
-
         # Wait for the announcer to finish
         try:
           while ann.chan.get_busy(): pygame.time.wait(1)
