@@ -434,8 +434,8 @@ class BannerDisplay(pygame.sprite.Sprite):
   def _render(self):
     self.image = make_box(self._color, [350, 350])
     self.image.blit(self._banner, self._r_b)
-    self.image.set_clip(None)
-    
+    self.image.set_clip()
+
     self.image.blit(self._title, self._r_t)
     self.image.blit(self._artist, self._r_a)
     if self._subtitle: self.image.blit(self._subtitle, self._r_s)
