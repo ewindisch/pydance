@@ -9,11 +9,16 @@ record_fn = os.path.join(rc_path, "records")
 
 try: records = pickle.load(file(record_fn, "r"))
 except: records = {}
+bad_records = {}
 
+# Before starting, move any records we don't know about into a different hash,
+# so we don't try to load them for player's {best,worst}.
 def verify(recordkeys):
   for k in records.keys():
-    if k[0] not in recordkeys: del(records[k])
-    if len(records[k]) < 3: records[k] += (1,)
+    if k[0] not in recordkeys:
+      bad_records[k] = records[k]
+      del(records[k])
+    elif len(records[k]) < 3: records[k] += (1,)
   
 # records maps the title, mix, difficulty, and game onto a tuple
 # (rank, name) where rank is a floating point number from 0 to 1; and
@@ -44,18 +49,52 @@ def get(recordkey, diff, game):
   return records.get((recordkey, diff, game), (-1, ""))
 
 def write():
-  pickle.dump(records, file(record_fn, "w"))
+  r = {}
+  r.update(bad_records)
+  r.update(records)
+  pickle.dump(r, file(record_fn, "w"))
 
-def best(index, diff):
+def best(index, diffs, game):
+  game = games.VERSUS2SINGLE.get(game, game)
+  if not isinstance(diffs, list): diffs = [diffs]
   index -= 1
-  r = [(v[0], k[0]) for k, v in records.items() if (k[1] == diff)] 
+  r = [(v[0], k[0]) for k, v in records.items() if
+       (k[1] in diffs and k[2] == game)] 
+  if len(r) == 0: return None
+  r.sort()
+  r.reverse()
+  index %= len(r)
+  return r[index][1]
+
+def worst(index, diffs, game):
+  game = games.VERSUS2SINGLE.get(game, game)
+  index -= 1
+  if not isinstance(diffs, list): diffs = [diffs]
+  r = [(v[0], k[0]) for k, v in records.items() if
+       (k[1] in diffs and k[2] == game)] 
   if len(r) == 0: return None
   r.sort()
   index %= len(r)
   return r[index][1]
 
-def worst(index, diff):
-  r = [(v[0], k[0]) for k, v in records.items() if (k[1] == diff)]
+def like(index, diffs, game):
+  game = games.VERSUS2SINGLE.get(game, game)
+  if not isinstance(diffs, list): diffs = [diffs]
+  index -= 1
+  r = [(v[2], k[0]) for k, v in records.items() if
+       (k[1] in diffs and k[2] == game)] 
+  if len(r) == 0: return None
+  r.sort()
+  r.reverse()
+  index %= len(r)
+  return r[index][1]
+
+def dislike(index, diffs, game):
+  game = games.VERSUS2SINGLE.get(game, game)
+  index -= 1
+  if not isinstance(diffs, list): diffs = [diffs]
+  r = [(v[2], k[0]) for k, v in records.items() if
+       (k[1] in diffs and k[2] == game)] 
   if len(r) == 0: return None
   r.sort()
   index %= len(r)

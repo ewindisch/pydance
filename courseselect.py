@@ -89,7 +89,7 @@ class CourseDisplay(object):
   no_banner = pygame.image.load(NO_BANNER)
   no_banner.set_colorkey(no_banner.get_at([0, 0]))
 
-  def __init__(self, course): # A CRSFile object
+  def __init__(self, course, recordkeys, game): # A CRSFile object
     self.filename = course.filename
     self.course = course
     self.mixname = course.mixname
@@ -100,16 +100,50 @@ class CourseDisplay(object):
     self.banner = None
     self.clip = None
     self._songs = []
+    self.generate_songlist(recordkeys, game)
 
+  # Note that we don't need to worry about player's best/worst/etc changing
+  # while playing courses, since per-song records don't change.
+  def generate_songlist(self, recordkeys, game):
     i = 1
-    for name, diff, mods in course.songs:
+    for name, diff, mods in self.course.songs:
       if "*" in name: name, subtitle = "??????????", ""
       elif name[0] == "BEST":
-        name = "Player's Best #%d" % name[1]
-        subtitle = ""
+        song = recordkeys.get(records.best(name[1], diff, game))
+        if song:
+          subtitle = (song.info["subtitle"] or "") + (" (Best #%d)" % name[1])
+          name = song.info["title"]
+        else:
+          name = "Player's Best Unavailable"
+          subtitle = "(You need to play more songs!)"
+
       elif name[0] == "WORST":
-        name = "Player's Worst #%d" % name[1]
-        subtitle = ""
+        song = recordkeys.get(records.best(name[1], diff, game))
+        if song:
+          subtitle = (song.info["subtitle"] or "") + (" (Worst #%d)" % name[1])
+          name = song.info["title"]
+        else:
+          name = "Player's Worst Unavailable"
+          subtitle = "(You need to play more songs!)"
+
+      elif name[0] == "LIKES":
+        song = recordkeys.get(records.like(name[1], diff, game))
+        if song:
+          subtitle = (song.info["subtitle"] or "") + (" (Likes #%d)" % name[1])
+          name = song.info["title"]
+        else:
+          name = "Player's Likes Unavailable"
+          subtitle = "(You need to play more songs!)"
+
+      elif name[0] == "DISLIKES":
+        song = recordkeys.get(records.dislike(name[1], diff, game))
+        if song:
+          subtitle = (song.info["subtitle"] or "") + (" (Dislikes #%d)" % name[1])
+          name = song.info["title"]
+        else:
+          name = "Player's Dislikes Unavailable"
+          subtitle = "(You need to play more songs!)"
+
       else: name, subtitle = util.find_subtitle(name.split("/")[-1])
 
       if "." in diff: diff = "?"
@@ -199,7 +233,10 @@ class CourseSelector(InterfaceWindow):
   def __init__(self, songs, courses, screen, game):
     InterfaceWindow.__init__(self, screen, "courseselect-bg.png")
 
-    self._all_courses = self._courses = [CourseDisplay(c) for c in courses]
+    recordkeys = dict([(k.info["recordkey"], k) for k in songs])
+
+    self._courses = [CourseDisplay(c, recordkeys, game) for c in courses]
+    self._all_courses = self._courses
     self._index = 0
     self._clock = pygame.time.Clock()
     self._game = game
@@ -210,7 +247,6 @@ class CourseSelector(InterfaceWindow):
                          [255, 255, 255], 32, 10, 256, [373, 150])
     if len(self._courses) > 60 and mainconfig["folders"]:
       self._create_folders()
-      #name = SORT_NAMES[mainconfig["sortmode"]] % NUM_SORTS
       self._create_folder_list()
     else:
       self._folders = None

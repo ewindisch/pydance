@@ -13,7 +13,7 @@ import records
 import menudriver
 
 from fileparsers import SongItem
-from courses import CRSFile
+from courses import CourseFile
 from pygame.mixer import music
 from fontfx import TextProgress
 from error import ErrorMessage
@@ -142,7 +142,7 @@ def main():
     song_dict[mix][title] = song
     record_dict[song.info["recordkey"]] = song
 
-  courses = load_files(screen, course_list, "courses", CRSFile,
+  courses = load_files(screen, course_list, "courses", CourseFile,
                        (song_dict, record_dict))
 
   records.verify(record_dict)
