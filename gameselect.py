@@ -5,7 +5,7 @@ from interface import *
 from pygame.font import Font
 
 import ui
-import newss, courses, endless, songselect, courseselect
+import newss, endless, songselect, courseselect
 
 GS_HELP = [
   "Up / Down moves through list",
@@ -18,7 +18,7 @@ GS_HELP = [
 GAMES = ["4 panel", "5 panel", "6 panel", "8 panel", "9 panel",
          "Parapara", "DMX"]
 TYPES = ["Single", "Versus", "Double", "Couple"]
-SS = ["Normal", "Nonstop", "Endless", "Testing", "Nonstop Testing"]
+SS = ["Normal", "Nonstop", "Endless", "Testing"]
 
 VALUES = [GAMES, TYPES, SS]
 

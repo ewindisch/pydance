@@ -1,9 +1,12 @@
 # Like DWI and SM files, CRS files are a variant of the MSD format.
 
+from constants import *
+
 import pygame
 import random
 import util
 import error
+import os
 
 class CRSFile(object):
   # Map modifier names to internal pydance names.
@@ -52,6 +55,9 @@ class CRSFile(object):
       line = lines[i]
       while line[-1] == ";": line = line[:-1] # Some lines have two ;s.
       lines[i] = line.split(":")
+
+    if os.path.split(self.filename)[0][-7:] != "courses":
+      self.mixname = os.path.split(os.path.split(self.filename)[0])[1]
 
     for line in lines:
       if line[0] == "COURSE": self.name = ":".join(line[1:])
