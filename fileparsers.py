@@ -680,6 +680,8 @@ class SongItem:
     self.difficulty = song.difficulty
     self.filename = filename
     self.description = song.description
+
+    if self.info["mix"] == "": self.info["mix"] = "No Mix"
   
     self.diff_list = {}
     for key in self.difficulty:    
