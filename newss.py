@@ -108,6 +108,19 @@ class DifficultyBox(pygame.sprite.Sprite):
     self.rect.topleft = self._topleft
     self.image.set_alpha(140)
 
+SS_HELP = [
+  "Up / Down change song selection",
+  "Left / Right change difficulty setting (Left: Easier, Right: Harder)",
+  "Confirm / O / Up Right opens a folder or starts a song.",
+  "Cancel / X / Escape closes a folder or backs up.",
+  "Select / Tab takes you to a random song.",
+  "Start / Enter switches between screens.",
+  "F11 toggles fullscreen. S changes the sort mode.",
+  "Enjoy pydance 0.9.0!",
+  ]
+  
+           
+
 class MainWindow(object):
   def __init__(self, screen, numplayers):
     self._screen = screen
@@ -119,6 +132,8 @@ class MainWindow(object):
     diff2 = DifficultyBox(1, 2)
     diff2.set("TRICK", [255, 0, 0], 4, "C")
     self._sprites.add([diff1, diff2])
+    self._sprites.add(HelpText(SS_HELP, [255, 255, 255], [0, 0, 0],
+                               pygame.font.Font(None, 18), [206, 20]))
     self._screen.blit(self._bg, [0, 0])
     pygame.display.update()
     while True:
