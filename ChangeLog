@@ -6,6 +6,9 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
+0.7.2 -	                                                        [2003.07.XX]
++ Boost, brake, left, right, mirror, and shuffle.
+
 0.7.1 - OUCH MY BLADDER                                         [2003.07.01]
 + Support for COUPLE mode.
  + And battle mode.

@@ -682,7 +682,7 @@ class HoldArrowSprite(CloneSprite):
     beatsleft_bottom = 0
 
     if len(lbct) == 0:
-      onebeat = float(60000.0/curbpm)/1000
+      onebeat = float(60.0/curbpm)
       doomtime = self.timef1 - curtime
       if self.broken == 0 and doomtime < 0: doomtime = 0
       beatsleft_top = float(doomtime / onebeat)
@@ -694,29 +694,28 @@ class HoldArrowSprite(CloneSprite):
       bpmbeats = 0
       for bpmsub in lbct:
         if bpmsub[0] <= self.timef1:
-          onefbeat = float(60000.0/oldbpmsub[1])/1000
+          onefbeat = float(60.0/oldbpmsub[1])
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           beatsleft_top += float(bpmdoom / onefbeat)
           oldbpmsub = bpmsub
         else: break
 
-      onefbeat = float(60000.0/oldbpmsub[1])/1000
+      onefbeat = float(60.0/oldbpmsub[1])
       bpmdoom = self.timef1 - oldbpmsub[0]
       beatsleft_top += float(bpmdoom / onefbeat)
 
       oldbpmsub = [curtime, curbpm]
-      bpmbeats = 0
       for bpmsub in lbct:
         if bpmsub[0] <= self.timef2:
-          onefbeat = float(60000.0/oldbpmsub[1])/1000
+          onefbeat = float(60.0/oldbpmsub[1])
           bpmdoom = bpmsub[0] - oldbpmsub[0]
-          beats_bottom += float(bpmdoom / onefbeat)
+          beatsleft_bottom += float(bpmdoom / onefbeat)
           oldbpmsub = bpmsub
         else: break
 
-      onefbeat = float(60000.0/oldbpmsub[1])/1000
+      onefbeat = float(60.0/oldbpmsub[1])
       bpmdoom = self.timef2 - oldbpmsub[0]
-      beats_bottom += float(bpmdoom / onefbeat)
+      beatsleft_bottom += float(bpmdoom / onefbeat)
 
     if beatsleft_top > 0:
       if self.accel == 1:
