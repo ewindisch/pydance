@@ -168,9 +168,20 @@ class ExtremeNonstopScore(ThirdScore):
     self.inc = { "V": 10 * score_coeff, "P": 9 * score_coeff,
                  "G": 5 * score_coeff }
 
+# EZ2Dancer scoring algorithm.
+# http://www.annie.ne.jp/~ken/S3C21/ez2d_score.html
+class EZ2DancerScore(ThirdScore):
+  def set_song(self, pid, bpm, text, count, hold, feet):
+    AbstractScore.set_song(self, pid, bpm, text, count, hold, feet)
+    if count == 0: count = 1
+    self.arrow = 0
+    self.inc = { "V": 21, "P": 9, "G": 3 }
+
 scores = [PydanceScore, FirstScore, ThirdScore, FourthScore,
-          FifthScore, ExtremeScore, ExtremeOniScore, ExtremeNonstopScore]
+          FifthScore, ExtremeScore, ExtremeOniScore, ExtremeNonstopScore,
+          EZ2DancerScore]
 score_opt = [(0, "pydance", ""), (1, "DDR 1st/2nd Mix", ""),
              (2, "DDR 3rd Mix", ""), (3, "DDR 4th Mix", ""),
              (4, "DDR 5th Mix", ""), (5, "DDR 7th/8th", ""),
-             (6, "DDR 8th Oni", ""), (7, "DDR 8th Nonstop", "")]
+             (6, "DDR 8th Oni", ""), (7, "DDR 8th Nonstop", ""),
+             (8, "EZ2 Dancer", "")]
