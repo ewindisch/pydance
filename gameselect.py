@@ -16,13 +16,14 @@ GS_HELP = [
   ]
 
 GAMES = ["4 panel", "5 panel", "6 panel", "8 panel", "9 panel",
-         "Parapara", "DMX"]
+         "Parapara", "DMX", "3 panel"]
 TYPES = ["Single", "Versus", "Double", "Couple"]
 SS = ["Normal", "Nonstop", "Endless", "Testing"]
 
 VALUES = [GAMES, TYPES, SS]
 
 IMAGES = {
+    "3 panel": "select-3p.png",
     "4 panel": "select-4p.png",
     "5 panel": "select-5p.png",
     "6 panel": "select-6p.png",
@@ -44,6 +45,11 @@ MODES = {
   ("4 panel", "Versus"): "VERSUS",
   ("4 panel", "Couple"): "COUPLE",
   ("4 panel", "Double"): "DOUBLE",
+
+  ("3 panel", "Single"): "3PANEL",
+  ("3 panel", "Versus"): "3VERSUS",
+  ("3 panel", "Couple"): "3COUPLE",
+  ("3 panel", "Double"): "3DOUBLE",
 
   ("5 panel", "Single"): "5PANEL",
   ("5 panel", "Versus"): "5VERSUS",
@@ -78,6 +84,7 @@ MODES = {
 
 DESCRIPTIONS = {
   "4 panel": "The standard up, down, left and right arrows (like Dance Dance Revolution)",
+  "3 panel": "Practice using up left and up right with easier steps.",
   "5 panel": "Diagonal arrows and the center (like Pump It Up)",
   "6 panel": "Four panel plus the upper diagonal arrows (like DDR Solo)",
   "8 panel": "Everything but the center (like Technomotion)",
@@ -106,8 +113,8 @@ class MainWindow(InterfaceWindow):
     if len(courses) == 0 and "Nonstop" in SS: SS.remove("Nonstop")
 
     font = Font(None, 26)
-    self._lists = [ListBox(font, [255, 255, 255], 26, 8, 220, [408, 53]),
-                   ListBox(font, [255, 255, 255], 26, 4, 220, [408, 275]),
+    self._lists = [ListBox(font, [255, 255, 255], 26, 9, 220, [408, 53]),
+                   ListBox(font, [255, 255, 255], 26, 3, 220, [408, 300]),
                    ListBox(font, [255, 255, 255], 26, 3, 220, [408, 393])]
     self._lists[0].set_items(GAMES)
     self._lists[1].set_items(TYPES)

@@ -7,7 +7,12 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
-0.8.3 - Also it should be called Streetball.			[200X.YY.ZZ]
+0.9.0 - Also it should be called Streetball.			[200X.YY.ZZ]
+!!! Completely new user interface for almost all screens. Please pay
+  attention to the help messages displayed onscreen, because many of the
+  controls have changed.
++ 3 panel mode (automatically generated from 6 panel beginner steps in
+  DWIs and SMs, or available directly in .dance).
 + Hold arrows now have a grace period (by default 1/4 second, but it's
   affected by the judge type and difficulty).
 + Best grades for songs are now stored (in ~/.pydance/records).

@@ -70,6 +70,11 @@ GAMES = {
   "COUPLE": GameType(couple = True, theme = "4p"),
   "DOUBLE": GameType(double = True, players = 1, theme = "4p"),
 
+  "3PANEL": GameType(players = 1, dirs = "kdz", theme = "3p"),
+  "3VERSUS": GameType(players = 2, dirs = "kdz", theme = "3p"),
+  "3COUPLE": GameType(players = 2, couple = True, dirs = "kuz", theme = "3p"),
+  "3DOUBLE": GameType(players = 1, double = True, dirs = "kuz", theme = "3p"),
+
   "5PANEL": GameType(players = 1, dirs = "wkczg", width = 56, theme = "5p"),
   "5VERSUS": GameType(players = 2, dirs = "wkczg", width = 56, theme = "5p"),
   "5COUPLE": GameType(players = 2, couple = True, dirs = "wkczg",
@@ -133,6 +138,7 @@ DOUBLE = [mode for mode in GAMES if GAMES[mode].double]
 # Convert versus modes to single modes, for grading.
 VERSUS2SINGLE = {
   "VERSUS": "SINGLE",
+  "3VERSUS": "3PANEL",
   "5VERSUS": "5PANEL",
   "6VERSUS": "6PANEL",
   "8VERSUS": "8PANEL",

@@ -388,6 +388,20 @@ class MSDFile(GenericFile):
     lyrics = self.find_files(["lrc"])
     if len(lyrics) > 0: self.parse_lyrics(lyrics[0])
 
+  def create_3panel_steps(self):
+    if (("6PANEL" in self.difficulty) and
+        ("BEGINNER" in self.difficulty["6PANEL"])):
+      self.difficulty["3PANEL"] = {
+        "BEGINNER": self.difficulty["6PANEL"]["BEGINNER"]
+        }
+      self.steps["3PANEL"] = {}
+      if self._need_steps:
+        steps = []
+        for s in self.steps["6PANEL"]["BEGINNER"]:
+          if isinstance(s[0], float): steps.append([s[0], s[2], s[3], s[5]])
+          else: steps.append(s)
+        self.steps["3PANEL"]["BEGINNER"] = steps
+
 # The DWI format, from Dance With Intensity.
 class DWIFile(MSDFile):
   modes = { "{": 0.25, "[": 2.0/3.0, "(": 1.0, "`": 1.0/12.0,
@@ -475,6 +489,8 @@ class DWIFile(MSDFile):
     self.find_subtitle()
     self.find_files_sanely()
     self.resolve_files_sanely()
+
+    self.create_3panel_steps()
 
   def parse_steps(self, mode, diff, steps):
     if mode not in DWIFile.steps: return
@@ -605,6 +621,7 @@ class SMFile(MSDFile):
     self.find_mixname()
     self.resolve_files_sanely()
     self.find_files_sanely()
+    self.create_3panel_steps()
 
   def parse_steps(self, steps, gametype):
     stepdata = []
@@ -816,6 +833,7 @@ class SongItem(object):
   # A table of equivalencies between step sets; if the value doesn't
   # exist, it should be made the same as the key.
   equivs = { "SINGLE": "VERSUS",
+             "3PANEL": "3VERSUS",
              "5PANEL": "5VERSUS",
              "6PANEL": "6VERSUS",
              "8PANEL": "8VERSUS",
