@@ -221,7 +221,7 @@ class BGmovie(pygame.sprite.Sprite):
       if self.oldframe != curframe:
         self.changed = 1
         self.movie.render_frame(curframe)
-        self.oldframe = copy.copy(curframe)
+        self.oldframe = curframe
 
 class keykludge:
   def __init__ (self):
@@ -271,12 +271,12 @@ class Judge:
     
   def changingbpm(self, bpm):
     self.oldtick = toRealTime(bpm, 1)
-    self.oldbpm = copy.copy(bpm)
+    self.oldbpm = bpm
 
   def changebpm(self, bpm):
     self.tick = toRealTime(bpm, 1)
-    self.oldbpm = copy.copy(bpm)
-    self.bpm = copy.copy(bpm)
+    self.oldbpm = copy
+    self.bpm = bpm
         
   def getbpm(self):
     return self.bpm
@@ -618,8 +618,8 @@ class GradingScreen:
 class zztext(pygame.sprite.Sprite):
     def __init__(self,text,x,y):
       pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-      self.x = copy.copy(x)
-      self.y = copy.copy(y)
+      self.x = x
+      self.y = y
       self.zoom = 0
       self.baseimage = pygame.surface.Surface((320,24))
       self.rect = self.baseimage.get_rect()
@@ -789,7 +789,7 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
             self.image.blit(self.ngimg,(x,0))
           if self.slotnow[i] == '':
             self.image.blit(self.space,(x,0))
-          self.slotold[i] = copy.copy(self.slotnow[i])
+          self.slotold[i] = self.slotnow[i]
           
 class LyricDispKludge(pygame.sprite.Sprite):
   def __init__(self,top,colors):
@@ -842,7 +842,7 @@ class LyricDispKludge(pygame.sprite.Sprite):
       if curtime >= i:
 #        print "curtime", curtime, "  i", i, "   index", self.times.index(i)
         self.currentlyric = self.times.index(i)
-        self.lasttime = copy.copy(i)
+        self.lasttime = i
 
     if self.currentlyric != self.oldlyric:
       self.image = self.prender[self.currentlyric]
@@ -860,9 +860,9 @@ class LyricDispKludge(pygame.sprite.Sprite):
       if alp != self.oldalp:
         alp = int(alp)
         self.image.set_alpha(alp)
-        self.oldalp = copy.copy(alp)
+        self.oldalp = alp
 
-    self.oldlyric = copy.copy(self.currentlyric)
+    self.oldlyric = self.currentlyric
       
 class fpsDisp(pygame.sprite.Sprite):
     def __init__(self):
@@ -889,12 +889,12 @@ class fpsDisp(pygame.sprite.Sprite):
         self.rect.right = 640
 
         if self.loops > self.highest:
-          self.highest = copy.copy(self.loops)
+          self.highest = self.loops
         if (self.loops < self.lowest) and len(self.fpses)>2:
-          self.lowest = copy.copy(self.loops)
+          self.lowest = self.loops
 
         self.fpses.append(self.loops)
-        self.oldtime = copy.copy(time)
+        self.oldtime = time
         self.loops = 0
 
 class TopArrow(pygame.sprite.Sprite):
@@ -944,7 +944,7 @@ class TopArrow(pygame.sprite.Sprite):
 
     if self.frame != self.oldframe:
       self.image = self.topimg[self.frame]
-      self.oldframe = copy.copy(self.frame)
+      self.oldframe = self.frame
 
 class Blinky(pygame.sprite.Sprite):
   def __init__ (self, bpm):
@@ -974,7 +974,7 @@ class Blinky(pygame.sprite.Sprite):
 
     if self.frame != self.oldframe:
       self.image = self.topimg[self.frame]
-      self.oldframe = copy.copy(self.frame)
+      self.oldframe = self.frame
 
 class ArrowFX(pygame.sprite.Sprite):
   def __init__ (self, bpm, direction, ypos, playernum):
@@ -1155,7 +1155,7 @@ class LifeBarDisp(pygame.sprite.Sprite):
       if self.failed:
         self.image.blit(self.failtext, (70, 2) )
 
-      self.oldlife = copy.copy(self.life)
+      self.oldlife = self.life
 
 class JudgingDisp(pygame.sprite.Sprite):
     def __init__(self,playernum):
@@ -1269,7 +1269,7 @@ class TimeDisp(pygame.sprite.Sprite):
       if (nowtime != self.oldtime) and (self.blahmod > 3):
         self.image = self.font.render(nowtime,1,(224,224,224))
         self.image.set_colorkey(self.image.get_at((0,0)),RLEACCEL)
-        self.oldtime = copy.copy(nowtime)
+        self.oldtime = nowtime
         self.rect = self.image.get_rect()
         self.rect.top = 25
         self.rect.centerx = 320
@@ -1310,7 +1310,7 @@ class Song:
     self.startsec = 0.0
     self.endsec = -1.0
     self.bpm = 146.0
-    self.lastbpmchangetime = [[0.0,copy.copy(self.bpm)]]
+    self.lastbpmchangetime = [[0.0,self.bpm]]
     self.bgfile = ' '
     self.file = None
     self.moviefile = ' '
@@ -1456,7 +1456,7 @@ class Song:
         self.bpm = float(nextword) 
         if int(mainconfig['onboardaudio']):
           self.bpm = self.bpm * float(48000/44128.0)
-        self.playingbpm = copy.copy(self.bpm)
+        self.playingbpm = self.bpm
       elif firstword in modes.keys():  chompNext=(modes[firstword],)
       elif firstword == 'file':        self.file = " ".join(rest)
       elif firstword == 'bg':          self.bgfile = " ".join(rest)
@@ -1976,7 +1976,7 @@ class ArrowSprite(CloneSprite):
     self.arrowspin = float(mainconfig["arrowspin"])
     self.arrowshrink = float(mainconfig["arrowshrink"])
     self.arrowgrow = float(mainconfig["arrowgrow"])
-    self.centerx = copy.copy(self.rect.centerx)+(self.playernum*320)
+    self.centerx = self.rect.centerx+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
     # assist
@@ -1991,7 +1991,7 @@ class ArrowSprite(CloneSprite):
     self.rect = self.image.get_rect()
     self.rect.centerx = self.centerx
 
-    self.top = copy.copy(ARROWTOP)
+    self.top = ARROWTOP
     finaltime = 0
     
     if len(lbct)<2:
@@ -2013,7 +2013,7 @@ class ArrowSprite(CloneSprite):
           bpmbeats = float(bpmdoom / onefbeat)
 #          print "bpmbeats",bpmbeats
           self.top = self.top - int(bpmbeats*ARROWDIFF/8.0)
-          oldbpmsub = copy.copy(bpmsub)
+          oldbpmsub = bpmsub
       if not finaltime:
 #        print "adjusting for finaltime",
         onefbeat = float(60000.0/oldbpmsub[1])/1000
@@ -2026,7 +2026,7 @@ class ArrowSprite(CloneSprite):
             
     if self.top > 480:
       self.top = 480
-    self.rect.top = copy.copy(self.top)
+    self.rect.top = self.top
     
     self.cimage = self.bimage
     arrscale = int(float((self.rect.top-64)/416.0)*64)
@@ -2091,7 +2091,7 @@ class HoldArrowSprite(CloneSprite):
     self.arrowspin = float(mainconfig["arrowspin"])
     self.arrowshrink = float(mainconfig["arrowshrink"])
     self.arrowgrow = float(mainconfig["arrowgrow"])
-    self.centerx = copy.copy(self.rect.centerx)+(self.playernum*320)
+    self.centerx = self.rect.centerx+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
     # assist
@@ -2106,8 +2106,8 @@ class HoldArrowSprite(CloneSprite):
     self.rect = self.image.get_rect()
     self.rect.centerx = self.centerx
 
-    self.top = copy.copy(ARROWTOP)
-    self.bottom = copy.copy(ARROWTOP) #+ int(ARROWDIFF/8.0)
+    self.top = ARROWTOP
+    self.bottom = ARROWTOP #+ int(ARROWDIFF/8.0)
 
     finaltime = 0
     if len(lbct)<2:
@@ -2129,7 +2129,7 @@ class HoldArrowSprite(CloneSprite):
           bpmbeats = float(bpmdoom / onefbeat)
 #          print "bpmbeats",bpmbeats
           self.top = self.top - int(bpmbeats*ARROWDIFF/8.0)
-          oldbpmsub = copy.copy(bpmsub)
+          oldbpmsub = bpmsub
       if not finaltime:
 #        print "adjusting for finaltime",
         onefbeat = float(60000.0/oldbpmsub[1])/1000
@@ -2163,7 +2163,7 @@ class HoldArrowSprite(CloneSprite):
           bpmbeats = float(bpmdoom / onefbeat)
 #          print "bpmbeats",bpmbeats
           self.top = self.top - int(bpmbeats*ARROWDIFF/8.0)
-          oldbpmsub = copy.copy(bpmsub)
+          oldbpmsub = bpmsub
       if not finaltime:
 #        print "adjusting for finaltime",
         onefbeat = float(60000.0/oldbpmsub[1])/1000
@@ -2178,13 +2178,13 @@ class HoldArrowSprite(CloneSprite):
       self.bottom = 480
     if self.bottom < 64:
       self.bottom = 64
-    self.rect.bottom = copy.copy(self.bottom)
+    self.rect.bottom = self.bottom
  
     if self.top > 480:
       self.top = 480
     if self.top < 64:
       self.top = 64
-    self.rect.top = copy.copy(self.top)
+    self.rect.top = self.top
     
 #    print "top",self.top,"bottom",self.bottom
     holdsize = self.bottom-self.top
@@ -2315,12 +2315,12 @@ class EventManager:
       matbuttons = int(mainconfig['mat_buttons'])
       mataxes = int(mainconfig['mat_axes'])
       if ddrmat.get_numbuttons() == 32 and ((ddrmat.get_numaxes() == 11) or (ddrmat.get_numaxes() == 8)):
-        emsusb2 = copy.copy(i)
+        emsusb2 = i
       elif ddrmat.get_numbuttons() == matbuttons and ddrmat.get_numaxes() == mataxes:
         if matjoy is None:
-          matjoy = copy.copy(i)
+          matjoy = i
         else:
-          matjoy2 = copy.copy(i)
+          matjoy2 = i
       ddrmat.quit()
     if emsusb2 is not None:
       ddrmat = pygame.joystick.Joystick(emsusb2)
@@ -2715,7 +2715,7 @@ def main():
   if not debugmode:
     # prerender the list texts for songs, speed up song selector
     brect = Rect(220, 250, 190, 5)
-    ox = copy.copy(brect.left+4)
+    ox = brect.left+4
     pixelbar = pygame.surface.Surface((1,3))
     pixelbar.fill((192,192,192))
     fuxor = 1
@@ -2725,7 +2725,7 @@ def main():
       for i in range(x-ox):
         dirty.append(screen.blit(pixelbar,(brect.left+ox+i,brect.bottom+3)))
       pygame.display.update(dirty)
-      ox = copy.copy(x)-1
+      ox = x-1
       n.renderListText(totalsongs,fuxor)
       fuxor += 1
 
@@ -3238,7 +3238,7 @@ def domenu(songs):
       elif (k.key == K_UP) and (curitem > 0):
         curitem -= 1
         if curitem < topitem: 
-          topitem = copy.copy(curitem)
+          topitem = curitem
 
       elif k.key == K_ESCAPE:
         if lastmenu == []:
@@ -3529,7 +3529,7 @@ def songSelect(songs, fooblah):
       else:
         scrolloff = -60
       prevsong = songs[songidx]
-      songidx = copy.copy(newidx)
+      songidx = newidx
       songChanged = 1
       fontdisp = 1
       sod = 0
@@ -4382,7 +4382,7 @@ def dance(song,players,difficulty):
           dajudge.changebpm(nbpm)
           if players == 2:
             dajudge2.changebpm(nbpm)
-          oldbpm = copy.copy(nbpm)
+          oldbpm = nbpm
           print "succeeded."
         else:
           print "failed."
