@@ -53,12 +53,10 @@ def get(recordkey, diff, game):
   return records.get((recordkey, diff, game), (-1, ""))
 
 def write():
-  # FIXME: When we declare a dependency on Python 2.3, switch to the
-  # new binary pickle format.
   r = {}
   r.update(bad_records)
   r.update(records)
-  pickle.dump(r, file(record_fn, "w"), proto = 2)
+  pickle.dump(r, file(record_fn, "w"), 2)
 
 # Highest scores
 def best(index, diffs, game):
