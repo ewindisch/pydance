@@ -77,7 +77,7 @@ def make_box(color):
   return img
 
 # Wrap a SongItem object in a way that we can render it.
-class SongItemDisplay:
+class SongItemDisplay(object):
   def __init__(self, song):
     self.song = song
     self.banner = None
@@ -133,7 +133,7 @@ class SongItemDisplay:
       grouptext = FONTS[20].render(st, 1, color)
       self.menuimage.blit(grouptext, (15, 36))
 
-class SongPreview:
+class SongPreview(object):
   def __init__(self):
     self.playing = False
     self.filename = None
@@ -171,7 +171,7 @@ class SongPreview:
       self.playing = False
       self.filename = None
 
-class FolderDisplay:
+class FolderDisplay(object):
   def __init__(self, name, type, numsongs):
     self.name = name
     self.type = type
@@ -229,7 +229,7 @@ class FolderDisplay:
       grouptext = FONTS[20].render("%d songs" % self.numsongs, 1, colors.WHITE)
       self.menuimage.blit(grouptext, (15, 32))
 
-class SongSelect:
+class SongSelect(object):
   def __init__(self, songitems, screen, gametype):
     self.songs = [SongItemDisplay(s) for s in songitems
                   if s.difficulty.has_key(gametype)]

@@ -1,7 +1,7 @@
 # This contains a bunch of information describing the different
 # game types pydance supports.
 
-class GameType:
+class GameType(object):
   def __init__(self, **args):
     # The width in pixels of the arrows. FIXME: Height should also be
     # dependent on this, or separate variable; currently it's hardcoded

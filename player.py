@@ -279,7 +279,9 @@ class JudgingDisp(pygame.sprite.Sprite):
     self.judgetype = judgetype
 
   def update(self, curtime):
+    self.laststep = min(curtime, self.laststep)
     steptimediff = curtime - self.laststep
+
     if steptimediff < 0.5 or (self.judgetype == ('MISS' or ' ')):
       if   self.judgetype == "MARVELOUS": self.image = self.marvelous
       elif self.judgetype == "PERFECT": self.image = self.perfect
@@ -349,6 +351,7 @@ class ComboDisp(pygame.sprite.Sprite):
     self.combo += 1
 
   def update(self, curtime):
+    self.laststep = min(curtime, self.laststep)
     steptimediff = curtime - self.laststep
     if self.combo > self.bestcombo: self.bestcombo = self.combo
 
@@ -739,7 +742,7 @@ class HoldArrowSprite(pygame.sprite.Sprite):
 
     if alp != self.image.get_alpha(): self.image.set_alpha(alp)
 
-class Player:
+class Player(object):
 
   lifebars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp]
 

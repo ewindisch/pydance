@@ -66,7 +66,7 @@ def shadefade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
     displaysurface.blit(text, (camt,camt))
   return displaysurface
 
-class TextZoomer:
+class TextZoomer(object):
   def __init__(self, text, font, size, fore, back):
     self.tempsurface = pygame.surface.Surface(size)
     self.back = back
@@ -101,7 +101,7 @@ class TextZoomer:
 
 # From the PCR (http://www.pygame.org/pcr/progress_text/index.php),
 # by Pete Shinners.
-class TextProgress:
+class TextProgress(object):
     def __init__(self, font, message, color, bgcolor):
         self.font = font
         self.message = message

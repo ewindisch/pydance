@@ -29,7 +29,7 @@ STEP_MAPPINGS = {
 
 # FIXME: This can probably be replaced by something smaller, like a tuple.
 
-class SongEvent:
+class SongEvent(object):
   def __init__ (self, bpm, when=0.0, beat = 0, feet=None, next=None,
                 extra=None, color=None):
     self.bpm  = bpm
@@ -49,7 +49,7 @@ class SongEvent:
 
 # Step objects, made from SongItem objects
 
-class Steps:
+class Steps(object):
   def __init__(self, song, difficulty, player, pid, lyrics, playmode):
     self.playmode = playmode
     self.difficulty = difficulty
@@ -67,11 +67,11 @@ class Steps:
     self.totalarrows = 0
     self.ready = None
 
-    if player.arrows == -1:
+    if player.transform == -1:
       self.mapping = copy.copy(STEP_MAPPINGS[playmode][0])
       random.shuffle(self.mapping)
-    elif player.arrows >= 0:
-      self.mapping = STEP_MAPPINGS[playmode][player.arrows]
+    elif player.transform >= 0:
+      self.mapping = STEP_MAPPINGS[playmode][player.transform]
 
     holdlist = []
     holdtimes = []
@@ -122,7 +122,7 @@ class Steps:
 
         if cando and arrowcount != 0:
           origsteps = words[1:]
-          if player.arrows == -2:
+          if player.transform == -2:
             feetstep = list(origsteps)
             random.shuffle(feetstep)
           else:
@@ -237,7 +237,7 @@ class Steps:
 
 # Player-indep data generated from SongItem.
 
-class SongData:
+class SongData(object):
   def __init__(self, song, config):
     if song.info["background"]: self.background = song.info["background"]
     else: self.background = os.path.join(image_path, "bg.png")

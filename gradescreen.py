@@ -4,7 +4,7 @@ from constants import *
 
 # FIXME - This whole thing needs reworking/documentation
 
-class GradingScreen:
+class GradingScreen(object):
   def __init__(self, judges):
     self.judges = judges
 

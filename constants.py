@@ -91,7 +91,7 @@ mainconfig = config.Config({ # Wow we have a lot of options
 
 player_config = {"spin": 0,
                  "accel": 0,
-                 "arrows": 0,
+                 "transform": 0,
                  "scale": 1,
                  "speed": 1.0,
                  "sudden": 0,

@@ -2,7 +2,7 @@ import os, stat, util, string
 
 import games
 
-class GenericFile:
+class GenericFile(object):
   def __init__(self, filename, need_steps):
     self.filename = filename
     self.difficulty = {}
@@ -641,7 +641,7 @@ def sorted_diff_list(difflist):
   return keys
 
 # Encapsulates and abstracts the above classes
-class SongItem:
+class SongItem(object):
 
   defaults = { "valid": 1,
                "mix": "No Mix",

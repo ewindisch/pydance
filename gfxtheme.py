@@ -6,7 +6,7 @@ import dircache, os, games
 from constants import *
 from util import toRealTime
 
-class GFXTheme:
+class GFXTheme(object):
   def themes(cls):
     theme_list = []
     for path in search_paths:
@@ -45,7 +45,7 @@ class GFXTheme:
   def __repr__(self):
     return ('<GFXTheme name=%r>' % self.name)
 
-class ArrowSet: 
+class ArrowSet(object):
   def __init__ (self, path, game, pid):
     arrows = {}
     for dir in game.dirs:
@@ -183,7 +183,7 @@ class ArrowFX(pygame.sprite.Sprite):
 
       self.rect.left += (320 * self.pid)
 
-class ScrollingArrow:
+class ScrollingArrow(object):
   def __init__ (self, path, dir, color, left):
     self.dir = dir
     self.left = left

@@ -4,7 +4,7 @@ from util import toRealTime
 from announcer import Announcer
 import random
 
-class Judge:
+class Judge(object):
   def __init__ (self, bpm, holds, combos, score, display, feet, stepcount, diff, lifebar):
     self.steps = {}
     self.combos = combos

@@ -9,7 +9,7 @@ import os
 # When writing out, only things *not* equal to the master hash (or only
 # in the master hash) are written back out. 
 
-class Config:
+class Config(object):
   # Start a config file, based off a hash - this hash is always a master set
   def __init__(self, data = None):
     self.user = {}

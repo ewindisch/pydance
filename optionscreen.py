@@ -57,7 +57,7 @@ def game_opt_driver(screen, config):
     return False
   else: return True
                     
-class OptionScreen:
+class OptionScreen(object):
 
   bg = pygame.image.load(os.path.join(pyddr_path, "images", "option-bg.png"))
   bg.set_colorkey(bg.get_at((0, 0)))

@@ -65,7 +65,7 @@ class LyricChannel(pygame.sprite.Sprite):
  
     self.oldlyric = self.currentlyric
 
-class Lyrics:
+class Lyrics(object):
   def __init__(self, clrs):
     self.channels = {}
     self.colors = clrs

@@ -14,7 +14,7 @@ DISPLAYED_ITEMS = 6
 
 button_bg = pygame.image.load(os.path.join(image_path, "button.png"))
 
-class MenuItem:
+class MenuItem(object):
 
   def __init__(self, text, callbacks, args):
     # Dict of callbacks by keycodes, also "initial", "select", "unselect"
@@ -77,7 +77,7 @@ class MenuItem:
                        2 * BUTTON_HEIGHT/3 - FONTS[20].size(self.text)[1] / 2))
     self.image.set_alpha(self.alpha)
 
-class Menu:
+class Menu(object):
 
   bgimage = pygame.image.load(os.path.join(image_path, "menu-bg.png"))
   click_sound = pygame.mixer.Sound(os.path.join(sound_path, "clicked.ogg"))

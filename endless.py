@@ -22,7 +22,7 @@ def check_constraints(constraints, diff):
   return True
 
 # For selecting songs
-class Constraint:
+class Constraint(object):
   def __init__(self, kind = "name", value = "BASIC"):
     self.kind = kind
     self.value = value
@@ -43,7 +43,7 @@ class Constraint:
         if diffs[k] in range(self.value[0], self.value[1] + 1): return k
 
 # Generate a playlist forever
-class FakePlaylist:
+class FakePlaylist(object):
   def __init__(self, songs, constraints, screen, mode):
     self.songs = [s for s in songs if (s.info["valid"] and
                                        check_constraints(constraints,
@@ -70,7 +70,7 @@ class FakePlaylist:
     return (song.filename,
             [c.diff(song.difficulty[self.mode]) for c in self.constraints])
 
-class Endless:
+class Endless(object):
   def __init__(self, songitems, screen, gametype):
     self.player_configs = [copy.copy(player_config)]
     self.game_config = copy.copy(game_config)

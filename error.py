@@ -1,6 +1,6 @@
 from constants import *
 
-class ErrorMessage:
+class ErrorMessage(object):
   def __init__(self, screen, lines):
     screen.fill((0, 0, 0))
     bg = pygame.image.load(os.path.join(image_path, "bg.png"))

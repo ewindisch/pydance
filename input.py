@@ -83,7 +83,7 @@ MATS = { (6, 12): A6B12,
          (2, 10): A2B10,
          (2, 8): A2B8 }
 
-class EventManager:
+class EventManager(object):
   def __init__(self, handler = pygame.event):
     self.handler = handler
     self.handler.set_blocked(range(NUMEVENTS))
