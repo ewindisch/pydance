@@ -284,7 +284,7 @@ class Judge:
     curtick = round((time - 2*self.tick) / (self.tick / 6))
     self.times = self.steps.keys()
     self.times.sort()
-    for k in range(24):
+    for k in range(72):
       j = curtick - k
       if j in self.times and self.steps[j]:
         self.broke = 1
@@ -1031,7 +1031,7 @@ class Song:
     if head and fhead:
       bpm = self.playingbpm
       arrowtime = 512.0/bpm
-      ntime = time + arrowtime
+      ntime = time + (arrowtime*1.5)
       while (fhead and fhead.when <= ntime):
         self.playingbpm = fhead.bpm
         nevents_append(fhead)
@@ -1109,7 +1109,7 @@ class ArrowSprite(CloneSprite):
       self.sample.play()
       self.playedsound = 1
 
-    if curtime > self.timef + (0.001*(60000.0/curbpm)):
+    if curtime > self.timef + (0.002*(60000.0/curbpm)):
       self.kill()
       return
       
@@ -1625,6 +1625,7 @@ def dance(song, players, ARROWPOS, prevscr):
         screen.blit(prevscr,(0,0))
         screen.blit(bgkludge,(0,0))
         pygame.display.flip()
+        pygame.time.delay(1)
     else:
       background.fill(colors.BLACK)
 #      backmovie.add(bgroup)
