@@ -17,13 +17,11 @@ from gfxtheme import GFXTheme
 from player import Player
 from spritelib import *
 
-from pygame.sprite import *
+from pygame.sprite import RenderUpdates
 
 import fontfx, menudriver, fileparsers, colors, gradescreen, steps
 
-import os, sys, random, operator, string, util
-
-from stat import *
+import os, sys, random, operator, string, util, getopt
 
 os.chdir(pyddr_path)
 
@@ -836,6 +834,7 @@ def SetDisplayMode(mainconfig):
 
 def main():
   global screen
+
   print "pyDDR, by theGREENzebra (tgz@clickass.org)"
   print "Initialising.."
 

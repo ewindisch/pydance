@@ -10,7 +10,7 @@ class DanceFile:
     self.difficulty = {}
     self.steps = {}
     self.info = {}
-    self.lyrics = {}
+    self.lyrics = []
     self.description = None
     self.need_steps = need_steps
 
@@ -42,7 +42,8 @@ class DanceFile:
 
   def parse_metadata(self, line, data):
     parts = line.split()
-    self.info[parts[0]] = " ".join(parts[1:])
+    line2 = line.replace(parts[0], '').strip()
+    self.info[parts[0]] = line2
     return DanceFile.METADATA
 
   def parse_waiting(self, line, data):
@@ -79,6 +80,11 @@ class DanceFile:
     return DanceFile.LYRICS
 
   def parse_description(self, line, data):
+    if line == ".": self.description.append(None)
+    elif self.description is None: self.description = [line]
+    elif self.description[-1] is None: self.description[-1] = line
+    else: self.description[-1] += " " + line
+
     return DanceFile.DESCRIPTION
 
 class StepFile: 
@@ -163,7 +169,8 @@ class StepFile:
         if self.difficulty.get(line) == None: self.difficulty[line] = {}
         return StepFile.GAMETYPE, data
       else:
-        self.info[parts[0].lower()] = " ".join(parts[1:])
+        line2 = line.replace(parts[0], '').strip()
+        self.info[parts[0]] = line2
         return StepFile.METADATA, data
 
   def parse_gametype(self, line, data):
@@ -304,12 +311,12 @@ class SongItem:
     f.write("end\n")
 
     if self.description is not None:
-      paras = description.split("\n ").join("\n .\n")
+      paras = "\n.\n".join(self.description)
       f.write("DESCRIPTION\n" + paras + "\nend\n")
       
     if self.lyrics != []:
       f.write("LYRICS\n")
-      for lyr in lyrics:  f.write(" ".join([str(l) for l in lyrics]) + "\n")
+      for lyr in self.lyrics:  f.write(" ".join([str(l) for l in lyr]) + "\n")
       f.write("end\n")
 
     for game in self.difficulty:
