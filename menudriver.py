@@ -5,8 +5,7 @@ import pygame, menus, os, sys, copy, colors, games
 from constants import *
 from announcer import Announcer
 from gfxtheme import ThemeFile
-from songselect import SongSelect
-from endless import Endless
+from gameselect import GameSelect
 
 # A simple on/off setting, 1 or 0
 def get_onoff(name):
@@ -134,20 +133,7 @@ def do(screen, songdata):
             name in games.GAMES]
   themes = tuple(themes) # Python sucks Python sucks Python sucks
 
-  m = (("Play Game",
-        ["Single", {E_START: wrap_ctr}, (SongSelect, songdata + ("SINGLE",))],
-        ["Versus", {E_START: wrap_ctr}, (SongSelect, songdata + ("VERSUS",))],
-        ["Couple", {E_START: wrap_ctr}, (SongSelect, songdata + ("COUPLE",))],
-        ["Double", {E_START: wrap_ctr}, (SongSelect, songdata + ("DOUBLE",))],
-        ["5 Panel", {E_START: wrap_ctr}, (SongSelect, songdata + ("5PANEL",))],
-        ["5 Versus", {E_START: wrap_ctr}, (SongSelect, songdata + ("5VERSUS",))],
-        ["5 Couple", {E_START: wrap_ctr}, (SongSelect, songdata + ("5COUPLE",))],
-        ["5 Double", {E_START: wrap_ctr}, (SongSelect, songdata + ("5DOUBLE",))],
-        ["6 Panel", {E_START: wrap_ctr}, (SongSelect, songdata + ("6PANEL",))],
-        ["8 Panel", {E_START: wrap_ctr}, (SongSelect, songdata + ("8PANEL",))],
-        ["Endless", {E_START: wrap_ctr}, (Endless, songdata + ("SINGLE",))],
-        ["Back", None, None]
-        ),
+  m = (["Play Game", {E_START: wrap_ctr}, (GameSelect, songdata)],
        ("Game Options",
         ["Autofail", onoff_opt, ("autofail",)],
         ["Assist Mode", onoff_opt, ("assist",)],

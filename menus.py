@@ -128,6 +128,7 @@ class Menu(object):
   # Postcondition: Screen buffer is in an unknown state!
   def display(self):
     screen = self.screen
+    clock = pygame.time.Clock()
     Menu.bgimage.set_alpha(256)
     pygame.display.update(screen.blit(Menu.bgimage, TOPLEFT))
     curitem = 0
@@ -189,7 +190,7 @@ class Menu(object):
                                                   BUTTON_PADDING))))
 
       pygame.display.update(r)
-      pygame.time.wait(30)
+      clock.tick(30)
 
     if ev == E_QUIT:
       Menu.back_sound.play()

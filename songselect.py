@@ -31,8 +31,7 @@ difficulty_colors = { "BEGINNER": colors.color["white"],
                       "SMANIAC": colors.color["purple"],
                       "CHALLENGE": colors.color["purple"],
                       "CRAZY": colors.color["purple"],
-                      
-                     }
+                      }
 
 ITEM_SIZE = (344, 60)
 ITEM_X = [240, 250, 270, 300, 340, 390, 460]
@@ -240,6 +239,7 @@ class FolderDisplay(object):
 
 class SongSelect(object):
   def __init__(self, songitems, screen, gametype):
+    clock = pygame.time.Clock()
     self.songs = [SongItemDisplay(s) for s in songitems
                   if s.difficulty.has_key(gametype)]
 
@@ -272,9 +272,6 @@ class SongSelect(object):
  
     audio.fadeout(500)
 
-    self.helpfiles = ["menuhelp-" + str(i) + ".png" for i in range(1, 6)]
-    self.last_help_update = pygame.time.get_ticks() - 1000000
-
     pygame.display.update(self.screen.blit(self.bg, (0, 0)))
     
     self.index = 0
@@ -296,7 +293,6 @@ class SongSelect(object):
     else:
       self.folders = None
       self.songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
-    self.update_help()
     self.render(True)
 
     while ev[1] != E_QUIT:
@@ -500,8 +496,7 @@ class SongSelect(object):
           self.scroll_in(self.index)
 
       self.render(changed)
-
-      pygame.time.wait(50 - (pygame.time.get_ticks() - loop_start_time))
+      clock.tick(20)
 
     audio.fadeout(500)
     pygame.time.wait(500)
@@ -590,15 +585,7 @@ class SongSelect(object):
                             DIFF_LOCATION[1] + 25 * i))
       i += 1
 
-    # Key help display
-    if mainconfig["ingamehelp"]:
-      self.update_help()
-      r = [self.screen.blit(self.helpimage,
-                            (5, DIFF_LOCATION[1] + len(diff_list) * 26))]
-    else: r = []
-
-    if changed: pygame.display.update()
-    else: pygame.display.update(r)
+    pygame.display.update()
 
   def scroll_up(self):
     if not mainconfig["gratuitous"]: return
@@ -627,6 +614,7 @@ class SongSelect(object):
                        self.songs[self.index].banner_rect)
       self.screen.set_clip()
       pygame.display.update(r)
+
     self.songs[self.oldindex].banner.set_alpha(256)
     self.songs[self.index].banner.set_alpha(256)
 
@@ -657,6 +645,7 @@ class SongSelect(object):
                        self.songs[self.index].banner_rect)
       self.screen.set_clip()
       pygame.display.update(r)
+
     self.songs[self.oldindex].banner.set_alpha(256)
     self.songs[self.index].banner.set_alpha(256)
 
@@ -687,7 +676,6 @@ class SongSelect(object):
       cur_time = pygame.time.get_ticks()
       q = min(1, max(0, (end_time - cur_time) / 150.0))
       p = 1 - q
-#    for j in range(840, 214, -25): # position to move to
       self.screen.blit(self.bg, (0,0))
       for k in range(-4, 5): # Redraw screen
         idx = (index + k) % self.numsongs
@@ -708,23 +696,6 @@ class SongSelect(object):
     text = self.current_song.info["title"] + " "
     for d in self.diff_list[-1]: text += "/" + d[0]
     self.title_list.append(text)
-
-  def update_help(self):
-    delta = pygame.time.get_ticks() - self.last_help_update
-    if delta < 1000:
-      self.helpimage.set_alpha(int(256.0 * (delta / 1000.0)))
-    elif delta < 5000:
-      pass
-    elif delta < 6000:
-      self.helpimage.set_alpha(int(256.0 - (256.0 * (delta - 5000)/1000.0)))
-    elif delta > 6000:
-      fn = self.helpfiles.pop(0)
-      self.helpfiles.append(fn)
-      fn = os.path.join(image_path, fn)
-      self.helpimage = pygame.image.load(fn).convert()
-      self.helpimage.set_colorkey(self.helpimage.get_at((0,0)), RLEACCEL)
-      self.helpimage.set_alpha(0)
-      self.last_help_update = pygame.time.get_ticks()
 
   def set_up_folders(self):
     mixnames = {}
