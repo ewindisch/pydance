@@ -135,6 +135,7 @@ def main():
         stepfile.writelines("offset "+repr(-gap)+"\n")
       if fileline[0:14] == '#SINGLE:BASIC:':
         onbeat = 0
+        neareof = 0
         bpmidx = 0
         delayidx = 0
         diff = int(fileline[14])
@@ -146,6 +147,7 @@ def main():
         rar = 1
       if fileline[0:14] == '#SINGLE:TRICK:':
         onbeat = 0
+        neareof = 0
         bpmidx = 0
         delayidx = 0
         diff = int(fileline[14])
@@ -157,6 +159,7 @@ def main():
         rar = 1
       if fileline[0:15] == '#SINGLE:MANIAC:':
         onbeat = 0
+        neareof = 0
         bpmidx = 0
         delayidx = 0
         diff = int(fileline[15])
@@ -168,6 +171,7 @@ def main():
         rar = 1
       if fileline[0:16] == '#SINGLE:ANOTHER:':
         onbeat = 0
+        neareof = 0
         bpmidx = 0
         delayidx = 0
         diff = int(fileline[16])
@@ -182,7 +186,7 @@ def main():
 
       while rar:
         steps = []
-        print "beat"+repr(onbeat),
+#        print "b"+repr(onbeat),
 
         for xyz in bpmchange_beats[bpmidx:]:    #check to see if we need to change the bpm
           if xyz <= onbeat:
