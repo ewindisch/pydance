@@ -1,10 +1,12 @@
 # Different lifebars.
 
-from constants import *
 import os, pygame, fontfx
 
+from listener import Listener
+from constants import *
+
 # The base lifebar class from which most other ones inherit.
-class AbstractLifeBar(pygame.sprite.Sprite):
+class AbstractLifeBar(Listener, pygame.sprite.Sprite):
   def __init__(self, playernum, maxlife, songconf, game):
     pygame.sprite.Sprite.__init__(self)
     self.gameover = False
@@ -26,12 +28,6 @@ class AbstractLifeBar(pygame.sprite.Sprite):
     if self.life >= 0:
       self.life += self.deltas.get(rating, 0)
       self.life = min(self.life, self.maxlife)
-
-  def broke_hold(self): pass
-
-  def ok_hold(self): pass
-
-  def next_song(self): pass
 
   # Inform the judge if we've failed, and adjust life.
   def update(self, judge):

@@ -4,9 +4,10 @@
 
 import colors, pygame, fontfx
 
+from Listener import listener
 from constants import *
 
-class AbstractScore(pygame.sprite.Sprite):
+class AbstractScore(Listener, pygame.sprite.Sprite):
   def __init__(self, pid, text, game):
     pygame.sprite.Sprite.__init__(self)
     self.score = 0
@@ -34,12 +35,6 @@ class AbstractScore(pygame.sprite.Sprite):
       self.image.blit(scoretext, (64 - (scoretext.get_rect().size[0] / 2), 13))
       self.image.set_colorkey(self.image.get_at((0, 0)), RLEACCEL)
       self.oldscore = self.score
-
-  def stepped(self, cur_time, rating, combo): pass
-
-  def broke_hold(self): pass
-
-  def ok_hold(self): pass
 
 # This is pydance's custom scoring algorithm. It's designed to make
 # scores "fair" between different difficulty modes, and is similar
@@ -160,5 +155,5 @@ class ExtremeScore(AbstractScore):
 
 scores = [PydanceScore, FirstScore, ThirdScore, FourthScore,
           FifthScore, ExtremeScore]
-scores_opt = [(0, "pydance"), (1, "1st"), (2, "3rd"), (3, "4th"),
+score_opt = [(0, "pydance"), (1, "1st"), (2, "3rd"), (3, "4th"),
               (4, "5th"), (5, "8th")]
