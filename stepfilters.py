@@ -63,7 +63,7 @@ class NonRandom(random.Random):
     self.seed = (self.seed * self.m) % self.n
     return float(self.seed) / self.n
   
-# General step transformation class. By default, this is an identity transform.
+# General step transformation class. By default, identity transform.
 class Transform(object):
   def __init__(self, *args): pass
   
@@ -96,6 +96,7 @@ def compress(steps):
 
   return new_steps
 
+# Rotation, mirroring, shuffle, and random.
 class MappingTransform(Transform):
   def __init__(self, mode, opt):
     self._mapping = STEP_MAPPINGS[mode][opt][:]
@@ -120,12 +121,12 @@ class RightTransform(MappingTransform):
 
 class ShuffleTransform(MappingTransform):
   def __init__(self, mode):
-    MappingTransform.__init__(self, mode, 2)
+    MappingTransform.__init__(self, mode, 0)
     random.shuffle(self._mapping)
 
 class RandomTransform(ShuffleTransform):
   def __init__(self, mode):
-    MappingTransform.__init__(self, mode, 0)
+    ShuffleTransform.__init__(self, mode)
     self._holds = []
 
   def _update_state(self, steps):
@@ -216,70 +217,69 @@ def insert_taps(steps, interval, offset, not_same):
   steps[0:-1] = new_steps # Copy into place.
 
 # Pretty obvious.
-def remove_holds(steps, jump):
-  for s in steps:
-    if s[0] not in NOT_STEPS: s[1:] = [i & 1 for i in s[1:]]
+class RemoveHoldTransform(Transform):
+  def _transform(self, s):
+    if s[0] not in NOT_STEPS: return [s[0]] + [i & 13 for i in s[1:]]
+    else: return s[:]
 
 # Remove secret steps; defined by the 4 bit being on, so 5, 6, or 7.
-def remove_secret(steps):
-  for s in steps:
+class RemoveSecret(Transform):
+  def _transform(self, s):
+    s = s[:]
     if s[0] not in NOT_STEPS:
-      for i in range(len(s[1:])):
-        if s[1 + i] & 4: s[1 + i] = 0
+      for i in range(1, len(s)):
+        if s[i] & 4: s[i] = 0
+    return s
 
-# Remove or add jumps:
-def jumps(steps, jump):
-  if jump == 0: remove_jumps(steps)
-  elif jump == 2: wide(steps)
+class RemoveJumps(Transform):
+  def __init__(self): self._side = 0
 
-def remove_jumps(steps):
-  side = 0 # Alternate sides so e.g. LR alternates between L and R.
-  for s in steps:
+  def _transform(self, s):
     if s[0] not in NOT_STEPS:
-      step = list(s[1:])
+      step = s[1:]
       if step.count(0) < len(step) - 1:
-        if side == 1: step.reverse()
+        if self._side: step.reverse()
         for i in range(len(step)):
-          if step[i] != 0:
+          if step[i]:
             step[i] = 0
             break
-        if side == 1: step.reverse()
-        side ^= 1
+        if self._side: step.reverse()
+        self._side ^= 1
 
-        s[1:] = step
+      return [s[0]] + step
+    else: return s[:]
 
-# Add jumps on the on-beats that have steps.
-def wide(steps):
-  beat = 0.0
-  holds = []
-  for s in steps:
+# Add jumps to on-beats with steps.
+class WideTransform(Transform):
+  def __init__(self):
+    self._beat = 0.0
+    self._holds = []
+
+  def _update_state(self, s):
     if s[0] not in NOT_STEPS:
-      step = list(s[1:])
+      for i in range(1, len(s)):
+        if s[i] & 1 and i in self._holds: self._holds.remove(i)
 
-      for i in range(len(step)):
-        if step[i] & 1 and i in holds: holds.remove(i)
-
-      # Don't add jumps to things that are already jumps, or empty, or
-      # during holds
-      if (beat % 4 == 0 and
-          step.count(0) == len(step) - 1 and
-          len(holds) == 0):
-
+  def _transform(self, s):
+    if s[0] not in NOT_STEPS:
+      step = s[1:]
+      if (self._beat % 4 == 0 and s.count(0) == len(step) - 1 and
+          len(self._holds) == 0):
         first = 0
         while step[first] == 0: first += 1 # Find the first step
-
-        # Pseudorandom but deterministically
-        to_add = int(math.sqrt(beat)) % len(step)
+        to_add = int(math.sqrt(self._beat)) % len(step)
         if step[to_add] != 0: to_add = (to_add + 1) % len(step)
         step[to_add] = 1
+        s = [s[0]] + step
 
-        s[1:] = step
+      for i in range(1, len(s)):
+        if s[i] & 2: self._holds.append(i)
 
-      for i in range(len(step)):
-        if step[i] & 2: holds.append(i)
-
-      beat += s[0]
+      self._beat += s[0]
     elif s[0] == "D": beat += s[1]
+    return s[:]
+
+jumps = [RemoveJumps, Transform, WideTransform]
 
 # Now, here's where stuff gets tricky. We have to randomly but
 # deterministically generate fun steps for modes not in the file.

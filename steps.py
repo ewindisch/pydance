@@ -91,10 +91,13 @@ class Steps(object):
       song_steps = T(playmode).transform(song_steps)
 
     if player.size: stepfilters.size(song_steps, player.size)
-    if player.jumps != 1: stepfilters.jumps(song_steps, player.jumps)
-    if not player.holds: stepfilters.remove_holds(song_steps, player.holds)
+    if player.jumps != 1:
+      song_steps = stepfilters.jumps[player.jumps]().transform(song_steps)
+    if not player.holds:
+      song_steps = stepfilters.RemoveHoldTransform().transform(song_steps)
 
-    if not player.secret_kind: stepfilters.remove_secret(song_steps)
+    if not player.secret_kind:
+      song_steps = stepfilters.RemoveSecret().transform(song_steps)
 
     for words in song_steps:
 

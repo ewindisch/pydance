@@ -602,7 +602,7 @@ class SMFile(MSDFile):
                 "EZ2SINGLE": 5, "EZ2REAL": 7, "EZ2DOUBLE": 10,
                 }
 
-  step = [0, 1, 3, 1]
+  step = [0, 1, 3, 1, 5, 5]
 
   def __init__(self, filename, need_steps):
     lines = MSDFile.__init__(self, filename, need_steps)
