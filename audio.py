@@ -29,9 +29,8 @@ def play_thread():
   mf = state["mf"]
   dev = ao.AudioDevice('oss', bits = 16, rate = mf.samplerate())
   state["busy"] = True
+  state["lasttime"] = pygame.time.get_ticks()
   while not state["killed"]:
-    state["lasttime"] = pygame.time.get_ticks()
-    state["currenttime"] = state["mf"].current_time() - 400
     buffy = mf.read()
     if buffy is None: break
     dev.play(buffy, len(buffy))
@@ -52,9 +51,7 @@ def get_busy():
 
 def get_pos():
   if state["mf"]:
-    time = state["currenttime"]
-    if state["lasttime"]: time += (pygame.time.get_ticks() - state["lasttime"])
-    return time
+    return (pygame.time.get_ticks() - state["lasttime"])
   else: return pygame.mixer.music.get_pos()
 
 def stop():
