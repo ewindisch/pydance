@@ -27,11 +27,25 @@ KEYCONFIG = {
   K_DELETE: E_CLEAR
 }
 
+# Hardcode numeric pad to player 1 for now... Grah.
+P1_KEYS = {
+  K_KP7: E_UPLEFT,
+  K_KP8: E_UP,
+  K_KP9: E_UPRIGHT,
+  K_KP4: E_LEFT,
+  K_KP5: E_CENTER,
+  K_KP6: E_RIGHT,
+  K_KP1: E_DOWNLEFT,
+  K_KP2: E_DOWN,
+  K_KP3: E_DOWNRIGHT,
+  K_RETURN: E_START
+  }
+
 # 16 buttons, 4 axis
 # The EMSUSB2, one adapter, two joysticks - +16 to get p2, uses this too
 # Apparently, there are two possible start buttons, 9 and 11
-A4B16 = { 0: E_MARK, 1: E_PGUP, 2: E_UNMARK, 3: E_PGDN, 8: E_SELECT, 9: E_START,
-          15: E_LEFT, 13: E_RIGHT, 12: E_UP, 14: E_DOWN, 11: E_START }
+A4B16 = { 0: E_MARK, 1: E_PGUP, 2: E_UNMARK, 3: E_PGDN, 8: E_SELECT, 9:
+          E_START, 15: E_LEFT, 13: E_RIGHT, 12: E_UP, 14: E_DOWN, 11: E_START }
 
 
 # 6 axis, 12 button joystick (BNS parallel adapter)
@@ -129,7 +143,7 @@ class EventManager:
     self.setupKeys()
 
   def setupKeys(self):
-    keys = [{K_RETURN: E_START}, {K_2: E_START, K_KP2: E_START}]
+    keys = [P1_KEYS, {K_2: E_START, K_KP_ENTER: E_START}]
     dirs = (E_UP, E_DOWN, E_LEFT, E_RIGHT)
   
     # Keymap settings. The 'r' varieties are just swapped.

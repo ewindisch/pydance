@@ -107,93 +107,91 @@ class Blinky(pygame.sprite.Sprite):
       self.oldframe = self.frame
 
 class JudgingDisp(pygame.sprite.Sprite):
-    def __init__(self,playernum):
-        pygame.sprite.Sprite.__init__(self)
+  def __init__(self, playernum, game):
+    pygame.sprite.Sprite.__init__(self)
 
-        self.total = mainconfig['totaljudgings']
-        self.sticky = mainconfig['stickyjudge']
-        self.needsupdate = 1
-        self.playernum = playernum
-        self.stepped = 0
-        self.oldzoom = -1
+    self.sticky = mainconfig['stickyjudge']
+    self.needsupdate = 1
+    self.stepped = 0
+    self.oldzoom = -1
+    self.bottom = 320
+    self.centerx = game.sprite_center + (playernum * game.player_offset)
         
-        # prerender the text for judging for a little speed boost
-        tx = FONTS[48].size("MARVELOUS")[0]+4
-        self.marvelous = fontfx.shadefade("MARVELOUS",48,4,(tx,40),(224,224,224))
-        tx = FONTS[48].size("PERFECT")[0]+4
-        self.perfect   = fontfx.shadefade("PERFECT"  ,48,4,(tx,40),(224,224, 32))
-        tx = FONTS[48].size("GREAT")[0]+4
-        self.great     = fontfx.shadefade("GREAT"    ,48,4,(tx,40),( 32,224, 32))
-        tx = FONTS[48].size("OK")[0]+4
-        self.ok        = fontfx.shadefade("OK"       ,48,4,(tx,40),( 32, 32,224))
-        tx = FONTS[48].size("BOO")[0]+4
-        self.boo      = fontfx.shadefade("BOO"      ,48,4,(tx,40),( 96, 64, 32))
-        tx = FONTS[48].size("MISS")[0]+4
-        self.miss      = fontfx.shadefade("MISS"     ,48,4,(tx,40),(224, 32, 32))
-        self.space     = FONTS[48].render( " ",       1, (  0,   0,   0) )
+    # prerender the text for judging for a little speed boost
+    tx = FONTS[48].size("MARVELOUS")[0]+4
+    self.marvelous = fontfx.shadefade("MARVELOUS",48,4,(tx,40),(224,224,224))
+    tx = FONTS[48].size("PERFECT")[0]+4
+    self.perfect   = fontfx.shadefade("PERFECT"  ,48,4,(tx,40),(224,224, 32))
+    tx = FONTS[48].size("GREAT")[0]+4
+    self.great     = fontfx.shadefade("GREAT"    ,48,4,(tx,40),( 32,224, 32))
+    tx = FONTS[48].size("OK")[0]+4
+    self.ok        = fontfx.shadefade("OK"       ,48,4,(tx,40),( 32, 32,224))
+    tx = FONTS[48].size("BOO")[0]+4
+    self.boo      = fontfx.shadefade("BOO"      ,48,4,(tx,40),( 96, 64, 32))
+    tx = FONTS[48].size("MISS")[0]+4
+    self.miss      = fontfx.shadefade("MISS"     ,48,4,(tx,40),(224, 32, 32))
+    self.space     = FONTS[48].render( " ",       1, (  0,   0,   0) )
 
-        self.marvelous.set_colorkey(self.marvelous.get_at((0,0)),RLEACCEL)
-        self.perfect.set_colorkey(self.perfect.get_at((0,0)),RLEACCEL)
-        self.great.set_colorkey(self.great.get_at((0,0)),RLEACCEL)
-        self.ok.set_colorkey(self.ok.get_at((0,0)),RLEACCEL)
-        self.boo.set_colorkey(self.boo.get_at((0,0)),RLEACCEL)
-        self.miss.set_colorkey(self.miss.get_at((0,0)),RLEACCEL)
-
-        self.image = self.space
+    self.marvelous.set_colorkey(self.marvelous.get_at((0,0)),RLEACCEL)
+    self.perfect.set_colorkey(self.perfect.get_at((0,0)),RLEACCEL)
+    self.great.set_colorkey(self.great.get_at((0,0)),RLEACCEL)
+    self.ok.set_colorkey(self.ok.get_at((0,0)),RLEACCEL)
+    self.boo.set_colorkey(self.boo.get_at((0,0)),RLEACCEL)
+    self.miss.set_colorkey(self.miss.get_at((0,0)),RLEACCEL)
+    
+    self.image = self.space
         
-    def update(self, listnum, steptimediff, judgetype):
-      if steptimediff < 0.5 or (judgetype == ('MISS' or ' ')):
-        if   judgetype == "MARVELOUS":       self.image = self.marvelous
-        elif judgetype == "PERFECT":         self.image = self.perfect
-        elif judgetype == "GREAT":           self.image = self.great
-        elif judgetype == "OK":              self.image = self.ok
-        elif judgetype == "BOO":             self.image = self.boo
-        elif judgetype == " ":               self.image = self.space
-        elif judgetype == "MISS":            self.image = self.miss
+  def update(self, steptimediff, judgetype):
+    if steptimediff < 0.5 or (judgetype == ('MISS' or ' ')):
+      if   judgetype == "MARVELOUS":       self.image = self.marvelous
+      elif judgetype == "PERFECT":         self.image = self.perfect
+      elif judgetype == "GREAT":           self.image = self.great
+      elif judgetype == "OK":              self.image = self.ok
+      elif judgetype == "BOO":             self.image = self.boo
+      elif judgetype == " ":               self.image = self.space
+      elif judgetype == "MISS":            self.image = self.miss
 
-        zoomzoom = steptimediff
+      zoomzoom = steptimediff
 
-        if zoomzoom != self.oldzoom:
-          self.needsupdate = 1
-          if (steptimediff > 0.36) and (self.sticky == 0) and self.stepped:
-            self.image = self.space
-            self.stepped = 0
-          if listnum == 0:
-            if steptimediff > 0.2:                zoomzoom = 0.2
-            self.image = pygame.transform.rotozoom(self.image, 0, 1-(zoomzoom*2))
-            self.stepped = 1
-          else:
-            self.image = pygame.transform.rotozoom(self.image, 0, 0.6)
+      if zoomzoom != self.oldzoom:
+        self.needsupdate = True
+        if (steptimediff > 0.36) and (self.sticky == 0) and self.stepped:
+          self.image = self.space
+          self.stepped = 0
 
-      if self.needsupdate:
-        self.rect = self.image.get_rect()
-        self.image.set_colorkey(self.image.get_at((0,0)))
-        self.rect.bottom = 320+(listnum*24)
-        self.rect.centerx = 160+(self.playernum*320)
-        self.needsupdate = 0
+        if steptimediff > 0.2: zoomzoom = 0.2
+        self.image = pygame.transform.rotozoom(self.image, 0, 1-(zoomzoom*2))
+        self.stepped = 1
+
+    if self.needsupdate:
+      self.rect = self.image.get_rect()
+      self.rect.centerx = self.centerx
+      self.rect.bottom = self.bottom
+      self.image.set_colorkey(self.image.get_at((0,0)))
+      self.needsupdate = False
 
 class TimeDisp(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.oldtime = "-1000"
-        self.image = pygame.surface.Surface((1,1))
-        self.rect = self.image.get_rect()
-        self.rect.top = 25
-        self.rect.centerx = 320
-        self.blahmod = 0
+  def __init__(self):
+    pygame.sprite.Sprite.__init__(self)
+    self.oldtime = "-1000"
+    self.image = pygame.surface.Surface((1,1))
+    self.rect = self.image.get_rect()
+    self.rect.top = 0
+    self.rect.centerx = 320
+    self.blahmod = 0
         
-    def update(self, time):
-      nowtime = repr(time)[:repr(time).index('.')+3]
-      if (nowtime != self.oldtime) and (self.blahmod > 1):
-        self.image = FONTS[40].render(nowtime,1,(224,224,224))
-        self.image.set_colorkey(self.image.get_at((0,0)),RLEACCEL)
-        self.oldtime = nowtime
-        self.rect = self.image.get_rect()
-        self.rect.top = 25
-        self.rect.centerx = 320
-        self.blahmod = 0
-      else:
-        self.blahmod += 1
+  def update(self, time):
+    nowtime = repr(time)[:repr(time).index('.')+3]
+    if (nowtime != self.oldtime) and (self.blahmod > 1):
+      self.image = FONTS[40].render(nowtime,1,(224,224,224))
+      self.image.set_colorkey(self.image.get_at((0,0)),RLEACCEL)
+      self.oldtime = nowtime
+      self.rect = self.image.get_rect()
+      self.rect.top = 0
+      self.rect.centerx = 320
+      self.blahmod = 0
+    else:
+      self.blahmod += 1
 
 class ArrowSprite(SimpleSprite):
 
@@ -674,10 +672,9 @@ def dance(screen, song, players, prevscr, ready_go, game):
     players[pid].score.add(tgroup)
     players[pid].lifebar.add(tgroup)
     players[pid].holdtext.add(tgroup)
-    for i in range(mainconfig['totaljudgings']):
-      pj = JudgingDisp(pid)
-      players[pid].judging_list.append(pj)
-      pj.add(tgroup)
+    pj = JudgingDisp(pid, game)
+    players[pid].judging_list.append(pj)
+    pj.add(tgroup)
 
   strobe = mainconfig["strobe"]
   if strobe:
@@ -784,35 +781,9 @@ def dance(screen, song, players, prevscr, ready_go, game):
         players[playerID].toparr[keyPress].stepped(1, curtime+(players[playerID].steps.soffset))
         players[playerID].fx_data.append(players[playerID].judge.handle_key(keyPress, curtime) )
 
-    # This maps the old holdkey system to the new event ID one
-    # We should phase this out
-    keymap_kludge = ({"u": E_UP, "k": E_UNMARK, "z": E_PGUP,
-                      "d": E_DOWN, "l": E_LEFT, "r": E_RIGHT,
-                      "g": E_PGDN, "w": E_PGUP} )
-
     for plr in players:
-      for checkhold in game.dirs:
-        plr.toparrfx[checkhold].holding(0)
-        currenthold = plr.should_hold(checkhold, curtime)
-        dirID = game.dirs.index(checkhold)
-        if currenthold is not None:
-          if event.states[(plr.pid, keymap_kludge[checkhold])]:
-            if plr.judge.holdsub[plr.tempholding[dirID]] != -1:
-              plr.toparrfx[checkhold].holding(1)
-            plr.tempholding[dirID] = currenthold
-          else:
-            plr.judge.botchedhold(currenthold)
-            plr.holdtext.fillin(curtime, dirID, "NG")
-            botchdir, timef1, timef2 = plr.steps.holdinfo[currenthold]
-            for spr in plr.arrow_group.sprites():
-              try:
-                if (spr.timef1 == timef1) and (game.dirs.index(spr.dir) == dirID): spr.broken = 1
-              except: pass
-        else:
-          if plr.tempholding[dirID] > -1:
-            if plr.judge.holdsub[plr.tempholding[dirID]] != -1:
-              plr.tempholding[dirID] = -1
-              plr.holdtext.fillin(curtime,dirID,"OK")
+
+      plr.check_holds(curtime)
     
       if plr.evt is not None:
         # handle events that are happening now

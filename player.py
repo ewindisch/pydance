@@ -33,7 +33,7 @@ class ScoringDisp(pygame.sprite.Sprite):
       self.oldscore = score
 
 class AbstractLifeBar(pygame.sprite.Sprite):
-  def __init__(self, playernum, maxlife, songconf):
+  def __init__(self, playernum, maxlife, songconf, game):
     pygame.sprite.Sprite.__init__(self)
     self.oldlife = 0
     self.failed = False
@@ -46,7 +46,7 @@ class AbstractLifeBar(pygame.sprite.Sprite):
         
     self.rect = self.image.get_rect()
     self.rect.top = 30
-    self.rect.left = 58 + (320 * playernum)
+    self.rect.centerx = game.sprite_center + playernum * game.player_offset
 
   def failed(self):
     return self.failed
@@ -81,8 +81,8 @@ class AbstractLifeBar(pygame.sprite.Sprite):
 
 # Regular lifebar
 class LifeBarDisp(AbstractLifeBar):
-  def __init__(self, playernum, theme, songconf):
-    AbstractLifeBar.__init__(self, playernum, 100, songconf)
+  def __init__(self, playernum, theme, songconf, game):
+    AbstractLifeBar.__init__(self, playernum, 100, songconf, game)
     self.life = self.maxlife / 2
     self.displayed_life = self.life
 
@@ -114,16 +114,16 @@ class LifeBarDisp(AbstractLifeBar):
 
 # A lifebar that only goes down.
 class DropLifeBarDisp(LifeBarDisp):
-  def __init__(self, playernum, theme, songconf):
-    LifeBarDisp.__init__(self, playernum, theme, songconf)
+  def __init__(self, playernum, theme, songconf, game):
+    LifeBarDisp.__init__(self, playernum, theme, songconf, game)
     self.life = self.maxlife
     for k in self.deltas:
       if self.deltas[k] > 0: self.deltas[k] = 0
 
 # Lifebar where doing too good also fails you
 class MiddleLifeBarDisp(AbstractLifeBar):
-  def __init__(self, playernum, theme, songconf):
-    AbstractLifeBar.__init__(self, playernum, 20, songconf)
+  def __init__(self, playernum, theme, songconf, game):
+    AbstractLifeBar.__init__(self, playernum, 20, songconf, game)
     self.life = 10.0
     self.displayed_life = 10
 
@@ -158,8 +158,8 @@ class OniLifeBarDisp(AbstractLifeBar):
 
   lose_sound = pygame.mixer.Sound(os.path.join(sound_path, "loselife.ogg"))
 
-  def __init__(self, playernum, theme, songconf):
-    AbstractLifeBar.__init__(self, playernum, songconf["onilives"], songconf)
+  def __init__(self, playernum, theme, songconf, game):
+    AbstractLifeBar.__init__(self, playernum, songconf["onilives"], songconf, game)
 
     self.life = onilives
 
@@ -212,7 +212,7 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
     elif player.scrollstyle == 1: self.rect.top = 400
     else: self.rect.top = 56
 
-    self.rect.left = self.game.left_off + (320 * player.pid)
+    self.rect.centerx = game.sprite_center + player.pid * game.player_offset
 
     self.slotnow = [''] * len(game.dirs)
     self.slotold = list(self.slotnow)
@@ -237,13 +237,13 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
         self.slotold[i] = self.slotnow[i]
 
 class ComboDisp(pygame.sprite.Sprite):
-  def __init__(self,playernum):
-    pygame.sprite.Sprite.__init__(self)
+  def __init__(self, playernum, game):
+    pygame.sprite.Sprite.__init__(self,)
     self.sticky = mainconfig['stickycombo']
     self.lowcombo = mainconfig['lowestcombo']
 
-    self.trect = 296 + (mainconfig['totaljudgings'] * 24)
-    self.centerx = (320*playernum) + 160
+    self.centerx = game.sprite_center + (game.player_offset * playernum)
+    self.top = 320
     
     fonts = []
     for x in range(11, 0, -1):
@@ -264,17 +264,17 @@ class ComboDisp(pygame.sprite.Sprite):
       self.words.append(render)
     self.space = pygame.surface.Surface((0,0)) #make a blank image
     self.image = self.space
-    self.rect = Rect(0,0,0,0)
 
   def update(self, xcombo, steptimediff):
     if steptimediff < 0.36 or self.sticky:
       self.drawcount = xcombo
-      self.drawsize = min(int(steptimediff*50), len(self.words)-1)
-      if self.drawsize < 0: self.drawsize = 0
+      drawsize = min(int(steptimediff*50), len(self.words)-1)
+      if drawsize < 0: drawsize = 0
     else:
       self.drawcount = 0
+
     if self.drawcount >= self.lowcombo:
-      render = self.words[self.drawsize]
+      render = self.words[drawsize]
       width = render[-1].get_width()
       thousands = self.drawcount /1000
       hundreds = self.drawcount / 100
@@ -309,11 +309,12 @@ class ComboDisp(pygame.sprite.Sprite):
       self.image.blit(ones, (left, 0))
       left += ones.get_width()
       r = self.image.blit(render[-1], (left, 0))
-      self.rect = self.image.get_rect()
-      self.rect.top=self.trect
-      self.rect.left=self.centerx - width/ 2
     else :
       self.image = self.space #display the blank image
+
+    self.rect = self.image.get_rect()
+    self.rect.top = self.top
+    self.rect.centerx = self.centerx
 
 class Player:
 
@@ -331,12 +332,11 @@ class Player:
     
     self.score = ScoringDisp(pid, "Player " + str(pid), game)
     self.lifebar = Player.lifebars[songconf["lifebar"]](pid, self.theme,
-                                                        songconf)
+                                                        songconf, game)
     self.holdtext = HoldJudgeDisp(self, game)
     self.judging_list = []
-    self.total_judgings = mainconfig['totaljudgings']
     self.tempholding = [-1] * len(game.dirs)
-    self.combos = ComboDisp(pid)
+    self.combos = ComboDisp(pid, game)
     self.judge = None
     self.steps = None
     self.holds = None
@@ -383,9 +383,10 @@ class Player:
   def combo_update(self, curtime):
     self.combos.update(self.judge.combo, curtime - self.judge.steppedtime)
     self.score.update(self.judge.score)
-    for i in range(self.total_judgings):
-      self.judging_list[i].update(i, curtime - self.judge.steppedtime,
-                                  self.judge.recentsteps[i])
+    i = 0
+    for j in self.judging_list:
+      j.update(curtime - self.judge.steppedtime, self.judge.recentsteps[i])
+      i += 1
     self.lifebar.update(self.judge)
     self.holdtext.update(curtime)
     
@@ -415,3 +416,35 @@ class Player:
         if ((curtime - 15.0/self.steps.playingbpm > l[i][1])
             and (curtime < l[i][2])):
           return i
+
+  def check_holds(self, curtime):
+    # FIXME THis needs to go away
+    keymap_kludge = ({"u": E_UP, "k": E_UPLEFT, "z": E_UPRIGHT,
+                      "d": E_DOWN, "l": E_LEFT, "r": E_RIGHT,
+                      "g": E_DOWNRIGHT, "w": E_DOWNLEFT} )
+
+    for dir in self.game.dirs:
+      self.toparrfx[dir].holding(0)
+      current_hold = self.should_hold(dir, curtime)
+      dir_idx = self.game.dirs.index(dir)
+      if current_hold is not None:
+        if event.states[(self.pid, keymap_kludge[dir])]:
+          if self.judge.holdsub[self.tempholding[dir_idx]] != -1:
+            self.toparrfx[dir].holding(1)
+          self.tempholding[dir_idx] = current_hold
+        else:
+          self.judge.botchedhold(current_hold)
+          self.holdtext.fillin(curtime, dir_idx, "NG")
+          botchdir, timef1, timef2 = self.steps.holdinfo[current_hold]
+          for spr in self.arrow_group.sprites():
+            # FIXME This is insanely slow
+            try:
+              if spr.timef1 == timef1 and self.game.dirs.index(spr.dir) == dir_idx:
+                spr.broken = True
+                break
+            except: pass
+      else:
+        if self.tempholding[dir_idx] > -1:
+          if self.judge.holdsub[self.tempholding[dir_idx]] != -1:
+            self.tempholding[dir_idx] = -1
+            self.holdtext.fillin(curtime, dir_idx, "OK")
