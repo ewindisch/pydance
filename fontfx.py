@@ -11,6 +11,7 @@
 #  screen.blit(asdf,asdfpos)
 
 import pygame, pygame.font
+import random
 from pygame.locals import *
 
 # SINKBLUR - sinking "motion blur" effect (middle is brightest)
@@ -65,3 +66,53 @@ def shadefade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
     displaysurface.blit(text, (camt,camt))
   return displaysurface
 
+# Zoom and rotate text randomly
+class TextZoomer:
+  def __init__(self,text,r,g,b):
+    self.zf = pygame.font.Font(None,60)
+    self.zoomsurface = pygame.surface.Surface((640,64))
+    self.tempsurface = pygame.surface.Surface((640,64))
+    self.r = r
+    self.g = g
+    self.b = b
+
+    self.zoomtext = text
+    self.reset()
+
+  def changetext(self,text):
+    if text:
+      self.zoomtext = text
+      self.textrendered = 0
+
+  def reset(self):
+    self.mrangle = 0
+    self.textrendered = 0
+
+  def iterate(self):
+    colortochange = random.randint(0,333) % 4
+    colordiff = (random.random()*8) - 4
+    if colortochange == 0:
+      if 255 > (self.r + colordiff) > 0:
+        self.r += colordiff
+    if colortochange == 1:
+      if 255 > (self.g + colordiff) > 0:
+        self.g += colordiff
+    if colortochange == 2:
+      if 255 > (self.b + colordiff) > 0:
+        self.b += colordiff
+
+    self.mrangle += 1
+
+    self.zoomsurface = pygame.transform.scale(self.tempsurface,(656,72))
+    self.zoomsurface = pygame.transform.rotate(self.zoomsurface,self.mrangle)
+    self.zoomsurface.set_alpha(48)
+    zsrect = self.zoomsurface.get_rect()
+    zsrect.centerx = 320
+    zsrect.centery = 32
+    self.tempsurface.blit(self.zoomsurface,zsrect)
+    self.textrendered = 0
+    if not self.textrendered:
+      self.text = self.zf.render(self.zoomtext,1,(self.r,self.g,self.b))
+      self.trect = self.text.get_rect()
+      self.textrendered = 1
+    self.tempsurface.blit(self.text,(320-(self.trect.size[0]/2),32-(self.trect.size[1]/2)))
