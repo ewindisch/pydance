@@ -3,9 +3,7 @@ import os, stat, util
 # FIXME: DanceFile and StepFile can easily share a parent class.
 # FIXME: This file needs major refactoring and cleanups
 
-class DanceFile:
-  WAITING, METADATA, DESCRIPTION, LYRICS, GAMETYPE, STEPS = range(6)
-
+class GenericFile:
   def __init__(self, filename, need_steps):
     self.filename = filename
     self.difficulty = {}
@@ -14,6 +12,119 @@ class DanceFile:
     self.lyrics = []
     self.description = None
     self.need_steps = need_steps
+
+  def strip_line(self, line):
+    try:
+      i = line.index(self.comment)
+      line = line[0:i]
+    except ValueError: pass
+    return line.strip()
+
+  def find_subtitle(self):
+    if not self.info.has_key("subtitle"):
+      for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
+        if pair[0] in self.info["title"] and self.info["title"][-1] == pair[1]:
+          l = self.info["title"].index(pair[0])
+          r = self.info["title"].rindex(pair[1])
+          if l != 0 and r > l + 1:
+            self.info["subtitle"] = self.info["title"][l+1:r]
+            self.info["title"] = self.info["title"][:l]
+            break
+
+  def find_mixname(self):
+    dir, name = os.path.split(self.filename)
+    mixname = os.path.split(os.path.split(dir)[0])[1]
+    if mixname != "songs": self.info["mix"] = mixname
+
+  def find_files_insanely(self):
+    dir, name = os.path.split(self.filename)
+    largefile = 10240 # Oh crap, I hate DWI. Shoot me now.
+    found_bg = False
+    found_ban = False
+    if dir == "": dir = os.path.realpath(".")
+    for file in os.listdir(dir):
+      lfile = file.lower()
+      # SimWolf should be indicted for some sort of programming crime
+      # for making me write all the code below this.
+      fullfile = os.path.join(dir, file)
+      if lfile[-3:] == "mp3" and not self.info.has_key("filename"):
+        self.info["filename"] = fullfile
+      elif lfile[-3:] == "ogg"  and not self.info.has_key("filename"):
+        self.info["filename"] = fullfile
+      elif lfile[-3:] == "lrc":
+        self.parse_lyrics(fullfile)
+      elif lfile[-3:] == "jpg" or lfile[-3:] == "png":
+        size = os.stat(fullfile).st_size
+        try:
+          lfile.index("bg")
+          found_bg = True
+          largefile = max(largefile, size)
+          if self.info.has_key("background") and not found_ban:
+            self.info["banner"] = self.info["background"]
+          self.info["background"] = fullfile
+        except ValueError:
+          try:
+            lfile.index("ban")
+            found_ban = True
+            largefile = max(largefile, size)
+            self.info["banner"] = fullfile
+          except ValueError:
+            if size > largefile and not found_bg:
+              largefile = size
+              if self.info.has_key("background"):
+                self.info["banner"] = self.info["background"]
+              self.info["background"] = fullfile
+            else:
+              self.info["banner"] = fullfile
+    if (self.info.get("banner") == self.info.get("background") and
+        self.info.has_key("banner")):
+      del(self.info["banner"])
+
+  # Fucking braindead file format
+  # Fucking braindead DWI writers
+  def parse_time(self, string):
+    offset = 0
+    time = 0
+    if string[0] == "+":
+      string = string[1:]
+      offset = self.info["gap"]
+    if ":" in string:
+      parts = string.split(":")
+      if len(parts) == 2: time = 60 * int(parts[0]) + float(parts[1])
+      elif len(parts) == 3:
+        time = int(parts[0]) + float(parts[1]) + float(parts[2]) / 100
+    elif "." in string: time = float(string)
+    else: time = int(string) / 1000.0
+    return offset + time
+
+  def parse_lyrics(self, filename):
+    f = open(filename)
+    offset = 0
+    for line in f:
+      line = line.strip()
+      if line[1:7] == "offset": offset = float(line[8:-1]) / 1000.0
+      if len(line) > 2 and line[1] in "0123456789":
+        time = self.parse_time(line[1:line.index("]")])
+        lyr = line[line.index("]") + 1:].split("|")
+        lyr.reverse()
+        for i in range(len(lyr)):
+          if lyr[i] is not "": self.lyrics.append((time, i, lyr[i]))
+
+  def resolve_files_sanely(self):
+    dir, name = os.path.split(self.filename)
+    for t in ("banner", "filename", "movie", "background"):
+      if self.info.has_key(t):
+        if not os.path.isfile(self.info[t]):
+          self.info[t] = os.path.join(dir, self.info[t])
+          if not os.path.isfile(self.info[t]): del(self.info[t])
+
+
+class DanceFile(GenericFile):
+  WAITING, METADATA, DESCRIPTION, LYRICS, GAMETYPE, STEPS = range(6)
+
+  def __init__(self, filename, need_steps):
+    GenericFile.__init__(self, filename, need_steps)
+    self.comment = "#"
 
     parsers = [self.parse_waiting, self.parse_metadata, self.parse_description,
                self.parse_lyrics, self.parse_gametype, self.parse_steps]
@@ -29,13 +140,7 @@ class DanceFile:
       elif line == "end": state = DanceFile.WAITING
       else: state = parsers[state](line, state_data)
 
-    dir, name = os.path.split(filename)
-
-    for t in ("banner", "filename", "movie", "background"):
-      if self.info.has_key(t):
-        if not os.path.isfile(self.info[t]):
-          self.info[t] = os.path.join(dir, self.info[t])
-          if not os.path.isfile(self.info[t]): del(self.info[t])
+    self.resolve_files_sanely()
 
     if self.info.has_key("preview"):
       start, length = self.info["preview"].split()
@@ -88,7 +193,7 @@ class DanceFile:
 
     return DanceFile.DESCRIPTION
 
-class StepFile: 
+class StepFile(GenericFile):
   METADATA, GAMETYPE, LYRICS, STEPS, WAITING = range(5)
   word_trans = { "whole": "o", "halfn": "h", "qurtr": "q", "eight": "e",
                  "tripl": "w", "steps": "s", "twtfr": "f", "thrty": "t",
@@ -97,11 +202,9 @@ class StepFile:
                  "00": 0, "08": 1, "88": 3, "80": 2 }
 
   def __init__(self, filename, need_steps):
-    self.filename = filename
-    self.steps = {}
-    self.difficulty = {}
-    self.info = {}
-    self.lyrics = []
+    GenericFile.__init__(self, filename, need_steps)
+    self.comment = "#"
+
     f = open(filename)
     # parser states
     state = StepFile.METADATA
@@ -112,53 +215,33 @@ class StepFile:
     if not need_steps: parsers[StepFile.STEPS] = self.parse_dummy_steps
 
     for line in f:
-      line = line.strip()
-      if line == "" or line[0] == "#": continue
-      else: state, state_data = parsers[state](line, state_data)
+      line = self.strip_line(line)
+      if line != "": state, state_data = parsers[state](line, state_data)
 
-    dir, name = os.path.split(filename)
+    for old, new in (("song", "title"), ("group", "artist"),
+                     ("offset", "gap"), ("bg", "background")):
+      if self.info.has_key(old):
+        self.info[new] = self.info[old]
+        del(self.info[old])
 
+    self.info["gap"] = int(self.info.get("gap", 0))
+    self.info["bpm"] = float(self.info["bpm"])
+
+    if self.info.has_key("version"): del(self.info["version"])
+
+    self.resolve_files_sanely()
+
+    dir, name = os.path.split(self.filename)
     for t in (("banner", ".png"), ("banner", "-full.png"),
-              ("bg", "-bg.png"), ("file", ".ogg"),
-              ("file", ".mp3"), ("movie", ".mpg")):
-      if self.info.has_key(t[0]):
-        if not os.path.isfile(self.info[t[0]]):
-          self.info[t[0]] = os.path.join(dir, self.info[t[0]])
-          if not os.path.isfile(self.info[t[0]]): del(self.info[t[0]])
+              ("bg", "-bg.png"), ("filename", ".ogg"),
+              ("filename", ".mp3"), ("movie", ".mpg")):
       if not self.info.has_key(t[0]):
         possible = os.path.join(dir, name.replace(".step", t[1]))
         possible = os.path.realpath(possible)
         if os.path.isfile(possible): self.info[t[0]] = possible
 
-    self.info["title"] = self.info["song"]
-    self.info["artist"] = self.info["group"]
-    self.info["filename"] = self.info["file"]
-    self.info["gap"] = int(self.info.get("offset", 0))
-    self.info["bpm"] = float(self.info["bpm"])
-    del(self.info["song"])
-    del(self.info["group"])
-    del(self.info["file"])
-    del(self.info["offset"])
-
-    if self.info.has_key("version"): del(self.info["version"])
-
-    if self.info.has_key("bg"):
-      self.info["background"] = self.info["bg"]
-      del(self.info["bg"])
-
     self.find_subtitle()
     self.description = None
-
-  def find_subtitle(self):
-    if not self.info.has_key("subtitle"):
-      for pair in (("[", "]"), ("(", ")"), ("~", "~")):
-        if pair[0] in self.info["title"] and pair[1] in self.info["title"]:
-          l = self.info["title"].index(pair[0])
-          r = self.info["title"].rindex(pair[1])
-          if l != 0 and r > l + 1:
-            self.info["subtitle"] = self.info["title"][l+1:r]
-            self.info["title"] = self.info["title"][:l]
-            break
 
   def parse_metadata(self, line, data):
     if line == "LYRICS": return StepFile.LYRICS, [None, None]
@@ -224,7 +307,7 @@ class StepFile:
       if not self.difficulty.has_key(data[0]): self.difficulty[data[0]] = {}
       return StepFile.GAMETYPE, data
 
-class DWIFile:
+class DWIFile(GenericFile):
   modes = { "{": "x", "[": "f", "(": "s", "`": "n",
             "'": "n", ")": "e", "]": "e", "}": "e" }
   times = { "x": 0.25, "f": 2.0/3.0, "s": 1.0, "e": 2.0, "n": 1/12.0 }
@@ -243,12 +326,8 @@ class DWIFile:
     }
 
   def __init__(self, filename, need_steps):
-    self.filename = filename
-    self.description = None
-    self.lyrics = []
-    self.steps = {}
-    self.difficulty = {}
-    self.info = {}
+    GenericFile.__init__(self, filename, need_steps)
+    self.comment = "//"
 
     self.bpms = []
     self.freezes = []
@@ -293,109 +372,22 @@ class DWIFile:
             beat, wait = change.split("=")
             self.freezes.append((float(beat), float(wait)/1000.0))
 
-    dir, name = os.path.split(filename)
-    largefile = 10240 # Oh crap, I hate DWI. Shoot me now.
-    found_bg = False
-    if dir == "": dir = os.path.realpath(".")
-    for file in os.listdir(dir):
-      lfile = file.lower()
-      # SimWolf should be indicted for some sort of programming crime
-      # for making me write all the code below this.
-      fullfile = os.path.join(dir, file)
-      if lfile[-3:] == "mp3" and not self.info.has_key("filename"):
-        self.info["filename"] = fullfile
-      elif lfile[-3:] == "ogg":
-        self.info["filename"] = fullfile
-      elif lfile[-3:] == "lrc":
-        self.parse_lyrics(fullfile)
-      elif lfile[-3:] == "jpg" or lfile[-3:] == "png":
-        size = os.stat(fullfile).st_size
-        try:
-          lfile.index("bg")
-          found_bg = True
-          largefile = max(largefile, size)
-          if self.info.has_key("background"):
-            self.info["banner"] = self.info["background"]
-          self.info["background"] = fullfile
-        except ValueError:
-          try:
-            lfile.index("ban")
-            largefile = max(largefile, size)
-            self.info["banner"] = fullfile
-          except ValueError:
-            if size > largefile and not found_bg:
-              largefile = size
-              if self.info.has_key("background"):
-                self.info["banner"] = self.info["background"]
-              self.info["background"] = fullfile
-            else: self.info["banner"] = fullfile
+    self.find_mixname()
+    self.find_files_insanely()
+    self.find_subtitle()
 
-      self.find_subtitle()
+    for key in ("title", "subtitle", "artist", "mix"):
+      if self.info.has_key(key):
+        self.info[key] = util.titlecase(self.info[key])
 
-      mixname = os.path.split(os.path.split(dir)[0])[1]
-      if mixname != "songs": self.info["mix"] = mixname
-
-      for key in ("title", "subtitle", "artist", "mix"):
-        if self.info.has_key(key):
-          self.info[key] = util.titlecase(self.info[key])
-
-      for game in self.difficulty:
-        for odiff, ndiff in (("ANOTHER", "TRICK"), ("SMANIAC", "HARDCORE")):
-          if self.difficulty[game].has_key(odiff):
-            self.difficulty[game][ndiff] = self.difficulty[game][odiff]
-            del(self.difficulty[game][odiff])
-            if need_steps:
-              self.steps[game][ndiff] = self.steps[game][odiff]
-              del(self.steps[game][odiff])
-
-  def strip_line(self, line):
-    try:
-      i = line.index("//")
-      line = line[0:i]
-    except ValueError: pass
-    return line.strip()
-
-  # Fucking braindead file format
-  # Fucking braindead DWI writers
-  def parse_time(self, string):
-    offset = 0
-    time = 0
-    if string[0] == "+":
-      string = string[1:]
-      offset = self.info["gap"]
-    if ":" in string:
-      parts = string.split(":")
-      if len(parts) == 2: time = 60 * int(parts[0]) + float(parts[1])
-      elif len(parts) == 3:
-        time = int(parts[0]) + float(parts[1]) + float(parts[2]) / 100
-    elif "." in string: time = float(string)
-    else: time = int(string) / 1000.0
-    return offset + time
-
-  def parse_lyrics(self, filename):
-    f = open(filename)
-    offset = 0
-    for line in f:
-      line = line.strip()
-      if line[1:7] == "offset": offset = float(line[8:-1]) / 1000.0
-      if len(line) > 2 and line[1] in "0123456789":
-        time = self.parse_time(line[1:line.index("]")])
-        lyr = line[line.index("]") + 1:].split("|")
-        lyr.reverse()
-        for i in range(len(lyr)):
-          if lyr[i] is not "": self.lyrics.append((time, i, lyr[i]))
-
-  # FIXME We share this with StepFile...
-  def find_subtitle(self):
-    if not self.info.has_key("subtitle"):
-      for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
-        if pair[0] in self.info["title"] and pair[1] == self.info["title"][-1]:
-          l = self.info["title"].index(pair[0])
-          r = self.info["title"].rindex(pair[1])
-          if l != 0 and r > l + 1:
-            self.info["subtitle"] = self.info["title"][l+1:r]
-            self.info["title"] = self.info["title"][:l]
-            break
+    for game in self.difficulty:
+      for odiff, ndiff in (("ANOTHER", "TRICK"), ("SMANIAC", "HARDCORE")):
+        if self.difficulty[game].has_key(odiff):
+          self.difficulty[game][ndiff] = self.difficulty[game][odiff]
+          del(self.difficulty[game][odiff])
+          if need_steps:
+            self.steps[game][ndiff] = self.steps[game][odiff]
+            del(self.steps[game][odiff])
 
   def parse_steps(self, mode, diff, steps):
     step_type = "e"
@@ -428,38 +420,19 @@ class DWIFile:
       elif steps[0] == " ": steps.pop(0)
       else: steps.pop(0)
 
-class SMFile:
+class SMFile(GenericFile):
 
-  gametypes = { "dance-single": "SINGLE",
-                "dance-double": "DOUBLE",
+  gametypes = { "dance-single": "SINGLE", "dance-double": "DOUBLE",
                 "dance-couple": "COUPLE" }
-
-  notecount = { "SINGLE": 4,
-                "DOUBLE": 8,
-                "COUPLE": 8 }
-
-  notetypes = {
-    192: "n",
-    64: "x",
-    48: "u",
-    32: "t",
-    24: "f",
-    16: "s",
-    12: "w",
-    8: "e",
-    4: "q",
-    2: "h",
-    1: "o" }
+  notecount = { "SINGLE": 4, "DOUBLE": 8, "COUPLE": 8 }
+  notetypes = { 192: "n", 64: "x", 48: "u", 32: "t", 24: "f",
+                16: "s", 12: "w", 8: "e", 4: "q", 2: "h", 1: "o" }
 
   step = [0, 1, 3, 1]
 
   def __init__(self, filename, need_steps):
-    self.filename = filename
-    self.description = None
-    self.lyrics = []
-    self.steps = {}
-    self.difficulty = {}
-    self.info = {}
+    GenericFile.__init__(self, filename, need_steps)
+    self.comment = "//"
 
     self.bpms = []
     self.freezes = []
@@ -508,28 +481,15 @@ class SMFile:
         if need_steps:
           self.steps[game][parts[2].upper()] = self.parse_steps(parts[6], game)
 
-    dir, name = os.path.split(filename)
-    for t in ("banner", "filename", "movie", "background"):
-      if self.info.has_key(t):
-        if not os.path.isfile(self.info[t]):
-          self.info[t] = os.path.join(dir, self.info[t])
-          if not os.path.isfile(self.info[t]): del(self.info[t])
-
     self.find_subtitle()
-          
-    mixname = os.path.split(os.path.split(dir)[0])[1]
-    if mixname != "songs": self.info["mix"] = mixname
-
-  def find_subtitle(self):
-    if not self.info.has_key("subtitle"):
-      for pair in (("[", "]"), ("(", ")"), ("~", "~")):
-        if pair[0] in self.info["title"] and pair[1] in self.info["title"]:
-          l = self.info["title"].index(pair[0])
-          r = self.info["title"].rindex(pair[1])
-          if l != 0 and r > l + 1:
-            self.info["subtitle"] = self.info["title"][l+1:r]
-            self.info["title"] = self.info["title"][:l]
-            break
+    self.find_mixname()
+    for k in ("banner", "background", "filename"):
+      if not os.path.isfile(self.info.get(k, "")):
+        del(self.info[k])
+    
+    if not (self.info.has_key("background") or self.info.has_key("banner")):
+      self.find_files_insanely()
+    self.resolve_files_sanely()
 
   def parse_steps(self, steps, gametype):
     stepdata = []
@@ -559,13 +519,6 @@ class SMFile:
             freezeidx += 1
 
     return stepdata
-
-  def strip_line(self, line):
-    try:
-      i = line.index("//")
-      line = line[0:i]
-    except ValueError: pass
-    return line.strip()
 
 formats = ((".step", StepFile),
            (".dance", DanceFile),
