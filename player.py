@@ -362,7 +362,7 @@ class Player(object):
       if (rating == "V" or rating == "P" or rating == "G"):
         for spr in arrows.sprites():
           if spr.endtime == time and spr.dir == dir:
-            if spr.hold: spr.broken = 0
+            if spr.hold: spr.broken = False
             else: spr.kill()
 
     arrows.update(curtime, self.bpm, steps.lastbpmchangetime)

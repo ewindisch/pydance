@@ -188,15 +188,18 @@ class HoldArrowSprite(AbstractArrow):
     self.timef2 = times[2]
     if self.timef2 is None: self.timef2 = self.timef1
 
-    self.broken = 1
-    self.oimage = pygame.surface.Surface((self.width, self.width / 2))
-    self.oimage.blit(self.image, (0, -self.width / 2))
-    self.oimage.set_colorkey(self.oimage.get_at((0,0)), RLEACCEL)
-    self.oimage2 = pygame.surface.Surface((self.width, self.width / 2))
-    self.oimage2.blit(self.image, (0,0))
-    self.oimage2.set_colorkey(self.oimage.get_at((0,0)), RLEACCEL)
-    self.baseimage = pygame.surface.Surface((self.width, 1))
-    self.baseimage.blit(self.image,(0,-self.width / 2 + 1))
+    self.broken = True
+
+    self.top_image = pygame.surface.Surface([self.width, self.width / 2])
+    self.top_image.blit(self.image, [0, 0])
+    self.top_image.set_colorkey(self.top_image.get_at([0, 0]), RLEACCEL)
+
+    self.bottom_image = pygame.surface.Surface([self.width, self.width / 2])
+    self.bottom_image.blit(self.image, [0, -self.width / 2])
+    self.bottom_image.set_colorkey(self.bottom_image.get_at([0, 0]), RLEACCEL)
+
+    self.center_image = pygame.surface.Surface([self.width, 1])
+    self.center_image.blit(self.image, [0, -self.width / 2 + 1])
 
   def update(self, curtime, curbpm, lbct):
     AbstractArrow.update(self, curtime, curbpm, lbct)
@@ -236,15 +239,13 @@ class HoldArrowSprite(AbstractArrow):
     
     holdsize = abs(bottom - top)
     if holdsize < 0: holdsize = 0
-    image = pygame.Surface((self.width, holdsize + 64))
-    image.blit(pygame.transform.scale(self.baseimage,
-                                      (self.width, holdsize)),
-                     (0, self.width / 2))
-    image.blit(self.oimage2,(0,0))
-    image.blit(self.oimage,(0, holdsize + self.width / 2))
+    image = pygame.Surface([self.width, holdsize + 64])
+    h_img = pygame.transform.scale(self.center_image, [self.width, holdsize])
+    image.blit(h_img, [0, self.width / 2])
+    image.blit(self.top_image, [0, 0])
+    image.blit(self.bottom_image, [0, holdsize + self.width / 2])
 
     self.rect, self.image = self.scale_spin_battle(image, top, pct)
-
 
     alp = 256
     if self.top < self.bottom: 
