@@ -295,6 +295,7 @@ class DWIFile:
     dir, name = os.path.split(filename)
     largefile = 10240 # Oh crap, I hate DWI. Shoot me now.
     found_bg = False
+    if dir == "": dir = "."
     for file in os.listdir(dir):
       lfile = file.lower()
       # SimWolf should be indicted for some sort of programming crime
