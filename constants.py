@@ -8,10 +8,12 @@ import games
 import sys
 import os
 import colors
+import locale
 
 from pygame.locals import *
 
 VERSION = "0.9.0"
+locale.setlocale(locale.LC_ALL, '')
 
 # Detect the name of the OS - Mac OS X is not really UNIX.
 osname = None

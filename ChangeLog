@@ -7,6 +7,9 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
+0.9.1 -
+* Don't crash sometimes on slower systems when failing.
+
 0.9.0 - Great Three-Toed Sloth of Ice Planet Hoth!		[2004.02.02]
 + "Click only" assist tick.
 + New grading screen... with groove graph!

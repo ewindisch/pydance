@@ -5,6 +5,7 @@ import announcer
 import colors
 import fontfx
 import ui
+import locale
 
 from interface import *
 from constants import *
@@ -117,7 +118,8 @@ class StatSprite(pygame.sprite.Sprite):
     rt = self._title.get_rect()
     rt.midleft = [0, self._size[1] / 2]
     self.image.blit(self._title, rt)
-    cnt = fontfx.shadow(str(self._curcount), 28, colors.WHITE)
+    cnt = fontfx.shadow(locale.format("%d", self._curcount, True), 28,
+                        colors.WHITE)
     rc = cnt.get_rect()
     rc.midright = [self._size[0] - 1, self._size[1] / 2]
     self.image.blit(cnt, rc)
