@@ -10,6 +10,7 @@
 import pygame
 from constants import *
 
+from util import ErrorMessage, toRealTime
 from announcer import Announcer
 from config import Config
 from gfxtheme import GFXTheme
@@ -899,11 +900,7 @@ def main():
   pygame.mouse.set_visible(0)
 
   pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
-  try:
-    pygame.mixer.music.play(4, 0.0)
-  except TypeError:
-    print "Sorry, pyDDR needs a more up to date Pygame or SDL than you have."
-    sys.exit()
+  pygame.mixer.music.play(4, 0.0)
 
   background = BlankSprite(screen.get_size())
 
@@ -922,7 +919,13 @@ def main():
   while ev[1] != E_PASS: ev = event.poll()
 
   if len(songs) < 1:
-    print "You don't have any songs, and you need one. Go to http://icculus.org/pyddr/"
+    ErrorMessage(screen, ("You don't have any songs or step files. Check out",
+                          "http://icculus.org/pyddr/get.php",
+                          "and download some free ones."
+                          " ", " ", " ",
+                          "If you already have some, make sure they're in",
+                          songdir))
+    print "You don't have any songs. http://icculus.org/pyddr/get.php."
     sys.exit(1)
 
   menudriver.do(screen, (songs, screen, playSequence))
@@ -1127,51 +1130,14 @@ def dance(song, players, prevscr):
   song.init()
 
   if song.crapout != 0:
-    font = None
-    text = None
-    text = FONTS[192].render('ERROR!', 1, (48,48,48))
-    textpos = text.get_rect()
-    textpos.centerx = 320
-    textpos.centery = 240
-    screen.blit(text, textpos)
-
-    font = None
-    text = None
-
-    if song.crapout == 1:
-      text = FONTS[32].render("The type of music file this song is in isn't recognised", 1, (224,224,224))
-    elif song.crapout == 2:
-      text = FONTS[32].render("The music file ("+song.file+") for this song wasn't found", 1, (224,224,224))
-
-    text.set_colorkey(text.get_at((0,0)))
-    textpos = text.get_rect()
-    textpos.centerx = 320
-    textpos.centery = 216
-    screen.blit(text, textpos)
-
-    text = FONTS[32].render("Press ENTER", 1, (160,160,160))
-    text.set_colorkey(text.get_at((0,0)))
-    textpos = text.get_rect()
-    textpos.centerx = 320
-    textpos.centery = 264
-    screen.blit(text, textpos)
-
-    pygame.display.flip()
-
-    while 1:
-      ev = event.poll()
-      if ev[1] == E_START or ev[1] == E_QUIT: break
-      pygame.time.wait(50)
-    
-    print "Unable to play this song."
-    return 0 #player didn't fail, so return 0 here.
+    ErrorMessage(screen, ["The audio file for this song", song.file,
+                          "could not be found."])
+    return False # The player didn't fail.
   
   screenshot = 0
 
-  if mainconfig['assist']:
-    pygame.mixer.music.set_volume(0.6)
-  else:
-    pygame.mixer.music.set_volume(1.0)
+  if mainconfig['assist']: pygame.mixer.music.set_volume(0.6)
+  else: pygame.mixer.music.set_volume(1.0)
 
   if (mainconfig['strobe']):
     extbox = Blinky(song.bpm)

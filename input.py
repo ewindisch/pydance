@@ -187,3 +187,10 @@ class EventManager:
       v = (0, E_PASS)
 
     return v
+
+  def wait(self, delay = 10):
+    ev = (0, E_PASS)
+    while ev[1] == E_PASS:
+      ev = self.poll()
+      pygame.time.wait(delay)
+    return ev

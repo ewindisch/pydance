@@ -5,6 +5,7 @@ import dircache, os
 
 from constants import *
 from spritelib import *
+from util import toRealTime
 
 class GFXTheme:
   def themes(cls, imgtype = "png"):

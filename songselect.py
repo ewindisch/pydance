@@ -402,10 +402,10 @@ class SongSelect:
 
       self.render(changed, all_changed)
 
-      pygame.time.delay(30)
+      pygame.time.wait(30)
 
     pygame.mixer.music.fadeout(500)
-    pygame.time.delay(500)
+    pygame.time.wait(500)
     # FIXME Does this belong in the menu code? Probably.
     pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
     pygame.mixer.music.set_volume(1.0)

@@ -1,6 +1,6 @@
 # Support for endless song playing!
 
-import random, copy, colors, fontfx, gradescreen
+import random, copy, colors, fontfx, gradescreen, util
 from constants import *
 
 RESOLUTION = (640, 480)
@@ -44,19 +44,24 @@ class Constraint:
 
 # Generate a playlist forever
 class FakePlaylist:
-  def __init__(self, songs, constraints, mode = "SINGLE"):
+  def __init__(self, songs, constraints, screen, mode = "SINGLE"):
     self.songs = [s for s in songs if check_constraints(constraints,
                                                         s.difficulty[mode])]
     self.working = []
     self.mode = mode
     self.constraints = constraints
     self.numplayers = len(constraints)
+    self.screen = screen
 
   def __iter__(self):
     return self
 
   def next(self):
-    if len(self.songs) == 0: raise StopIteration
+    if len(self.songs) == 0:
+      util.ErrorMessage(self.screen,
+                        ("The difficulty settings you chose result",
+                         "in no songs being available to play."))
+      raise StopIteration
     elif len(self.working) == 0: self.working = copy.copy(self.songs)
     i = random.randint(0, len(self.working) - 1)
     song = self.working[i]
@@ -78,11 +83,17 @@ class Endless:
           else: diff_count[d] = True
 
     diffs.sort(python_sucks_sort)
+
+    if len(diffs) == 0:
+      util.ErrorMessage(screen, ("You need more songs to play Endless Mode.",
+                                 "Otherwise, it's just really boring."))
+
     mainconfig["autofail"] = 1
 
     self.constraints = [Constraint()]
     self.bg = pygame.image.load(BACKGROUND)
     self.screen = screen
+    self.firsttime = True
 
     pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
     pygame.mixer.music.play(4, 0.0)
@@ -92,12 +103,12 @@ class Endless:
     ev = (0, E_PASS)
 
     while ev[1] != E_QUIT:
-      ev = event.poll()
+      ev = event.wait()
 
       # Start game
       if ev[0] == 0 and ev[1] == E_START:
         playSequence(len(self.constraints),
-                     FakePlaylist(songitems, self.constraints))
+                     FakePlaylist(songitems, self.constraints, screen))
 
         pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
         pygame.mixer.music.play(4, 0.0)
@@ -115,10 +126,10 @@ class Endless:
       # Ignore unknown events
       elif ev[0] >= len(self.constraints): pass
 
-      elif ev[1] == E_LEFT:
+      elif ev[1] == E_LEFT and self.constraints[ev[0]].kind != "name":
         self.constraints[ev[0]].kind = "name"
-        self.constraints[ev[0]].value = "BASIC"
-      elif ev[1] == E_RIGHT:
+        self.constraints[ev[0]].value = diffs[0]
+      elif ev[1] == E_RIGHT and self.constraints[ev[0]].kind != "number":
         self.constraints[ev[0]].kind = "number"
         self.constraints[ev[0]].value = [1, 3]
       elif ev[1] == E_UP: # easier
@@ -139,12 +150,13 @@ class Endless:
           self.constraints[ev[0]].value = [newmin, newmin + 2]
 
       self.render()
-      pygame.time.delay(50)
 
     mainconfig["autofail"] = oldaf
 
+  # FIXME - Calculate rects instead?
   def render(self):
     self.screen.blit(self.bg, (0,0))
+
     for i in range(len(self.constraints)):
       c = self.constraints[i]
       ptext = FONTS[60].render("Player " + str(i + 1), 1, colors.WHITE)
@@ -173,4 +185,5 @@ class Endless:
       self.screen.blit(ptext, ptext_r)
       self.screen.blit(ctext, ctext_r)
       self.screen.blit(vtext, vtext_r)
+
     pygame.display.flip()

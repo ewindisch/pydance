@@ -1,4 +1,5 @@
 from constants import *
+from util import toRealTime
 from gfxtheme import GFXTheme
 
 import fontfx, spritelib, colors
@@ -9,7 +10,6 @@ class Player:
     if mainconfig["scrollstyle"] == 2: self.top = 236
     elif mainconfig["scrollstyle"] == 1: self.top = 408
     else: self.top = 64
-    print self.top
     
     self.pid = pid
     self.score = ScoringDisp(pid, "Player " + str(pid))

@@ -167,9 +167,7 @@ class RenderLayered(pygame.sprite.RenderClear):
   # Override the add method so we can add lists of items
   def add(self, sprite):
     if type(sprite) == type((0,0)) or type(sprite) == type([]):
-      for spr in sprite:
-        print spr
-        self.add(spr)
+      for spr in sprite: self.add(spr)
     else: pygame.sprite.RenderClear.add(self, sprite)
 
   def ordersprites(self):

@@ -1,10 +1,11 @@
 # These parse various file formats describing steps.
 # Please read docs/fileparsers.txt and docs/dance-spec.txt
 
-from lyrics import Lyrics
-from constants import *
-
 import colors
+
+from lyrics import Lyrics
+from util import toRealTime
+from constants import *
 
 BEATS = { 'x': 0.25, 't': 0.5, 'f': 2.0/3.0,
           's': 1.0, 'w': 4.0/3.0, 'e': 2.0,
