@@ -44,7 +44,7 @@ class GenericFile:
       fullfile = os.path.join(dir, file)
       if lfile[-3:] == "mp3" and not self.info.has_key("filename"):
         self.info["filename"] = fullfile
-      elif lfile[-3:] == "ogg"  and not self.info.has_key("filename"):
+      elif lfile[-3:] == "ogg":
         self.info["filename"] = fullfile
       elif lfile[-3:] == "lrc":
         self.parse_lyrics(fullfile)
