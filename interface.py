@@ -32,7 +32,6 @@ class TextDisplay(pygame.sprite.Sprite):
     self._render()
 
   def _render(self):
-    self._needs_update = False
     font = fontfx.max_size(self._text, self._size[0], self._font)
     img = fontfx.shadow(self._text, font, [255, 255, 255])
     self.image = img
@@ -41,10 +40,64 @@ class TextDisplay(pygame.sprite.Sprite):
 
   def set_text(self, text):
     self._text = text
-    self._needs_update = True
+    self._render()
+
+class BPMDisplay(pygame.sprite.Sprite):
+  def __init__(self, font, center, song = None):
+    pygame.sprite.Sprite.__init__(self)
+    self._last_update = pygame.time.get_ticks()
+    self._font = font
+    self._center = center
+    self.set_song(song)
+    self._render()
+
+  def _render(self):
+    if self._bpm:
+      w = 100
+      h = self._font.get_linesize() * 2 - self._font.get_descent()
+      self.image = pygame.Surface([w, h], SRCALPHA, 32)
+      self.image.fill([0, 0, 0, 0])
+      t1 = fontfx.shadow("BPM:", self._font, [255, 255, 255])
+      t2 = fontfx.shadow("%d" % int(self._bpm), self._font, [255, 255, 255])
+      r1 = t1.get_rect()
+      r1.midtop = [50, 0]
+      r2 = t2.get_rect()
+      r2.midtop = [50, self._font.get_linesize()]
+      self.image.blit(t1, r1)
+      self.image.blit(t2, r2)
+    else: self.image = pygame.Surface([0, 0])
+    self.rect = self.image.get_rect()
+    self.rect.center = self._center
+
+  def set_song(self, song):
+    if song and "displaybpm" in song.info:
+      bpms = song.info["displaybpm"]
+      self._bpm_idx = 1 # This should be one higher than the current index.
+      self._bpm = bpms[0]
+      self._bpms = bpms
+      self._last_update = pygame.time.get_ticks()
+      self._bpm_idx %= len(self._bpms)
+      self._render()
+    else:
+      self._bpms = []
+      self._bpm_idx = 0
+      self._bpm = 0
+      self._last_update = pygame.time.get_ticks() + 100000000
+      self._render()
 
   def update(self, time):
-    if self._needs_update: self._render()
+    t = time - self._last_update
+    if t > 4000:
+      self._bpm_idx = (self._bpm_idx + 1) % len(self._bpms)
+      self._bpm = self._bpms[self._bpm_idx - 1]
+      self._last_update = time
+      self._render()
+    elif t > 3000:
+      t -= 3000
+      p = t / 1000.0
+      self._bpm = (p * self._bpms[self._bpm_idx] +
+                   (1 - p) * self._bpms[self._bpm_idx - 1])
+      self._render()
 
 class ScrollingImage(pygame.sprite.Sprite):
   def __init__(self, image, topleft, height):
@@ -304,9 +357,11 @@ class BannerDisplay(pygame.sprite.Sprite):
     self._next_update = -1
     self._delta = 5
     self._idx = 1
+    self._bpmdisplay = BPMDisplay(pygame.font.Font(None, 24), [60, 180])
 
   def set_song(self, song):
-    c1, c2 = [255, 255, 255], [30, 30, 30]
+    c1 = [255, 255, 255]
+    self._bpmdisplay.set_song(song)
     self._next_update = -2 # Magic value
 
     song.render()
@@ -335,7 +390,10 @@ class BannerDisplay(pygame.sprite.Sprite):
     self._clip = song.clip
     self._banner = song.banner
     self._r_b = self._banner.get_rect()
-    self._r_b.center = (179, 100)
+    self._r_b.center = [179, 100]
+    self._cdtitle = song.cdtitle
+    self._r_cd = self._cdtitle.get_rect()
+    self._r_cd.center = [290, 180]
 
   def _render(self):
     self.image = make_box(self._color, [350, 350])
@@ -345,14 +403,15 @@ class BannerDisplay(pygame.sprite.Sprite):
     self.image.blit(self._title, self._r_t)
     self.image.blit(self._artist, self._r_a)
     if self._subtitle: self.image.blit(self._subtitle, self._r_s)
-
+    self.image.blit(self._bpmdisplay.image, self._bpmdisplay.rect)
+    self.image.blit(self._cdtitle, self._r_cd)
     self.rect = self.image.get_rect()
     self.rect.center = self._center
 
   def update(self, time):
+    self._bpmdisplay.update(time)
     if self._next_update == -2:
       self._next_update = time + 300
-      self._render()
     elif time > self._next_update:
       self._next_update = time + 300
       if ((self._delta > 0 and self._color[self._idx] == 255) or
@@ -361,7 +420,7 @@ class BannerDisplay(pygame.sprite.Sprite):
         if self._color[self._idx]: self._delta = -3
         else: self._delta = 3
       self._color[self._idx] += self._delta
-      self._render()
+    self._render()
 
 class WrapTextDisplay(pygame.sprite.Sprite):
   def __init__(self, font, width, topleft, str = " "):

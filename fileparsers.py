@@ -388,6 +388,17 @@ class MSDFile(GenericFile):
     lyrics = self.find_files(["lrc"])
     if len(lyrics) > 0: self.parse_lyrics(lyrics[0])
 
+  def find_cdtitle(self, name):
+    if "\\" in name: name = name.replace("\\", "/")
+    fn = os.path.split(name)[-1]
+    # I FUCKING HATE YOU WINDOWS AND YOUR FUCKING FILENAMES, GO TO HELL
+    for dir in [os.path.join(p, "cdtitles") for p in search_paths]:
+      if os.path.isdir(dir):
+        for f in os.listdir(dir):
+          if f.lower() == fn.lower():
+            return os.path.join(dir, f)
+    return None
+
   def create_3panel_steps(self):
     if (("6PANEL" in self.difficulty) and
         ("BEGINNER" in self.difficulty["6PANEL"])):
@@ -451,7 +462,11 @@ class DWIFile(MSDFile):
       elif parts[0] == "TITLE": self.info["title"] = rest.decode("iso-8859-1").encode("utf-8")
       elif parts[0] == "ARTIST": self.info["artist"] = rest.decode("iso-8859-1").encode("utf-8")
       elif parts[0] == "MD5": self.info["md5sum"] = rest
-      elif parts[0] == "BPM": self.info["bpm"] = float(rest)
+      elif parts[0] == "CDTITLE":
+        self.info["cdtitle"] = self.find_cdtitle(rest)
+      elif parts[0] == "BPM":
+        self.info["bpm"] = float(rest)
+        self.info["displaybpm"] = [self.info["bpm"]]
       elif parts[0] == "SAMPLESTART":
         if "preview" in self.info:
           self.info["preview"][0] = self.parse_time(rest)
@@ -460,10 +475,17 @@ class DWIFile(MSDFile):
         if "preview" in self.info:
           self.info["preview"][1] = self.parse_time(rest)
         else: self.info["preview"] = [45, self.parse_time(rest)]
+      elif parts[0] == "DISPLAYBPM":
+        if parts[1] != "*":
+          self.info["displaybpm"] = [float(b) for b in parts[1].split("..")]
+        #FIXME
       elif parts[0] == "CHANGEBPM":
         rest = rest.replace(" ", "")
         self.bpms = [(float(beat), float(bpm)) for beat, bpm in
                      [change.split("=") for change in rest.split(",")]]
+        self.info.setdefault("displaybpm",
+                             [self.info["bpm"]] + [b[1] for b in self.bpms])
+        
       elif parts[0] == "FREEZE":
         rest = rest.replace(" ", "")
         self.freezes = [(float(beat), float(wait)/1000) for beat, wait in
@@ -588,6 +610,8 @@ class SMFile(MSDFile):
       elif parts[0] == "BANNER": self.info["banner"] = rest
       elif parts[0] == "BACKGROUND": self.info["background"] = rest
       elif parts[0] == "MD5": self.info["md5sum"] = parts[1]
+      elif parts[0] == "CDTITLE":
+        self.info["cdtitle"] = self.find_cdtitle(rest)
       elif parts[0] == "SAMPLESTART":
         if "preview" in self.info:
           self.info["preview"][0] = float(parts[1])
@@ -600,7 +624,9 @@ class SMFile(MSDFile):
         rest = rest.replace(" ", "")
         self.bpms = [(float(beat), float(bpm)) for beat, bpm in
                      [change.split("=") for change in rest.split(",")]]
+        self.info["displaybpm"] = [b[1] for b in self.bpms]
         self.info["bpm"] = self.bpms.pop(0)[1]
+        
       elif parts[0] == "STOPS":
         rest = rest.replace(" ", "")
         self.freezes = [(float(beat), float(wait)) for beat, wait in
@@ -865,11 +891,11 @@ class SongItem(object):
 
     # Default values
     for k in ("subtitle", "background", "banner",
-              "revision", "md5sum", "movie"):
-      self.info[k] = self.info.get(k, None)
+              "revision", "md5sum", "movie", "cdtitle"):
+      self.info.setdefault(k, None)
 
     for k in SongItem.defaults:
-      self.info[k] = self.info.get(k, SongItem.defaults[k])
+      self.info.setdefault(k, SongItem.defaults[k])
       if self.info[k] == "": self.info[k] = "Unknown"
 
     for k in ("filename",):
@@ -882,6 +908,8 @@ class SongItem(object):
 
     for k in ("startat", "endat", "gap", "bpm"):
       self.info[k] = float(self.info[k])
+
+    self.info.setdefault("displaybpm", [self.info["bpm"]])
 
     self.info["valid"] = int(self.info["valid"])
 

@@ -115,9 +115,13 @@ class SongItemDisplay(object):
 
   def render(self):
     if self.banner: return
-    elif self._song.info["banner"]:
-      self.banner, self.clip = load_banner(self._song.info["banner"])
+    elif self.info["banner"]:
+      self.banner, self.clip = load_banner(self.info["banner"])
     else: self.banner = SongItemDisplay.no_banner
+
+    if self.info["cdtitle"]:
+      self.cdtitle = pygame.image.load(self.info["cdtitle"])
+    else: self.cdtitle = pygame.Surface([0, 0])
 
 class FolderDisplay(object):
   def __init__(self, name, type, count):
@@ -150,6 +154,7 @@ class FolderDisplay(object):
           if os.path.exists(fn): self.banner, self.clip = load_banner(fn)
 
     if self.banner == None: self.banner = SongItemDisplay.no_banner
+    self.cdtitle = pygame.Surface([0, 0])
 
 class SongPreview(object):
   def __init__(self):
@@ -247,17 +252,15 @@ class MainWindow(InterfaceWindow):
         d.set("None", [127, 127, 127], 0, "?")
       self._diff_widgets.append(d)
     
-    self._sprites.add(self._diff_widgets)
-    self._sprites.add(self._list)
     ActiveIndicator([405, 259]).add(self._sprites)
     self._banner = BannerDisplay([350, 300], [210, 230])
     self._banner.set_song(self._song)
-    self._banner.add(self._sprites)
     self._sprites.add(HelpText(SS_HELP, [255, 255, 255], [0, 0, 0],
                                pygame.font.Font(None, 22), [206, 20]))
 
     self._title = TextDisplay(30, [210, 28], [414, 27])
-    self._sprites.add(self._title)
+    self._sprites.add(self._diff_widgets +
+                      [self._banner, self._list, self._title])
     self._screen.blit(self._bg, [0, 0])
     pygame.display.update()
     self.loop()
