@@ -21,6 +21,7 @@ KEYCONFIG = {
   K_r: E_SELECT,
   K_PAGEUP: E_PGUP,
   K_PAGEDOWN: E_PGDN,
+  K_m: E_MARK
 }
 
 # 6 axis, 12 button joystick (BNS parallel adapter)
@@ -29,8 +30,8 @@ A6B12 = { 1: E_PGUP, 3: E_PGDN, 8: E_SELECT, 4: E_LEFT, 5: E_RIGHT,
 
 # 16 buttons, 4 axis
 # The EMSUSB2, one adapter, two joysticks - +16 to get p2, uses this too
-A4B16 = { 1: E_PGUP, 3: E_PGDN, 8: E_SELECT, 15: E_LEFT, 13: E_RIGHT,
-          12: E_UP, 14: E_DOWN, 9: E_START }
+A4B16 = { 0: E_MARK, 1: E_PGUP, 3: E_PGDN, 8: E_SELECT, 9: E_START,
+          15: E_LEFT, 13: E_RIGHT, 12: E_UP, 14: E_DOWN }
 
 class EventManager:
   def __init__(self, handler = pygame.event):
