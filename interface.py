@@ -46,6 +46,41 @@ class TextDisplay(pygame.sprite.Sprite):
   def update(self, time):
     if self._needs_update: self._render()
 
+class ImageDisplay(pygame.sprite.Sprite):
+  def __init__(self, filename, center):
+    pygame.sprite.Sprite.__init__(self)
+    self._cache = {None: pygame.Surface([0, 0])}
+    self._center = center
+    self._image = self._cache[None]
+    self.set_image(filename)
+    self._changed_time = pygame.time.get_ticks() - 250
+
+  def set_image(self, filename):
+    self._oldimage = self._image
+    self._changed_time = pygame.time.get_ticks()
+    if filename in self._cache:
+      self._image = self._cache[filename]
+    else:
+      self._image = pygame.image.load(os.path.join(image_path, filename))
+      self._cache[filename] = self._image
+
+  def update(self, time):
+    if time - self._changed_time > 400:
+      self.image = self._image
+    elif time - self._changed_time > 200:
+      x = self._image.get_width()
+      p = (time - self._changed_time - 200) / 200.0
+      y = int(p * self._image.get_height())
+      self.image = pygame.transform.scale(self._image, [x, y])
+    else:
+      p = 1 - (time - self._changed_time) / 200.0
+      x = int(p * self._oldimage.get_width())
+      y = self._oldimage.get_height()
+      self.image = pygame.transform.scale(self._oldimage, [x, y])
+    self.rect = self.image.get_rect()
+    self.rect.center = self._center
+  
+
 # Crossfading help text along the top of the screen.
 class HelpText(pygame.sprite.Sprite):
   def __init__(self, strs, color, bgcolor, font, center):

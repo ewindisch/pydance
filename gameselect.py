@@ -1,3 +1,5 @@
+# FIXME: This file needs documentation.
+
 from constants import *
 from interface import *
 from pygame.font import Font
@@ -17,6 +19,14 @@ GAMES = ["4 panel", "5 panel", "6 panel", "8 panel", "9 panel",
          "Parapara", "DMX"]
 TYPES = ["Single", "Versus", "Double", "Couple"]
 SS = ["Normal", "Nonstop", "Endless", "Testing"]
+
+VALUES = [GAMES, TYPES, SS]
+
+IMAGES = {
+    "4 panel": "select-4p.png",
+    "6 panel": "select-6p.png",
+    "8 panel": "select-8p.png",
+    }
 
 SELECTORS = {
   "Normal": songselect.SongSelect,
@@ -69,7 +79,7 @@ DESCRIPTIONS = {
   "8 panel": "Everything but the center (like Technomotion)",
   "9 panel": "Everything! (like Pop'n'Stage)",
   "Parapara": "Wave your arms (or feet) around",
-  "DMX": "Crazy kung-fu action (like Dance ManiaX / Dance Freaks)",
+  "DMX": "Crazy kung-fu action (like Dance ManiaX / Freaks). Use left, up left, up right, and right.",
 
   "Single": "Play by yourself.",
   "Versus": "Challenge an opponent to the same steps.",
@@ -111,6 +121,8 @@ class MainWindow(InterfaceWindow):
     self._sprites.add(HelpText(GS_HELP, [255, 255, 255], [0, 0, 0],
                                Font(None, 22), [206, 20]))
     self._sprites.add(self._lists)
+    self._image = ImageDisplay(IMAGES.get("4 panel"), [200, 200])
+    self._sprites.add(self._image)
 
     self._screen.blit(self._bg, [0, 0])
     self._sprites.update(pygame.time.get_ticks())
@@ -120,7 +132,6 @@ class MainWindow(InterfaceWindow):
     self.loop()
 
   def loop(self):
-    values = [GAMES, TYPES, SS]
     active = 0
     clock = pygame.time.Clock()
     indices = [0, 0, 0]
@@ -140,8 +151,8 @@ class MainWindow(InterfaceWindow):
       elif ev == ui.CONFIRM:
         if active == 2:
           SELECTORS[SS[indices[2]]](self._songs, self._courses, self._screen,
-                                    MODES.get((values[0][indices[0]],
-                                               values[1][indices[1]])))
+                                    MODES.get((VALUES[0][indices[0]],
+                                               VALUES[1][indices[1]])))
           #indices = [0, 0, 0]
           #for l in self._lists: l.set_index(0)
           active = 0
@@ -150,19 +161,23 @@ class MainWindow(InterfaceWindow):
         else:
           active += 1
 
-      indices[active] %= len(values[active])
+      indices[active] %= len(VALUES[active])
 
       if ev in [ui.UP, ui.DOWN]:
         if ev == ui.UP: self._lists[active].set_index(indices[active], -1)
         else: self._lists[active].set_index(indices[active], 1)
-        self._selected.set_text(values[active][indices[active]])
-        self._description.set_text(DESCRIPTIONS[values[active][indices[active]]])
+        text = VALUES[active][indices[active]]
+        self._selected.set_text(text)
+        self._description.set_text(DESCRIPTIONS[text])
+        self._image.set_image(IMAGES.get(text))
 
       if ev in [ui.CONFIRM, ui.CANCEL]:
         self._indicator.move([405, self._indicator_y[active]])
         self._title.set_text(self._message[active])
-        self._selected.set_text(values[active][indices[active]])
-        self._description.set_text(DESCRIPTIONS[values[active][indices[active]]])
+        text = VALUES[active][indices[active]]
+        self._selected.set_text(text)
+        self._description.set_text(DESCRIPTIONS[text])
+        self._image.set_image(IMAGES.get(text))
 
       clock.tick(45)
       self.update()
