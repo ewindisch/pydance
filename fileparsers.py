@@ -219,7 +219,8 @@ class StepFile(GenericFile):
       if line != "": state, state_data = parsers[state](line, state_data)
 
     for old, new in (("song", "title"), ("group", "artist"),
-                     ("offset", "gap"), ("bg", "background")):
+                     ("offset", "gap"), ("bg", "background"),
+                     ("file", "filename")):
       if self.info.has_key(old):
         self.info[new] = self.info[old]
         del(self.info[old])
