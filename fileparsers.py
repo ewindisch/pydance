@@ -810,6 +810,8 @@ class SongItem(object):
 
   defaults = { "valid": 1,
                "mix": "No Mix",
+               "title": "Untitled",
+               "artist": "Unknown",
                "endat": 0.0,
                "preview": (45.0, 10.0),
                "startat": 0.0,
@@ -837,7 +839,7 @@ class SongItem(object):
     self.info = song.info
 
     # Sanity checks
-    for k in ("bpm", "title", "artist", "filename"):
+    for k in ("bpm", "filename"):
       if not self.info.has_key(k):
         raise RuntimeError(filename + " is missing: " + k)
 
@@ -849,9 +851,8 @@ class SongItem(object):
 
     # Default values
     for k in ("subtitle", "background", "banner",
-                "author", "revision", "md5sum", "movie"):
+              "revision", "md5sum", "movie"):
       self.info[k] = self.info.get(k, None)
-
 
     for k in SongItem.defaults:
       self.info[k] = self.info.get(k, SongItem.defaults[k])
@@ -876,13 +877,12 @@ class SongItem(object):
     self.filename = filename
     self.description = song.description
 
-    if self.info["mix"] == "": self.info["mix"] = "No Mix Available"
+    if self.info["mix"] == "": self.info["mix"] = "No Mix"
 
     for k, v in SongItem.equivs.items():
       if self.difficulty.has_key(k) and not self.difficulty.has_key(v):
         self.difficulty[v] = self.difficulty[k]
         self.steps[v] = self.steps[k]
-
 
     if mainconfig["autogen"]:
       # Fill in non-defined game modes, if possible.

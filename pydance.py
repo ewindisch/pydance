@@ -65,8 +65,9 @@ def main():
       print "W:", message
     except RuntimeError, message:
       print "E:", message
-    except:
+    except Exception, message:
       print "E: Unknown error loading " + f
+      print "E:", message
       print "E: Please contact the developers (pydance-devel@icculus.org)."
     img = pbar.render(parsedsongs / totalsongs)
     pygame.display.update(screen.blit(img, r))
