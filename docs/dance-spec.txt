@@ -60,10 +60,9 @@ Metadata Storage:
 <Valid> ::= "valid" <Whitespace> 1 | 0
 
 Text Sections:
-<TextSection> ::= [<Description>] [<Lyrics>] [<Backgrounds>]
+<TextSection> ::= [<Description>] [<Lyrics>]
 <Lyrics> ::= "LYRICS" <Newline> (<LyricLine>)+ <EndToken>
 <LyricLine> ::= <Float> <Whitespace> <PosInt> <Whitespace> <LongString> <Newline>
-<Backgrounds> ::= "BACKGROUNDS" <Newline> (<BgLine>)+ <EndToken>
 <BgLine> ::= <Float> <Whitespace> <LongString> <Newline>
 <Description> ::= "DESCRIPTION" <Newline> (<LongString> <Newline>)+ <EndToken>
 
