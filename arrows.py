@@ -33,18 +33,18 @@ class AbstractArrow(pygame.sprite.Sprite):
       self.bottom = random.choice([748, -276])
       if self.top < self.bottom:
         self.suddenzone = 480 - int(64.0 * player.sudden)
-        self.hiddenzone = 236 + int(64.0 * player.hidden)
+        self.hiddenzone = 240 - player.game.width / 2 + int(64.0 * player.hidden)
       else:
         self.suddenzone = int(64.0 * player.sudden) 
-        self.hiddenzone = 236 - int(64.0 * player.hidden)
+        self.hiddenzone = 240 - player.game.width / 2 - int(64.0 * player.hidden)
     elif player.scrollstyle == 1:
       self.top = 352
-      self.bottom = -128
+      self.bottom = -64
       self.suddenzone = int(64.0 * player.sudden)
       self.hiddenzone = 352 - int(64.0 * player.hidden)
     else:
       self.top = 64
-      self.bottom = 576
+      self.bottom = 480
       self.suddenzone = 480 - int(64.0 * player.sudden)
       self.hiddenzone = 64 + int(64.0 * player.hidden)
 
@@ -56,6 +56,10 @@ class AbstractArrow(pygame.sprite.Sprite):
 
     self.diff = self.top - self.bottom
     self.baseimage = self.image
+
+    # NB - Although "beats" refers to 16th notes elsewhere, this refers to
+    # "proper" beats, meaning a quarter note.
+    self.totalbeats = abs(self.diff) / 64.0
 
     self.goalcenterx = self.rect.centerx
     if self.battle:
@@ -95,10 +99,9 @@ class AbstractArrow(pygame.sprite.Sprite):
   def scale_spin_battle(self, image, top, pct):
     if self.scale != 1:
       if self.scale < 1: # Shrink
-        new_size = [pct * i for i in self.image.get_size()]
+        new_size = [max(0, int(pct * i)) for i in image.get_size()]
       else: # Grow
-        new_size = [i - pct * i for i in image.get_size()]
-      new_size = [max(0, i) for i in new_size]
+        new_size = [max(0, int(i - pct * i)) for i in image.get_size()]
       image = pygame.transform.scale(image, new_size)
     
     if self.spin:
@@ -115,7 +118,8 @@ class AbstractArrow(pygame.sprite.Sprite):
       else: rect.centerx = self.goalcenterx
     else: rect.centerx = self.centerx
 
-    if image.get_size() != (0, 0):
+    # Although the image size can be 0x!0, it can't ever be !0x0, because X > Y always.
+    if image.get_size()[0] != 0:
       image.set_colorkey(image.get_at([0, 0]))
 
     return rect, image
@@ -147,14 +151,14 @@ class ArrowSprite(AbstractArrow):
     beatsleft = self.calculate_beats(curtime, self.endtime, curbpm, lbct)
 
     if self.accel == 1:
-      p = min(1, max(0, -0.125 * (beatsleft * self.speed - 8)))
-      speed = 3 * p * self.speed + self.speed * (1 - p)
+      p = min(1, max(0, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats)))
+      speed = 2 * p * self.speed + self.speed * (1 - p)
     elif self.accel == 2:
-      p = min(1, max(0, -0.125 * (beatsleft * self.speed - 8)))
+      p = min(1, max(0, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats)))
       speed = p * self.speed / 2.0 + self.speed * (1 - p)
     else: speed = self.speed
 
-    top = top - int(beatsleft / 8.0 * speed * self.diff)
+    top = top - int(beatsleft / self.totalbeats * speed * self.diff)
 
     self.image = self.baseimage
   
@@ -215,23 +219,23 @@ class HoldArrowSprite(AbstractArrow):
     beatsleft_bot = self.calculate_beats(curtime, self.timef2, curbpm, lbct)
 
     if self.accel == 1:
-      p = min(1, max(0, -0.125 * (beatsleft_top * self.speed - 8)))
-      speed_top = 3 * p * self.speed + self.speed * (1 - p)
-      p = min(1, max(0, -0.125 * (beatsleft_bottom * self.speed - 8)))
-      speed_bottom = 3 * p * self.speed + self.speed * (1 - p)
+      p = min(1, max(0, -1 / self.totalbeats * (beatsleft_top * self.speed - self.totalbeats)))
+      speed_top = 2 * p * self.speed + self.speed * (1 - p)
+      p = min(1, max(0, -1 / self.totalbeats * (beatsleft_bot * self.speed - self.totalbeats)))
+      speed_bottom = 2 * p * self.speed + self.speed * (1 - p)
     elif self.accel == 2:
-      p = min(1, max(0, -0.125 * (beatsleft_top * self.speed - 8)))
+      p = min(1, max(0, -1 / self.totalbeats * (beatsleft_top * self.speed - self.totalbeats)))
       speed_top = p * self.speed / 2.0 + self.speed * (1 - p)
-      p = min(1, max(0, -0.125 * (beatsleft_bottom * self.speed - 8)))
+      p = min(1, max(0, -1 / self.totalbeats* (beatsleft_bot * self.speed - self.totalbeats)))
       speed_bottom = p * self.speed / 2.0 + self.speed * (1 - p)
     else: speed_top = speed_bottom = self.speed
 
     if self.bottom > self.top:
-      top = self.top - int(beatsleft_top / 8.0 * self.diff * speed_top)
-      bottom = self.top - int(beatsleft_bot / 8.0 * self.diff * speed_bottom)
+      top = self.top - int(beatsleft_top / self.totalbeats * self.diff * speed_top)
+      bottom = self.top - int(beatsleft_bot / self.totalbeats * self.diff * speed_bottom)
     else:
-      top = self.top - int(beatsleft_bot / 8.0 * self.diff * speed_top)
-      bottom = self.top - int(beatsleft_top / 8.0 * self.diff * speed_bottom)
+      top = self.top - int(beatsleft_bot / self.totalbeats * self.diff * speed_top)
+      bottom = self.top - int(beatsleft_top / self.totalbeats * self.diff * speed_bottom)
 
     if bottom > 480: bottom = 480
     if top > 480: top = 480
