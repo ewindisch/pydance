@@ -34,6 +34,7 @@ legend:
   scores for longer lengths e.g. a 50 combo is worth about twice as much
   as two 25 combos. Scores always have a maximum of 50,000,000 regardless
   of the song rating.
+* Double mirror works correctly.
 * Support the Thrustmaster USB mats (probably), and X-Box controllers.
  + We suspect that pydance will run properly on GNU/Linux on an X-Box now.
 * Correctly encode/decode KSF, SM, DWI, and .dance file metadata.

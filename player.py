@@ -690,10 +690,18 @@ class Player(object):
 
     if self.game.double:
       self.holding = [[-1] * len(self.game.dirs), [-1] * len(self.game.dirs)]
-      self.steps = [steps.Steps(song, diff, self, self.pid * 2,
-                                lyrics, self.game.name),
-                    steps.Steps(song, diff, self, self.pid * 2 + 1,
-                                lyrics, self.game.name)]
+      if self.transform == 1:
+        # In double mirror mode, we have to swap the step sets for this
+        # player's pids. This ensures, e.g., 1R becomes 2L, rather than 1L.
+        self.steps = [steps.Steps(song, diff, self, self.pid * 2 + 1,
+                                  lyrics, self.game.name),
+                      steps.Steps(song, diff, self, self.pid * 2,
+                                  lyrics, self.game.name)]
+      else:
+        self.steps = [steps.Steps(song, diff, self, self.pid * 2,
+                                  lyrics, self.game.name),
+                      steps.Steps(song, diff, self, self.pid * 2 + 1,
+                                  lyrics, self.game.name)]
 
       self.length = max(self.steps[0].length, self.steps[1].length)
 

@@ -410,10 +410,6 @@ class DWIFile(MSDFile):
                 },
     }
 
-  # FIXME: Is double mapping actually the same?
-  # FIXME: NO! Sort of. Double doesn't support left and right at all.
-  # Double mirror acts as "expected", everything is reversed. So this
-  # is wrong.
   steps["DOUBLE"] = steps["COUPLE"] = steps["SINGLE"]
 
   diff_map = { "ANOTHER": "TRICK", "SMANIAC": "HARDCORE",
