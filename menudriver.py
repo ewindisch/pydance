@@ -131,7 +131,7 @@ def do(screen, songdata):
         ["Autofail", onoff_opt, ("autofail",)],
         ["Assist Mode", onoff_opt, ("assist",)],
         ["Announcer", rotate_opt, ('djtheme', Announcer.themes())],
-        ("Themes ...", # FIXME: We can probably autogenerate this list somehow.
+        ("Themes ...",
          ["4 Panel", rotate_opt,
           ("4p-theme", ThemeFile.list_themes("SINGLE"))],
          ["5 Panel", rotate_opt,

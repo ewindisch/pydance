@@ -17,20 +17,15 @@ class GenericFile(object):
     self.need_steps = need_steps
 
   # Find a list of files with a given extension in the directory.
-  # We call this a lot (4x / DWI/SM), so it should be as fast as possible.
+  # We call this a lot (2x / DWI/SM), so it should be as fast as possible.
   def find_files(self, formats):
     files = []
 
     dir = os.path.split(self.filename)[0]
     if dir == "": dir = "."
 
-    # FIXME: Make this a list comprehension, for speed... (Can we?)
-    for f in dircache.listdir(dir):
-      for ext in formats:
-        if f.lower()[-len(ext):] == ext:
-          fullname = os.path.join(dir, f)
-          files.append(fullname)
-          break
+    files = [os.path.join(dir, f) for f in dircache.listdir(dir) if
+             f.lower()[-3:] in formats]
 
     files.sort(lambda a, b: cmp(os.stat(a).st_size, os.stat(b).st_size))
     return files
@@ -349,11 +344,11 @@ class MSDFile(GenericFile):
 
   # Return a list of all the images in the directory, sorted by file size
   def find_images(self):
-    return self.find_files([".png", ".jpg", ".jpeg", ".bmp"])
+    return self.find_files(["png", "jpg", "peg", "bmp"])
 
   # Find all audio files
   def find_audio(self):
-    return self.find_files([".ogg", ".mp3", ".wav", ".xm"])
+    return self.find_files(["ogg", "mp3", "wav", ".xm"])
 
   # DWI finds files based on their image size, not on any naming conventions.
   # However, naming conventions combined with file size appears to be a
@@ -389,7 +384,7 @@ class MSDFile(GenericFile):
                 self.info.get("filename", "").lower()[-3:] != "ogg"):
             self.info["filename"] = fn
 
-    lyrics = self.find_files([".lrc"])
+    lyrics = self.find_files(["lrc"])
     if len(lyrics) > 0: self.parse_lyrics(lyrics[0])
 
 # The DWI format, from Dance With Intensity.
@@ -416,6 +411,9 @@ class DWIFile(MSDFile):
     }
 
   # FIXME: Is double mapping actually the same?
+  # FIXME: NO! Sort of. Double doesn't support left and right at all.
+  # Double mirror acts as "expected", everything is reversed. So this
+  # is wrong.
   steps["DOUBLE"] = steps["COUPLE"] = steps["SINGLE"]
 
   diff_map = { "ANOTHER": "TRICK", "SMANIAC": "HARDCORE",
@@ -794,6 +792,7 @@ class KSFFile(MSDFile):
     self.difficulty[mode][difficulty] = ratings.get(difficulty, 5)
     self.steps[mode][difficulty] = steps
 
+# Sort by difficulty rating, or by a preset list if equal.
 def sorted_diff_list(difflist):
   keys = difflist.keys()
   keys.sort((lambda a, b: cmp(difflist[a], difflist[b]) or
@@ -884,22 +883,21 @@ class SongItem(object):
         self.difficulty[v] = self.difficulty[k]
         self.steps[v] = self.steps[k]
 
-    # FIXME: Be more intelligent about equivalencies between modes.
-    for game in games.SINGLE:
-      if game not in self.difficulty and "SINGLE" in self.difficulty:
-        self.difficulty[game] = copy.copy(self.difficulty["SINGLE"])
+    # Fill in non-defined game modes, if possible.
+    for game in games.GAMES:
+      if game in self.difficulty: continue # This mode is defined already.
 
-    for game in games.VERSUS:
-      if game not in self.difficulty and "VERSUS" in self.difficulty:
+      elif game in games.SINGLE and "SINGLE" in self.difficulty:
+        self.difficulty[game] = copy.copy(self.difficulty["SINGLE"])
+        
+      elif game in games.VERSUS and "VERSUS" in self.difficulty:
         self.difficulty[game] = copy.copy(self.difficulty["VERSUS"])
 
-    for game in games.ONLY_COUPLE:
-      if game not in self.difficulty and "COUPLE" in self.difficulty:
-        self.difficulty[game] = copy.copy(self.difficulty["COUPLE"])
-
-    for game in games.DOUBLE:
-      if game not in self.difficulty and "DOUBLE" in self.difficulty:
+      elif game in games.DOUBLE and "DOUBLE" in self.difficulty:
         self.difficulty[game] = copy.copy(self.difficulty["DOUBLE"])
+
+      elif game in games.COUPLE and "COUPLE" in self.difficulty:
+        self.difficulty[game] = copy.copy(self.difficulty["COUPLE"])
 
     self.diff_list = {}
     for key in self.difficulty:    

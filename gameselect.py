@@ -87,8 +87,6 @@ class GameSelect(object):
       val = states[state]()
       self.values[state] = val
 
-      # FIXME: When esc is pressed, return to the previously selected
-      # choice, not the initial choice.
       if val is None: state -= 1
       else: state += 1
 

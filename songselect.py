@@ -257,8 +257,6 @@ class SongSelect(object):
   def __init__(self, songitems, screen, gametype):
     clock = pygame.time.Clock()
 
-    # FIXME: We can probably do this in the wrap_ctr stage, since all
-    # selectors will use it.
     self.songs = [SongItemDisplay(s) for s in songitems
                   if s.difficulty.has_key(gametype)]
 
@@ -446,8 +444,7 @@ class SongSelect(object):
           self.index = self.songs.index(s)
 	changed = True
 
-      # Change sort modes - FIXME: terrible event name
-      elif ev[1] == E_SCREENSHOT:
+      elif ev[1] == E_SORT:
         s = self.songs[self.index]
         self.scroll_out(self.index)
         mainconfig["sortmode"] = (mainconfig["sortmode"] + 1) % NUM_SORTS
