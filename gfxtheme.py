@@ -176,6 +176,30 @@ class GFXTheme(object):
       arrfx[d] = ArrowFX(d, ypos, pid, self.theme_data, self.game)
     return arrs, arrfx
 
+  def get_lifebar(self):
+    # Lifebars are 204x28 images.
+    try:
+      full = self.theme_data.get_image("lifebar-full.png").convert()
+      empty = self.theme_data.get_image("lifebar-empty.png").convert()
+    except RuntimeError:
+      img = self.theme_data.get_image("lifebar.png").convert()
+      full = pygame.Surface([204, img.get_height()])
+      empty = pygame.Surface([204, img.get_height()])
+      full.blit(img, [0, 0])
+      empty.blit(img, [-204, 0])
+
+    f = []
+    e = []
+    for y in range(0, full.get_height(), 28):
+      new_f = pygame.Surface([204, 28])
+      new_e = pygame.Surface([204, 28])
+      new_f.blit(full, [0, -y])
+      new_e.blit(empty, [0, -y])
+      f.append(new_f)
+      e.append(new_e)
+
+    return f, e
+
 # The scrolling arrows for this game mode.
 class ArrowSet(object):
   def __init__ (self, theme, game, pid):

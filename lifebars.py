@@ -13,13 +13,13 @@ class AbstractLifeBar(Listener, pygame.sprite.Sprite):
     pygame.sprite.Sprite.__init__(self)
     self.gameover = LIVING
     self.maxlife = maxlife * songconf["life"]
-    self.image = pygame.Surface((204, 28))
+    self.image = pygame.Surface([204, 28])
     self.deltas = {}
     self.record = []
     self.last_record_update = 0
 
-    self.failtext = fontfx.embfade("FAILED",28,3,(80,32),(224,32,32))
-    self.failtext.set_colorkey(self.failtext.get_at((0,0)), RLEACCEL)
+    self.failtext = fontfx.embfade("FAILED", 28, 3, [80, 32], [224, 32, 32])
+    self.failtext.set_colorkey(self.failtext.get_at([0, 0]), RLEACCEL)
 
     self.rect = self.image.get_rect()
     self.rect.top = 30
@@ -51,8 +51,18 @@ class LifeBarDisp(AbstractLifeBar):
     self.displayed_life = self.life
 
     self.deltas = {"V": 0.008, "P": 0.008, "G": 0.004, "B": -0.04, "M": -0.08}
-    self.empty = theme.theme_data.get_image('lifebar-empty.png')
-    self.full = theme.theme_data.get_image('lifebar-full.png')
+    self.full, self.empty = theme.get_lifebar()
+
+  def draw(self, time):
+    time = int(1000 * time)
+    full = self.full[(time / 33) % len(self.full)]
+    empty = self.empty[(time / 33) % len(self.empty)]
+    
+    self.image.blit(empty, [0, 0])
+    self.image.set_clip([0, 0,
+                         int(202 * self.displayed_life / self.maxlife), 28])
+    self.image.blit(full, [0, 0])
+    self.image.set_clip()
 
   def update(self, time):
     if self.gameover and self.displayed_life <= 0: return
@@ -66,16 +76,11 @@ class LifeBarDisp(AbstractLifeBar):
     AbstractLifeBar.update(self, time)
 
     if self.life < 0: self.gameover = FAILED
-
     if self.displayed_life < 0: self.displayed_life = 0
-    self.image.blit(self.empty, [0, 0])
-    self.image.set_clip([0, 0,
-                         int(202 * self.displayed_life / self.maxlife), 28])
-    self.image.blit(self.full, [0, 0])
-    self.image.set_clip()
 
-    if self.gameover:
-      self.image.blit(self.failtext, (70, 2))
+    self.draw(time)
+
+    if self.gameover: self.image.blit(self.failtext, (70, 2))
 
 # A lifebar that only goes down.
 class DropLifeBarDisp(LifeBarDisp):
@@ -89,7 +94,8 @@ class DropLifeBarDisp(LifeBarDisp):
 class GreatAttack(LifeBarDisp):
   def __init__(self, playernum, theme, songconf, game):
     LifeBarDisp.__init__(self, playernum, theme, songconf, game)
-    self.deltas = {"V": -0.005, "P": -0.005, "G": 0.008, "O": -0.005, "B": -0.02, "M": -0.06}
+    self.deltas = {"V": -0.005, "P": -0.005, "G": 0.008, "O": -0.005,
+                   "B": -0.02, "M": -0.06}
 
 # Tug of war lifebar, increases your lifebar and decreases your opponents'.
 class TugLifeBarDisp(LifeBarDisp):

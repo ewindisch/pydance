@@ -458,7 +458,7 @@ class Player(object):
   def clear_sprites(self, screen, bg):
     for g in self.sprite_groups: g.clear(screen, bg)
 
-  def game_loop(self, time, screen):
+  def game_loop(self, time, screen):    
     if self.game.double:
       for i in range(2):
         if len(self.steps[i].lastbpmchangetime) == 0:
