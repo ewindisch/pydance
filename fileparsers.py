@@ -218,9 +218,10 @@ class DanceFile(GenericFile):
 
 class StepFile(GenericFile):
   METADATA, GAMETYPE, LYRICS, STEPS, WAITING = range(5)
-  word_trans = { "whole": "o", "halfn": "h", "qurtr": "q", "eight": "e",
-                 "tripl": "w", "steps": "s", "twtfr": "f", "thrty": "t",
-                 "sixty": "x", "ready": "R", "chbpm": "B", "waits": "W",
+  word_trans = { "whole": 16.0, "halfn": 8.0, "qurtr": 4.0, "eight": 2.0,
+                 "tripl": 4.0/3.0, "steps": 1.0, "twtfr": 2.0/3.0,
+                 "thrty": 0.5, "sixty": 0.25,
+                 "ready": "R", "chbpm": "B", "waits": "W",
                  "delay": "D", "tstop": "S",
                  "00": 0, "08": 1, "88": 3, "80": 2 }
 
@@ -332,9 +333,8 @@ class StepFile(GenericFile):
       return StepFile.GAMETYPE, data
 
 class DWIFile(GenericFile):
-  modes = { "{": "x", "[": "f", "(": "s", "`": "n",
-            "'": "n", ")": "e", "]": "e", "}": "e" }
-  times = { "x": 0.25, "f": 2.0/3.0, "s": 1.0, "e": 2.0, "n": 1/12.0 }
+  modes = { "{": 0.25, "[": 2.0/3.0, "(": 1.0, "`": 1.0/12.0,
+            "'": 2.0, ")": 2.0, "]": 2.0, "}": 2.0 }
   steps = {
     "SINGLE": { "0": [0, 0, 0, 0], "1": [1, 1, 0, 0], "2": [0, 1, 0, 0],
                 "3": [0, 1, 0, 1], "4": [1, 0, 0, 0], "6": [0, 0, 0, 1],
@@ -435,7 +435,7 @@ class DWIFile(GenericFile):
 
   def parse_steps(self, mode, diff, steps):
     if mode not in DWIFile.steps: return
-    step_type = "e"
+    step_type = 2.0
     current_time = 0
     bpmidx = 0
     freezeidx = 0
@@ -453,7 +453,7 @@ class DWIFile(GenericFile):
           for i in range(len(holdstep)):
             if holdstep[i]: step[i] |= 2
         steplist.append([step_type] + step)
-        current_time += DWIFile.times[step_type]
+        current_time += step_type
 
         for xyz in self.bpms[bpmidx:]:
           if current_time >= xyz[0]:
@@ -495,8 +495,6 @@ class SMFile(GenericFile):
   gametypes = { "dance-single": "SINGLE", "dance-double": "DOUBLE",
                 "dance-couple": "COUPLE", "dance-solo": "6PANEL" }
   notecount = { "SINGLE": 4, "DOUBLE": 8, "COUPLE": 8, "6PANEL": 6 }
-  notetypes = { 192: "n", 64: "x", 48: "u", 32: "t", 24: "f",
-                16: "s", 12: "w", 8: "e", 4: "q", 2: "h", 1: "o" }
 
   step = [0, 1, 3, 1]
 
@@ -550,7 +548,7 @@ class SMFile(GenericFile):
         for change in parts[1].split(","):
           if "=" in change:
             beat, wait = change.split("=")
-            self.freezes.append((float(beat), float(wait)/1000.0))
+            self.freezes.append((float(beat), float(wait)))
       elif parts[0] == "NOTES":
         if parts[1] in SMFile.gametypes:
           game = SMFile.gametypes[parts[1]]
@@ -582,9 +580,7 @@ class SMFile(GenericFile):
     for measure in measures:
       measure = measure.replace(" ", "")
       notetype = len(measure)/count
-      if notetype in SMFile.notetypes:
-        note = SMFile.notetypes[notetype]
-      else: note = 16 * notetype
+      note = 16.0 / notetype
       while len(measure) != 0:
         sd = measure[0:count]
         measure = measure[count:]
@@ -600,7 +596,7 @@ class SMFile(GenericFile):
           step.extend([SMFile.step[int(s)] for s in sd])
           stepdata.append(step)
 
-        beat += 4.0 / notetype
+        beat += note / 4.0
 
         for xyz in self.bpms[bpmidx:]:
           if beat >= xyz[0]:
@@ -611,6 +607,7 @@ class SMFile(GenericFile):
               stepdata.append(["B", float(xyz[1])])
             bpmidx += 1
         for xyz in self.freezes[freezeidx:]:
+          print xyz, beat
           if beat >= xyz[0]:
             if gametype in games.COUPLE:
               stepdata[0].append(["S", float(xyz[1])])
@@ -693,66 +690,3 @@ class SongItem(object):
     self.diff_list = {}
     for key in self.difficulty:    
       self.diff_list[key] = sorted_diff_list(self.difficulty[key])
-
-  def write(self, filename):
-    f = file(filename, "w")
-
-    # Write metadata
-    for key in ("filename", "title", "subtitle", "artist", "mix", "bpm",
-                "startat", "endat", "background", "banner", "md5sum",
-                "gap", "author", "movie", "revision", "valid"):
-      if (self.info[key] is not None and
-          self.info[key] != SongItem.defaults.get(key)):
-        f.write(key + " " + str(self.info[key]) + "\n")
-
-    self.info["gap"] = int(self.info["gap"])
-      
-    if self.info["preview"] != SongItem.defaults["preview"]:
-      f.write("preview " + str(self.info["preview"][0]) + " " +
-              str(self.info["preview"][1]) + "\n")
-
-    f.write("end\n")
-
-    if self.description is not None:
-      paras = "\n.\n".join(self.description)
-      f.write("DESCRIPTION\n" + paras + "\nend\n")
-      
-    if self.lyrics != []:
-      f.write("LYRICS\n")
-      for lyr in self.lyrics:  f.write(" ".join([str(l) for l in lyr]) + "\n")
-      f.write("end\n")
-
-    for game in self.difficulty:
-      for diff in self.difficulty[game]:
-        f.write(game + "\n")
-        f.write(diff + " " + str(self.difficulty[game][diff]) + "\n")
-
-        if not game in games.COUPLE:
-          for step in self.steps[game][diff]:
-            extra = ""
-            if step[0] in ("B", "W", "S", "D"): extra = str(step[1])
-            elif step[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x", "u"):
-              extra = "".join([str(i) for i in step[1:]])
-            elif step[0] == "L": extra = " ".join([str(i) for i in step[1:]])
-            f.write(step[0] + " " + extra + "\n")
-          f.write("end\n")
-        else:
-          to_write = []
-          for step1, step2 in zip(*self.steps[game][diff]):
-            if step1[0] != step2[0]:
-              print "Unable to convert %s %s mode steps" % (game, diff)
-              break
-            else:
-              if step1[0] in ("B", "W", "S", "D"): extra = str(step1[1])
-              elif step[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x", "n"):
-                extra = "".join([str(i) for i in step1[1:]])
-                extra += " " + "".join([str(i) for i in step2[1:]])
-              elif step1[0] == "L":
-                extra = " ".join([str(i) for i in step1[1:]])
-              to_write.append(step1[0] + " " + extra + "\n")
-          else:
-            to_write.append("end\n")
-            for line in to_write: f.write(line)
-            
-
-    f.close()

@@ -93,7 +93,7 @@ class Steps(object):
         self.ready = cur_time
         last_event_was_freeze = False
         coloring_mod = 0
-      elif words[0] in BEATS or isinstance(words[0], int):
+      elif words[0] in BEATS or isinstance(words[0], float):
         # Don't create arrow events with no arrows
         arrowcount = 0
         for i in words[1:]: arrowcount += int(i)
@@ -132,7 +132,7 @@ class Steps(object):
               self.totalarrows += 1
 
         if words[0] in BEATS: beat = BEATS[words[0]]
-        else: beat = 16.0 / words[0]
+        else: beat = words[0]
 
         cur_time += toRealTime(cur_bpm, beat)
         cur_beat += beat
@@ -145,8 +145,8 @@ class Steps(object):
 
       elif words[0] == "D":
         last_event_was_freeze = False
-        cur_time += toRealTime(cur_bpm, BEATS['q'] * words[1])
-        cur_beat += BEATS['q'] * words[1]
+        cur_time += toRealTime(cur_bpm, 4.0 * words[1])
+        cur_beat += 4.0 * words[1]
         coloring_mod += 4 * words[1]
 
       elif words[0] == "B":
