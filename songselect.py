@@ -34,18 +34,18 @@ DIFF_LOCATION = (8, 120)
 # FIXME: DSU at some point in the future.
 SORTS = {
   "filename": (lambda x, y: cmp(x.song.filename, y.song.filename)),
-  "subtitle": (lambda x, y: cmp(str(x.song.info.get("subtitle")).lower(),
-                                str(y.song.info.get("subtitle")).lower())),
-  "title": (lambda x, y: (cmp(x.song.info["song"].lower(),
-                              y.song.info["song"].lower()) or
+  "subtitle": (lambda x, y: cmp(str(x.song.info["subtitle"]).lower(),
+                                str(y.song.info["subtitle"]).lower())),
+  "title": (lambda x, y: (cmp(x.song.info["title"].lower(),
+                              y.song.info["title"].lower()) or
                           SORTS["subtitle"](x, y))),
-  "artist": (lambda x, y: (cmp(x.song.info["group"].lower(),
-                               y.song.info["group"].lower()) or
+  "artist": (lambda x, y: (cmp(x.song.info["artist"].lower(),
+                               y.song.info["artist"].lower()) or
                            SORTS["title"](x, y))),
   "bpm": (lambda x, y: (cmp(x.song.info["bpm"], y.song.info["bpm"]) or
                         SORTS["title"](x, y))),
-  "mix": (lambda x, y: (cmp(str(x.song.info.get("mix")).lower(),
-                            str(y.song.info.get("mix")).lower()) or
+  "mix": (lambda x, y: (cmp(str(x.song.info["mix"]).lower(),
+                            str(y.song.info["mix"]).lower()) or
                         SORTS["title"](x, y)))
   }
 
@@ -81,7 +81,7 @@ class SongItemDisplay:
 
     # Cache it for fast access later
     if self.banner == None:
-      if info.has_key("banner"):
+      if info["banner"]:
         # A postcondition of file parsers is that this is a valid filename
         banner = pygame.image.load(info["banner"]).convert()
         if banner.get_rect().size[0] > banner.get_rect().size[1] * 2:
@@ -102,7 +102,7 @@ class SongItemDisplay:
       # Start with a random color, but...
       color = colors.color[rcolors[random.randint(0, len(rcolors) - 1)]]
 
-      if info.has_key("mix"): # ... pick a consistent mix color
+      if info["mix"]: # ... pick a consistent mix color
         idx = hash(info["mix"]) % len(rcolors)
         color = colors.color[rcolors[idx]]
 
@@ -110,17 +110,17 @@ class SongItemDisplay:
 
       self.menuimage = pygame.surface.Surface(ITEM_SIZE)
       self.menuimage.blit(ITEM_BG, (0,0))
-      songtext = FONTS[26].render(info["song"], 1, color)
+      songtext = FONTS[26].render(info["title"], 1, color)
       self.menuimage.blit(songtext, (10, 5))
 
       subtext_text = ""
-      if info.has_key("subtitle"): subtext_text += info["subtitle"] + " / "
-      if info.has_key("mix"): subtext_text += info["mix"] + " / "
+      if info["subtitle"]: subtext_text += info["subtitle"] + " / "
+      if info["mix"]: subtext_text += info["mix"] + " / "
       subtext_text  += "bpm: " + str(int(info["bpm"]))
 
       subtext = FONTS[14].render(subtext_text, 1, color)
       self.menuimage.blit(subtext, (30, 26))
-      st = "by " + info["group"]
+      st = "by " + info["artist"]
       grouptext = FONTS[20].render(st, 1, color)
       self.menuimage.blit(grouptext, (15, 36))
 
@@ -270,7 +270,7 @@ class SongSelect:
       # Start the dancing!
       elif ev[1] == E_START and ev[0] == 0:
         # If we added the current song with E_MARK earlier, don't readd it
-        try: self.title_list[-1].index(self.current_song.info["song"])
+        try: self.title_list[-1].index(self.current_song.info["title"])
         except: self.add_current_song()
         background = spritelib.CloneSprite(pygame.transform.scale(self.screen,
                                                                   (640,480)))
@@ -363,23 +363,25 @@ class SongSelect:
           new_preview = False
           is_playing = True
           try:
+            start_time = self.songs[self.index].song.info["preview"][0]
             pygame.mixer.music.stop()
             preview_start = current_time
-            pygame.mixer.music.load(self.songs[self.index].song.info["file"])
+            pygame.mixer.music.load(self.songs[self.index].song.info["filename"])
             pygame.mixer.music.set_volume(0.01)
-            pygame.mixer.music.play(0, 45)
+            pygame.mixer.music.play(0, start_time)
           except pygame.error: # The song was probably too short
             is_playing = False
             preview_start = 0
 
         # Fade in, then fade out
         if is_playing:
+          length = self.songs[self.index].song.info["preview"][1]
           timesince = (current_time - preview_start)/2000.0
-          if timesince <= 2.0:
+          if timesince <= 1.0:
             pygame.mixer.music.set_volume(timesince)
-          elif 9.0 <= timesince <= 10.0:
-            pygame.mixer.music.set_volume(10.0-timesince)
-          elif timesince > 10.0:
+          elif length - 1 <= timesince <= length:
+            pygame.mixer.music.set_volume(length - timesince)
+          elif timesince > length:
             pygame.mixer.music.set_volume(0)
             pygame.mixer.music.stop()
             is_playing = False
@@ -583,7 +585,7 @@ class SongSelect:
                    self.player_diffs)
     self.diff_list.append(new_diff)
     # Pseudo-pretty difficulty tags
-    text = self.current_song.info["song"] + " "
+    text = self.current_song.info["title"] + " "
     for d in self.diff_list[-1]: text += "/" + d[0]
     self.title_list.append(text)
 

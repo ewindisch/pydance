@@ -35,7 +35,7 @@ class Steps:
     self.difficulty = difficulty
     self.feet = song.difficulty[playmode][difficulty]
     self.length = 0.0
-    self.offset = float(song.info["offset"] +
+    self.offset = float(song.info["gap"] +
                         mainconfig['masteroffset']) / -1000.0
 
     if mainconfig['onboardaudio']:
@@ -198,20 +198,11 @@ class Steps:
 
 class SongData:
   def __init__(self, song):
-    if song.info.has_key("bg"): self.background = song.info["bg"]
+    if song.info["background"]: self.background = song.info["background"]
     else: self.background = os.path.join(image_path, "bg.png")
 
-    if song.info.has_key("movie"): self.movie = song.info["movie"]
-    else: self.movie = None
-
-    self.song_file = song.info["file"]
-
-    self.title, self.artist = song.info["song"], song.info["group"]
-
-    if song.info.has_key("startat"): self.start = float(song.info["startat"])
-    else: self.start = 0.0
-    if song.info.has_key("endat"): self.end = float(song.info["endat"])
-    else: self.end = None
+    for key in ("movie", "filename", "title", "artist", "startat", "endat"):
+      self.__dict__[key] = song.info[key]
 
     self.crapout = 0
 
@@ -227,22 +218,22 @@ class SongData:
         self.lyricdisplay.addlyric(atsec - 0.4, " ".join(lsplit[1:]), 0)
 
   def init(self):
-    try: pygame.mixer.music.load(self.song_file)
+    try: pygame.mixer.music.load(self.filename)
     except pygame.error:
-      print "Not a supported file type:", self.song_file
+      print "Not a supported file type:", self.filename
       self.crapout = 1
-    if self.start > 0:
-      print "Skipping %f seconds." % self.start
+    if self.startat > 0:
+      print "Skipping %f seconds." % self.startat
       
   def play(self):
-    pygame.mixer.music.play(0, self.start)
+    pygame.mixer.music.play(0, self.startat)
 
   def kill(self):
     pygame.mixer.music.stop()
 
   def is_over(self):
     if not pygame.mixer.music.get_busy(): return True
-    elif self.end and pygame.mixer.music.get_pos() > self.end * 1000:
+    elif self.endat and pygame.mixer.music.get_pos() > self.endat * 1000:
       pygame.mixer.music.stop()
       return True
     else: return False

@@ -1026,9 +1026,10 @@ def main():
   r = pbar.render(0).get_rect()
   r.center = (320, 240)
   for f in fileList:
-    try: songs.append(fileparsers.SongItem(f))
-    except:
-      print "Error loading " + f
+#    try: songs.append(fileparsers.SongItem(f))
+    songs.append(fileparsers.SongItem(f))
+#    except:
+#      print "Error loading " + f
     img = pbar.render(parsedsongs / totalsongs)
     pygame.display.update(screen.blit(img, r))
     parsedsongs += 100.0

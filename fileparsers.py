@@ -2,7 +2,8 @@
 
 import sys, os, copy
 
-DIFFICULTIES = ["BEGINNER", "BASIC", "TRICK", "MANIAC", "HARDCORE"]
+DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "TRICK", "ANOTHER", "STANDARD",
+                "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE"]
 
 def sorted_diff_list(difficulty_hash):
   diffs = []
@@ -68,8 +69,8 @@ class StepFile:
     dir, name = os.path.split(filename)
 
     for t in (("banner", ".png"), ("banner", "-full.png"),
-              ("bg", "-bg.png"), ("file", ".ogg"), ("file", ".mp3"),
-              ("movie", ".mpg")):
+              ("bg", "-bg.png"), ("file", ".ogg"),
+              ("filename", ".mp3"), ("movie", ".mpg")):
       if self.info.has_key(t[0]):
         if not os.path.isfile(self.info[t[0]]):
           self.info[t[0]] = os.path.join(dir, self.info[t[0]])
@@ -79,29 +80,28 @@ class StepFile:
         possible = os.path.realpath(possible)
         if os.path.isfile(possible): self.info[t[0]] = possible
 
-    for key in self.difficulty:
-      self.diff_list[key] = sorted_diff_list(self.difficulty[key])
+    self.info["title"] = self.info["song"]
+    self.info["artist"] = self.info["group"]
+    self.info["filename"] = self.info["file"]
+    self.info["gap"] = self.info["offset"]
+    del(self.info["song"])
+    del(self.info["group"])
+    del(self.info["file"])
+    del(self.info["offset"])
+
+    if self.info.has_key("bg"):
+      self.info["background"] = self.info["bg"]
+      del(self.info["bg"])
 
     if not self.info.has_key("subtitle"):
-      try:
-        l, r = self.info["song"].index("["), self.info["song"].rindex("]")
-        if l != 0 and r > l + 1:
-          self.info["subtitle"] = self.info["song"][l+1:r]
-          self.info["song"] = self.info["song"][:l]
-      except ValueError:
-        try:
-          l, r = self.info["song"].index("("), self.info["song"].rindex(")")
+      for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
+        if pair[0] in self.info["title"] and pair[1] in self.info["title"]:
+          l = self.info["title"].index(pair[0])
+          r = self.info["title"].rindex(pair[1])
           if l != 0 and r > l + 1:
-            self.info["subtitle"] = self.info["song"][l+1:r]
-            self.info["song"] = self.info["song"][:l]
-        except ValueError:
-          try:
-            l, r = self.info["song"].index("~"), self.info["song"].rindex("~")
-            if l != 0 and r > l + 1:
-              self.info["subtitle"] = self.info["song"][l+1:r]
-              self.info["song"] = self.info["song"][:l]
-          except ValueError:
-            pass
+            self.info["subtitle"] = self.info["title"][l+1:r]
+            self.info["title"] = self.info["title"][:l]
+            break
 
 formats = ((".step", StepFile), )
 
@@ -119,22 +119,37 @@ class SongItem:
       raise NotImplementedError()
     self.info = song.info
 
+    self.info["bpm"] = float(self.info["bpm"])
+    if self.info.has_key("gap"):  self.info["gap"] = int(self.info["gap"])
+    else: self.info['gap'] = 0
+
     # Sanity checks
-    for k in ("bpm", "offset", "song", "group", "file"):
+    for k in ("bpm", "gap", "title", "artist", "filename"):
       if not self.info.has_key(k):
         raise RuntimError
 
-    for k in ("file", "bg", "banner"):
-      if self.info.has_key(k) and not os.path.isfile(self.info[k]):
+    # Default values
+    for k in ("subtitle", "mix", "background", "banner",
+                "author", "reivison", "md5sum", "movie"):
+      if not self.info.has_key(k): self.info[k] = None
+
+    for k, v in (("valid", 1), ("preview", (45.0, 10.0)),
+                 ("startat", 0.0), ("endat", 0.0), ("revision", "1970.01.01")):
+      if not self.info.has_key(k): self.info[k] = v
+
+    for k in ("filename", "background", "banner"):
+      if self.info[k] and not os.path.isfile(self.info[k]):
         raise RuntimeError
 
-    self.info["bpm"] = float(self.info["bpm"])
-    if self.info.has_key("offset"):
-      self.info["offset"] = int(self.info["offset"])
-    else: self.info['offset'] = 0
+    for k in ("startat", "endat", "gap"):
+      self.info[k] = float(self.info[k])
+
     self.steps = song.steps
     self.lyrics = song.lyrics
     self.difficulty = song.difficulty
-    self.diff_list = song.diff_list
     self.filename = filename
+
+    self.diff_list = {}
+    for key in self.difficulty:
+      self.diff_list[key] = sorted_diff_list(self.difficulty[key])
 
