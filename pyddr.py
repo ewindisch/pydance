@@ -1388,8 +1388,13 @@ class Song:
             # create it
             if cando and arrtotal:
               feetstep = map(lambda x: int(x,16),rest)
-#              print curTime,":",holding,feetstep,
 
+              arrowcount = 0
+              for checkforjumps in range(4):             # guess what this function does
+                  if (feetstep[checkforjumps] & 8):
+                      if arrowcount and mainconfig['badknees']:
+                          feetstep[checkforjumps] ^= 8
+                      arrowcount += 1
               for checkforholds in range(4):             # guess what this function does
                   didnothold = 1
                   if (feetstep[checkforholds] & 128) and (holding[checkforholds] == 0):
