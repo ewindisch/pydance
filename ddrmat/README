@@ -1,0 +1,23 @@
+WARNING: This kernel module is not endorsed, recommended, or whatever the 
+hell else by me or the Linux kernel team. This module may make your 
+joystick cease to function or it may make it explode. No one is 
+responsible for what you do with this module except YOU, the user.
+
+Having said that, here is a module that you can use for your DDR mat that 
+will make it so you don't have to turn your mat and dance on the buttons 
+(all the arrows will work, and you can pretend you're actually playing 
+Real(tm) DDR). I think this module requires kernel 2.4 =]
+
+To make the module, type:
+
+./build
+
+For a DDR mat on 0x378 (LPT1:), try:
+
+modprobe ddrmat gc=0,7
+
+The ,7 will not be needed as soon as this module turns into less than a 
+quick messy hack of drivers/char/joystick/gamecon.c
+
+Many thanks to Vojtech for his help and guidance in hacking around with 
+his gamecon module!

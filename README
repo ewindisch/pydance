@@ -1,0 +1,144 @@
+[note: this is practically verbatim from the website]
+
+pyDDR:
+a DDR clone for Python that needs a name
+
+DISCLAIMER: This game is not guaranteed to do anything of use. If it 
+decidedly blows up or does anything other than give you hours of 
+amusement, I'm not responsible for any damages.
+
+* What is pyDDR?
+
+  PyDDR is my solution to there being no DDR clone for Linux. Although 
+  Python code runs on many architectures, and PyGame code also runs on 
+  multiple platforms as well, it seems to be especially well suited on 
+  Linux boxen, so with my PC DDR mat, I set out on my quest....
+
+  PyDDR is also something to help me learn Python, which so far kicks a 
+  lot of ass for an interpreted programming language.
+
+  As a side note, pyDDR has nothing to do with your Double Datarate RAM.
+
+* What the hell is this DDR thing you keep referring to?
+
+  DDR stands for Dance Dance Revolution, a game that's slowly earning 
+  popularity in the states, but is tremendously popular in Asian 
+  countries. The game idea is simple. There's a mat with four directional 
+  arrows you can step on, and the game scrolls arrows up the screen while 
+  playing a song. When the arrows reach the top of the screen (not sooner 
+  and not later, since they pass over stationary arrows), you hit the 
+  corresponding arrow on the pad, and given that you hit it on time with 
+  the beat, you score points. The idea is that the game is supposed to 
+  either teach you to dance, or simulate dancing. Works to a degree. =] 
+  More DDR info is at http://ddrfreak.com
+
+* What do I need to play?
+
+  Aside from a mat, a brain, and an itch to twitch more than just your 
+  fingers, you'll need working installations of:
+
+    * Python 2.1 (?) or higher: get at http://python.org
+    * Pygame 1.4.9 or higher: get at http://pygame.org
+    * All of the pygame dependencies (I know this is a pain in the ass, 
+      but SDL and most of its libs are standard, and Numeric is good to 
+      have around, as is SMPEG)
+
+  PyDDR runs on Linux boxes, as this is the development platform. I have 
+  successfully been able to run it on win9x boxes as well, and there are 
+  reports of pyDDR running on NT. I don't have any framerates for any 
+  win boxen, but if you get em, send em in. Some current samples:
+
+  me: Athlon/700, 256M, MGA G400, Linux 2.4.14. SDL 1.2.2, 
+  Python 2.1.1. ~ 170fps without mat, ~ 60 fps with mat
+
+  CrashChaos: Athlon/1200, 512M, TNT2, Linux 2.4.9, 
+  SDL 1.2.2, Python 2.1. ~ 110fps
+
+  Intention: P2/400, 128M, ATI RagePro, Linux 2.4.8, 
+  SDL 1.2.2, Python 2.1.1. ~ 40fps
+
+  Chris: Athlon/1000, 160M, GeForce 2, Linux 2.4.5, 
+  SDL 1.2.1, Python 2.1.1. ~ 80fps
+
+
+GIVE TO ME THE PROGRAM$%#@!
+
+  New releases should always be available at:
+
+  http://clickass.org/~tgz/pyddr/
+
+  If you're reading this, you have the source tarball and you seem to 
+  have been able to untar it..
+
+  You do not need to be root to play. No installation is required. Untar 
+  and run pyddr.py with either:
+
+  $ python ./pyddr.py
+
+  or
+
+  $ ./pyddr.py
+
+* I'm scared, I've never played DDR before. 
+
+  This is really easy. I promise. Once you start, arrows are going to 
+  start scrolling up the screen. When the colored arrow passes over the 
+  stationary arrow at the top, press the corresponding arrow. THIS IS NOT 
+  A RACE and the idea is to hit the arrows ON BEAT. Don't step on every 
+  arrow you see.
+
+  IF YOU ARE PLAYING WITH THE KEYBOARD, hitting arrows means just that, 
+  you press the arrow keys.
+
+  IF YOU HAVE A MAT, make sure it's plugged in, and that you've got it set 
+  up for your OS. I do NOT know how windows boxes will handle mats. 
+  Currently in Linux 2.4, this should be sufficient:
+
+  # modprobe gamecon gc=0,7
+
+  or try the new included ddr mat module (new improved better faster!):
+
+  # insmod ddrmat.o gc=0,7
+
+  Now the one thing I regretfully report; if you use gamecon, you must 
+  turn your mat 45 degrees counter-clockwise so that the up arrow is 
+  pointing forward/left  and your mat is pointed like a diamond. Now, 
+  instead of dancing on the arrows, dance on the buttons -- with my topway 
+  mat it's now like this:
+  
+  X - Left      O - Up      triangle - down      square - right
+
+  I'm sorry the mat detection is clunky; if you have any 6 axis 12 button 
+  joysticks, pyDDR may think this is your mat and you should unplug them.
+
+* Where do I report bugs?
+
+  Please let me know if:
+  - you managed to get the game to run on any obscure platform,
+    or with especially old libraries.
+  - you have an OS and framerate for an unlisted OS
+  - you have a strange oddball problem that makes pyDDR not run at all
+    (PLEASE check to make sure you have ALL the pygame dependencies!)
+    (I know getting pyDDR to work in win is a pain, I'm working on this)
+  - you have some other problem with pyDDR that I claim to have fixed
+  - you have an idea on how to improve pyDDR that I haven't thought of
+  - you can code in python and want to help me improve pyDDR
+
+  Please do not contact me if:
+  - you haven't installed pygame properly and need help (I hang out in 
+    #pygame on irc.openprojects.net and we can help you there)
+  - you want a feature of pyDDR that I already plan on implementing
+    (in other words, I don't want to hear from 10 people that I need hold 
+    arrows and BPM changes - read pyddr.txt for my notes)
+  - all you can tell me is "it doesn't work" (I need details to help)
+
+  You can send me an email at tgz at orotech dot net - do be sure to 
+  substitute the proper marks where they go or I will not get any email. =]
+
+  You may have a lot of luck jumping on irc.openprojects.net and joining 
+  #pyDDR - my nickname is P2E.
+
+* Oh, so I don't get a screenshot?
+
+  Try running the game. It's better than an animated GIF. Or maybe it 
+  isn't..

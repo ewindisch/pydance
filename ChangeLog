@@ -1,0 +1,381 @@
+pyDDR Changelog and Roadmap
+
+legend:
++ new feature added or made an existing one better
+- removed a feature, or something bad happened
+* fixed a bug
+
+goals
+0.2.x - judge all steps correctly (EG. judges up+left as a pair)
+0.3.x - grades the dancer, even if it's in the console
+0.4.x - song selector
+0.6.x - supports all the step file options
+0.7.x - completely functional from start of song to end of grading
+0.9.x - trippy gfx, sfx (announcer?
+1.0.x - menus
+
+----- - CURRENT
+0.5.8 - Doth mine ears deceive me?
++ the game now forces 44khz stereo 16bit for misbehaving song files
++ if 'file' is not specified in the step file, it is searched for.
++ added pgup/pgdn support to song selector to jump 5 songs per press
++ Thanks to Colin for help and/or patches with the following:
+  + songselector improvements 
+    + finds songs recursively in all subdirectories of the songdir
+    + plays 10 second preview of song during song selection
+      + use config file option "previewmusic" to toggle on/off
+      + starts 45 seconds into the song, although it would be best to
+        have a way to specify this in the STEP file for each song
+  + dwi2step won't crash if GAP appears before BPM in DWI file
++ Thanks to Joe for patches/help with the following:
+  + optimizations to judging class
+  + lyrics now in different colors 
+    + "lyriccolor" and "transcolor" in pyddr.cfg to change preferred color
+  + a few text drawing optimisations
+  + included new utility, stepshrink, to shrink empty notes on stepfiles
++ DWI2STEP now doesn't care if .DWI is capitalised (thanks alex!)
+
+0.5.7 - Teculine Precision release (grin)
++ song selector doesn't take time between songs anymore (thanks Nuitari!)
++ new arrow positioning code (more accurate bpm changes!) 
+  - hold arrows still misbehave some in bpm changes, well, okay, a lot
++ better recap of fps in console
++ STEP2DWI utility to mostly convert step files back to DWIs (thanks matt!)
+* no more crashes with holds/freezes on alternate scrollspeeds
+* buttons defined in pyddr.cfg now work in grading screen
++ mouse is now hidden when inside game window
++ option 'fullscreen' to force fullscreen on startup
++ option 'vesacompat' for TVout users having trouble with flicker
+
+0.5.6 - Hold on tight, we're going for a ride!
++ HOLD/FREEZE ARROWS (arrows you need to hold for a certain time)
+  + OK/NG onscreen judging as well as grading (do holds affect the grade?)
+  - they look a bit kludgy, but they're clean
+  + neato arrowfx do stuff with hold arrows too
+* a few changebpm fixes, although not definitely completely fixed.
+* stupid multiple judgings fix
++ DWI2STEP improved to support hold/freeze arrows
++ BACKGROUND MOVIE support (MPEG-1 only)
+  - it's slow =[ but at least it stays on time according to current time
+  + new STEP file option:  'movie filename.mpg' in per-song stepfiles
++ sped up song selector a little
++ removed more delays in ddrmat.c - the game should run faster with 
+  parallel mats (I gained 10fps)
+  
+0.5.5 - Fee, Fi, Foo, Fix
++ big major happy framerate improvement, even with backgrounds enabled
++ arrow coloring is no longer off for TRICK/MANIAC if BASIC ends offbeat
++ new message for impatient people before song selector starts =]
++ SONG SORTING IN SONG SELECTOR
+  + option "sortmode" in config file to pick a default sorting mode
+  + option "sortpersist" can keep/ditch sortmode upon next songselect
+  + can sort by file, song, group, bpm, difficulty, or mix - (values 0-5)
++ new STEP file option "mix" to specify mix for song
++ DWI2STEP improved
+  + can convert 24th and 64th notes - basic support added to game
+  + can usually convert bpm changes - basic support added to game
++ "origddr" theme changed names to "classic"
+  + also spruced it up a little (see if you can tell what's new?)
++ included pyDDR music (loading and menu songs) are now OGG Vorbis (smaller)
+
+0.5.4 - Sing, Sing, Sing, with a DDR thing
++ LYRICS SUPPORT
+  + Oy, the lyrics option has always been there but no code to display em.
+  + pyDDR comes with a lyrics tagger (lyricstag.py) that processes a text 
+    file while playing an mp3 and writes out lyric data for step files
+  + lyrics fade out based on how long they are
+  + second line of text available for alternate languages
+  + now that STEP files are a little more happy, format is in stepfile.txt
+  + if you don't like lyrics, set 'showlyrics' to 0 in configfile
++ SONG BANNER SUPPORT
+  + looks for stepfilename.png for banner
+  + displays banner at bottom of screen - "SONG SELECT" now more transparent
+  + crossfades smoothly between song banners when picking
++ much faster step file finding time
+  + displays banner on startup when getting song informations
++ prerenders combo text and lyrics for speed boost
+  - combo text takes a few seconds to render on startup
+  + only needs to render combo text once
++ DWI2STEP improved: actively tries to make offset something little and 
+  calibrates steps it reads accordingly (works on dwi files I have)
++ new utility included with pyDDR - findbpm.py for tapping out bpm values
++ new configfile option 'showbackground'
+  + big framerate improvement when backgrounds are off, good for older PCs
++ new configfile option 'arrowspin'
+  + can be decimal and negative or positive, makes step arrows spin, 0 for off
++ 'none' announcer theme works again (sorry about that)
+* fixed a few more sprite priorities
+
+0.5.2 - I'm seeing things again
++ BACKGROUND SUPPORT
+  + option 'bgbrightness' in pyddr.cfg can be set from 0-255
+  + font fixes to make text look good on background
+  + statement 'bg' in step files to define image, or use stepfile-bg.png 
++ localised a few font calls to get a little speed increase (less jerky)
++ sudden and hidden arrows are alpha-based fadein/outs
++ added nice little border around lifebar for visibility
++ DWI2STEP is now included
+  - it doesn't do much more than MSD2STEP but you don't need to rename DWIs
++ new step inputter: inSTEP - good for inputting steps
+  + it's a bit dumb, but has online help. requires bryan theme. 
+  + won't overwrite existing STEP files.
+* bugfix: arrow effects/explosions on top of arrows again
+* bugfix: screenshots work again (hit 's' in the game)
+
+0.5.1 - I can see ASS in my dance
++ the author can finally pass afronova and paranoia in basic mode
++ ddrmat module cleanup (doesn't create kernel taints)
++ pyjoy is a little more verbose in describing what's going on
++ COLORS IN OFFBEAT ARROWS (the most requested feature!)
++ a few minor optimizations ( == better framerates )
++ configuration additions
+  + scrollspeed can now be a decimal (floating-point) value
+  + option 'grading' in configfile to turn off grading at end of songs
+  + option 'explodestyle' - 0 for non-exploding, 1 for rotating only,
+    2 for scaling only, 3 for both types of 'arrow explosions'
+  + option 'arrowcolors' to decide which arrows get colored - 1 for 
+    all-same-color, 2 for offbeats-only, 4 for beat-offbeat-wayoffbeat
+  + option 'little' to decide which arrows get DISPLAYED - 1 to turn off 
+    16ths, 2 for eighths off, 3 for only quarter notes, 0 to disable
++ debug mode: specify stepfile / mode at runtime and pyddr will play/exit
+  (example:    ./pyddr.py 6jan trick    starts 6jan.step in trick mode)
++ now displays total number of combos, and how early/late/ontime player is
++ remembers which song it was on in the song selector again
++ if the music file is bad/doesn't exist, game won't crash anymore
++ at last, pyDDR timing works on mu's machine. New option 'mixerclock' in 
+  config file to get song position from SDL_mixer instead of system.
+
+0.5.0 - WHAT?! They done shot the tires on my van!
++ pyDDR now REQUIRES at least Pygame 1.4.9, please install it!
+  + exception raised if pygame 1.4.9 is not found
++ new options:
+  + 'songdir' for configuring a directory for mp3/step files (thanks mu!)
+  + 'fpsdisplay' for loops/second display on/off
+  + 'mat_axes' for specifying number of axes your DDR mat reports
+  + 'mat_buttons' for specifying number of buttons your DDR mat reports
+  + adjustable 'hidden' mode (set to how many beats you want hidden)
++ music for song selector (stops after 4 loops)
++ music and screen while looking for songs (should not need to loop)
++ recognises when you have no songs and tells you where to get them
++ should not be as dodgy/crashy when only one song is 'installed'
++ new graphics theme 'origddr' for classic looking arrows
++ announcer should work on ALL machines, not just linux boxes with >1 dsp
++ ARROWS EXPLODE (you know, like real DDR) on perfects and greats
++ judging when arrow is stepped on, not half-beat later (thanks Dave!)
+
+0.4.9 - I made it -- you EAT it!
++ fixed incorrect current/bestcombo display in grading screen
++ better/more accurate judging on doubles (now just buggy, not problematic)
++ LONG AWAITED CONFIGURATION FILE SUPPORT (thanks nat!)
+  + joystick buttons can be set in pyddr.cfg - pyjoy.py can help find them
+  + all new listed features below are configurable from pyddr.cfg
+  - not all options specified in the configfile are implemented right now!
++ NEW FEATURES
+  + reverse scrolling (arrows scroll top to bottom)
+  + 'top' arrow display on/off
+  + master offset option incase all songs seem to start at the wrong time
+  + onboard audio option incase you have an onboard sound chipset
+    (some audio chipsets play 44.1khz sound at 48khz for some reason)
+  + autofail ('kill song on fail') optional, off by default
+  + configurable arrow speed multiplier (a la pump it up)    
+  + adjustable SUDDEN mode (can hide almost all the screen or just a bit)
+  + can set total number of recent judgings to 1, 2, 3, or 0 to turn off
+  + can turn off combo display
+  + can make judgings and combo display disappear after they've zoomed
+  + 'lowestcombo' option - you can define the lowest combo to be displayed
++ ANNOUNCER!
+  - only currently works on boxes with playmus and more than one dsp
+    (if the announcer breaks your machine, set djtheme to none)
+  + will be working on all platforms soon! =]
+  - currently has an overlap quirk
++ THEMES!
+  + both announcer and graphics theme are themable to at least a degree
+
+0.4.5 - a few new ideas.... more like LOTS of new code
++ MAJOR CODE REWRITE (MANY thanks to Bob, Dave, and Pete for lots of help)
+  + lots of class, sprite, and speed improvements - should be ultra-smooth
+    + song selector is nice and slick, for example
+      + can't select a difficulty that doesn't exist in a step file now
+      + up at top and down at bottom wraps to other end of songlist
+  + BETTER TIMING (enduser is less likely to have to mess with my offsets) 
+    - you WILL need new step files.... sorry!
+    + offset should not require tweaking on fast machines
+    + top arrows don't only flash, they animate too!
+  + judging and combo displays are now in a new style at the bottom
+    + "sticky" judging history of last three arrows
+    + combo sticks on the screen as long as combo is over 3
+    + judging and combo are BEHIND arrows; less distracting
+    * if you don't like this, don't worry, it'll be configurable soon
+
+0.4.1 - "rise from your grave!"
++ fixed stupid bug where all of 100+x combo texts was not erased
++ now draws X on both arrows when you miss a double
++ Lifebar improvements
+  + more fairness in judgement
+  + tells you when you've failed (but doesn't kill song)
+  - still don't know how lifebars work =]
++ MSD2STEP fixes 
+  + tries to write more accurate start times
+  + fixed offsets to something that seems to be more common
+
+0.4.0 - the "oops, I forgot to release 0.3.5" release
++ NEW DEMO SONG COMES WITH PYDDR
+  + I even wrote it!
+  + multiple difficulty levels (BASIC and TRICK)
++ Caches MP3 before playing it - this should make seeking faster and 
+  resolve the "sometimes the timing is off but not always" issues
+  - will probably need to download new step files or tweak the old ones
++ improved song selector
+  + looks a lot better (embossed text etc)
+  + not as buggy (doesn't crash unless you have bad STEP files)
+  + has DIFFICULTY SELECTOR/display in the corner (oo pretty, use L and R)
++ improved lifebar (sort of)
+  + lifebar doesn't go way past 0 or way above 50 now =]
+  + I need feedback:
+    should the lifebar reflect the kind of grade you're getting instead?
++ improved MSD2STEP
+  + generates files that won't crash pyDDR =]
+  + supports multiple difficulties in MSD files
+  + seems to be working better on MSD files for the time being
+
+0.3.5 - "Give it your best!"
++ added SONG SELECTOR: just run pyddr.py now
+  + automatically reads in STEP files, song/group/bpm, displays nicely
+  + smooth scrolling that is restricted to the step files available
+  + is integrated into pyddr now and looks pretty damn good
+  - song selector is buggy on dev machine, if I change focus while it's 
+    running, X stalls for like 30 seconds (anyone know what's going on?)
++ joystick code shouldn't break execution on boxes with no joysticks
++ pyDDR runs on OSX! Thanks, Bob!
++ SELECT on ddr mat will switch back/forth from/to fullscreen
++ START on ddr mat will exit song/scoring screen and start songs
+
+0.3.2 - home improvement
++ grading improved (now percentage based and slightly more leanient)
+  + percentages are displayed as well, and rounded to nearest tenth
++ pulsing stationary arrows now auto-adjust to framerate
++ fixed stepped-but-didn't-get-judging bug
++ lines in stepfiles can be commented with #
++ rudimentary LIFE BAR!
+  + does anyone know the technicalities of how DDR's lifebar works? =]
++ rearranged the goals list a little bit - I want a song selector now.
++ animated startup with songs and stuff, kinda cool
++ ddr mat module included with pyddr with hacks for the arrows to work
+
+0.3.1 - more beauty
++ GRAPHICAL GRADING
++ can now use numpad arrows as well as normal arrows
++ fixed dumb joystick bug I think
+
+0.3.0 - feelin mighty fine, oh yeah
++ NEW BEAUTIFUL IMAGES FOR THE ARROWS (thanks, Bryan!)
+  + decided this will be themable in the future
+  + can define graphics theme by changing a theme= line in the source
+    + this also cleans up the main pyddr directory as well
++ GRADING (SSS/SS/S/A/B/C/D/E)
+  - I /still/ don't know how DDR grading works but this seems to be decent
++ by the way, you can take screenshots: 's' and switch to fullscreen: 'f'
++ fps counter moved to lower left of playfield
+
+0.2.5 - decent progress
++ supports ddr mats
+  + will not initialise joystick if no joystick is found
+  - joystick code makes pyddr SLOOOOW
+  - detection of DDR mat is rudimentary; finds a 6 axis, 12 button joystick
+  - have to turn the mat 45 degrees counterclockwise and dance on buttons
++ fixed bug where combos wouldn't break
++ step file improvements
+  + supports startat marker: will skip X seconds into song and start there
+  + supports endat marker: will stop at X seconds after song is playing
+  + supports song and group markers: displays them at top of screen
++ antialiased fonts
+  - colors are wrong when antialiasing is on, oh well
+  + this is a result of a bug in SDL_ttf, upgrading to 2.0.4 fixes it!
++ based step judging on time-since-step, not frames, looks much cleaner
+  + also, for example, "CRAPPY" stays onscreen as long as "PERFECT" now
++ draws an X on a missed step once you've completely blown it
+
+0.2.0 - "oh, screw the roadmap" release
++ fixed .step extension adder. I'm just stupid.
++ smoothed out arrow animations even more. please report if you like it.
++ step judging improved:
+  + can no longer step twice in [very quick] succession to improve judging
+  + tells you how many perfect/great/etc.'s you have upon exit
+  + COMBOS (in playfield!)
+  + misses
+- still judges up+down, left+right, etc, as seperates (count as 2)
+  + but it WILL give you a miss if you miss one of them 
+  ? should I leave it this way, or make judging as a pair? Mixed opinions.
+- I don't know how the real DDR grading works, I am only good at guessing
++ fixed some delay things. eventually I will base this on time, not frames
++ changed INSTALL to explain adding songs
+
+0.1.9 - pretty! well, ok, not really.
++ now displays step judgement onscreen instead of in console
++ cleaned up codebase a little bit. eliminated beat-o-meter
++ repaired MSD2STEP - was writing garbage step files for some reason
+  + writes filenames in lowercase
+  + supports 16th notes in MSD files
+
+0.1.5 - help is on the way
++ does not require you to specify .step extension - it'll add it on
++ preliminary MSD to STEP conversion utility
+  - I don't know exactly how GAP works (docs are rather unclear)
+  - steps usually need fine tuning
+  - STEP files are not "compressed" very well
+  - you still need to convert WAV files to MP3 yourself
+
+0.1.4 - mo' features mo' problems? no mo, yo mofo. yo.
++ pyddr actually exits when song is over instead of requiring ESC
++ timing code is less anal (OK and GREAT before step is registered)
++ step arrows now cross over the pulsing ones at the right time (sorry)
++ step arrows twice as smooth (not slick as a baby's bottom, though)
++ more configfile support (no more hacking code to play different songs):
+  + now gets STEP file from commandline (test.step if not specified)
+  + reads in mp3 file to play from step file
+
+0.1.3 - more time (timing?) on my hands
++ version update to .step files
++ bpm / ticks / beats are all floating-point, therefore more accurate
+  (yeah, I know, I should have done this in the beginning, but....)
++ new keywords for .step files to save filespace and fingers:
+  + eight (eighth note)  - does "skip 1 tick after this step"
+  + qurtr (quarter note) - does "skip 3 ticks after this step"
+  + halfn (half note)    - does "skip 7 ticks after this step"
+
+0.1.2 - coloring
++ got bored, colored in the arrows that scroll =]
++ fixed a few very stupid typos that improve judging steps
+
+0.1.1 - timing code update
++ arrows scroll more smoothly/accurately
++ step judging is based on fractions of beats rather than milliseconds
++ tightened timing code to stay on beat again
+
+0.1.0 - I feel leet so this version gets a major number increase
++ IT SCROLLS ARROWS!
+  
+0.0.4 - file handling begins to show up
++ loads in step files:
+  + implements STEPS
+  + understands DELAY
+    + implements it too
+  + understands READY
+    - ignores it
+  + understands STEPS
+    + can display them on the beat they're supposed to hit to console
+  + judges step accuracy - BUGGY
+
+0.0.3 - freshmeat preparedness release
++ actually worked up a real ChangeLog, README, LICENSE, and webpage
+
+0.0.2 - another yay-but-not-really release
++ input handler actually does something useful, like make the arrows on 
+  the screen flash!
++ little BEAT-o-meter at the bottom of the screen. kind of neat. this is 
+  for those that don't realise the arrows pulse to the beat, too.
++ tells you what beat it's on
+
+0.0.1 - the only inital release worth giving a version number
++ successfully flashes to the bpm specified in the source
++ input handler but the only key that does anything is ESC =]
