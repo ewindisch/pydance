@@ -8,6 +8,9 @@ from pygame.locals import *
 (PASS, QUIT, UP, UPLEFT, LEFT, DOWNLEFT, DOWN, DOWNRIGHT,
  RIGHT, UPRIGHT, CENTER, START, SELECT) = range(13)
 
+NAMES = ["", "quit", "up", "up-left", "left", "down-left", "down",
+         "down-right", "right", "up-right", "center", "start", "select"]
+
 # Events for the transition
 # FIXME: REMOVE THESE
 FULLSCREEN = -100
@@ -132,21 +135,23 @@ class Pad(object):
     self.merge_events(0, -1, KEY1)
     self.merge_events(1, -1, KEY2)
 
+    loaded_input = False
     if os.path.exists(os.path.join(rc_path, "input.cfg")):
       try:
         fn = os.path.join(rc_path, "input.cfg")
         self.events = pickle.load(file(fn, "r"))
         for ev in self.events.values(): self.states[ev] = False
+        loaded_input = True
       except:
         print "E: Unable to load input configuration file."
 
-    if self.events != {}:
+    if loaded_input:
       print "Loaded input configuration."
-    elif emsusb2:
+    elif emsusb2 != None:
       self.merge_events(0, emsusb2, A4B16) 
-      self.merge_events(0, emsusb2, dict([(k + 16, v) for (k, v) in A4B16.items()]))
+      self.merge_events(1, emsusb2, dict([(k + 16, v) for (k, v) in A4B16.items()]))
       print "EMSUSB2 found. Using preset EMSUSB2 config."
-    elif mat:
+    elif mat != None:
       joy = pygame.joystick.Joystick(mat)
       but, axes = joy.get_numaxes(), joy.get_numbuttons()
       print "Initializing player 1 using js%d." % mat
@@ -169,9 +174,12 @@ class Pad(object):
     for key, event in events.items():
       self.add_event(device, key, pid, event)
 
-  def device_key_for(self, pid, event):
-    # @events.invert[pid, event] -- Ruby > Python.
-    return dict([(v, k) for (k, v) in self.events.items()]).get((pid, event))
+  def device_key_for(self, keyboard, pid, event):
+    for (device, key), (p, e) in self.events.items():
+      if p == pid and e == event:
+        if keyboard and device == -1: return pygame.key.name(key)
+        elif not keyboard and device != -1: return "js%d:%d" % (device, key)
+    return "n/a"
 
   def delete_events(self, pid):
     for k, v in self.events.items():
@@ -179,25 +187,23 @@ class Pad(object):
       self.states[v] == False
 
   # Poll the event handler and normalize the result. If we don't know
-  # about the event but the device is the keyboard, return (-1, key).
+  # about the event but the device is the keyboard, return (-2, key).
   # Otherwise, return pass.
   def poll(self):
     ev = self.handler.poll()
     t = ''
     v = 0
-    if ev.type == QUIT: return (-1, QUIT)
-    elif ev.type == JOYBUTTONDOWN or ev.type == JOYBUTTONUP:
+    if ev.type == JOYBUTTONDOWN or ev.type == JOYBUTTONUP:
       t, v = ev.joy, ev.button
     elif ev.type == KEYDOWN or ev.type == KEYUP:
       t, v = -1, ev.key
     else:
-      return (-1, PASS)
+      return (-2, PASS)
 
-    if ev.type == KEYDOWN or ev.type == KEYUP:
-      default = (-1, ev.key)
-    else: default = (-1, PASS)
+    if ev.type == KEYDOWN or ev.type == KEYUP: default = (-2, ev.key)
+    else: default = (-2, PASS)
 
-    ret = self.events.get((t, v), (-1, PASS))
+    ret = self.events.get((t, v), default)
 
     if ev.type == JOYBUTTONUP or ev.type == KEYUP:
       self.states[ret] = False
@@ -222,5 +228,58 @@ class Pad(object):
     pickle.dump(self.events, file(fn, "w"))
 
   def set_repeat(*args): pass
-    
+
 pad = Pad()
+
+class PadConfig(object):
+
+  bg = pygame.image.load(os.path.join(image_path, "bg.png"))
+
+  xys = {UP: [160, 100],
+         UPLEFT: [100, 100],
+         LEFT: [100, 250],
+         DOWNLEFT: [100, 400],
+         DOWN: [160, 400],
+         DOWNRIGHT: [220, 400],
+         RIGHT: [220, 250],
+         UPRIGHT: [220, 100],
+         CENTER: [160, 250],
+         SELECT: [106, 25],
+         START: [212, 25]
+         }
+
+  directions = range(2, 13)
+
+  def __init__(self, screen):
+    self.screen = screen
+
+    ev = pygame.event.poll()
+    while ev.type != KEYDOWN or ev.key != K_ESCAPE:
+      self.render()
+      ev = pygame.event.poll()
+      pygame.display.update()
+      pygame.time.delay(10)
+
+  def render(self):
+    self.screen.blit(PadConfig.bg, [0, 0])
+    for i in range(2):
+      for d in PadConfig.directions:
+        x, y = PadConfig.xys[d]
+
+        t_name = FONTS[16].render(NAMES[d], 1, [0, 0, 0])
+        r_name = t_name.get_rect()
+        r_name.center = (x + 320 * i, y)
+
+        text = pad.device_key_for(True, i, d)
+        t_key = FONTS[16].render(text, 1, [0, 0, 0])
+        r_key = t_key.get_rect()
+        r_key.center = (x + 320 * i, y + 16)
+
+        text = pad.device_key_for(False, i ,d)
+        t_but = FONTS[16].render(text, 1, [0, 0, 0])
+        r_but = t_but.get_rect()
+        r_but.center = (x + 320 * i, y + 32)
+
+        self.screen.blit(t_name, r_name)
+        self.screen.blit(t_key, r_key)
+        self.screen.blit(t_but, r_but)

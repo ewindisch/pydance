@@ -1,9 +1,7 @@
 # Code to construct pydance's menus
 
-import pygame, menus, os, sys, copy, colors, games
-
+import pygame, menus, os, sys, copy, colors, games, pad
 from constants import *
-from pad import pad
 from announcer import Announcer
 from gfxtheme import ThemeFile
 from gameselect import GameSelect
@@ -175,6 +173,7 @@ def do(screen, songdata):
         ["Back", None, None]
         ),
        ("Interface Options",
+        ["Configure pads", {pad.START: wrap_ctr}, (pad.PadConfig, (screen,))],
         ["Song Previews", onoff_opt, ('previewmusic',)],
         ["Folders", onoff_opt, ("folders",)],
         ["Timer Display", onoff_opt, ('fpsdisplay',)],
