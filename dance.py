@@ -617,10 +617,6 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
   # text group, EG. judgings and combos
   tgroup =  RenderUpdates()  
-  # special group for top arrows
-  sgroup =  RenderUpdates()
-  # special group for arrowfx
-  fgroup =  RenderUpdates()
   
   # lyric display group
   lgroup = RenderUpdates()
@@ -719,13 +715,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
   else: audio.set_volume(1.0)
 
   song.play()
-  for plr in players:
-    plr.start_song()
-    for arrowID in game.dirs:
-      if mainconfig['explodestyle'] > -1:
-        plr.toparrfx[arrowID].add(fgroup)
-      if not plr.dark:
-        plr.toparr[arrowID].add(sgroup)
+  for plr in players: plr.start_song()
       
   while 1:
     if mainconfig['autofail']:
@@ -776,12 +766,9 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
     if ev[1] == E_QUIT: return False
   
-    for keyAction in key:
-      playerID, keyPress = keyAction
-      if playerID < len(players) and keyPress in game.dirs:
-        keyPress = keyAction[1]
-        players[playerID].toparr[keyPress].stepped(1, curtime+(players[playerID].steps.soffset))
-        players[playerID].fx_data.append(players[playerID].judge.handle_key(keyPress, curtime) )
+    for ev in key:
+      pid = ev[0]
+      if pid < len(players): players[pid].handle_key(ev, curtime)
 
     for plr in players:
 
@@ -813,17 +800,10 @@ def dance(screen, song, players, prevscr, ready_go, game):
                 HoldArrowSprite(plr.theme.arrows[dirstr], curtime,
                                 plr.steps.holdinfo[holdindex], plr, song).add(groups)
 
-    for plr in players:
-      if len(plr.steps.lastbpmchangetime) > 0:
-        if (curtime >= plr.steps.lastbpmchangetime[0][0]):
-          nbpm = plr.steps.lastbpmchangetime[0][1]
-          plr.change_bpm(nbpm)
-          plr.steps.lastbpmchangetime.pop(0)
-     
+    for plr in players: plr.check_bpm_change(curtime)
     for plr in players: plr.check_sprites(curtime)
 
-    if strobe:
-      extbox.update(curtime+(players[0].steps.soffset))
+    if strobe: extbox.update(curtime+(players[0].steps.soffset))
     
     song.lyricdisplay.update(curtime)
 
@@ -843,12 +823,9 @@ def dance(screen, song, players, prevscr, ready_go, game):
       fpstext.update(curtime)
       timewatch.update(curtime)
 
-    rectlist = sgroup.draw(screen)
+    rectlist = []
+    for plr in players: rectlist.extend(plr.update_sprites(screen))
 
-    for plr in players:
-      rectlist.extend( plr.arrow_group.draw(screen))
-    
-    rectlist.extend(fgroup.draw(screen))
     rectlist.extend(tgroup.draw(screen))
     rectlist.extend(lgroup.draw(screen))
 
@@ -863,11 +840,10 @@ def dance(screen, song, players, prevscr, ready_go, game):
     if not backmovie.filename:
       lgroup.clear(screen,background)
       tgroup.clear(screen,background)
-      fgroup.clear(screen,background)
-      for plr in players: plr.arrow_group.clear(screen, background)
-      sgroup.clear(screen, background)
+      for plr in players: plr.clear_sprites(screen, background)
 
-    if (curtime > players[0].steps.length - 1) and (songtext.zdir == 0) and (songtext.zoom > 0):
+    if ((curtime > players[0].steps.length - 1) and
+        (songtext.zdir == 0) and (songtext.zoom > 0)):
       songtext.zout()
       grptext.zout()
 

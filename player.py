@@ -345,7 +345,6 @@ class Player:
 
   def set_song(self, steps):
     self.steps = steps
-    self.arrow_group = pygame.sprite.RenderUpdates()
     arr, arrfx = self.theme.toparrows(self.steps.bpm, self.top, self.pid)
     self.toparr = arr
     self.toparrfx = arrfx
@@ -368,17 +367,16 @@ class Player:
 
   def start_song(self):
     self.steps.play()
-
+    self.arrow_group = pygame.sprite.RenderUpdates()
+    self.toparr_group = pygame.sprite.RenderUpdates()
+    self.fx_group = pygame.sprite.RenderUpdates()
+    for d in self.game.dirs:
+      if mainconfig["explodestyle"] > -1: self.toparrfx[d].add(self.fx_group)
+      if not self.dark: self.toparr[d].add(self.toparr_group)
+  
   def get_next_events(self):
     self.evt = self.steps.get_events()
     self.fx_data = []
-
-  def change_bpm(self, newbpm):
-    if not self.dark:
-      for d in self.toparr:
-        self.toparr[d].tick = toRealTime(newbpm, 1)
-        self.toparrfx[d].tick = toRealTime(newbpm, 1)
-    self.judge.changebpm(newbpm)
 
   def combo_update(self, curtime):
     self.combos.update(self.judge.combo, curtime - self.judge.steppedtime)
@@ -448,3 +446,30 @@ class Player:
           if self.judge.holdsub[self.tempholding[dir_idx]] != -1:
             self.tempholding[dir_idx] = -1
             self.holdtext.fillin(curtime, dir_idx, "OK")
+
+  def handle_key(self, ev, time):
+    if ev[1] in self.game.dirs:
+      self.toparr[ev[1]].stepped(1, time + self.steps.soffset)
+      self.fx_data.append(self.judge.handle_key(ev[1], time))
+
+  def check_bpm_change(self, time):
+    if len(self.steps.lastbpmchangetime) > 0:
+      if time >= self.steps.lastbpmchangetime[0][0]:
+        newbpm = self.steps.lastbpmchangetime[0][1]
+        if not self.dark:
+          for d in self.toparr:
+            self.toparr[d].tick = toRealTime(newbpm, 1)
+            self.toparrfx[d].tick = toRealTime(newbpm, 1)
+        self.judge.changebpm(newbpm)
+        self.steps.lastbpmchangetime.pop(0)
+
+  def update_sprites(self, screen):
+    rects = self.toparr_group.draw(screen)
+    rects.extend(self.arrow_group.draw(screen))
+    rects.extend(self.fx_group.draw(screen))
+    return rects
+
+  def clear_sprites(self, screen, bg):
+    self.fx_group.clear(screen, bg)
+    self.arrow_group.clear(screen, bg)
+    self.toparr_group.clear(screen, bg)
