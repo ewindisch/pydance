@@ -3170,12 +3170,11 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
   
     for keyAction in key:
       playerID = keyAction[0]
-      if playerID <= players:
+      if playerID < players:
         keyPress = keyAction[1]
         playerContents[playerID]['toparr'][keyPress].stepped(1, curtime+(song.offset*1000))
         holdkey[playerID].pressed(keyPress)
         playerContents[playerID]['fxData'].append( playerContents[playerID]['judge'].handle_key(keyPress, curtime) )
-    
 
     # This maps the old holdkey system to the new event ID one
     # We should phase this out
