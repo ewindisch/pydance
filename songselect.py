@@ -20,6 +20,7 @@ difficulty_colors = { "BEGINNER": colors.color["white"],
                       "EASY": colors.color["orange"],
                       "BASIC": colors.color["orange"],
                       "STANDARD": colors.color["red"],
+                      "STANDER": colors.color["red"], # Shit you not, 3 people.
                       "TRICK": colors.color["red"],
                       "MEDIUM": colors.color["red"],
                       "DOUBLE": colors.color["red"],
