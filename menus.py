@@ -117,9 +117,11 @@ class Menu:
     while ev != E_QUIT:
       ev = event.poll()
 
+      if ev == E_FULLSCREEN: pygame.display.toggle_fullscreen()
+
       # Scroll down through the menu
-      if ev == E_DOWN1 or ev == E_DOWN2:
-        try: self.items[curitem].activate("deselect")
+      elif ev == E_DOWN1 or ev == E_DOWN2:
+        try: ev = self.items[curitem].activate("deselect")
         except AttributeError: pass
         curitem += 1
         if curitem == len(self.items): # Loop at the bottom
@@ -127,12 +129,12 @@ class Menu:
           topitem = 0
         elif curitem >= topitem + 7: # Advance the menu if necessary
           topitem += 1
-        try: self.items[curitem].activate("select")
+        try: ev = self.items[curitem].activate("select")
         except AttributeError: pass
 
       # Same as above, but up
       elif ev == E_UP1 or ev == E_UP2:
-        try: self.items[curitem].activate("deselect")
+        try: ev = self.items[curitem].activate("deselect")
         except AttributeError: pass
         curitem -= 1
         if curitem < 0:
@@ -140,13 +142,13 @@ class Menu:
           topitem = max(0, curitem - 6)
         elif curitem < topitem:
           topitem = curitem
-        try: self.items[curitem].activate("select")
+        try: ev = self.items[curitem].activate("select")
         except AttributeError: pass
 
       # Otherwise, if the event actually happened, pass it on to the button.
       elif ev != E_PASS and ev != E_QUIT:
         try:
-          self.items[curitem].activate(ev)
+          ev = self.items[curitem].activate(ev)
         except AttributeError:
           if ev == E_START1 or ev == E_START2:
             # Except if we're not a button and the event was START, go to
