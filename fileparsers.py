@@ -40,7 +40,7 @@ class GenericFile(object):
         if pair[0] in self.info["title"] and self.info["title"][-1] == pair[1]:
           l = self.info["title"][0:-1].rindex(pair[0])
           if l != 0:
-            self.info["subtitle"] = self.info["title"][l+1:-1]
+            self.info["subtitle"] = self.info["title"][l:]
             self.info["title"] = self.info["title"][:l]
             break
 
