@@ -2655,7 +2655,7 @@ def main():
 
   global update_screen
   if (screen.get_flags()&DOUBLEBUF == DOUBLEBUF):
-      update_screen = update_display_doublebuffer
+      update_screen = update_screen_doublebuffer
   elif screen.get_flags()&HWSURFACE:
       update_screen = update_display_hardware
   #else it defaults to software update rect
