@@ -284,7 +284,7 @@ class Judge:
     curtick = round((time - 2*self.tick) / (self.tick / 6))
     self.times = self.steps.keys()
     self.times.sort()
-    for k in range(72):
+    for k in range(24):
       j = curtick - k
       if j in self.times and self.steps[j]:
         self.broke = 1
