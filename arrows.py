@@ -27,8 +27,10 @@ class AbstractArrow(pygame.sprite.Sprite):
     self.battle = song.battle
     self.secret = secret
 
-    if mainconfig['assist'] and self.dir in ArrowSprite.samples:
+    if mainconfig['assist'] == 2 and self.dir in ArrowSprite.samples:
       self.sample = ArrowSprite.samples[self.dir]
+    elif mainconfig['assist']:
+      self.sample = ArrowSprite.samples["d"]
     else: self.sample = None
 
     if player.scrollstyle == 2:
