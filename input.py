@@ -51,8 +51,7 @@ class EventManager:
     for i in range(totaljoy):
       ddrmat = pygame.joystick.Joystick(i)
       ddrmat.init()
-      if ddrmat.get_numbuttons() == 32 and (ddrmat.get_numaxes() == 11 or
-                                            ddrmat.get_numaxes() == 8):
+      if ddrmat.get_numbuttons() == 32:
         emsusb2 = i
       elif ddrmat.get_numbuttons() == 16 and ddrmat.get_numaxes() == 4:
         if mat == None: mat = i
