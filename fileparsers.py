@@ -685,13 +685,32 @@ class SongItem:
         f.write(game + "\n")
         f.write(diff + " " + str(self.difficulty[game][diff]) + "\n")
 
-        for step in self.steps[game][diff]:
-          extra = ""
-          if step[0] in ("B", "W", "S", "D"): extra = str(step[1])
-          elif step[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x"):
-            extra = "".join([str(i) for i in step[1:]])
-          elif step[0] == "L": extra = " ".join([str(i) for i in step[1:]])
-          f.write(step[0] + " " + extra + "\n")
-        f.write("end\n")
+        if not game in couplemodes:
+          for step in self.steps[game][diff]:
+            extra = ""
+            if step[0] in ("B", "W", "S", "D"): extra = str(step[1])
+            elif step[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x"):
+              extra = "".join([str(i) for i in step[1:]])
+            elif step[0] == "L": extra = " ".join([str(i) for i in step[1:]])
+            f.write(step[0] + " " + extra + "\n")
+          f.write("end\n")
+        else:
+          to_write = []
+          for step1, step2 in zip(*self.steps[game][diff]):
+            if step1[0] != step2[0]:
+              print "Unable to convert %s %s mode steps" % (game, diff)
+              break
+            else:
+              if step1[0] in ("B", "W", "S", "D"): extra = str(step1[1])
+              elif step[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x"):
+                extra = "".join([str(i) for i in step1[1:]])
+                extra += " " + "".join([str(i) for i in step2[1:]])
+              elif step1[0] == "L":
+                extra = " ".join([str(i) for i in step1[1:]])
+              to_write.append(step1[0] + " " + extra + "\n")
+          else:
+            to_write.append("end\n")
+            for line in to_write: f.write(line)
+            
 
     f.close()
