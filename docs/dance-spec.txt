@@ -64,7 +64,7 @@ Metadata Storage:
 Text Sections:
 <TextSection> ::= [<Description>] [<Lyrics>]
 <Lyrics> ::= "LYRICS" <Newline> (<LyricLine>)+ <EndToken>
-<LyricLine> ::= <PosInt> <Whitespace> <Float> <Whitespace> <LongString>
+<LyricLine> ::= <Float> <Whitespace> <PosInt> <Whitespace> <LongString>
 <Description> ::= "DESCRIPTION" <Newline> (<LongString> <Newline>)+ <EndToken>
 
 Step Sections:
@@ -85,7 +85,7 @@ Song Commands:
 <Wait> ::= "W" <Whitespace> <Float>
 <Stop> ::= "S" <Whitespace> <Float>
 <Delay> ::= "D" <Whitespace> <Float>
-<Lyric> ::= "L" <Whitespace> <PosInt> <Whitespace> <Float> <Whitespace>
+<Lyric> ::= "L" <Whitespace> <Float> <Whitespace> <PosInt> <Whitespace>
                   <LongString>
 
 Informal & Semantic Description
