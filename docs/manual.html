@@ -16,7 +16,10 @@ img {
  margin: 1em;
 }
 
-pre { margin-left: 10% }
+pre {
+ margin-left: 10%;
+white-space: pre;
+}
 
 dl { margin-left: 3em }
 
@@ -41,13 +44,13 @@ p {
     <p>
     <img src="images/joe-sis.jpg" alt="Joe and his sister playing DDR"
       title="Joe and his sister playing DDR" style="float: right" />
-Have you ever gone to an arcade and seen some crazy girl
-busting moves on some sort of metal panel of sorts, or a guy making a
-fool of himself trying to dance without watching the screen? Well,
-that game is probably Dance Dance Revolution, or DDR for short, which
-has been a hit in Asian countries for awhile and is finally getting
-popular in Europe and North America. It might also have been a similar
-game, such as Pump It Up, or EZ2 Dancer.</p>
+Have you ever gone to an arcade and seen some crazy girl busting moves
+on some sort of metal panel of sorts, or a guy making a fool of
+himself trying to dance without watching the screen? Well, that game
+is probably Dance Dance Revolution, or DDR for short, which has been a
+hit in Asian countries for awhile and is finally getting popular in
+Europe and North America. It might also have been a similar game, such
+as Pump It Up, or EZ2 Dancer.</p>
     <p>pydance lets you play these games, and others like them, on
 your computer, either with the keyboard or with a custom controller.
 What you do is watch the screen as colored arrows move up the screen.
@@ -131,9 +134,9 @@ arcade machine; but it still won't look like the other games very
 much.)</dd>      
       <dt>Network Play</dt>
       <dd>Although a future version of pydance <em>might</em> have
-      network support, the current version does not. The best way to
-      ensure that pydance does have network support in the future is
-      to help write it yourself.</dd>
+network support, the current version does not. The best way to ensure
+that pydance does have network support in the future is to help write
+it yourself.</dd>
       <dt>Edit Dance Patterns Graphically</dt>
       <dd>There is no graphical step pattern editor for pydance's
 .dance format; instead, you can use a text editor.</dd>
@@ -185,8 +188,8 @@ information about installing from packages for Debian, Mandrake, and
 Gentoo GNU/Linux, and also has a disk image for Mac OS X users.</p>
     <p>Otherwise, to run pydance, you can often just download the
 source, unpack it, and double click on pydance.py (or run
-<kbd>./pydance.py</kbd>). The <tt>INSTALL</tt> file included with pydance
-has detailed installation instructions for Unix.</p>
+<kbd>./pydance.py</kbd>). The <tt>INSTALL</tt> file included with
+pydance has detailed installation instructions for Unix.</p>
 
     <h2>Getting Songs</h2>
     <p>pydance requires songs to run properly. There are some free
@@ -235,12 +238,10 @@ the same time. This doesn't affect most games, but will affect
 pydance.</p>
     <h3>Attaching a PSX/PS2 Mat</h3>
     <p>
-    <a href="http://www.levelsix.com/detail.aspx?ID=2"
-      title="Purchase an EMSUSB2 at Level Six"><img
-	src="images/emsusb2.jpg" alt="An
-	EMSUSB2 (colors may vary)" /></a>
-The most popular dance mats are for Playstation or Playstation
-2s. The best adapter for these is an <a
+    <a href="http://www.levelsix.com/detail.aspx?ID=2" title="Purchase
+an EMSUSB2 at Level Six"><img src="images/emsusb2.jpg" alt="An EMSUSB2
+	  (colors may vary)" /></a> The most popular dance mats are
+for Playstations or Playstation 2s. The best adapter for these is an <a
 href="http://levelsix.com/detail.aspx?ID=2" title="Purchase an EMSUSB2
 at Level Six">EMSUSB2</a>, which lets you connect two mats to a USB
 port. The EMSUSB2 works in Linux, Mac OS X, and Windows, and any OS
@@ -249,16 +250,14 @@ themselves at <a href="http://www.levelsix.com">Level Six</a>. If you
 live outside of North America, <a
 href="http://www.lik-sang.com/info.php?category=23&amp;products_id=1697">buying 
 an EMSUSB2 from Lik-Sang</a> might be easier, because they can ship
-from Europe and Hong Kong as well.</p>
+from Europe and Hong Kong as well. If you're looking for a high-quality dance pad, <a href="http://www.cobaltflux.com">Cobalt Flux pads</a> sells metal pads for $300. They have all 9 panels (center and the 8 directions), and work with pydance if you have a PS2-to-USB adapter like the EMSUSB2.</p>
 
     <p>
-    <a href="http://www.levelsix.com/detail.aspx?ID=56"
-      title="A good beginner's DDR pad at Level Six"><img
-	style="float:right"
-	src="images/cheappad.jpg" alt="A soft DDR mat without foam"
-	/></a>
-Some other adapters are also supported. The parallel port
-adapter that comes with <a
+    <a href="http://www.levelsix.com/detail.aspx?ID=56" title="A good
+beginner's DDR pad at Level Six"><img style="float:right"
+	  src="images/cheappad.jpg" alt="A soft DDR mat without foam"
+	  /></a> Some other adapters are also supported. The parallel
+port adapter that comes with <a
 href="http://www.buynshop.com">Buy'n'Shop</a> DDR mats is supported on
 many platforms, including Linux with the use of our <a
 href="http://icculus.org/pyddr/get.php#ddrmat">ddrmat.o kernel
@@ -372,10 +371,10 @@ Unix. This can't be used in the middle of a song.</dd>
     <h2>The Main Menu</h2>
     <p>
     <img src="images/menu.jpg" alt="Menu Screenshot"
-      title="The pydance main menu" style="float:right" />
-If your songs are properly installed, this is the first screen
-you will see after pydance finishes loading (if your songs aren't
-installed, you'll get a reminder to install them).</p>
+      title="The pydance main menu" style="float:right" /> If your
+songs are properly installed, this is the first screen you will see
+after pydance finishes loading (if your songs aren't installed, you'll
+get a reminder to install them).</p>
     <dl>
       <dt>Up or Down</dt><dd>Select an item in the menu.</dd>
       <dt>Confirm, Start, or Right</dt><dd>Activate a menu item, or
@@ -430,9 +429,9 @@ will be previewed, but MP3s won't. If you're having trouble with
 pydance crashing while previewing MP3s, set this to Safe.</dd>
 	  <dt>Folders</dt>
 	  <dd>If you have over 60 songs or courses, folders will be
-      displayed in the song and course selector for your
-      convenience. If you want to view them all in one display, you
-      can turn these folders off.</dd>
+displayed in the song and course selector for your convenience. If you
+want to view them all in one display, you can turn these folders
+off.</dd>
 	  <dt>Timer Display</dt>
 	  <dd>Turning this on results in a game timer being displayed
 at the top of the screen (in seconds), and an FPS counter in the lower
@@ -444,11 +443,11 @@ left corner.</dd>
     <h2>Game Types</h2>
     <p>
     <img src="images/gameselect.jpg" alt="Screenshot of the game selector"
-      title="The game selection screen" style="float:right"/>
-The game selection screen is the one you'll see first after
-selecting "play game". Here, you select what panels or controller you
-want to use, how many people are playing, and whether you want to play
-individual songs or a sequence of them.</p>
+      title="The game selection screen" style="float:right"/> The game
+selection screen is the one you'll see first after selecting "play
+game". Here, you select what panels or controller you want to use, how
+many people are playing, and whether you want to play individual songs
+or a sequence of them.</p>
     <dl>
       <dt>Up, Down</dt>
       <dd>Change your game, mode, or interface.</dd>
@@ -466,7 +465,7 @@ a center button, and so you won't be able to play 5 or 9 panel.</dd>
       <dd>Use the top half of the mat (left, up left, up, up right,
 and right) to dance.</dd>
       <dt>DMX</dt>
-      <dd>Like the DanceManiaX&trade; game, use the upper and lower
+      <dd>Like the DanceManiaX game, use the upper and lower
 parts of the sensors, or left, up left, up right, and right.</dd>
       <dt>EZ2 and EZ2 Real</dt>
       <dd>Use three direction arrows, and left, down left, down right,
@@ -503,10 +502,9 @@ out you need to back up and pick different options.</p>
     <p>
     <img src="images/ss-song.jpg"
       alt="Screenshot of the song selector, with a song selected"
-      title="Viewing a Song" style="float: right"/>
-The song selector is one of the "main screens" of the pydance
-interface.  This is where you pick the song you want to play, and the
-difficulty of it.</p>
+      title="Viewing a Song" style="float: right"/> The song selector
+is one of the "main screens" of the pydance interface.  This is where
+you pick the song you want to play, and the difficulty of it.</p>
     <p>If you have more than 60 songs, the song selector will start up
 in "folder mode", where your songs are organized into folders by
 title, artist, BPM, or mix name. You can turn off folders in the
@@ -518,7 +516,7 @@ the song will be displayed, as will each player's selected difficulty,
 the rating of that difficulty, and the top score on that difficulty.
     <img src="images/ss-folder.jpg"
       alt="Screenshot of the song selector, with a folder selected"
-      title="Viewing a Folder" style="float: left"/></p>
+	title="Viewing a Folder" style="float: left"/></p>
 
     <dl>
       <dt>Up, Down</dt><dd>Select a song or folder</dd>
@@ -530,16 +528,16 @@ list), or exit (if currently viewing the folder list, or folders are
 turned off)</dd>
       <dt>Start</dt><dd>Switch to the Player Options screen</dd>
       <dt>Select</dt><dd>Go to a random song, in the current folder
-      (if you're in a folder) or selected from all your songs (if
-      you're viewing the folder list)</dd>
+(if you're in a folder) or selected from all your songs (if you're
+viewing the folder list)</dd>
     </dl>
 
     <p>
     <img src="images/diff-indicator.jpg" alt="The difficulty selector"
-      title="The difficulty selector" style="float: right" />
-In addition to a name, each difficulty has a numerical
-rating, usually on a scale of 1 to 9. The pydance tutorial song has a
-difficulty of 0, and some very hard songs may have difficulties above 9.</p>
+      title="The difficulty selector" style="float: right" /> In
+addition to a name, each difficulty has a numerical rating, usually on
+a scale of 1 to 9. The pydance tutorial song has a difficulty of 0,
+and some very hard songs may have difficulties above 9.</p>
 
     <h3>Song Difficulties</h3>
     <p>Different games have used different names to refer to the same
@@ -563,12 +561,12 @@ are the easiest to understand for new players).</p>
     <h2>Players' Options</h2>
     <p>    <img src="images/options.jpg"
       alt="A screenshot of the options screen"
-      title="The options screen" style="float: right"/>
-Pressing <strong>Start</strong> on any of the song selection
-interfaces (the song selector, nonstop, or endless) takes you to the
-players' options screen. From here, you can change many per-player
-settings (sometimes called "modifiers" or "mods"), as well as some
-global ones, like the type of lifebar used.</p>
+      title="The options screen" style="float: right"/> Pressing
+<strong>Start</strong> on any of the song selection interfaces (the
+song selector, nonstop, or endless) takes you to the players' options
+screen. From here, you can change many per-player settings (sometimes
+called "modifiers" or "mods"), as well as some global ones, like the
+type of lifebar used.</p>
     <p>When you exit the options screen, both players' options are
 saved between songs. If you exit from the song selector (and go back
 to the main menu or game selection screen) only the first player's are
@@ -581,20 +579,20 @@ out!</p>
     <dl>
       <dt>Up, Down</dt><dd>Select an option</dd>
       <dt>Left, Right</dt><dd>Change the value of the current
-      option</dd>
+option</dd>
       <dt>Start, Confirm, Cancel</dt><dd>Return to the song
-      selector</dd>
+selector</dd>
     </dl>
 
     <h2>Nonstop Mode</h2>
     <p>
     <img src="images/nonstop.jpg" alt="Screenshot of Nonstop"
-      title="The HARD CORE course" style="float: right" />
-pydance lets you play several songs in a row, also called a
-    "course". In nonstop mode you to select courses to play. The
-    course selector works much like the song selector, except you
-    can't select difficulties. Again, if you have over 60 courses, a
-    folder display will be on by default.</p>
+      title="The HARD CORE course" style="float: right" /> pydance
+lets you play several songs in a row, also called a "course". In
+nonstop mode you to select courses to play. The course selector works
+much like the song selector, except you can't select difficulties.
+Again, if you have over 60 courses, a folder display will be on by
+default.</p>
     <dl>
       <dt>Up, Down</dt><dd>Select a song or folder</dd>
       <dt>Confirm</dt><dd>Open a folder, or start a course</dd>
@@ -603,29 +601,28 @@ list), or exit (if currently viewing the folder list or folders are
 turned off)</dd>
       <dt>Start</dt><dd>Switch to the Player Options screen</dd>
       <dt>Select</dt><dd>Go to a random course, in the current folder
-      (if you're in a folder), or out of all your songs (if you're
-      viewing the folder list)</dd>
+(if you're in a folder), or out of all your songs (if you're viewing
+the folder list)</dd>
     </dl>
     <h3>Included Courses</h3>
     <p>pydance comes with two sets of courses that you can play,
-    without having to install them.</p>
+without having to install them.</p>
     <dl>
       <dt>Player's Picks</dt>
       <dd>
     <img src="images/nonstop-picks.jpg" alt="Player's Picks example"
-	  title="Four Player's Best songs on Manaic" style="float: right" />
-The Player's Picks courses are courses that changed based on
-      what songs you play in the regular game mode. The courses
-      contain songs with your best or worst scores, or songs you have
-      played often ("Likes") or least ("Dislikes"). You must play
-      songs at least once for them to appear anywhere on these lists
-      (even in Dislikes). Songs played in Nonstop or Endless mode
-      don't affect these lists.</dd>
+	  title="Four Player's Best songs on Manaic" style="float:
+	  right" /> The Player's Picks courses are courses that
+changed based on what songs you play in the regular game mode. The
+courses contain songs with your best or worst scores, or songs you
+have played often ("Likes") or least ("Dislikes"). You must play songs
+at least once for them to appear anywhere on these lists (even in
+Dislikes). Songs played in Nonstop or Endless mode don't affect these
+lists.</dd>
       <dt>random.choose(songs)</dt>
       <dd>These courses consist of randomly selected songs, and will
-      be different each time you play them. In the <em>All Random</em>
-      course, even the difficulty you play on is random each
-      time.</dd>
+be different each time you play them. In the <em>All Random</em>
+course, even the difficulty you play on is random each time.</dd>
     </dl>
 
 
@@ -668,16 +665,16 @@ the steps follow.</p>
     <h2>Mapping Keys</h2>
     <p>
     <img src="images/keymap.jpg" alt="The keymap configurator"
-      title="The keymap configurator" style="float: right"/>
-These is the screen where you can set up input. Each direction,
-    plus start and select, can have one keyboard key and one joystick
-    button assigned to it.</p>
+      title="The keymap configurator" style="float: right"/> These is
+the screen where you can set up input. Each direction, plus start and
+select, can have one keyboard key and one joystick button assigned to
+it.</p>
     <p>The key mapping screen is only responds to the keyboard, and
-    isn't affected by your key mappings (so in case you screw up, you
-    can fix it). It can only be controlled by the arrow keys, and
-    enter. Note that if you map your regular arrow keys, enter, or any
-    of the other automatically configured keys here, they will only
-    work as their new function, not their old one.</p>
+isn't affected by your key mappings (so in case you screw up, you can
+fix it). It can only be controlled by the arrow keys, and enter. Note
+that if you map your regular arrow keys, enter, or any of the other
+automatically configured keys here, they will only work as their new
+function, not their old one.</p>
     <dl>
       <dt>Arrow keys</dt>
       <dd>Move the selector (the white highlighted key)</dd>
@@ -752,26 +749,25 @@ badly mess up your input settings, just delete this file to restore
 the controls to their defaults.</p>
 
     <h2>Records</h2>
-    <p><tt><em>rc_path</em>/records</tt> stores your best grades on each
-song. It is also a pickled Python file. Deleting this will reset all
-your grades.</p>
+    <p><tt><em>rc_path</em>/records</tt> stores your best grades on
+each song. It is also a pickled Python file. Deleting this will reset
+all your grades.</p>
 
     <h1>Creating .dance Files</h1>
     <p>.dance is designed to be easily written by hand, and work for
-    all possible dancing or beat games. If you're interested in
-    writing tools to work with .dance files, read the
-    <tt>docs/dance-spec.txt</tt> file included with pydance.</p>
+all possible dancing or beat games. If you're interested in writing
+tools to work with .dance files, read the <tt>docs/dance-spec.txt</tt>
+file included with pydance.</p>
     <p>.dance files are broken up into 3 parts &mdash; the header
-    information (often called the metadata), the text information, and the
-    step information. All parts are in UTF-8 encoding (which is
-    compatible with standard ASCII), and all filenames in .dance files
-    are case-sensitive. If you begin any line with a #, it will be
-    ignored as a comment.</p>
+information (often called the metadata), the text information, and the
+step information. All parts are in UTF-8 encoding (which is compatible
+with standard ASCII), and all filenames in .dance files are
+case-sensitive. If you begin any line with a #, it will be ignored as
+a comment.</p>
     <h2>Header Information</h2>
     <p>The header gives important information about the song that
-    pydance uses to load or categorize it. A sample header (for,
-    mysong.dance) might look
-    like:</p>
+pydance uses to load or categorize it. A sample header (for,
+mysong.dance) might look like:</p>
     <pre>filename mysong.ogg
 title My Song
 artist Me & I
@@ -818,34 +814,34 @@ this file won't be selected for endless mode, random courses, or when
 pressing select.</dd>
       <dt>revision</dt><dd>The last date the file was modified, in
 YYYY.MM.DD format.</dd>
-      <dt>movie</dt><dd>A background movie to play with the
-file. pydance currently only plays MPEG-1 files, but .dance files can
+      <dt>movie</dt><dd>A background movie to play with the file.
+pydance currently only plays MPEG-1 files, but .dance files can
 specify any format.</dd>
     </dl>
     <h2>Text Data</h2>
     <p>The text data section contains a description of the file, and
-    lyrics. Both sections are optional.</p>
+lyrics. Both sections are optional.</p>
     <h3>The Description</h3>
-    <p>The description section contains a description of the song. The format
-roughly follows the DPKG description format: All lines of text start
-with a space. Whitespace, including newlines, is ignored. A period ('.')
-on a line by itself (with a space before it!) is to be interpreted as a
-paragraph separator. An 'end' on a single line, with no space before
-it, ends the description. e.g.</p>
+    <p>The description section contains a description of the song. The
+format roughly follows the DPKG description format: All lines of text
+start with a space. Whitespace, including newlines, is ignored. A
+period ('.') on a line by itself (with a space before it!) is to be
+interpreted as a paragraph separator. An 'end' on a single line, with
+no space before it, ends the description. e.g.</p>
     <pre>DESCRIPTION
- This is a description of the file.
- It is not particularly interesting, but here it is.
+ This is a description of the file. It is not
+ particularly interesting, but here it is.
  Hooray.
  .
  Here is another paragraph.
 end</pre>
     <h3>Lyrics</h3>
-    <p>The lyrics section contains lyric timing information. The format
-of each line is, an integer, a float, and then a string. The integer
-specifies the lyric "channel"; lyrics in the same channel should overwrite
-each other, appear in the same place on the screen, etc. The float is the
-time into the song during which the lyric should appear, irrespective
-of the 'gap' value. e.g.</p>
+    <p>The lyrics section contains lyric timing information. The
+format of each line is, an integer, a float, and then a string. The
+integer specifies the lyric "channel"; lyrics in the same channel
+should overwrite each other, appear in the same place on the screen,
+etc. The float is the time into the song during which the lyric should
+appear, irrespective of the 'gap' value. e.g.</p>
     <pre>LYRICS
 1.0 1 I will be displayed 1 second into the song.
 2.0 2 Two seconds in and elsewhere on the screen!
@@ -853,64 +849,106 @@ of the 'gap' value. e.g.</p>
 end</pre>
     <h2>Step Data</h2>
     <p>Step sections must have at least three lines. First the game,
-    then the difficulty and rating, and at the end, "end". In between
-    that can be any number of step specifiers, e.g.</p>
+then the difficulty and rating, and at the end, "end". In between that
+can be any number of step specifiers, e.g.</p>
     <pre>SINGLE
 MANIAC 8
 q 1000
 q 0001
 end</pre>
     <p>This makes steps for SINGLE (4 panel, 1 player) mode, MANIAC
-    difficulty, with a rating of 7. First a left step, then a right
-    step, and then the song ends.</p>
+difficulty, with a rating of 7. First a left step, then a right step,
+and then the song ends.</p>
     <p>The string of numerals indicates which directions to press at
-    that time; from left to right they are the same as the directions
-    displayed in pydance's top arrows left to right (e.g. left, down,
-    up, right for 4 panel). A 1 indicates a normal arrow or the end of
-    a hold arrow; a 3 indicates the start of a hold arrow; a 5
-    indicates a secret arrow.</p>
-    <p>.dance has the following types of notes (specified by
-    a single lowercase character starting the line) (a "beat" is a
-    non-overlapping but touching pair of arrows, on 1x speed):</p>
+that time; from left to right they are the same as the directions
+displayed in pydance's top arrows left to right (e.g. left, down, up,
+right for 4 panel). A 1 indicates a normal arrow or the end of a hold
+arrow; a 3 indicates the start of a hold arrow; a 5 indicates a secret
+arrow.</p>
+    <p>.dance has the following types of notes (specified by a single
+lowercase character starting the line) (a "beat" is a non-overlapping
+but touching pair of arrows, on 1x speed):</p>
     <table style="width: 80%; margin-left: 10%">
       <tr><td>o</td><td>whole</td><td>4 beats</td></tr>
       <tr><td>h</td><td>1/2</td><td>2 beats</td></tr>
       <tr><td>q</td><td>1/4</td><td>1 beat</td></tr>
       <tr><td>e</td><td>1/8</td><td>0.5 beats</td></tr>
       <tr><td>w</td><td>1/12</td><td>0.3<span style="text-decoration:
-      overline">3</span> beats</td></tr>
+overline">3</span> beats</td></tr>
       <tr><td>s</td><td>1/16</td><td>0.25 beats</td></tr>
       <tr><td>f</td><td>1/24</td><td>0.1<span style="text-decoration:
-      overline">6</span> beats</td></tr>
+overline">6</span> beats</td></tr>
       <tr><td>t</td><td>1/32</td><td>0.125 beats</td></tr>
       <tr><td>u</td><td>1/48</td><td>0.08<span style="text-decoration:
-      overline">3</span> beats</td></tr>
+overline">3</span> beats</td></tr>
       <tr><td>x</td><td>1/64</td><td>0.0625 beats</td></tr>
-      <tr><td>n</td><td>1/192nd</td><td>0.0208<span style="text-decoration:
-      overline">3</span> beats</td></tr>
+      <tr><td>n</td><td>1/192nd</td><td>0.0208<span
+style="text-decoration: overline">3</span> beats</td></tr>
     </table>
-    <p>.dance also has single uppercase character
-    commands. <tt>B&nbsp;[new&nbsp;BPM]</tt> changes the BPM at that
-    point to a new value. <tt>S&nbsp;[seconds]</tt> stops the arrows
-    at that point for a certain number of seconds. <tt>L [channel]
-    [text]</tt> displays a lyric, on a particular channel, with the
-    given text (this lets you have different lyrics for each
-    difficulty).</p>
+    <p>.dance also has single uppercase character commands.
+<tt>B&nbsp;[new&nbsp;BPM]</tt> changes the BPM at that point to a new
+value. <tt>S&nbsp;[seconds]</tt> stops the arrows at that point for a
+certain number of seconds. <tt>L [channel] [text]</tt> displays a
+lyric, on a particular channel, with the given text (this lets you
+have different lyrics for each difficulty).</p>
     <p>If you're making double or couple steps, separate the two
-    players' steps with spaces, like
-    <tt>q&nbsp;1001&nbsp;0110</tt>.</p>
+players' steps with spaces, like <tt>q&nbsp;1001&nbsp;0110</tt>.</p>
     <p>The game modes that pydance supports follows: SINGLE, VERSUS,
-    COUPLE, DOUBLE (these are for 4 panel mode), 3PANEL, 3VERSUS,
-    3COUPLE, 3DOUBLE, 5PANEL etc, 6PANEL etc, 8PANEL etc, 9PANEL etc,
-    EZ2SINGLE, EZ2VERSUS, EZ2COUPLE, EZ2DOUBLE, EZ2REAL, REALVERSUS,
-    REALCOUPLE, REALDOUBLE, PARAPARA, PARAVERSUS, PARACOUPLE,
-    PARADOUBLE, DMX, DMXVERSUS, DMXCOUPLE, DMXDOUBLE. The definitive
-    version of this list is in the <tt>games.py</tt> file. If steps
-    aren't found for a versus mode, the single mode steps will be
-    used. If steps aren't found for any mode but they exist for 4 or 5
-    panel, then steps for every other mode will be autogenerated (but
-    they might not be very fun).</p>
+COUPLE, DOUBLE (these are for 4 panel mode), 3PANEL, 3VERSUS, 3COUPLE,
+3DOUBLE, 5PANEL etc, 6PANEL etc, 8PANEL etc, 9PANEL etc, EZ2SINGLE,
+EZ2VERSUS, EZ2COUPLE, EZ2DOUBLE, EZ2REAL, REALVERSUS, REALCOUPLE,
+REALDOUBLE, PARAPARA, PARAVERSUS, PARACOUPLE, PARADOUBLE, DMX,
+DMXVERSUS, DMXCOUPLE, DMXDOUBLE. The definitive version of this list
+is in the <tt>games.py</tt> file. If steps aren't found for a versus
+mode, the single mode steps will be used. If steps aren't found for
+any mode but they exist for 4 or 5 panel, then steps for every other
+mode will be autogenerated (but they might not be very fun).</p>
+
     <h1>Creating Graphical Themes</h1>
+    <p>The easiest way to explain graphical themes is to look at the
+existing ones, so you should do that before reading on. These are in
+<tt>themes/gfx/NxN</tt>, where N is some number, the dimensions of the
+arrow.</p>
+    <p>Every theme must contain a file <tt>is-theme</tt> (no
+extension) in the same directory.</p>
+    <h2>The Arrows</h2>
+    <p>pydance uses one file per arrow direction, but it can also
+rotate arrows 90 degrees if necessary; so if you have an up arrow and
+a diagonal up right arrow, it can make all 8 directions (minus
+center). Each file is named
+<tt>arr_<em>type</em>_<em>dir</em>_<number>.png</tt>. The "type is one
+of c ("colored" arrow, the ones that scroll", n (the top arrows that
+flash), or s ("stepped", the top arrows that are displayed when you
+step on them). If the type is n, the number must be 0; if the type is
+s, the number must be 4. Otherwise, for color arrows, 0 means on-beat
+arrows (quarter notes), 2 is for half-beat arrows (8th notes), and 1
+and 3 are for all other arrows; 1 and 3 will be alternated between if
+a lot of arrows on the beat or half beat occur in a row.</p>
+    <p>Arrows are animated if there is more than one NxN image tiled
+in them (e.g. a 64x64 arrow that is 128x128 has four frames of
+animation, tiled 2x2). The vertical tiling is animated during the
+space of one beat. The horizontal tiling is animated over beats, and
+loops when it reaches the end. So a 168x112 image for a 56x56 arrow,
+contains six frames of animation (3x2). In the space of one beat, it
+loops over the first three frames, and then over the next beat, it
+goes to the next three frames, and then back to the first three.</p>
+    <h2>The Lifebar</h2>
+    <p>You also need to provide a a lifebar.png, an oni-bar.png, and
+an oni-empty.png. lifebar.png should be 408x28 pixels, at least. This
+is in turn split into two 204x28 images; the left half should be the
+full lifebar, and the right half should be the empty one. If you want
+to animate the lifebar, stack images on top of each other (e.g.
+408x56, 408x84, and so on).</p>
+    <p>oni-bar.png can be any size, and is the "bar" that will be
+displayed in your battery lifebar. It will be scaled to fit depending
+on how much life the player can have. oni-empty.png is a 204x28 image
+that the scaled oni-bar.png image will be displayed over.</p>
+    <h2>Zipping Themes</h2>
+    <p>If you want to distribute your theme as a .zip file
+    (recommended for completed themes), make it so that it unzips to
+    the current directory, e.g. the file names are just <tt>arr_n_d_0.png</tt>
+    instead of <tt>mytheme/arr_n_d_0.png</tt>. Make sure the is-theme
+    file gets included.</p>
 
     <h1>Contact the Developers</h1>
     <h2>Email</h2>
@@ -963,9 +1001,9 @@ because it only played DDR at the time. Now, in addition to being
 possible trademark violation, the name is inaccurate; pydance plays
 many dancing games in addition to Dance Dance Revolution.</dd>
       <dt>What is 'Bemani'?</dt>
-      <dd>Bemani is the name of Konami of Japan's music game
-division, that produces many of the popular arcade dancing and music
-games. Other non-Konami music games are also often called "bemani" by
+      <dd>Bemani is the name of Konami of Japan's music game division,
+that produces many of the popular arcade dancing and music games.
+Other non-Konami music games are also often called "bemani" by
 association. The word itself is a shortening of "Beatmania", the first
 beat game produced by Konami.</dd>
       <dt>Where can I get songs?</dt>
