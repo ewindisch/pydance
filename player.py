@@ -129,42 +129,20 @@ class LifeBarDisp(pygame.sprite.Sprite):
     def __init__(self, playernum, theme, previously = None):
         pygame.sprite.Sprite.__init__(self)
         self.oldlife = self.failed = 0
-        self.life = 25
+        self.life = 50.0
 
         self.image = pygame.Surface((204,28))
-        self.blkbar = pygame.Surface((3,24))
-        self.bugbar = pygame.Surface((2,24))
-        self.bugbar.fill((192,192,192))
         self.grade = None
-        self.deltas = {"V": 0.4, "P": 0.25, "G": 0.0,
-                       "O": -0.5, "B": -2, "M": -4}
-        self.redbar = pygame.image.load(os.path.join(theme.path,
-                                                     'redbar.png')).convert()
-        self.orgbar = pygame.image.load(os.path.join(theme.path,
-                                                     'orgbar.png')).convert()
-        self.yelbar = pygame.image.load(os.path.join(theme.path,
-                                                     'yelbar.png')).convert()
-        self.grnbar = pygame.image.load(os.path.join(theme.path,
-                                                     'grnbar.png')).convert()
+        self.deltas = {"V": 0.8, "P": 0.5, "G": 0.0,
+                       "O": -1.0, "B": -4.0, "M": -8.0}
+        self.empty = pygame.image.load(os.path.join(theme.path,
+                                                     'lifebar-empty.png'))
+        self.full = pygame.image.load(os.path.join(theme.path,
+                                                   'lifebar-full.png'))
 
         self.failtext = fontfx.embfade("FAILED",28,3,(80,32),(224,32,32))
         self.failtext.set_colorkey(self.failtext.get_at((0,0)))
         
-        embossbar = pygame.Surface((204,1))
-        embossbar.fill((128,128,128))
-        self.image.blit(embossbar,(0,0))
-        self.image.blit(embossbar,(-1,1))
-        embossbar.fill((192,192,192))
-        self.image.blit(embossbar,(1,26))
-        self.image.blit(embossbar,(0,27))
-        embossbar = pygame.Surface((1,28))
-        embossbar.fill((128,128,128))
-        self.image.blit(embossbar,(0,0))
-        self.image.blit(embossbar,(1,-1))
-        embossbar.fill((192,192,192))
-        self.image.blit(embossbar,(202,1))
-        self.image.blit(embossbar,(203,0))
-
         self.rect = self.image.get_rect()
         self.rect.top = 30
         self.rect.left = 58 + (320 * playernum)
@@ -176,7 +154,7 @@ class LifeBarDisp(pygame.sprite.Sprite):
       if self.life > 0 and self.deltas.has_key(rating):
         self.oldlife = self.life
         self.life += self.deltas[rating]
-        self.life = min(self.life, 50.0)
+        self.life = min(self.life, 100.0)
        
     def update(self, judges):
       if self.failed: return
@@ -185,28 +163,17 @@ class LifeBarDisp(pygame.sprite.Sprite):
         self.failed = 1
         judges.failed_out = True
         self.life = 0
-      elif self.life > 50.0:
-        self.life = 50.0
+      elif self.life > 100.0:
+        self.life = 100.0
         
       if self.life == self.oldlife: return
 
       self.oldlife = self.life
-      intlife = int(self.life)
-      for j in range(49 - intlife):
-        self.image.blit(self.blkbar, (2 + (intlife + j) * 4, 2))
 
-      self.image.blit(self.bugbar, (202, 2))
-        
-      for j in range(intlife):
-        barpos = intlife - j - 1
-        image = None
-
-        if barpos <= 10: image = self.redbar
-        elif barpos <= 20: image = self.orgbar
-        elif barpos <= 35: image = self.yelbar
-        elif barpos < 50: image = self.grnbar
-
-        if image: self.image.blit(image, (2 + barpos * 4, 2))
+      self.image.set_clip()
+      self.image.blit(self.empty, (0, 0))
+      self.image.set_clip((0, 0, int(202 * self.life / 100.0), 28))
+      self.image.blit(self.full, (0, 0))
 
       if self.failed:
         self.image.blit(self.failtext, (70, 2) )

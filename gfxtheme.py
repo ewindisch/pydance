@@ -34,7 +34,6 @@ class GFXTheme:
 
   def load(self):
     self.arrows = ArrowSet(self.path)
-    self.bars = BarSet(self.path)
 
   def toparrows(self, bpm, ypos, playernum):
     arrs = {}
@@ -201,12 +200,3 @@ class ScrollingArrow:
       states[state].rect.left = left
     # allow access by instance.n or instance.states['n']
     for n in states: self.__dict__[n] = states[n]
-
-class BarSet:
-  def __init__ (self, path, imgtype='png'):
-    bars = {'red': None, 'org':None, 'yel':None, 'grn':None}
-    for color in bars:
-      fn = os.path.join(path, ''.join((color,"bar",'.',imgtype)))
-      bars[color] = SimpleSprite(fn, zindex=BARSZINDEX)
-    self.bars = bars
-    for n in bars: self.__dict__[n] = bars[n]
