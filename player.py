@@ -221,7 +221,7 @@ class OniLifeBarDisp(AbstractLifeBar):
   def __init__(self, playernum, theme, songconf, game):
     AbstractLifeBar.__init__(self, playernum, songconf["onilives"], songconf, game)
 
-    self.life = onilives
+    self.life = songconf["onilives"]
 
     self.deltas = { "O": -1, "B": -1, "M": -1}
     self.empty = theme.theme_data.get_image('oni-empty.png')
