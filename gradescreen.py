@@ -6,6 +6,31 @@ import ui
 
 from constants import *
 
+class GradeSprite(pygame.sprite.Sprite):
+  def __init__(self, center, rating):
+    pygame.sprite.Sprite.__init__(self)
+    rating = rating.lower()
+    if rating == "!!": rating = "ee"
+    self._end = pygame.time.get_ticks() + 3000
+    fn = os.path.join(image_path, "rating-%s.png" % rating)
+    self._image = pygame.image.load(fn).convert()
+    self._center = center
+    self.rect = self._image.get_rect()
+    self.rect.center = center
+
+  def update(self, time):
+    if time < self._end:
+      angle = (self._end - time) / 3.0
+      #print "angle is", angle, time, self._end
+      zoom = (1 - (self._end - time) / 3000.0)
+      self.image = pygame.transform.rotozoom(self._image, angle, zoom)
+      self.image = self.image.convert()
+    else:
+      self.image = self._image
+    self.image.set_colorkey(self.image.get_at([0, 0]))
+    self.rect = self.image.get_rect()
+    self.rect.center = self._center
+
 class StatSprite(pygame.sprite.Sprite):
   def __init__(self, pos, title, count, size, delay):
     pygame.sprite.Sprite.__init__(self)
@@ -122,6 +147,7 @@ class GradingScreen(object):
       StatSprite([400, 146], "Score:", int(plr.score.score), s, 2000),
       StatSprite([400, 180], "TOTAL:", plr.stats.arrow_count, s, 2333)
       ])
+    sprites.add(GradeSprite([98, 183], plr.grade.grade(plr.failed)))
 
     if len(self.players) == 2:
       plr = self.players[1]
@@ -140,6 +166,7 @@ class GradingScreen(object):
         StatSprite([215, 406], "Score:", int(plr.score.score), s, 2000),
         StatSprite([215, 440], "TOTAL:", plr.stats.arrow_count, s, 2333),
         ])
+      sprites.add(GradeSprite([541, 294], plr.grade.grade(plr.failed)))
 
     ui.ui.clear()
     screenshot = False

@@ -22,7 +22,9 @@ class Listener(object):
 
   # Received when an arrow is stepped on or missed.
   # combo is the current combo count. rating is V (marvelous), P
-  # (perfect), G (great), O (okay), B (boo), or M (miss).
+  # (perfect), G (great), O (okay), B (boo), or M (miss), or None,
+  # if no arrow was hit.
+
   # Note that since Combo objects are Listeners, the order Listeners
   # are called in *does* matter in that case.
   # etime is the "proper" time to step.
