@@ -180,11 +180,13 @@ class FolderDisplay:
       self.banner_rect.center = BANNER_CENTER
       self.menuimage = pygame.surface.Surface(ITEM_SIZE)
       self.menuimage.blit(FOLDER_BG, [0, 0])
-      songtext = FONTS[26].render(self.name, 1, colors.WHITE)
+      songtext = FONTS[36].render(self.name, 1, colors.WHITE)
       if songtext.get_size()[0] > ITEM_SIZE[0] - 20:
         songtext = pygame.transform.scale(songtext, [ITEM_SIZE[0] - 20,
                                                      songtext.get_size()[1]])
       self.menuimage.blit(songtext, [10, 5])
+      grouptext = FONTS[20].render("%d songs" % self.numsongs, 1, colors.WHITE)
+      self.menuimage.blit(grouptext, (15, 32))
 
 class SongSelect:
   # FIXME We need to remove playSequence, by refactoring it elsewhere, too
