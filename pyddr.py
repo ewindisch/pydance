@@ -676,7 +676,7 @@ class ComboDisp(pygame.sprite.Sprite):
 
 
 class HoldJudgeDisp(pygame.sprite.Sprite):
-    def __init__(self,playernum):
+    def __init__(self, POS, playernum):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
         self.playernum = playernum
 
@@ -692,8 +692,8 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.image.set_colorkey(self.image.get_at((0,0)))
-        self.rect.top = 112
-        self.rect.left = 48+(320*self.playernum)
+        self.rect.top = POS['top']-8
+        self.rect.left = 60+(320*self.playernum)
 
         self.slotnow = ['','','','']        
         self.slotold = ['','','','']
@@ -1287,9 +1287,9 @@ class ArrowSprite(CloneSprite):
       self.pos = POS
     if (self.pos['mode'] == 'centered') or (self.pos['mode'] == 'switchy'):
       if random.choice([0,1]):
-        self.pos['bot']  = int(236 + (mainconfig['scrollspeed']*576))
+        self.pos['bot'] = int(236 + (mainconfig['scrollspeed']*576))
       else:
-        self.pos['bot']  = int(236 - (mainconfig['scrollspeed']*576))
+        self.pos['bot'] = int(236 - (mainconfig['scrollspeed']*576))
       self.pos['diff'] = float(self.pos['top']-self.pos['bot'])
     self.playernum = playernum
     self.bimage = self.image
@@ -1391,9 +1391,9 @@ class HoldArrowSprite(CloneSprite):
       self.pos = POS
     if (self.pos['mode'] == 'centered') or (self.pos['mode'] == 'switchy'):
       if random.choice([0,1]):
-        self.pos['bot']  = int(236 + (mainconfig['scrollspeed']*576))
+        self.pos['bot'] = int(236 + (mainconfig['scrollspeed']*576))
       else:
-        self.pos['bot']  = int(236 - (mainconfig['scrollspeed']*576))
+        self.pos['bot'] = int(236 - (mainconfig['scrollspeed']*576))
       self.pos['diff'] = float(self.pos['top']-self.pos['bot'])
     self.playernum = playernum
     self.curalpha = -1
@@ -1478,17 +1478,23 @@ class HoldArrowSprite(CloneSprite):
     if self.bottom > 480:
       self.bottom = 480
     if self.bottom < 64:
-      self.bottom = 64
+      if self.pos['top'] < self.pos['bot']:
+        self.bottom = 64
     self.rect.bottom = self.bottom
  
     if self.top > 480:
       self.top = 480
     if self.top < 64:
-      self.top = 64
-    self.rect.top = self.top
+      if self.pos['top'] < self.pos['bot']:
+        self.top = 64
+
+    if self.pos['top'] < self.pos['bot']:
+      self.rect.top = self.top
+    else:
+      self.rect.top = self.bottom
     
 #    print "top",self.top,"bottom",self.bottom
-    holdsize = self.bottom-self.top
+    holdsize = abs(self.bottom-self.top)
     if holdsize < 0:
       holdsize = 0
     self.cimage = pygame.surface.Surface((64,holdsize+64))
@@ -1512,11 +1518,17 @@ class HoldArrowSprite(CloneSprite):
     suddenzone = ( 480 - int(64.0*sudden) )
     alp = 255
     self.curalpha = self.get_alpha()
-    if self.rect.top < hiddenzone:
-      alp = 255-(hiddenzone-self.rect.top)*4
-    if self.rect.top > hiddenzone:
-      if self.rect.top < suddenzone:
-        alp = (suddenzone-self.rect.top)*4
+
+    if self.pos['top'] < self.pos['bot']:
+      atest = self.rect.top
+    else:    # test for alpha using the bottom of the arrow instead of the top in the case of reverse scrolling
+      atest = self.rect.bottom-64
+
+    if atest < hiddenzone:
+      alp = 255-(hiddenzone-atest)*4
+    if atest > hiddenzone:
+      if atest < suddenzone:
+        alp = (suddenzone-atest)*4
     if alp < 0:      alp = 0
     if alp > 255:    alp = 255
     if alp != self.curalpha:
@@ -1750,7 +1762,7 @@ def playSequence(numplayers, playlist):
 
   players = []
   for playerID in range(numplayers):
-    plr = Player(playerID, ARROWPOS, HoldJudgeDisp(playerID), ComboDisp(playerID), DIFFICULTYLIST)
+    plr = Player(playerID, ARROWPOS, HoldJudgeDisp(ARROWPOS,playerID), ComboDisp(playerID), DIFFICULTYLIST)
     players.append(plr)
     
   for songfn, diff in playlist:
