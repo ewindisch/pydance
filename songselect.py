@@ -98,10 +98,10 @@ class SongItemDisplay(object):
         # A postcondition of file parsers is that this is a valid filename
         banner = pygame
         banner = pygame.image.load(info["banner"]).convert()
-        if banner.get_rect().size == (300, 200): # KSF-style banner
+        if list(banner.get_rect().size) == [300, 200]: # KSF-style banner
           self.banner = pygame.transform.rotozoom(banner, 0, 0.4).convert()
           self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
-        if banner.get_rect().size == (93, 92): # Parapara-style banner
+        elif list(banner.get_rect().size) == [93, 92]: # Parapara-style banner
           self.banner = pygame.transform.rotozoom(banner, 0, 0.87).convert()
         elif banner.get_rect().size[0] != banner.get_rect().size[1]:
           self.banner = pygame.transform.scale(banner, BANNER_SIZE)
