@@ -38,6 +38,11 @@
    player's dance mat, or '2' on the keyboard (or on the numeric keypad
    for azerty keyboard users); The second player uses the arrow keys.
 
+   In the song selector, you can hold down start when selecting a song to
+   bring up a screen full of game modifiers, that affect how the arrows
+   are displayed. You can also hold down select (or tab) to bring up a
+   screen of game-wide options, like oni or battle mode.
+
    If you need to exit the game or back out of menus, just press escape.
 
 Nonstop Mode
@@ -52,14 +57,6 @@ Endless Mode
    The Endless Mode option on the Play Game menu takes you into a
    different selector. In this one, you can select a difficulty (either
    by name, or by rating), and just keep playing until you fail.
-
-Oni Mode
-
-   In the Play Game menu, there's an option called Oni Mode. This is a
-   more difficult mode of play where you only have a set amount of life
-   (usually 3-5 bars), and whenever you break a hold or combo, you lose
-   one bar. When your bars run out, the game is over. The only way to get
-   them back is by passing songs.
 
                                Configuring pyDDR
 
@@ -87,18 +84,7 @@ Adding Songs
 
 pyddr.cfg
 
-   There's a ton of options for this program, most of them with confusing
-   names. A complete (as of sometime between 0.6.3 and 0.6.4) list
-   follows.
-
   Gameplay Options
-
-   arrowcolors 1|2|3|4
-          Normally there are three colors of arrows; one for on-beat
-          (quarter notes), one for exactly off-beat (eighth notes), and
-          one for all other kinds (16th, 24th, and so on). If you change
-          this option, you will only see limited colors, which can make
-          the game much harder.
 
    assist 0|1
           In this mode, pyDDR will play a sound when you are supposed to
@@ -109,60 +95,12 @@ pyddr.cfg
           If this is turned off, the game will continue, even when your
           lifebar runs out.
 
-   badknees 0|1
-          If you have trouble with jumps (two or more arrows at once),
-          you can turn this option on to change jumps to one regular
-          arrow.
-
    grading 1|0
           pyDDR will normally display a grade at the end of every song.
           Turning this option off will bring you back to the song
           selector immediately instead.
 
-   hidden [num] (default 0)
-          This makes arrows fade out when they are a certain number of
-          beats before the top arrows. You do, however, still have to hit
-          them. :)
-
-   little 0|1|2|3 (default 0)
-          If you want to try a harder song but want simpler steps, you
-          can set this option. 1 removes 16th notes from the song, 2
-          removes 8th notes, and 3 removes 16th and 8th notes.
-
-   lowestcombo [num] (default 4)
-          The number of greats, perfects, or marvelouses you need in a
-          row before it begins to count as a "combo" (which affects
-          scoring and judging).
-
-   scrollspeed [num] (default 1)
-          You can use this to make the arrows scroll faster or slower
-          (which changes how many are on the screen at any time and the
-          spacing between them). It can be a fractional value, like 0.5
-          or 1.33.
-
-   scrollstyle 0|1|2
-          Normally arrows scroll from bottom to top. If this is 1, they
-          will scroll from top to bottom; if it's 2, they will scroll
-          from both sides towards the center.
-
-   showtoparrows 1|0
-          This removes the visual aid of the arrows at the top, making
-          you pay more attention to the beat of the music.
-
-   sudden [num] (default 0)
-          This makes arrows appear only after they are a certain number
-          of beats up the screen. It's the opposite of hidden.
-
   Graphical Options
-
-   arrowspin 0|1
-          If this option is on, the arrows will spin around in circles as
-          they go up the screen.
-
-   arrowscale [num] (default 1)
-          Arrows normally stay the same size as they go up the screen.
-          This option makes them shrink (if it's less than 1) or grow (if
-          it's more than 1).
 
    bgbrightness [num] (default 127)
           This option determines how bright the background during the
@@ -269,10 +207,10 @@ pyddr.cfg
           'chtn'. The "r" variants swap controls (so player 1 uses the
           arrows, and player 2 uses the letters).
 
-   sortmode 0|1|2|3|4|5 (default 0)
+   sortmode 0|1|2|3|4 (default 0)
           This sets the sorting mode for the song select screen. 0 sorts
-          by filename, 1 by song name, 2 by artist name, 3 by BPM, 4 by
-          difficulty, and 5 by mix.
+          by mix, 1 by song name, 2 by artist name, 3 by BPM, and 4 by
+          difficulty.
 
           This can also be changed by pressing 's' on the song select
           screen.
@@ -293,10 +231,6 @@ pyddr.cfg
           bottom right corner of the screen. With various light detection
           equipment, this can be used to make pyDDR communicate with a
           strobe lighting system.
-
-   vesacompat 0|1
-          This makes pyDDR (try to) work with the old, buggy, obsolete
-          SVGAlib library and drivers on UNIX.
 
                                   Using a Mat
 
@@ -324,7 +258,7 @@ GNU/Linux
 Mac OS X
 
    Plug-and-play, or so I've heard. Just plug in your pad using the USB
-   adapter, and off you go.
+   adapter, and off you go. Parallel port adapters are not supported.
 
 Windows
 
@@ -339,9 +273,6 @@ Other
    button joysticks (and also the 32 button EMSUSB2).
 
                                 Other Programs
-
-   pyDDR comes with a handful of miscellaneous programs to manipulate its
-   step file format, and to help time songs.
 
 any2dance
 
