@@ -122,7 +122,7 @@ class EventManager:
     self.setupKeys()
 
   def setupKeys(self):
-    keys = [{K_RETURN: E_START}, {K_2: E_START}]
+    keys = [{K_RETURN: E_START}, {K_2: E_START, K_KP2: E_START}]
     dirs = (E_UP, E_DOWN, E_LEFT, E_RIGHT)
   
     # Keymap settings. The 'r' varieties are just swapped.
