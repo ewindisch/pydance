@@ -794,6 +794,7 @@ class ReadyGoSprite(pygame.sprite.Sprite):
 def SetDisplayMode(mainconfig):
   try:
     flags = HWSURFACE | DOUBLEBUF
+    if osname = "macosx": flags = 0
     if mainconfig["vesacompat"]: flags = 0
     elif mainconfig["fullscreen"]: flags |= FULLSCREEN
     screen = pygame.display.set_mode((640, 480), flags, 16)
