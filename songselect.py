@@ -28,6 +28,7 @@ difficulty_colors = { "BEGINNER": (210, 210, 210),
                      }
 
 ITEM_SIZE = (344, 60)
+ITEM_X = [240, 250, 270, 300, 340, 390, 460]
 BANNER_LOCATION = (5, 5)
 BANNER_SIZE = (256, 80)
 DIFF_BOX_SIZE = (15, 25)
@@ -152,6 +153,7 @@ class SongSelect:
     self.render()
 
     while ev[1] != E_QUIT:
+      self.oldindex = self.index
       ev = event.poll()
 
       # We keep a constant and mod it by the length of the list, so
@@ -164,26 +166,22 @@ class SongSelect:
         self.index = (self.index - 1) % self.numsongs
         MOVE_SOUND.play()
         scroll_wait = 0
-        song_changed = True
 
       elif ((event.states[(0, E_LEFT)] or event.states[(1, E_LEFT)]) and
-            scroll_wait > 5):
+            scroll_wait > 7):
         self.index = (self.index - 1) % self.numsongs
         MOVE_SOUND.play()
-        song_changed = True
 
       # Down the menu list
       elif ev[1] == E_RIGHT:
         self.index = (self.index + 1) % self.numsongs
         MOVE_SOUND.play()
         scroll_wait = 0
-        song_changed = True
 
       elif ((event.states[(0, E_RIGHT)] or event.states[(1, E_RIGHT)]) and
-            scroll_wait > 5):
+            scroll_wait > 7):
         self.index = (self.index + 1) % self.numsongs
         MOVE_SOUND.play()
-        song_changed = True
 
       # Easier difficulty
       elif (ev[1] == E_UP and ev[0] < len(self.player_diffs)):
@@ -290,14 +288,16 @@ class SongSelect:
 
       elif ev[1] == E_SELECT:
         self.index = random.randint(0, self.numsongs - 1)
-        song_changed = True
 
       # Change sort modes - FIXME: terrible event name
       elif ev[1] == E_SCREENSHOT:
         s = self.songs[self.index]
+        self.scroll_out(self.index)
         mainconfig["sortmode"] = (mainconfig["sortmode"] + 1) % NUM_SORTS
         self.songs.sort(SORTS[mainconfig["sortmode"]])
         self.index = self.songs.index(s)
+        self.oldindex = self.index # We're cheating!
+        self.scroll_in(self.index)
         needs_update = True
 
       elif ev[1] == E_FULLSCREEN:
@@ -308,14 +308,23 @@ class SongSelect:
       # wrong song.
       self.current_song = self.songs[self.index].song
 
-      if song_changed:
+      if self.index != self.oldindex:
+        if self.index == (self.oldindex + 1) % self.numsongs:
+          self.scroll_down()
+        elif self.index == (self.oldindex - 1) % self.numsongs:
+          self.scroll_up()
+        else:
+          self.scroll_out(self.oldindex)
+          self.scroll_in(self.index)
+
         not_changed_for = 0
         song_changed = False
         new_preview = True
         needs_update = True
         pygame.mixer.music.fadeout(500)
 
-      if needs_update: self.render()
+      if needs_update and (not_changed_for or not mainconfig["gratuitous"]):
+        self.render()
 
       # Song preview support
       if previews:
@@ -348,7 +357,7 @@ class SongSelect:
         not_changed_for += 1
 
       scroll_wait += 1
-      pygame.time.delay(30)
+      pygame.time.delay(10)
 
     pygame.mixer.music.fadeout(500)
     pygame.time.delay(500)
@@ -361,14 +370,10 @@ class SongSelect:
     self.screen.blit(self.bg, (0,0))
 
     # The song list
-
-    item_x_loc = [240, 250, 270, 300, 340]
-
-
     for i in range(-4, 5):
       idx = (self.index + i) % self.numsongs
       self.songs[idx].render()
-      x = item_x_loc[abs(i)]
+      x = ITEM_X[abs(i)]
       y = 210 + i * 60
       img = self.songs[idx].menuimage
       img.set_alpha(226 - (40 * abs(i)))
@@ -440,6 +445,66 @@ class SongSelect:
       i += 1
 
     pygame.display.flip()
+
+  def scroll_up(self):
+    if not mainconfig["gratuitous"]: return
+    for i in range(1, 4):
+      p = i/4.0
+      q = 1 - p
+      self.screen.blit(self.bg, (0,0))
+      for k in range(-5, 5):
+        idx = (self.oldindex + k) % self.numsongs
+        self.songs[idx].render()
+        x = ITEM_X[abs(k)] * q + ITEM_X[abs(k + 1)] * p
+        y = 210 + int(60 * (k * q + (k + 1) * p))
+        img = self.songs[idx].menuimage
+        img.set_alpha(226 - int(40 * (abs(k) * q + abs(k + 1) * p)))
+        self.screen.blit(self.songs[idx].menuimage, (x,y))
+      pygame.display.flip()
+
+  def scroll_down(self):
+    if not mainconfig["gratuitous"]: return
+    for i in range(1, 4):
+      p = i/4.0
+      q = 1 - p
+      self.screen.blit(self.bg, (0,0))
+      for k in range(-4, 6):
+        idx = (self.oldindex + k) % self.numsongs
+        self.songs[idx].render()
+        x = ITEM_X[abs(k)] * q + ITEM_X[abs(k - 1)] * p
+        y = 210 + int(60 * (k * q + (k - 1) * p))
+        img = self.songs[idx].menuimage
+        img.set_alpha(226 - int(40 * (abs(k) * q + abs(k - 1) * p)))
+        self.screen.blit(self.songs[idx].menuimage, (x,y))
+      pygame.display.flip()
+
+  def scroll_out(self, index):
+    if not mainconfig["gratuitous"]: return
+    for j in range(240, 841, 50): # position to move to
+      self.screen.blit(self.bg, (0,0))
+      for k in range(-4, 5): # Redraw screen
+        idx = (index + k) % self.numsongs
+        self.songs[idx].render()
+        x = max(j - 50 * k, ITEM_X[abs(k)])
+        y = 210 + k * 60
+        img = self.songs[idx].menuimage
+        img.set_alpha(226 - (40 * abs(k)))
+        self.screen.blit(self.songs[idx].menuimage, (x,y))
+      pygame.display.flip()
+
+  def scroll_in(self, index):
+    if not mainconfig["gratuitous"]: return
+    for j in range(840, 239, -50): # position to move to
+      self.screen.blit(self.bg, (0,0))
+      for k in range(-4, 5): # Redraw screen
+        idx = (index + k) % self.numsongs
+        self.songs[idx].render()
+        x = max(j - 50 * k, ITEM_X[abs(k)])
+        y = 210 + k * 60
+        img = self.songs[idx].menuimage
+        img.set_alpha(226 - (40 * abs(k)))
+        self.screen.blit(self.songs[idx].menuimage, (x,y))
+      pygame.display.flip()
 
   def add_current_song(self):
     self.song_list.append(self.current_song.filename)
