@@ -33,8 +33,10 @@ class SongEvent:
 
 # Step objects, made from SongItem objects
 
+COUPLE_MODES = ["COUPLE"]
+
 class Steps:
-  def __init__(self, song, difficulty, player, lyrics, playmode="SINGLE"):
+  def __init__(self, song, difficulty, player, lyrics, playmode):
     self.playmode = playmode
     self.difficulty = difficulty
     self.feet = song.difficulty[playmode][difficulty]
@@ -69,7 +71,10 @@ class Steps:
     self.event_idx = 0
     self.nevent_idx = 0
 
-    for words in song.steps[playmode][difficulty]:
+    song_steps = song.steps[playmode][difficulty]
+    if playmode in COUPLE_MODES: song_steps = song_steps[player.pid]
+
+    for words in song_steps:
 
       if words[0] == 'W':
         cur_time += float(words[1])

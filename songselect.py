@@ -4,7 +4,7 @@
 import os, string, pygame, random, copy
 from constants import *
 
-import spritelib, announcer, audio, colors, optionscreen
+import spritelib, announcer, audio, colors, optionscreen, error
 
 # FIXME: this needs to be moved elsewhere if we want theming
 ITEM_BG = pygame.image.load(os.path.join(image_path, "ss-item-bg.png"))
@@ -56,6 +56,9 @@ SORT_NAMES = ("mix", "title", "artist", "bpm")
 
 NUM_SORTS = len(SORT_NAMES)
 BY_MIX,BY_NAME,BY_GROUP,BY_BPM = range(NUM_SORTS)
+
+# Game modes where player 1 and player 2 must have the same difficulty
+LOCKED_MODES = ["COUPLE"]
 
 # Make a box of a specific color - these are used for difficulty ratings
 def make_box(color):
@@ -129,16 +132,27 @@ class SongItemDisplay:
 
 class SongSelect:
   # FIXME We need to remove playSequence, by refactoring it elsewhere, too
-  def __init__(self, songitems, screen, playSequence,
-               players = 1, gametype = "SINGLE"):
+  def __init__(self, songitems, screen, playSequence, gametype):
     self.songs = [SongItemDisplay(s) for s in songitems
                   if s.difficulty.has_key(gametype)]
+
+    if len(self.songs) == 0:
+      error.ErrorMessage(screen,
+                         ["You don't have any songs with steps",
+                          "for the game mode (%s) that you" % gametype.lower(),
+                          "selected.",
+                          " ", "Install more songs, or try a different mode."])
+      return
+
     self.bg = pygame.image.load(BACKGROUND).convert()
     ev = (0, E_PASS)
     self.numsongs = len(self.songs)
     self.gametype = gametype
     self.player_image = [pygame.image.load(os.path.join(image_path,
                                                         "player0.png"))]
+
+    if gametype in LOCKED_MODES: self.locked = True
+    else: self.locked = False
 
     self.diff_list = []
     self.song_list = []
@@ -173,7 +187,6 @@ class SongSelect:
     self.songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
     self.update_help()
     self.render(True, True)
-
 
     while ev[1] != E_QUIT:
       self.oldindex = self.index
@@ -258,8 +271,9 @@ class SongSelect:
 
       # Player n+1 hit start, so add a new player
       elif ev[1] == E_START and ev[0] == len(self.player_diffs):
-        self.player_diffs.append(0)
-        self.player_diff_names.append(self.current_song.diff_list[gametype][0])
+        self.player_diffs.append(self.player_diffs[0])
+        self.player_diff_names.append(self.player_diff_names[0])
+
         file = os.path.join(image_path, "player" + str(ev[0]) + ".png")
         self.player_image.append(pygame.image.load(file))
         self.player_configs.append(copy.copy(player_config))
@@ -300,7 +314,7 @@ class SongSelect:
           # playSequence can probably derive the number of players from
           # the length of the other lists
           playSequence(zip(self.song_list, self.diff_list),
-                       self.player_configs)
+                       self.player_configs, gametype)
 
           audio.fadeout(500) # This is the just-played song
 
@@ -365,6 +379,11 @@ class SongSelect:
       # This has to be after events, otherwise we do stuff to the
       # wrong song.
       self.current_song = self.songs[self.index].song
+
+      if self.locked and ev[1] in [E_UP, E_DOWN]:
+        for i in range(len(self.player_diffs)):
+          self.player_diffs[i] = self.player_diffs[ev[0]]
+          self.player_diff_names[i] = self.player_diff_names[ev[0]]
 
       if self.index != self.oldindex:
         for i in range(len(self.player_diff_names)):

@@ -112,4 +112,3 @@ event = input.EventManager()
 FONTS = {}
 for s in (192, 60, 48, 40, 32, 28, 26, 20, 16, 14):
   FONTS[s] = pygame.font.Font(None, s)
-

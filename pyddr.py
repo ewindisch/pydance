@@ -809,7 +809,7 @@ def main():
   r.center = (320, 240)
   for f in fileList:
     try: songs.append(fileparsers.SongItem(f, False))
-    except: print "Error loading " + f
+    except None: print "Error loading " + f
     img = pbar.render(parsedsongs / totalsongs)
     pygame.display.update(screen.blit(img, r))
     parsedsongs += 100.0
@@ -894,7 +894,7 @@ def blatantplug():
   sys.exit()    
 
 
-def playSequence(playlist, configs):
+def playSequence(playlist, configs, playmode):
   global screen
 
   numplayers = len(configs)
@@ -912,7 +912,7 @@ def playSequence(playlist, configs):
 
     for pid in range(len(players)):
       players[pid].set_song(steps.Steps(current_song, diff[pid], players[pid],
-                                        songdata.lyricdisplay),
+                                        songdata.lyricdisplay, playmode),
                                         Judge)
 
     print "Playing", songfn

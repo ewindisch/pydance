@@ -44,7 +44,7 @@ class Constraint:
 
 # Generate a playlist forever
 class FakePlaylist:
-  def __init__(self, songs, constraints, screen, mode = "SINGLE"):
+  def __init__(self, songs, constraints, screen, mode):
     self.songs = [s for s in songs if check_constraints(constraints,
                                                         s.difficulty[mode])]
     self.working = []
@@ -70,8 +70,7 @@ class FakePlaylist:
             [c.diff(song.difficulty[self.mode]) for c in self.constraints])
 
 class Endless:
-  def __init__(self, songitems, screen, playSequence,
-               numplayers = 1, gametype = "SINGLE"):
+  def __init__(self, songitems, screen, playSequence, gametype):
     self.player_configs = [copy.copy(player_config)]
 
     songitems = [s for s in songitems if s.difficulty.has_key(gametype)]
@@ -112,9 +111,9 @@ class Endless:
       if ev[0] == 0 and ev[1] == E_START:
 
         if self.optionscreen(screen):
-          playSequence(FakePlaylist(songitems, self.constraints, screen),
-                       self.player_configs)
-                     
+          playSequence(FakePlaylist(songitems, self.constraints,
+                                    screen, gametype),
+                       self.player_configs, gametype)                     
 
         audio.load(os.path.join(sound_path, "menu.ogg"))
         audio.play(4, 0.0)

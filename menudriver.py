@@ -127,8 +127,9 @@ def do(screen, songdata):
                 E_CREATE: get_tuple }
 
   m = (("Play Game",
-        ["Regular", {E_START: wrap_ctr}, (SongSelect, songdata)],
-        ["Endless", {E_START: wrap_ctr}, (Endless, songdata)],
+        ["Single/Versus", {E_START: wrap_ctr}, (SongSelect, songdata + ("SINGLE",))],
+        ["Couple", {E_START: wrap_ctr}, (SongSelect, songdata + ("COUPLE",))],
+        ["Endless", {E_START: wrap_ctr}, (Endless, songdata + ("SINGLE",))],
         ["Oni Mode", tuple_opt, ('maxonilife',
                                  [(0, 'off'), (3, 'three lives'),
                                   (4, 'four lives'), (5, 'five lives'),
