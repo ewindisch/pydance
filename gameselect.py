@@ -22,6 +22,31 @@ SS = ["Normal", "Nonstop", "Endless"]
 
 VALUES = [GAMES, TYPES, SS]
 
+def make_versus(oldimage):
+  surf = pygame.Surface([350, 300], SRCALPHA, 32)
+  surf.fill([0, 0, 0, 0])
+  newimage = pygame.transform.rotozoom(oldimage, 0, 0.714286)
+  surf.blit(newimage, [0, 0])
+  surf.blit(newimage, [100, 100])
+  return surf
+
+def make_double(oldimage):
+  surf = pygame.Surface([350, 300], SRCALPHA, 32)
+  surf.fill([0, 0, 0, 0])
+  newimage = pygame.transform.rotozoom(oldimage, 0, 0.5)
+  surf.blit(newimage, [0, 80])
+  surf.blit(newimage, [175, 80])
+  return surf
+
+def make_couple(oldimage):
+  surf = pygame.Surface([350, 300], SRCALPHA, 32)
+  surf.fill([0, 0, 0, 0])
+  image1 = pygame.transform.rotozoom(oldimage, -30, 0.714286)
+  image2 = pygame.transform.rotozoom(oldimage, 30, 0.714286)
+  surf.blit(image1, [-30, -40])
+  surf.blit(image2, [60, 20])
+  return surf
+
 IMAGES = {
     "3 panel": "select-3p.png",
     "4 panel": "select-4p.png",
@@ -30,7 +55,11 @@ IMAGES = {
     "8 panel": "select-8p.png",
     "9 panel": "select-9p.png",
     "Parapara": "select-para.png",
-    "DMX": "select-dmx.png"
+    "DMX": "select-dmx.png",
+    "Single": (lambda x: x),
+    "Versus": make_versus,
+    "Double": make_double,
+    "Couple": make_couple,
     }
 
 SELECTORS = {
@@ -161,13 +190,13 @@ class MainWindow(InterfaceWindow):
           SELECTORS[SS[indices[2]]](self._songs, self._courses, self._screen,
                                     MODES.get((VALUES[0][indices[0]],
                                                VALUES[1][indices[1]])))
-          #indices = [0, 0, 0]
-          #for l in self._lists: l.set_index(0)
           active = 0
           self._screen.blit(self._bg, [0, 0])
           pygame.display.update()
         else:
           active += 1
+
+          if active == 1: self._oldimage = self._image._image # FIXME
 
       indices[active] %= len(VALUES[active])
 
@@ -177,7 +206,9 @@ class MainWindow(InterfaceWindow):
         text = VALUES[active][indices[active]]
         self._selected.set_text(text)
         self._description.set_text(DESCRIPTIONS[text])
-        self._image.set_image(IMAGES.get(text))
+        img = IMAGES.get(text)
+        if callable(img): self._image.set_image(img(self._oldimage))
+        else: self._image.set_image(IMAGES.get(text))
 
       if ev in [ui.CONFIRM, ui.START, ui.CANCEL]:
         self._indicator.move([405, self._indicator_y[active]])
@@ -185,7 +216,9 @@ class MainWindow(InterfaceWindow):
         text = VALUES[active][indices[active]]
         self._selected.set_text(text)
         self._description.set_text(DESCRIPTIONS[text])
-        self._image.set_image(IMAGES.get(text))
+        img = IMAGES.get(text)
+        if callable(img): self._image.set_image(img(self._oldimage))
+        else: self._image.set_image(IMAGES.get(text))
 
       self.update()
       pid, ev = ui.ui.poll()

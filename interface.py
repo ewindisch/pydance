@@ -169,11 +169,15 @@ class FlipImageDisplay(pygame.sprite.Sprite):
       self._changed_time = t - (400 - (t - self._changed_time))
     else:
       self._changed_time = t
-    if filename in self._cache:
-      self._image = self._cache[filename]
+
+    if isinstance(filename, str) or filename is None:
+      if filename in self._cache:
+        self._image = self._cache[filename]
+      else:
+        self._image = pygame.image.load(os.path.join(image_path, filename))
+        self._cache[filename] = self._image
     else:
-      self._image = pygame.image.load(os.path.join(image_path, filename))
-      self._cache[filename] = self._image
+      self._image = filename
 
   def update(self, time):
     if time - self._changed_time > 400:
