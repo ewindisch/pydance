@@ -156,7 +156,7 @@ class HoldStatSprite(pygame.sprite.Sprite):
     elif time - self._start < 2000:
       p = (time - self._start) / 1000.0
       self._curgood = min(int(self._goodcount * p), self._goodcount)
-      self._curtotal = min(int(self._totalcount * p), self._curtotal)
+      self._curtotal = min(int(self._totalcount * p), self._totalcount)
       self._render()
     elif self._curgood != self._goodcount:
       self._curgood = self._goodcount
