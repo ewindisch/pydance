@@ -12,11 +12,14 @@ Generic Information
 -------------------
 All strings are case-sensitive. Filenames are case-sensitive. The
 directory separator is '/' regardless of the platform. All text
-is encoded in UTF-8.
+is encoded in UTF-8. Byte-order marking is not allowed.
 
 Enhanced Backus-Naur Form (ENBF) Specification
 ----------------------------------------------
 This is purely the grammar. A semantic explanation is below.
+
+Although this is given as a CFG specification, .dance is designed to be
+parsed by a table-based DFA (as in pydance's fileparsers.py)
 
 Primitives:
 <String> ::= a sequence of characters
@@ -65,7 +68,6 @@ Text Sections:
 <TextSection> ::= [<Description>] [<Lyrics>]
 <Lyrics> ::= "LYRICS" <Newline> (<LyricLine>)+ <EndToken>
 <LyricLine> ::= <Float> <Whitespace> <PosInt> <Whitespace> <LongString> <Newline>
-<BgLine> ::= <Float> <Whitespace> <LongString> <Newline>
 <Description> ::= "DESCRIPTION" <Newline> (<LongString> <Newline>)+ <EndToken>
 
 Step Sections:
