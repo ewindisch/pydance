@@ -27,23 +27,27 @@ BANNER_SIZE = (256, 80)
 DIFF_BOX_SIZE = (15, 25)
 DIFF_LOCATION = (8, 120)
 
-# FIXME: DSU at some point in the future? Almost definitely yes.
-SORTS = ((lambda x, y: cmp(x.song.filename, y.song.filename)),
-         (lambda x, y: cmp(x.song.info.get("song").lower(),
-                           y.song.info.get("song").lower())),
-         (lambda x, y: cmp(x.song.info.get("group").lower(),
-                           y.song.info.get("group").lower())),
-         (lambda x, y: cmp(x.song.info.get("bpm"), y.song.info.get("bpm"))),
-         (lambda x, y: (cmp(str(x.song.info.get("mix")).lower(),
-                            str(y.song.info.get("mix")).lower())
-                        or cmp(x.song.info["song"].lower(),
-                               y.song.info["song"].lower()))
-          )
-         )
+# FIXME: DSU at some point in the future.
+SORTS = {
+  "filename": (lambda x, y: cmp(x.song.filename, y.song.filename)),
+  "subtitle": (lambda x, y: cmp(str(x.song.info.get("subtitle")).lower(),
+                                str(y.song.info.get("subtitle")).lower())),
+  "title": (lambda x, y: (cmp(x.song.info["song"].lower(),
+                              y.song.info["song"].lower()) or
+                          SORTS["subtitle"](x, y))),
+  "artist": (lambda x, y: (cmp(x.song.info["group"].lower(),
+                               y.song.info["group"].lower()) or
+                           SORTS["title"](x, y))),
+  "bpm": (lambda x, y: (cmp(x.song.info["bpm"], y.song.info["bpm"]) or
+                        SORTS["title"](x, y))),
+  "mix": (lambda x, y: (cmp(str(x.song.info.get("mix")).lower(),
+                            str(y.song.info.get("mix")).lower()) or
+                        SORTS["title"](x, y)))
+  }
 
 SORT_NAMES = ("filename", "title", "artist", "bpm", "mix")
 
-NUM_SORTS = len(SORTS)
+NUM_SORTS = len(SORT_NAMES)
 BY_FILENAME,BY_NAME,BY_GROUP,BY_BPM,BY_MIX = range(NUM_SORTS)
 
 # Make a box of a specific color - these are used for difficulty ratings
@@ -158,7 +162,7 @@ class SongSelect:
       pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
       pygame.mixer.music.play(4, 0.0)
 
-    self.songs.sort(SORTS[mainconfig["sortmode"] % NUM_SORTS])
+    self.songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
     self.update_help()
     self.render()
 
@@ -325,7 +329,7 @@ class SongSelect:
         s = self.songs[self.index]
         self.scroll_out(self.index)
         mainconfig["sortmode"] = (mainconfig["sortmode"] + 1) % NUM_SORTS
-        self.songs.sort(SORTS[mainconfig["sortmode"]])
+        self.songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"]]])
         self.index = self.songs.index(s)
         self.oldindex = self.index # We're cheating!
         self.scroll_in(self.index)
