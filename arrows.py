@@ -139,7 +139,7 @@ class AbstractArrow(pygame.sprite.Sprite):
     return alp
 
   def update(self, curtime, curbpm, lbct):
-    if self.sample and curtime >= self.timef1:
+    if self.sample and curtime >= self.endtime:
       self.sample.play()
       self.sample = None
 
