@@ -79,7 +79,7 @@ class QuitGame:
 #  _blit_array(surf,narray.astype(Int8))
 
 #MAIN CONFIG FILE
-#mainconfig = ConfigFile('pyddr.cfg')
+
 mainconfig = Config({ # Wow we have a lot of options
   "gfxtheme": "classic", "djtheme": "none", "songdir": ".",
   "stickycombo": 1,  "lowestcombo": 4,  "totaljudgings": 1,  "stickyjudge": 1,
@@ -102,9 +102,9 @@ mainconfig = Config({ # Wow we have a lot of options
   })
 
 if os.path.isfile("/etc/pyddr.cfg"): mainconfig.load("/etc/pyddr.cfg", True)
+if os.path.isfile("pyddr.cfg"): mainconfig.load("pyddr.cfg")
 if os.path.isfile(os.path.join(rscdir, "pyddr.cfg")):
   mainconfig.load(os.path.join(rscdir, "pyddr.cfg"))
-if os.path.isfile("pyddr.cfg"): mainconfig.load("pyddr.cfg")
 
 DefaultThemeDir = os.path.join('themes','gfx')
 theme = mainconfig['gfxtheme']
@@ -2724,34 +2724,33 @@ def main():
   global p1combo, p2combo, holdkey, holdkey2, sortmode
   text_fadeoff(screen, font, "Prerendering....", (320, 240))
 
-  pygame.mixer.music.fadeout(500)
 #  pygame.time.delay(500)
-
-  stfile = ' '
-  sortmode = int(mainconfig["sortmode"])-1
 
   print "pyDDR ready. Entering song selector...."
 
+  domenu(songs)
+
+
+def playgame(ps, songs):
+  global players
+  players = ps
+  stfile = ' '
   while 1:    # this loop runs while music is playing only
-    if debugmode != 1:
-      print "stfile is ",stfile
-      song,difficulty = songSelect(songs,stfile)
+    print "stfile is ",stfile
     try:
-      if debugmode:
-        stfile = stepspecd
-      else:
-        stfile = song.fooblah
+      song, difficulty = songSelect(songs, stfile)
+    except QuitGame:
+      return
+
+    try:
+      stfile = song.fooblah
       song = Song(stfile)
       pygame.mixer.quit()
       dance(song,players,difficulty)
       #blatantplug()
-      if debugmode:
-        print "Ending game, debug mode finished."
-        break
     except QuitGame:
       pass
     song = difficulty = None
-    sortmode -= 1
     
 class TextSprite(BlankSprite):
   def __init__(self, font=None, size=32, text='', color=WHITE, bold=None, italic=None, underline=None, antialias=1, bkgcolor=None):
@@ -2769,23 +2768,23 @@ class TextSprite(BlankSprite):
     self.image = surf
     self.rect = surf.get_rect()
       
-def domenu():
+def domenu(songs):
   class MenuItem:
     # Simplest option switcher - select the next option in the list
     def opt_rotate(self, initial = 0):
       option_name = self.extras["option_name"]
       options = self.extras["options"]
       if not initial:
-        current_val = config[option_name]
+        current_val = mainconfig[option_name]
         new_val = None
         if current_val == None:
           new_val = options[0]
         else:
           new_val = options[(options.index(current_val) + 1) % len(options)]
-        config[option_name] = new_val
+        mainconfig[option_name] = new_val
         return new_val
       else:
-        return config[option_name]
+        return mainconfig[option_name]
 
     # Slightly more advanced option switcher -
     # the displayed text is the list value, but the option value is
@@ -2794,15 +2793,15 @@ def domenu():
       option_name = self.extras["option_name"]
       options = self.extras["options"]
       if not initial:
-        current_val = config[option_name]
+        current_val = mainconfig[option_name]
         new_val = None
         if current_val == None: new_val = 0
         else:
           new_val = str((int(current_val) + 1) % len(options))
-          config[option_name] = new_val
+          mainconfig[option_name] = new_val
         return options[int(new_val)]
       else:
-        return options[int(config[option_name])]
+        return options[int(mainconfig[option_name])]
 
     # For settings with a range of values - divide into 25 discrete values,
     # cycle through them
@@ -2818,18 +2817,18 @@ def domenu():
           else:
             delta /= (sign * min(delta, 20))
           try:
-            val = int(config[option_name]) + delta
+            val = int(mainconfig[option_name]) + delta
           except ValueError:
-            val = float(config[option_name]) + delta
+            val = float(mainconfig[option_name]) + delta
           val = str(max(self.extras["min"], min(self.extras["max"], val)))
-          config[option_name] = val
+          mainconfig[option_name] = val
           self.add_text = val
           self.render()
           return val
         except KeyError:
-          return config[option_name]
+          return mainconfig[option_name]
       else:
-        return config[option_name]
+        return mainconfig[option_name]
 
     # This is used for lyric & trans colors - it changes the text color
     # of the object and the data value
@@ -2838,24 +2837,24 @@ def domenu():
       option_name = self.extras["option_name"]
       if not initial:
         is_next = False
-        current_val = config[option_name]
+        current_val = mainconfig[option_name]
         for colors in options:
           if colors[0] == current_val:
             print colors[0], "is current_val"
             is_next = True
           elif is_next:
             print colors[0], "was found next"
-            config[option_name] = colors[0]
+            mainconfig[option_name] = colors[0]
             self.add_text = colors[1]
             self.rgb = map((lambda x: int(x)), colors[0].split(","))
             is_next = False
             break
         if is_next: # we were at the end of the list
-            config[option_name] = options[0][0]
+            mainconfig[option_name] = options[0][0]
             self.add_text = options[0][1]
             self.rgb = map((lambda x: int(x)), options[0][0].split(","))
       else:
-        colorval = config[option_name]
+        colorval = mainconfig[option_name]
         for colors in options:
           if colors[0] == colorval:
             self.add_text = colors[1]
@@ -3065,13 +3064,12 @@ def domenu():
   # they got the Pope to declare rats fish, so they could eat them every
   # Friday?
 
-  pygame.init()
-  pygame.event.set_blocked(MOUSEMOTION)
-
-  config = ConfigFile.ConfigFile(["%s/pyddr.cfg" % os.environ["HOME"]], {},
-                                 None, 0)
-
-  screen = pygame.display.set_mode((640,480),DOUBLEBUF|HWSURFACE)
+  if int(mainconfig["vesacompat"]):
+    screen = pygame.display.set_mode((640, 480), 16)
+  elif int(mainconfig["fullscreen"]):
+    screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF|FULLSCREEN, 16)
+  else:
+    screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF, 16)
 
   # Make structures appropriate for the menu
   def onoff_opt(name):
@@ -3161,10 +3159,17 @@ def domenu():
                ("Back", None)
                ]]
 
+  def fullscreen_toggle():
+    mainconfig["fullscreen"] = int(mainconfig["fullscreen"]) ^ 1
+    if mainconfig["fullscreen"] == 1:
+      screen = pygame.display.set_mode((640, 480),
+                                       HWSURFACE|DOUBLEBUF|FULLSCREEN, 16)
+    else:
+      screen = pygame.display.set_mode((640, 480),
+                                       HWSURFACE|DOUBLEBUF, 16)
 
   gr_opts = ['Graphic Options',
-             [('Fullscreen',
-               (lambda : sys.stdout.write("Toggle fullscreen\n"))),
+             [('Fullscreen', fullscreen_toggle),
               ('Arrow Theme', list_opt('gfxtheme', ['classic', 'bryan'])),
               ('Backgrounds', onoff_opt("showbackground")),
               ('BG Brightness', range_opt("bgbrightness", 255)),
@@ -3178,8 +3183,8 @@ def domenu():
 
 
   mainmenu = [['PLAY GAME',
-              [('SINGLE', (lambda : playgame(1) )),
-               ('VERSUS', (lambda : playgame(2) )),
+              [('SINGLE', (lambda : playgame(1, songs) )),
+               ('VERSUS', (lambda : playgame(2, songs) )),
                ('DOUBLE', (lambda : sys.stdout.write("double\n"))),
                ('NONSTOP', (lambda : sys.stdout.write("nonstop\n"))),
                ('UNISON', (lambda : sys.stdout.write("unison\n"))),
@@ -3188,11 +3193,12 @@ def domenu():
                ]],
               ['OPTIONS',
                [game_opts, gr_opts, lyr_opts,
-                ("Preview Songs", onoff_opt("previewmusic")),
+#                ("Preview Songs", onoff_opt("previewmusic")),
                 ("Sort By", list_index_opt("sortmode",
                                            ["file", "song", "group", "bpm",
                                             "difficulty", "mix"])),
-                ("Save Changes", config.update),
+                ("Save Changes",
+                 (lambda : mainconfig.write(os.path.join(os.environ["HOME"], ".pyddr", "pyddr.cfg")))),
                 ("Back", None)
                 ]],
               ('HELP', help_strings),
@@ -3269,7 +3275,7 @@ def domenu():
           screen.blit(blah.items[topitem+i].image,(224,80+i*48))
 
     pygame.display.flip()
-    pygame.time.wait(1)
+    pygame.time.wait(10)
 
 def blatantplug():
   xiphlogo = pygame.image.load("xifish.png").convert()
@@ -3326,8 +3332,9 @@ def blatantplug():
     pygame.time.delay(4)
     
 
-def songSelect(songs,fooblah):
-  global screen,background,eventManager,currentTheme,playmode,sortmode
+def songSelect(songs, fooblah):
+  global screen,background,eventManager,currentTheme,playmode,players
+  pygame.mixer.music.fadeout(500)
 
   # let's calm the impatient crowd
   font = pygame.font.Font(None,40)
@@ -3352,11 +3359,7 @@ def songSelect(songs,fooblah):
   fontdisp = dozoom = 1
   idir = -8
   i = 192
-  # do we have a default sorting mode? should it persist?
-  if int(mainconfig["sortpersist"]):
-    print "keeping persistent sortmode"
-  else:
-    sortmode = int(mainconfig["sortmode"])-1
+  sortmode = int(mainconfig["sortmode"])
   s = 1
   # filter out songs that don't support the current mode (e.g. 'SINGLE')
   songs = filter(lambda song,mode=playmode: song.modes.has_key(mode),songs)
@@ -3382,6 +3385,7 @@ def songSelect(songs,fooblah):
   songSelectTextMax = TextSprite(size=47*2, bkgcolor=BLACK, text='SONG SELECT')
   prevsong = songs[0]
   previewMusic = int(mainconfig['previewmusic'])
+  sortmode -= 1
   songChanged = 1
   while 1:
     boink = 0
@@ -3426,12 +3430,16 @@ def songSelect(songs,fooblah):
         raise QuitGame("Sorry, pyDDR needs at least pygame 1.4.9")
   
     event = eventManager.poll()
-    if   event == E_QUIT:       
+    if  event == E_QUIT:
       pygame.mixer.music.fadeout(1000)
-      raise QuitGame("Quit from songSelect")
+      pygame.mixer.music.load("menu.ogg")
+      pygame.mixer.music.play(4, 0.0)
+      raise QuitGame("Escape pressed")
     elif event < 0:                                  pass # key up
     elif event == E_PASS:                            pass
-    elif event == E_FULLSCREEN:                      pygame.display.toggle_fullscreen()
+    elif event == E_FULLSCREEN:
+      pygame.display.toggle_fullscreen()
+      mainconfig["fullscreen"] = int(mainconfig["fullscreen"]) ^ 1
     elif event == E_SCREENSHOT:                      s = 1
     elif (event == E_LEFT):    difficulty -= 1
     elif (event == E_RIGHT):   difficulty += 1
@@ -3497,7 +3505,6 @@ def songSelect(songs,fooblah):
       print "     to filter the modes it took", songs[songidx].modereadcreationtime - songs[songidx].filereadcreationtime
       '''
     elif (event == E_START2):
-      global players
       players = 2
     elif (event == E_SELECT):
       newidx = int(random.random()*len(songs))
@@ -3753,7 +3760,7 @@ def songSelect(songs,fooblah):
       newlist = []
 
       sortmode += 1
-      if sortmode > 5:
+      if sortmode > 5 or sortmode < 0:
         sortmode = 0
       sortbytext = "sorted by "
       if sortmode == 0:
@@ -3780,6 +3787,9 @@ def songSelect(songs,fooblah):
         sortbytext+= "mix"
         for sorti in songs:
           newlist.append(sorti.mixname)
+
+      if int(mainconfig["sortpersist"]) == 1:
+        mainconfig["sortmode"] = sortmode
 
       print sortbytext
 
