@@ -35,8 +35,8 @@
    for up/down/left/right.
 
    If you want to play a versus game, just hit start on the second
-   player's dance mat, or '2' on the keyboard; The second player uses the
-   arrow keys.
+   player's dance mat, or '2' on the keyboard (or on the numeric keypad
+   for azerty keyboard users); The second player uses the arrow keys.
 
    If you need to exit the game or back out of menus, just press escape.
 
@@ -58,13 +58,13 @@ Oni Mode
    In the Play Game menu, there's an option called Oni Mode. This is a
    more difficult mode of play where you only have a set amount of life
    (usually 3-5 bars), and whenever you break a hold or combo, you lose
-   one bar. When your bars run out, the game is over, and the only way to
-   get them back is by passing songs in nonstop.
+   one bar. When your bars run out, the game is over. The only way to get
+   them back is by passing songs.
 
                                Configuring pyDDR
 
    The easy way to configure pyDDR is to use the in-game configuration
-   menus. Just select the menu item you want to change and hit enter or
+   menus. Just select the menu item you want to change and hit enter, or
    left and right. If you need more precise configuration, read on.
 
    pyDDR reads from configuration files in appropriate places. This means
@@ -88,7 +88,7 @@ Adding Songs
 pyddr.cfg
 
    There's a ton of options for this program, most of them with confusing
-   names. A complete (as of sometime between 0.6.1 and 0.6.2) list
+   names. A complete (as of sometime between 0.6.3 and 0.6.4) list
    follows.
 
   Gameplay Options
@@ -116,7 +116,7 @@ pyddr.cfg
    grading 1|0
           pyDDR will normally display a grade at the end of every song.
           Turning this option off will bring you back to the song
-          selector instead.
+          selector immediately instead.
 
    hidden [num] (default 0)
           This makes arrows fade out when they are a certain number of
@@ -133,15 +133,16 @@ pyddr.cfg
           row before it begins to count as a "combo" (which affects
           scoring and judging).
 
-   reversescroll 0|1
-          Normally arrows scroll from bottom to top. If this is on, they
-          will scroll from top to bottom.
-
-   scrollspeed [num] (default 1.0)
+   scrollspeed [num] (default 1)
           You can use this to make the arrows scroll faster or slower
           (which changes how many are on the screen at any time and the
           spacing between them). It can be a fractional value, like 0.5
           or 1.33.
+
+   scrollstyle 0|1|2
+          Normally arrows scroll from bottom to top. If this is 1, they
+          will scroll from top to bottom; if it's 2, they will scroll
+          from both sides towards the center.
 
    showtoparrows 1|0
           This removes the visual aid of the arrows at the top, making
@@ -186,15 +187,17 @@ pyddr.cfg
 
    gratuitous 1|0
           This turns on some graphical effects that may slow down the
-          game and interface considerably.
+          game and interface considerably, but look nice.
 
    ingamehelp 1|0
           Normally pyDDR displays some messages about how to use the
           menus. If these annoy you, turn this off.
 
-   lyriccolor [color] (default cyan)
-          Set the color that lyrics appear in. Possible values are cyan,
-          aqua, yellow, white, black, red, purple, or orange.
+   lyriccolor [colors] (default cyan)
+          Set the colors that lyrics appear in. Possible values are cyan,
+          aqua, yellow, white, black, red, purple, or orange. If you list
+          more than one color, other lines of lyrics will appear in those
+          colors.
 
    showbackground 1|0
           Many songs in pyDDR and other dancing games have a background
@@ -223,11 +226,6 @@ pyddr.cfg
    totaljudgings [num] (default 1)
           This many judgings will be displayed on the screen at a time.
 
-   transcolor [color] (default aqua)
-          The color of the second line of lyrics (the "translated" line).
-          Possible colors are the same as the ones for the lyriccolor
-          option.
-
   Sound Options
 
    djtheme [themename]
@@ -249,17 +247,12 @@ pyddr.cfg
           this, all new files you get will be wrong, and no one else will
           be able to use your original files.
 
-   mixerclock 1|0
-          Setting this to 0 will make pyDDR use the system clock instead
-          of SDL's internal timing functions. This can lead to drift
-          between the position in the song and the arrows displayed.
-
    onboardaudio 0|1
-          Some systems (especially laptops) use sound cards that resample
-          sound in really stupid ways, which may make pyDDR play songs
-          such that they "drift" in relation to the steps. If you seem to
-          be having drifting issues in all the songs you play, you should
-          try turning this on.
+          Some systems (especially laptops) use sound cards or drivers
+          that resample sound in strange ways, which may make pyDDR play
+          songs such that they "drift" in relation to the steps. If you
+          seem to be having drifting issues in all the songs you play,
+          you should try turning this on.
 
    previewmusic 1|0
           If this is on, the song selection screen will play a brief
@@ -319,8 +312,8 @@ GNU/Linux
    from the 2.4 kernel). Once compiled, just run insmod ddrmat gc=0,7
    (where 7 is the IRQ of your parallel port, which is probably 7). Note
    that your lp (parallel printer) module cannot be loaded at the same
-   time. The normal gamecon.o module may work too, although you may have
-   to rotate your pad 45 degrees.
+   time. The normal gamecon.o module might work too, although you may
+   have to rotate your pad 45 degrees.
 
    USB drivers are much easier. If your kernel has USB joystick support,
    just plug it in and it should work. If it doesn't, make sure the
