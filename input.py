@@ -29,20 +29,19 @@ KEYCONFIG = {
   K_2: E_START2
 }
 
+A4B16 = { }
+A4B16_1 = { }
+A4B16_2 = { }
+
+A6B12 = { 1: E_PGUP, 3: E_PGDN, 8: E_SELECT }
+A6B12_1 = { 4: E_LEFT1, 5: E_RIGHT1, 6: E_DOWN1, 7: E_UP1, 9: E_START1 }
+A6B12_2 = { 4: E_LEFT2, 5: E_RIGHT2, 6: E_DOWN2, 7: E_UP2, 9: E_START2 }
+
 EMSUSB2 = {
-  15: E_LEFT1,
-  13: E_RIGHT1,
-  12: E_UP1,
-  14: E_DOWN1,
-  9: E_START1,
-  1: E_PGUP,
-  3: E_PGDN,
-  31: E_LEFT2,
-  29: E_RIGHT2,
-  28: E_UP2,
-  30: E_DOWN2,
-  25: E_START2,
-  8: E_SELECT
+  1: E_PGUP, 3: E_PGDN, 8: E_SELECT,
+  17: E_PGUP, 20: E_PGDN, 24: E_SELECT,
+  15: E_LEFT1, 13: E_RIGHT1, 12: E_UP1, 14: E_DOWN1, 9: E_START1,
+  31: E_LEFT2, 29: E_RIGHT2, 28: E_UP2, 30: E_DOWN2, 25: E_START2
   }
 
 class EventManager:
@@ -65,10 +64,14 @@ class EventManager:
       if ddrmat.get_numbuttons() == 32 and (ddrmat.get_numaxes() == 11 or
                                             ddrmat.get_numaxes() == 8):
         emsusb2 = i
-      elif (ddrmat.get_numbuttons() == config['mat_buttons'] and
-            ddrmat.get_numaxes() == config['mat_axes']):
+      elif ddrmat.get_numbuttons() == 16 and ddrmat.get_numaxes() == 4:
         if mat == None: mat = i
-        else: mat2 = i
+        else:
+          mat2 = mat
+          mat =i
+      elif ddrmat.get_numbuttons() == 12 and ddrmat.get_numaxes() == 6:
+        if mat == None: mat = i
+        elif mat2 == None: mat2 = i
       ddrmat.quit()
     if emsusb2 != None:
       ddrmat = pygame.joystick.Joystick(emsusb2)
@@ -77,33 +80,26 @@ class EventManager:
       self.handler.set_allowed((JOYBUTTONUP, JOYBUTTONDOWN))
       self.mergeEvents(EMSUSB2, "js" + str(emsusb2))
     elif mat != None:
-      p1jconf = { config["joy_left"]: E_LEFT1,
-                  config["joy_right"]: E_RIGHT1,
-                  config["joy_up"]: E_UP1,
-                  config["joy_down"]: E_DOWN1,
-                  config["joy_start"]: E_START1
-                 }
-      jconf = { config["joy_select"]: E_SELECT,
-                config["joy_pgup"]: E_PGUP,
-                config["joy_pgdown"]: E_PGDN
-                }
-
       ddrmat = pygame.joystick.Joystick(mat)
       ddrmat.init()
-      self.mergeEvents(p1jconf, "js" + str(mat))
+      data = {}
+      if ddrmat.get_numbuttons() == 16:
+        self.mergeEvents(A4B16, "js" + str(mat))
+        self.mergeEvents(A4B16_1, "js" + str(mat))
+      elif ddrmat.get_numbuttons() == 12:
+        self.mergeEvents(A6B12, "js" + str(mat))
+        self.mergeEvents(A6B12_1, "js" + str(mat))
       print "DDR mat 1 initialized: js", mat
       self.handler.set_allowed((JOYBUTTONUP, JOYBUTTONDOWN))
       if mat2 != None:
-        p2jconf = { config["joy_left"]: E_LEFT2,
-                    config["joy_right"]: E_RIGHT2,
-                    config["joy_up"]: E_UP2,
-                    config["joy_down"]: E_DOWN2,
-                    config["joy_start"]: E_START2
-                    }
-        ddrmat2 = pygame.joystick.Joystick(mat2)
-        ddrmat2.init()
-        self.mergeEvents(jconf, "js" + str(mat2))
-        self.mergeEvents(p2jconf, "js" + str(mat2))
+        ddrmat = pygame.joystick.Joystick(mat2)
+        ddrmat.init()
+        if ddrmat.get_numbuttons() == 16:
+          self.mergeEvents(A4B16, "js" + str(mat2))
+          self.mergeEvents(A4B16_2, "js" + str(mat2))
+        elif ddrmat.get_numbuttons() == 12:
+          self.mergeEvents(A6B12, "js" + str(mat2))
+          self.mergeEvents(A6B12_2, "js" + str(mat2))
         print "DDR mat 2 initialized: js", mat2
     else:
       print "No DDR mats found. Not initializing joystick support."
