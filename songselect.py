@@ -10,7 +10,7 @@ import spritelib, announcer
 ITEM_BG = pygame.image.load(os.path.join(image_path, "ss-item-bg.png"))
 NO_BANNER = pygame.image.load(os.path.join(image_path, "no-banner.png"))
 BACKGROUND = os.path.join(image_path, "ss-bg.png")
-MOVE_SOUND = pygame.mixer.Sound(os.path.join(sound_path, "move.wav"))
+MOVE_SOUND = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
 
 # FIXME: We need more difficulties here
 # Also we should merge this with the lyrics colors

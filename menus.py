@@ -81,8 +81,8 @@ class MenuItem:
 class Menu:
 
   bgimage = None
-  click_sound = pygame.mixer.Sound(os.path.join(sound_path, "clicked.wav"))
-  move_sound = pygame.mixer.Sound(os.path.join(sound_path, "move.wav"))
+  click_sound = pygame.mixer.Sound(os.path.join(sound_path, "clicked.ogg"))
+  move_sound = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
   move_sound.set_volume(0.5)
 
   # Menus are defined based on a tree of tuples (submenus) ending

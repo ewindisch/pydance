@@ -1359,7 +1359,7 @@ class ArrowSprite(CloneSprite):
     self.dir = spr.fn[-7:-6]
     if mainconfig['assist']:
       self.playedsound = None
-      self.sample = pygame.mixer.Sound(os.path.join(sound_path, "assist-" + self.dir + ".wav"))
+      self.sample = pygame.mixer.Sound(os.path.join(sound_path, "assist-" + self.dir + ".ogg"))
     else:
       self.playedsound = 1
     self.r = 0
@@ -1463,7 +1463,7 @@ class HoldArrowSprite(CloneSprite):
     self.dir = spr.fn[-7:-6]
     self.playedsound = None
     if mainconfig['assist']:
-      self.sample = pygame.mixer.Sound(os.path.join(sound_path, "assist-" + self.dir + ".wav"))
+      self.sample = pygame.mixer.Sound(os.path.join(sound_path, "assist-" + self.dir + ".ogg"))
     else:
       self.playedsound = 1
     self.r = 0
