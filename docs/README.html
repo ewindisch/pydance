@@ -76,7 +76,7 @@ dl.faq dt { font-weight: bold }
     configuration, read on.</p>
     <p>pyDDR reads from configuration files in appropriate
     places. This means <tt>/etc/pyddr.cfg</tt> and
-    <tt>~/.pyddr/pyddr.cfg</tt> on UNIX,
+    <tt>~/.pyddr/pyddr.cfg</tt> on POSIX,
     <tt>/Library/Preferences/pyDDR/pyddr.cfg</tt> and
     <tt>~/Library/Preferences/pyDDR/pyddr.cfg</tt> on Mac OS X, and
       <tt>pyddr.cfg</tt> in the current directory on all platforms
@@ -115,7 +115,7 @@ dl.faq dt { font-weight: bold }
       your lifebar runs out.</p></dd>
 
       <dt>badknees 0|1</dt>
-      <dd><p>If you have trouble with jumps (two arrows at once), you
+      <dd><p>If you have trouble with jumps (two or more arrows at once), you
       can turn this option on to change jumps to one regular
       arrow.</p></dd>
 
@@ -340,26 +340,18 @@ dl.faq dt { font-weight: bold }
     <h1>Other Programs</h1>
     <p>pyDDR comes with a handful of miscellaneous programs to
     manipulate its step file format, and to help time songs.</p>
-    <h2>dwi2step, msd2step, and step2dwi</h2>
-    <p>These programs convert to and from the popular MSD and DWI file
-    formats. Just run <tt>dwi2step file.dwi</tt> and it should convert
-    the file nicely. If a DWI file works in Dance With Intensity but
-    not after conversion, let us know.</p>
+    <h2>any2dance</h2>
+    <p>This program will convert any file pyDDR can read (such as .step
+      or .dwi files) to pyDDR's native .dance format. In addition to
+      using it on one file, it will recurse directories. It also has a
+      <kbd>--delete</kbd> option to delete the old files once it is done
+      converting them.</p>
     <h2>findbpm</h2>
     <p>This program plays a song and lets you tap a key along with the
     beat. It averages the number of times you tap over the length of
     the song, and calculates a BPM. This method sounds crude, but if
     you have a good sense of rhythm, it's actually highly
     accurate. Run it using <tt>findbpm song.ogg</tt>.</p>
-    <h2>lyrictag</h2>
-    <p>This program helps you add lyrics to step files. To run it, use
-    <tt>lyrictag -s song.ogg -l lyrics.txt -o song.step</tt>. When the
-      highlighted lyric is said in the song, press space to advance
-    the display. If you press a key too early, press backspace to go
-    back in the list.</p>
-    <p>lyrictag will not overwrite lyrics already in a file, so you
-    need to open up the step file and delete the LYRICS section if you
-    want to add new lyrics.</p>
     <h1>FAQ</h1>
       <p>The FAQ is available online at <a
     href="http://www.icculus.org/pyddr/faq.php">http://www.icculus.org/pyddr/faq.php</a>. Please read it before contacting the developers.</p>

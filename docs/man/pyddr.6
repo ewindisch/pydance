@@ -1,4 +1,4 @@
-.TH pyddr 6 "March 28th, 2003"
+.TH pyddr 6 "June 2nd, 2003"
 .SH NAME
 pyddr \- a Dance Dance Revolution simulator using Pygame
 .SH SYNOPSIS
@@ -13,38 +13,45 @@ of dancing.
 .PP
 pyDDR supports most of the features of similar games, such as background
 and banner images for each song, multiple difficulty levels, freeze
-arrows (arrows you have to remain standing on for a length of time),
-and lyric display. pyDDR also allows you to use a real DDR mat if you have
-a Playstation to PC joystick adapter supported by ddrmat kernel module (which
+arrows (arrows you have to remain standing on for a length of time), BPM
+changes and stops, and lyric display. pyDDR also allows you to use a real
+DDR mat if you have
+a Playstation to PC joystick adapter supported by ddrmat kernel module for Linux (which
 is a modified version of the gamecon kernel module), or a Playstation to
-USB joystick adapter and the USB joystick driver. If you lack a mat, you
-can play on the keyboard using the arrows as well, but it's much less fun.
+USB joystick adapter and the USB joystick driver, for any OS. If you lack a mat, you
+can play on the keyboard, but it's much less fun.
 .PP
-You can also make your own step files to new music. \fIstepfile.txt\fR
-included with pyDDR documents the format, or you can use the program
-\fBinstep\fR(1).
+You can also make your own step files to new music, in pyDDR's \fB.dance\fR
+format. \fIdance-spec.txt\fR included with pyDDR documents this format.
+pyDDR can also read its legacy \fB.step\fR format, and the popular Windows
+\fB.dwi\fR format.
 .SH USAGE
-The first player's arrows are controlled by the I, J, K, and L keys,
-and the second player's by the arrow keys. Letting the game wait on
+The first player's arrows and settings are controlled by the I, J, K, and L
+keys, and the second player's by the arrow keys. Letting the game wait on
 the song selection screen will display help messages on the sidebar.
+.PP
+pyDDR is documented more completely in the \fIREADME.html\fR file included
+with it.
 .SH FILES
 .IP /usr/share/games/pyddr/songs,\ /usr/local/share/games/pyddr/songs,\ ~/.pyddr/songs
 By default, pyDDR will look in these directories for your songs, step files,
 and other game data. You can configure this with the \fBsongdir\fR
 option in your pyddr.cfg file.
+.PP
+Note that for DWI files, you will need to put everything (the music file,
+lyric file, background, and banner) in its own separate directory, and
+that directory inside \fIanother\fR subdirectory in the \fIsongs\fR
+folder. This is a limitation of the DWI format; it uses its path name
+and files in the same directory, rather than specifying things in the
+file itself like \fB.dance\fR does.
 .IP /etc/pyddr.cfg,\ ~/.pyddr/pyddr.cfg
 pyDDR configuration files. The settings in your local one override
 the system-wide settings.
 .IP /usr/share/games/pyddr
 Various data needed by pyDDR, such as background music and Python modules.
 .SH AUTHOR
-Brendan Becker <tgz@orotech.net> is the primary author of pyDDR. Joe
-Wreschnig <piman@debian.org> is the maintainer of pyDDR for Debian and the
-author of this manual page. Konami wrote the original "Dance Dance
-Revolution" game.
+Brendan Becker <tgz@orotech.net> and Joe Wreschnig <piman@debian.org>.
 .SH SEE ALSO
-\fBdwi2step\fR(1),
 \fBfindbpm\fR(1),
-\fBlyrictag\fR(1),
-\fBstepshrink\fR(1),
-README.html included with pyDDR.
+README.html included with pyDDR,
+dance-spec.txt included with pyDDR.
