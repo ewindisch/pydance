@@ -1,15 +1,17 @@
 Bugs:
 -----
 Random results in bad hold arrows.
-Some arrows occassionally "black square" rather than explode?
 Hold arrows don't have a grace period.
 Hold arrows are drawn poorly.
 
 General:
 --------
 Our MP3 support is ass.
-We need a way to set the volume in pyao.
 We need a real BTS.
 
 THE FACT THAT ESCAPE IN ENDLESS TAKES YOU TO THE NEXT SONG IS NOT A BUG.
 STOP REPORTING IT.
+
+The whole UI will be getting a rewrite eventually. Rewriting the entire
+UI is a lot of work. Unless you're willing to help (as in, code or
+graphics), don't report things you don't like about the UI as bugs.
