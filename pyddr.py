@@ -1184,11 +1184,11 @@ class ArrowSprite(CloneSprite):
 
     if atest < hiddenzone:
       alp = 255-(hiddenzone-atest)*4
-    if atest > hiddenzone:
+    elif atest > hiddenzone:
       if atest < suddenzone:
         alp = (suddenzone-atest)*4
-    if alp < 0:      alp = 0
     if alp > 255:    alp = 255
+    elif alp < 0:    alp = 0
     if alp != self.curalpha:
       self.image.set_alpha(alp)
 
@@ -1296,19 +1296,15 @@ class HoldArrowSprite(CloneSprite):
     if self.bottom > 480:
       self.bottom = 480
     if self.pos['top'] < self.pos['bot']:
-      if self.bottom < 64 and (self.broken == 0):
+      if self.bottom < 64:
         self.bottom = 64
-      elif self.bottom < 32 and (self.broken):
-        self.bottom = 32
     self.rect.bottom = self.bottom
  
     if self.top > 480:
       self.top = 480
     if self.pos['top'] < self.pos['bot']:
-      if self.top < 64 and (self.broken == 0):
+      if self.top < 64:
         self.top = 64
-      elif self.top < 32 and (self.broken):
-        self.top = 32
 
     if self.pos['top'] < self.pos['bot']:
       self.rect.top = self.top
@@ -1350,11 +1346,13 @@ class HoldArrowSprite(CloneSprite):
 
     if atest < hiddenzone:
       alp = 255-(hiddenzone-atest)*4
-    if atest > hiddenzone:
+    elif atest > hiddenzone:
       if atest < suddenzone:
         alp = (suddenzone-atest)*4
-    if alp < 0:      alp = 0
     if alp > 255:    alp = 255
+    elif alp < 0:    alp = 0
+    if self.broken and (curtime > self.timef1+(0.00025*(60000.0/curbpm))):
+      alp /= 2
     if alp != self.curalpha:
       self.image.set_alpha(alp)
   
