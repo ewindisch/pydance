@@ -12,13 +12,13 @@ BEATS = { 'x': 0.25, 't': 0.5, 'u': 1.0/3.0, 'f': 2.0/3.0,
           'q': 4.0, 'h': 8.0, 'o': 16.0, 'n': 1/12.0 }
 
 # FIXME: This can probably be replaced by something smaller, like a tuple.
+
 class SongEvent:
   def __init__ (self, bpm, when=0.0, feet=None, next=None,
                 extra=None, color=None):
     self.bpm  = bpm
     self.when = when
     self.feet = feet
-    self.next = next
     self.extra = extra
     self.color = color
 
@@ -62,19 +62,19 @@ class Steps:
     cur_bpm = self.bpm
     self.speed = mainconfig['scrollspeed']
     self.lastbpmchangetime = []
-    self.events = SongEvent(when = cur_time, bpm = cur_bpm,
-                            extra = song.difficulty[playmode][difficulty])
+    self.events = [SongEvent(when = cur_time, bpm = cur_bpm,
+                             extra = song.difficulty[playmode][difficulty])]
 
-    tail = self.events
+    self.event_idx = 0
+    self.nevent_idx = 0
 
     for words in song.steps[playmode][difficulty]:
 
       if words[0] == 'W':
         cur_time += float(words[1])
       elif words[0] == 'R':
-        tail.next = SongEvent(when=cur_time,bpm=cur_bpm,extra='READY')
+        self.events.append(SongEvent(when=cur_time,bpm=cur_bpm,extra='READY'))
         coloring_mod = 0
-        tail = tail.next
       elif words[0] in BEATS:
         cando = True
         if ((little == 1 and (coloring_mod % 4 == 1 or
@@ -114,15 +114,13 @@ class Steps:
               feetstep[hold] = 0 # broken stepfile, junk the event
               holding[hold] = 0
 
-          tail.next = SongEvent(when = cur_time, bpm = cur_bpm,
-                                feet = feetstep, extra = words[0],
-                                color = coloring_mod % 4)
+          self.events.append(SongEvent(when = cur_time, bpm = cur_bpm,
+                                       feet = feetstep, extra = words[0],
+                                       color = coloring_mod % 4))
 
           for arrowadder in feetstep:
             if arrowadder & 1:
               self.totalarrows += 1
-
-          tail = tail.next
 
         cur_time += toRealTime(cur_bpm, BEATS[words[0]])
 
@@ -152,28 +150,28 @@ class Steps:
 
   def play(self):
     self.curtime = 0.0
-    self.tickstart = pygame.time.get_ticks()
-    self.head = self.fhead = self.events
+    self.event_idx = self.nevent_idx = 0
     self.playingbpm = self.bpm
 
   def get_events(self):
     events, nevents = [], []
+    idx = self.event_idx
+    nidx = self.nevent_idx
     time = self.curtime = float(audio.get_pos())/1000.0
-    head = self.head
-    fhead = self.fhead
-    while (head and head.when <= (time + 2 * toRealTime(head.bpm, 1))):
-      events.append(head)
-      head = head.next
+    while (idx < len(self.events) and
+           self.events[idx].when <= time + 2 * toRealTime(self.events[idx].bpm, 1)):
+      events.append(self.events[idx])
+      idx += 1
     bpm = self.playingbpm
-    self.head = head
+    self.event_idx = idx
 
-    if head and fhead:
-      ntime = time + toRealTime(head.bpm, 64) / self.speed
-      while fhead and fhead.when <= ntime:
-        self.playingbpm = fhead.bpm
-        nevents.append(fhead)
-        fhead = fhead.next
-      self.fhead = fhead
+    if idx < len(self.events) and nidx < len(self.events):
+      ntime = time + toRealTime(self.events[nidx].bpm, 64) / self.speed
+      while nidx < len(self.events) and self.events[nidx].when <= ntime:
+        self.playingbpm = self.events[nidx].bpm
+        nevents.append(self.events[nidx])
+        nidx += 1
+      self.nevent_idx = nidx
     return events, nevents, time, bpm
 
 # The other half of the old 'Song' object, which is player-indep data
