@@ -25,13 +25,13 @@ class Stats(Listener):
     else: self.ontime += 1
 
     if rating != "M" and rating != None:
-      self._times.append(curtime - etime)
+      self._times.append(etime - curtime)
 
   def times(self):
     s = sum(self._times)
-    s2 = sum([i*i for i in self._times])
     avg = s / len(self._times)
-    stddev = sqrt((s2 - s) / (len(self._times) - 1))
+    s2 = sum([(i - avg)**2 for i in self._times])
+    stddev = sqrt(s2 / (len(self._times) - 1))
     return avg, stddev
 
   def ok_hold(self, pid, time, dir, whichone):
