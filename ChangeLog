@@ -7,6 +7,10 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
+1.0.3 - Like that's possible.
+* An import conflict with python-stats was fixed. This mostly affects
+  Ubuntu users.
+
 1.0.2 - Moist!							[2004.07.06]
 * Defafult announcer theme courtsey of DJ Nz17!
 * Minor typos in the manual fixed.

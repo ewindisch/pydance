@@ -33,10 +33,10 @@ pydance_path = sys.argv[0]
 if osname == "posix":
   pydance_path = os.path.split(os.path.realpath(pydance_path))[0]
 else: pydance_path = os.path.split(os.path.abspath(pydance_path))[0]
-sys.path.append(pydance_path)
+sys.path.insert(0, pydance_path)
 
 if os.path.exists(os.path.join(pydance_path, "pydance.zip")):
-  sys.path.append(os.path.join(pydance_path, "pydance.zip"))
+  sys.path.insert(0, os.path.join(pydance_path, "pydance.zip"))
 
 # Set up some names for commonly referenced directories
 image_path = os.path.join(pydance_path, "images")
