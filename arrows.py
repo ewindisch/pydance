@@ -276,4 +276,4 @@ class HoldArrowSprite(AbstractArrow):
     image.blit(self.bottom_image, [0, holdsize + self.width / 2])
 
     self.rect, self.image = self.scale_spin_battle(image, top, pct)
-    self.set_alpha(curtime, beatsleft, top)
+    self.set_alpha(curtime, beatsleft_bot, top)
