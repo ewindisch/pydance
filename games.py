@@ -11,9 +11,12 @@ class GameType:
 
 
 GAMES = {
-  "SINGLE": GameType(couple = False, directions = ["u", "d", "l", "r"]),
-  "COUPLE": GameType(couple = True, directions = ["u", "d", "l", "r"]),
+  "SINGLE": GameType(couple = False, directions = ["u", "d", "l", "r"],
+                     locked = False),
+  "COUPLE": GameType(couple = True, directions = ["u", "d", "l", "r"],
+                     locked = True),
   }
 
 COUPLE = [mode for mode in GAMES if GAMES[mode].couple]
 SINGLE = [mode for mode in GAMES if not GAMES[mode].couple]
+

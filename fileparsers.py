@@ -369,14 +369,14 @@ class DWIFile(GenericFile):
         if not self.difficulty.has_key(parts[0]):
           self.difficulty[parts[0]] = {}
           self.steps[parts[0]] = {}
-        self.difficulty[parts[0]][parts[1]] = int(parts[2])
+        self.difficulty[parts[0]][parts[1]] = int(float(parts[2]))
         if need_steps: self.parse_steps(parts[0], parts[1], parts[3])
 
       elif len(parts) == 5 and parts[0] in games.COUPLE:
         if not self.difficulty.has_key(parts[0]):
           self.difficulty[parts[0]] = {}
           self.steps[parts[0]] = {}
-        self.difficulty[parts[0]][parts[1]] = int(parts[2])
+        self.difficulty[parts[0]][parts[1]] = int(float(parts[2]))
         if need_steps:
           self.parse_steps(parts[0], parts[1], parts[3])
           self.parse_steps(parts[0], parts[1], parts[4])
@@ -622,6 +622,7 @@ def sorted_diff_list(difflist):
 class SongItem:
 
   defaults = { "valid": 1,
+               "mix": "No Mix",
                "endat": 0.0,
                "preview": (45.0, 10.0),
                "startat": 0.0,
@@ -645,7 +646,7 @@ class SongItem:
         raise RuntimeError
 
     # Default values
-    for k in ("subtitle", "mix", "background", "banner",
+    for k in ("subtitle", "background", "banner",
                 "author", "revision", "md5sum", "movie"):
       if not self.info.has_key(k): self.info[k] = None
 
