@@ -8,11 +8,14 @@ legend:
 ----- - CURRENT
 0.7.3 - In My Pants
 + 6 panel ("solo") and 8 panel support.
++ Double (1 player, both sides) support.
+ - 'totaljudgings' option no longer works (no one was using it anyway...)
 * Song selector UI tweaks (faster animations, nicer folder opening).
 * Respace the arrows to be closer together in single/versus.
 * All 9 directions can always be done on the numeric pad for player 1.
  - azerty 2nd player start key changed to '+' on the numeric pad.
 * Some more speed optimizations for slower processors.
+* 'usepsyco' option (on by default) to try and load the Psyco JIT compiler.
 
 0.7.2 -	Dilaudid, how I love thee                               [2003.07.14]
 + Boost, brake, left, right, mirror, shuffle, and random ("supershuffle").

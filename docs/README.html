@@ -169,10 +169,6 @@ dl.faq dt { font-weight: bold }
       <dt>stickyjudge 1|0</dt>
       <dd><p>This is like stickycombo, but for judgings (good,
       marvelous, and so on), rather than your combo.</p></dd>
-
-      <dt>totaljudgings [num] (default 1)</dt>
-      <dd><p>This many judgings will be displayed on the screen at a
-      time.</p></dd>
     </dl>
     <h3>Sound Options</h3>
     <dl class="options">
@@ -239,6 +235,23 @@ dl.faq dt { font-weight: bold }
       bottom right corner of the screen. With various light detection
       equipment, this can be used to make pydance communicate with a
       strobe lighting system.</p></dd>
+
+<dt>usemad 1|0</dt>
+<dd><p>Try to use the MAD MP3 decoding library, which is able to
+decode MP3 audio (SDL's MP3 decoding library, SMPEG, is unable to do
+this). This only works on a small subset of UNIX systems (this does
+<em>not</em> include Mac OS X), and requires the pyao and pymad
+modules to be installed.</p></dd>
+
+<dt>usepsyco 1|0</dt>
+<dd><p>Try to use the Psyco optimizing compiler for Python (<a
+href="http://psyco.sf.net">http://psyco.sf.net</a>). This is on by
+default, and can give 30-50% speed gains on slower systems. However,
+it also uses substantially more memory (which is usually not a
+problem, since pydance's code memory footprint is small relative to
+its song data). Psyco is currently only available for IA32
+systems.</p></dd>
+
     </dl>
     <h1>Using a Mat</h1>
     <p>The recommended adapter for pydance is the <a
