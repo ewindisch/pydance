@@ -301,13 +301,14 @@ class ArrowFX(Listener, pygame.sprite.Sprite):
 
     style = mainconfig['explodestyle']
     self.rotating, self.scaling = style & 1, style & 2
+    self.stepped(self.pid, self.dir, -1, "V", 0)
     
   def holding(self, yesorno):
     self.holdtype = yesorno
   
   def stepped(self, pid, dir, time, tinttype, combo):
     if pid != self.pid or dir != self.dir: return
-    elif not tinttype or tinttype == "M": return
+    elif tinttype not in self.colors: return
 
     self.combo = combo
     self.presstime = time
@@ -324,6 +325,7 @@ class ArrowFX(Listener, pygame.sprite.Sprite):
 
   def update(self, time):
     steptimediff = time - self.presstime
+    
     if (steptimediff < 0.2) or self.holdtype:
       self.displaying = 1
       self.image = self.tintimg

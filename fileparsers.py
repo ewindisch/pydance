@@ -501,7 +501,7 @@ class DWIFile(MSDFile):
             step_type = DWIFile.modes[possible]
             holdstep = dwifile_steps[steps.pop(0)]
           for i in range(len(holdstep)):
-            if holdstep[i]: step[i] |= 2
+            if holdstep[i]: step[i] |= 3
         steplist.append([step_type] + step)
         current_time += step_type
 
@@ -532,7 +532,7 @@ class DWIFile(MSDFile):
       if steps[0] == "!":
         steps.pop(0)
         val = dwifile_steps[steps[0]]
-        ret = [a | (2 * b) for a, b in zip(ret, val)]
+        ret = [a | (3 * b) for a, b in zip(ret, val)]
       else:
         val = dwifile_steps[steps[0]]
         ret = [a | b for a, b in zip(ret, val)]
