@@ -1,4 +1,8 @@
+# Put up a pretty error message for a variety of programs.
+
 from constants import *
+
+# FIXME: We should word-wrap text so we don't have to pass in a list.
 
 class ErrorMessage(object):
   def __init__(self, screen, lines):
