@@ -6,6 +6,11 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
+0.7.1 - OUCH MY BLADDER                                         [2003.XX.XX]
++ Support for COUPLE mode.
+ - any2dance doesn't always convert COUPLE from DWI to .dance correctly.
++ New player options screen (hold down start in the song selector).
+
 0.7.0 - Applesauce makes the apples go yonder                   [2003.06.04]
 + More optimizations from JZig (movies this time)
 + New file formats

@@ -20,13 +20,13 @@ WHITE = color["white"]
 BLACK = color["black"]
 
 def brighten(color, diff = 64):
-  return tuple([min(x + diff, 255) for x in color])
+  return [min(x + diff, 255) for x in color]
 
 def darken(color, diff = 64):
-  return tuple([max(x - diff, 0) for x in color])
+  return [max(x - diff, 0) for x in color]
 
 def darken_div(color, div = 3.5):
-  return tuple([x / div for x in color])
+  return [x / div for x in color]
 
 def average(clr1, clr2, w = 0.5):
-  return tuple([int((c1 * w + c2 * (1 - w))) for c1, c2 in zip(clr1, clr2)])
+  return [int((c1 * w + c2 * (1 - w))) for c1, c2 in zip(clr1, clr2)]

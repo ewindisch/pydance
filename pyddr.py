@@ -12,17 +12,14 @@ from constants import *
 
 from util import toRealTime
 from announcer import Announcer
-from config import Config
-from gfxtheme import GFXTheme
 from player import Player
 from spritelib import *
 
 from pygame.sprite import RenderUpdates
 
 import fontfx, menudriver, fileparsers, colors, gradescreen, steps, audio
-import optionscreen
 
-import os, sys, random, operator, string, error, util, getopt
+import os, sys, random, operator, error, util, getopt
 
 os.chdir(pyddr_path)
 
@@ -321,7 +318,6 @@ class ComboDisp(pygame.sprite.Sprite):
       self.rect.left=self.centerx - width/ 2
     else :
       self.image = self.space #display the blank image
- 
 
 class fpsDisp(pygame.sprite.Sprite):
     def __init__(self):
@@ -537,7 +533,7 @@ class ArrowSprite(CloneSprite):
     top = self.top
     
     if len(lbct) == 0:
-      onebeat = float(60000.0/curbpm)/1000
+      onebeat = float(60.0/curbpm) # == float(60000.0/curbpm)/1000
       doomtime = self.endtime - curtime
       beatsleft = float(doomtime / onebeat)
       top = top - int( (beatsleft/8.0*self.speed)*self.diff)
@@ -546,7 +542,7 @@ class ArrowSprite(CloneSprite):
       bpmbeats = 0
       for bpmsub in lbct:
         if bpmsub[0] <= self.endtime:
-          onefbeat = float(60000.0/oldbpmsub[1])/1000
+          onefbeat = float(60.0/oldbpmsub[1]) # == float(60000.0/curbpm)/1000
           bpmdoom = bpmsub[0] - oldbpmsub[0]
           bpmbeats = float(bpmdoom / onefbeat)
           top = top - int(bpmbeats*self.diff/8.0 * self.speed)
@@ -756,17 +752,10 @@ class HoldArrowSprite(CloneSprite):
 
 def SetDisplayMode(mainconfig):
   try:
-    if mainconfig["vesacompat"]:
-      screen = pygame.display.set_mode((640, 480), 16)
-    
-    elif mainconfig["fullscreen"]:
-      if osname == "macosx":
-        screen = pygame.display.set_mode((640, 480), FULLSCREEN, 16)
-      else:
-        screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF|FULLSCREEN, 16)
-    
-    else:
-      screen = pygame.display.set_mode((640, 480), HWSURFACE|DOUBLEBUF, 16)
+    flags = HWSURFACE | DOUBLEBUF
+    if mainconfig["vesacompat"]: flags = 0
+    elif mainconfig["fullscreen"]: flags |= FULLSCREEN
+    screen = pygame.display.set_mode((640, 480), flags, 16)
   except:
     print "Can't get a 16 bit display!" 
     sys.exit()
@@ -777,9 +766,6 @@ def main():
 
   print "pyDDR, by theGREENzebra (tgz@clickass.org)"
   print "Initialising.."
-
-  # set up the screen and all that other stuff
-  pygame.init()
 
   # FIXME Debug mode has been broken for like, 4 releases, take it out
 

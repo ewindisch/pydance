@@ -9,10 +9,10 @@ import spritelib, announcer, audio, colors, optionscreen, error
 # FIXME: this needs to be moved elsewhere if we want theming
 ITEM_BG = pygame.image.load(os.path.join(image_path, "ss-item-bg.png"))
 NO_BANNER = pygame.image.load(os.path.join(image_path, "no-banner.png"))
+NO_BANNER.set_colorkey(NO_BANNER.get_at((0, 0)))
 BACKGROUND = os.path.join(image_path, "ss-bg.png")
 MOVE_SOUND = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
 
-# FIXME: We need more difficulties here
 difficulty_colors = { "BEGINNER": colors.color["white"],
                       "LIGHT": colors.color["yellow"],
                       "BASIC": colors.color["orange"],
@@ -95,8 +95,8 @@ class SongItemDisplay:
         else:
           # One of the older banners that we need to rotate
           # Don't scale, because it's hard to calculate and looks bad
-          self.banner = pygame.transform.rotate(banner,-45)
-          self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
+          banner.set_colorkey(banner.get_at((0,0)), RLEACCEL)
+          self.banner = pygame.transform.rotate(banner, -45)
       else:
         self.banner = NO_BANNER
         self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)

@@ -64,6 +64,7 @@ class Steps:
     cur_beat = 0
     cur_bpm = self.bpm
     self.speed = player.speed
+    self.nbeat_offset = 64 / player.speed
     self.lastbpmchangetime = []
     self.events = [SongEvent(when = cur_time, bpm = cur_bpm, beat = cur_beat,
                              extra = song.difficulty[playmode][difficulty])]
@@ -177,7 +178,7 @@ class Steps:
     self.event_idx = idx
 
     if idx < len(self.events) and nidx < len(self.events):
-      nbeat = self.events[idx].beat + (64 / self.speed)
+      nbeat = self.events[idx].beat + self.nbeat_offset
       while (nidx < len(self.events) and self.events[nidx].beat <= nbeat):
         self.playingbpm = self.events[nidx].bpm
         nevents.append(self.events[nidx])
@@ -185,7 +186,7 @@ class Steps:
       self.nevent_idx = nidx
     return events, nevents, time, bpm
 
-# The other half of the old 'Song' object, which is player-indep data
+# Player-indep data generated from SongItem.
 
 class SongData:
   def __init__(self, song):
