@@ -204,3 +204,8 @@ class OniLifeBarDisp(AbstractLifeBar):
     elif self.life < 0: self.gameover = True
 
     if self.gameover: self.image.blit(self.failtext, (70, 2) )
+
+bars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp,
+        TugLifeBarDisp]
+
+NORMAL, ONI, DROP, SUCK, TUG = range(5)

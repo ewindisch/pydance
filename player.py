@@ -1,5 +1,4 @@
 from constants import *
-from lifebars import *
 from util import toRealTime
 from gfxtheme import GFXTheme
 from judge import Judge
@@ -7,6 +6,7 @@ from judge import Judge
 from pygame.sprite import RenderUpdates, RenderClear
 
 import fontfx, colors, steps, random
+import lifebars
 
 # This class keeps an ordered list of sprites in addition to the dict,
 # so we can draw in the order the sprites were added.
@@ -658,9 +658,6 @@ class HoldArrowSprite(pygame.sprite.Sprite):
 
 class Player(object):
 
-  lifebars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp,
-              TugLifeBarDisp]
-
   def __init__(self, pid, config, songconf, game):
     self.theme = GFXTheme(mainconfig.get("%s-theme" % game.theme, "default"),
                           pid, game)
@@ -674,8 +671,8 @@ class Player(object):
     
     self.score = ScoringDisp(pid, "Player " + str(pid), game)
     self.judging_disp = JudgingDisp(self.pid, game)
-    self.lifebar = Player.lifebars[songconf["lifebar"]](pid, self.theme,
-                                                        songconf, game)
+    Lifebar = lifebars.bars[songconf["lifebar"]]
+    self.lifebar = Lifebar(pid, self.theme, songconf, game)
     self.judging_list = []
     self.combos = ComboDisp(pid, game)
     
