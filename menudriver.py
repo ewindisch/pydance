@@ -148,6 +148,8 @@ def do(screen, songdata):
           ("9pl-theme", ThemeFile.list_themes("9PANEL"))],
          ["Small 9 Panel", rotate_opt,
           ("9ps-theme", ThemeFile.list_themes("9VERSUS"))],
+         ["Parapara", rotate_opt,
+          ("para-theme", ThemeFile.list_themes("PARAPARA"))],
          ["Back", None, None]
          ),
         ["Back", None, None]

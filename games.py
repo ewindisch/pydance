@@ -91,7 +91,8 @@ GAMES = {
   "9DOUBLE": GameType(players = 1, dirs = "wlkdcuzrg", width = 32,
                       double = True, theme = "9ps"),
 
-  "PARAPARA": GameType(players = 1, dirs = "lkuzr", theme = "para"),
+  "PARAPARA": GameType(players = 1, dirs = "lkuzr", width = 48,
+                       theme = "para"),
   "PARAVERSUS": GameType(players = 2, dirs = "lkuzr", width = 48,
                          theme = "para"),
   "PARACOUPLE": GameType(players = 2, couple = True, dirs = "lkuzr",
