@@ -1,5 +1,5 @@
 # These parse various file formats describing steps.
-# Please read docs/fileparsers.txt and docs/dance-spec.txt
+# Please read docs/dance-spec.txt
 
 import colors, audio, games, stepfilters
 
