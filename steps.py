@@ -55,6 +55,8 @@ class Steps:
     coloring_mod = 0
     cur_time = float(self.offset)
     cur_bpm = self.bpm
+    self.speed = mainconfig['scrollspeed']
+    self.minbpm = self.bpm
     self.lastbpmchangetime = []
     self.events = SongEvent(when = cur_time, bpm = cur_bpm,
                             extra = song.difficulty[playmode][difficulty])
@@ -131,9 +133,12 @@ class Steps:
       elif words[0] == "B":
         cur_bpm = words[1]
         self.lastbpmchangetime.append([cur_time, cur_bpm])
+        if cur_bpm < self.minbpm: self.minbpm = cur_bpm
 
       elif words[0] == "S":
+        self.lastbpmchangetime.append([cur_time, 1e-127]) # This is zero
         cur_time += float(words[1])
+        self.lastbpmchangetime.append([cur_time, cur_bpm])
 
       elif words[0] == "L" and lyrics:
         lyrics.addlyric(cur_time - 0.4, words[2], words[1])
@@ -155,17 +160,16 @@ class Steps:
     time = self.curtime = float(pygame.mixer.music.get_pos())/1000.0
     head = self.head
     fhead = self.fhead
-    arrowtime = None
-    bpm = None
     while (head and head.when <= (time + 2 * toRealTime(head.bpm, 1))):
       events.append(head)
       head = head.next
+    bpm = None
     self.head = head
 
     if head and fhead:
       bpm = self.playingbpm
       arrowtime = 512.0 / bpm
-      ntime = time + arrowtime * 3
+      ntime = time + arrowtime * 2/self.speed # FIXME We need real math here
       while fhead and fhead.when <= ntime:
         self.playingbpm = fhead.bpm
         nevents.append(fhead)

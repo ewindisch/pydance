@@ -1296,10 +1296,9 @@ def dance(song, players, prevscr):
       if len(plr.steps.lastbpmchangetime) > 0:
         if (curtime >= plr.steps.lastbpmchangetime[0][0]):
           nbpm = plr.steps.lastbpmchangetime[0][1]
-          for plr in players:
-            plr.change_bpm(nbpm)
-            print "Last changed BPM at", plr.steps.lastbpmchangetime[0]
-            plr.steps.lastbpmchangetime.pop(0)
+          plr.change_bpm(nbpm)
+          print "Last changed BPM at", plr.steps.lastbpmchangetime[0]
+          plr.steps.lastbpmchangetime.pop(0)
      
     for plr in players: plr.check_sprites(curtime)
 

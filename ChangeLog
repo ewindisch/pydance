@@ -6,16 +6,15 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
-0.6.4 - We're Hardcore!						[2003.XX.XX]
+0.6.4 - We're Hardcore!						[2003.05.30]
 + New step file parsers
   + Beginner and hardcore (smaniac/oni/challenge) difficulty.
-+ New arrow scrolling mode, 'centered'.
 + New hold arrow display
 - 'mixerclock' option removed (it's now the only timing method).
 - 'transcolor' option removed in favor of new 'lyriccolor' syntax.
 * Bug fixes, optimizations, whippings, etc.
-  + Most notably, hold arrows are working wonderfully now.
-  + Also, reconvert any songs with BPM changes with the new dwi2step.
+  + Most notably, holds, bpm changes, and stops are working much nicer now.
+    - But may require reconversion with dwi2step.
 
 0.6.3 - Reasonable Starting Times!				[2003.05.17]
 + New song loading display and algorithm (at least 4-5 times faster).
