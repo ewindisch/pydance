@@ -3415,7 +3415,7 @@ def songSelect(songs, players):
         pygame.mixer.music.set_volume(10.0-timesince)
       if timesince > 10.0:
         pygame.mixer.music.set_volume(0)
-        pygame.mixer.music.pause()
+        pygame.mixer.music.stop()
     else:
       pygame.mixer.music.load("menu.ogg")
       try:
@@ -3427,6 +3427,8 @@ def songSelect(songs, players):
     event = eventManager.poll()
     if  event == E_QUIT:
       pygame.mixer.music.fadeout(1000)
+      pygame.time.delay(1000)
+      pygame.mixer.music.stop()
       pygame.mixer.music.load("menu.ogg")
       pygame.mixer.music.play(4, 0.0)
       pygame.mixer.music.set_volume(1.0)
