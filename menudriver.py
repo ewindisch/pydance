@@ -1,6 +1,6 @@
 # Code to construct pyDDR's menus
 
-import pygame, menus, os, sys
+import pygame, menus, os, sys, copy
 
 from constants import *
 from announcer import Announcer
@@ -50,6 +50,29 @@ def fullscreen_toggle(dummy):
   pygame.display.toggle_fullscreen()
   return None, None
 
+def get_tuple(name, list):
+  for item in list:
+    if item[0] == mainconfig[name]:
+      return None, item[1]
+  return None, "custom: " + str(mainconfig[name])
+
+def switch_tuple(name, list):
+  next = False
+  for item in list:
+    if next:
+      mainconfig[name] = item[0]
+      next = False
+      break
+    elif item[0] == mainconfig[name]:
+      next = True
+  if next: mainconfig[name] == list[0][0]
+  return get_tuple(name, list)
+
+def switch_tuple_back(name, list):
+  list = copy.copy(list)
+  list.reverse()
+  return switch_tuple(name, list)
+
 def do(screen, songselect, songdata):
 
   onoff_opt = { E_START: switch_onoff, E_CREATE: get_onoff }
@@ -61,12 +84,17 @@ def do(screen, songselect, songdata):
                        E_LEFT: switch_rotate_index_back,
                        E_RIGHT: switch_rotate_index,
                        E_CREATE: get_rotate_index }
+  tuple_opt = { E_START: switch_tuple,
+                E_LEFT: switch_tuple_back,
+                E_RIGHT: switch_tuple,
+                E_CREATE: get_tuple }
 
   m = (["Play Game", {E_START: songselect}, songdata],
        ("Game Options",
         ["Autofail", onoff_opt, ("killsongonfail",)],
         ["Announcer", rotate_opt, ("djtheme", Announcer.themes())],
         ["Reverse", onoff_opt, ("reversescroll",)],
+        ["Speed", rotate_opt, ('scrollspeed', [0.5, 1, 1.5, 2, 4, 8])],
         ["Little", rotate_index_opt,
          ("little", ("show all", "no 16ths", "no 8ths",
                              "no 8ths or 16ths"))],
@@ -81,11 +109,16 @@ def do(screen, songselect, songdata):
         ["Back", None, None]
         ),
        ("Graphic Options",
-        ["Fullscreen", {E_START: fullscreen_toggle}, (None,)],
         ["Graphics", rotate_opt, ('gfxtheme', GFXTheme.themes())],
         ["Exploding", rotate_index_opt,
          ('explodestyle', ('none', 'rotate', 'scale', 'rotate & scale'))],
         ["Backgrounds", onoff_opt, ('showbackground',)],
+        ["Brightness", tuple_opt, ('bgbrightness',
+                                              [(32, 'very dark'),
+                                               (64, 'dark'),
+                                               (127, 'normal'),
+                                               (192, 'bright'),
+                                               (255, 'very bright')])],
         ["Lyrics", onoff_opt, ("showlyrics",)],
         ["Main Lyrics", rotate_opt, ("lyriccolor", lyric_colors.keys())],
         ["Other Lyrics", rotate_opt, ("transcolor", lyric_colors.keys())],

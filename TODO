@@ -18,3 +18,8 @@ add to it.
    - This should remove fastSong.
    - Possible 0.6.3.
  - DWI loader natively using the SongFile interface.
+
+Misc:
+md5 checksums in .step files for the music they go with (wait for rewrite)
+new song select screen
+x

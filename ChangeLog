@@ -1,20 +1,19 @@
-pyDDR Changelog and Roadmap
+pyDDR ChangeLog
 
 legend:
 + new feature added or made an existing one better
 - removed a feature, or something bad happened
 * fixed a bug
 
-goals
-0.2.x - judge all steps correctly (EG. judges up+left as a pair)
-0.3.x - grades the dancer, even if it's in the console
-0.4.x - song selector
-0.6.x - supports all the step file options
-0.7.x - completely functional from start of song to end of grading
-0.9.x - trippy gfx, sfx (announcer?
-1.0.x - menus
-
 ----- - CURRENT
+0.6.2 - No More Ugly-Ass Buttons
+- Fullscreen switching during the game doesn't work on MacOS X.
+  - Use the configuration file instead, for now.
++ New game menu display.
++ Better theme detection and configuration support.
++ The 'badknees' option will remove jumps.
+* Once again, numerous cleanups and bugs fixed.
+
 0.6.1 - The second one
 + Experimental install system
   + Currently only works on Windows (and doesn't do much) and UNIX.
