@@ -188,6 +188,8 @@ class SongData:
 
     self.crapout = 0
 
+    self.filename = song.filename
+
     clrs = [colors.color[c] for c in mainconfig["lyriccolor"].split("/")]
     clrs.reverse()
     self.lyricdisplay = Lyrics(clrs)

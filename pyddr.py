@@ -1092,7 +1092,7 @@ def dance(song, players, prevscr):
   song.init()
 
   if song.crapout != 0:
-    util.ErrorMessage(screen, ("The audio file for this song", song.file,
+    util.ErrorMessage(screen, ("The audio file for this song", song.filename,
                                "could not be found."))
     return False # The player didn't fail.
   
