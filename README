@@ -30,19 +30,23 @@
 Controls
 
    All instructions are given in terms of directions. By default, for
-   player 1, this means the uiojklm,. keys on a qwerty keyboard, or the
-   numeric pad for player 2. "Start" refers to enter, and 'select' refers
-   to tab, or 0 on the numeric pad. Configuration notes for a dvorak
-   keyboard are given later.
+   player 1, this means the number pad on a qwerty keyboard, or uiojklm,.
+   for player 2. "Start" refers to enter, and "select" refers to tab, or
+   0 on the numeric pad. If you are using a dvorak keyboard, or a
+   keyboard without a number pad, you can remap the keys in Interface
+   Options / Map Keys.
+
+   In addition, unless mapped otherwise, the arrow keys will always
+   control player 1.
 
 Starting the Game
 
    To play the game, just select "Play Game" from the menu. Use left,
    right, and start, to select what directions you want to use, how many
-   people you want playing, and whether you want to use the song selector
-   or random endless songs. Once in the song selector, use left and right
-   to select a song, up and down to change your difficulty, and start to
-   start playing.
+   people you want playing, and whether you want to use the song
+   selector, course selector, or random endless songs. Once in the song
+   selector, use left and right to select a song, up and down to change
+   your difficulty, and start to start playing.
 
    Oh wait, now there's all these arrows scrolling up the screen - what
    should you do? Actually, it's pretty simple. When the arrows get to
@@ -59,10 +63,10 @@ Starting the Game
 Nonstop Mode
 
    From the normal song selector you can set up Nonstop Mode. Select a
-   song and difficulty you want to play, and press down left. That song
-   is now on your nonstop playlist. You can add a lot of songs this way,
+   song and difficulty you want to play, and press up left. That song is
+   now on your nonstop playlist. You can add a lot of songs this way,
    then play them all in succession without returning to the song
-   selector. To remove a song, press up left.
+   selector. To remove a song, press down left.
 
 Endless Mode
 
@@ -86,13 +90,40 @@ Endless Mode
 
 Adding Songs
 
-   To add songs, you just need to put the .step file, music file, and (if
-   they exist) background and banner files into one of your song
+   To add songs, you just need to put the .dance file, music file, and
+   (if they exist) background and banner files into one of your song
    directories. This is the songdir configuration variable. On POSIX
    systems this is /usr/share/games/pydance/songs,
    /usr/local/share/games/pydance/songs, and ~/.pydance/songs. On
    Windows, this is anywhere in the directory pydance was installed in.
    On Mac OS X, this is the 'pydance Songs' folder in your Music folder.
+   You can change this by editing pydance.cfg.
+
+   If your files are .sm, .dwi, or .ksf instead of .dance, then you have
+   to use a specific directory layout. The files need to go in
+   <tsongdir>/Mix Name/Song Name/. This is a limitation of the DWI and SM
+   formats.
+
+Adding Courses
+
+   To add courses, put them in one of the directories in your "coursedir"
+   configuration variable (replace "songs" with "courses" in the above
+   examples to find out where this is by default), or a subdirectory of
+   that directory. In addition, if the file is named Course.crs, then if
+   a file named Course.png is found, it will be displayed with the course
+   in the course selection screen.
+
+Adding Graphics
+
+   If you want folders to have banners in the song select (like songs
+   do), you can put them in a banners directory (replace "songs" in the
+   examples with "banners", again). Within the banners directory, create
+   subdirectories like "mix", "title", and "artist". Then, when a a
+   folder named "Foo" in a display mode is found, it checks
+   <banners>/<display_mode>/Foo.png. For example, if you want to have a
+   banner associated with the folder "Dancing Stage MegaMix" when you're
+   sorting by mix, make the image <banners>/mix/Dancing Stage
+   MegaMix.png.
 
 pydance.cfg
 
@@ -205,12 +236,10 @@ pydance.cfg
 
   Interface Options
 
-   keyboard qwerty|rqwerty|dvorak|rdvorak
-          Your keyboard type. uiojklm,., while convenient on qwerty
-          (standard) keyboards, doesn't work at all on dvorak ones.
-          Setting this option to dvorak will redefine your keys to
-          'chtn'. The "r" variants swap controls (so player 1 uses the
-          numeric pad, and player 2 uses the letters).
+   saveinput 1|0
+          Normally when pydance exits it saves your current keymap to
+          ~/.pydance/input.cfg (or just input.cfg). Turning this option
+          off stops that behavior.
 
    sortmode 0|1|2|3 (default 0)
           This sets the sorting mode for the song select screen. 0 sorts
@@ -228,10 +257,16 @@ pydance.cfg
 
    songdir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)
           This is a list of directories where pydance should look for
-          songs (.step files, backgrounds and banners, and the audio
+          songs (.dance files, backgrounds and banners, and the audio
           itself). Generally installing pydance gives you a system-wide
           location to place songs (that all users will have access to),
           and a local one in your home directory.
+
+   coursedir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)
+          This is a list of directories where pydance should look for
+          courses (.crs files). Installing pydance gives you a
+          system-wide location to place courses (that all users will have
+          access to), and a local one in your home directory.
 
   Obscure Options
 
@@ -240,13 +275,6 @@ pydance.cfg
           bottom right corner of the screen. With various light detection
           equipment, this can be used to make pydance communicate with a
           strobe lighting system.
-
-   usemad 1|0
-          Try to use the MAD MP3 decoding library, which is able to
-          decode MP3 audio (SDL's MP3 decoding library, SMPEG, is unable
-          to do this). This only works on a small subset of UNIX systems
-          (this does not include Mac OS X), and requires the pyao and
-          pymad modules to be installed.
 
    usepsyco 1|0
           Try to use the Psyco optimizing compiler for Python
@@ -267,6 +295,13 @@ pydance.cfg
    operating systems. Also known to work is the parallel port adapter
    that comes with [3]BNS pads. Any other 6 axis, 12 button or 4 axis, 16
    button joysticks that behave like those two adapters will also work.
+
+   If you use a mat, you may need to remap your keyboard or joystick
+   buttons. From the main menu, go to Interface Options, then Map Keys.
+   From here you can rebind your joystick or keyboard buttons. In
+   addition, you will need to go here if you plug in a joystick while
+   pydance is running; otherwise it will not be detected until you
+   restart.
 
 GNU/Linux
 
@@ -341,7 +376,7 @@ IRC
    If you need a bit more real-time help than email offers, pydance has
    an IRC channel on the [10]Freenode IRC network. Surprisingly, the
    channel is named #pyddr. The main developers are often in the channel
-   as P2E (Brendan), piman (Joe), and DShadow (John).
+   as P2E (Brendan) and piman (Joe).
 
 References
 

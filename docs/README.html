@@ -40,17 +40,22 @@ playing many different game modes.</p>
     <h1>Playing pydance</h1>
 <h2>Controls</h2>
 <p>All instructions are given in terms of directions. By default, for
-player 1, this means the uiojklm,. keys on a qwerty keyboard, or
-the numeric pad for player 2. "Start" refers to enter, and 'select'
-refers to tab, or 0 on the numeric pad. Configuration notes for a dvorak
-keyboard are given later.</p>
+player 1, this means the number pad on a qwerty keyboard, or
+uiojklm,. for player 2. "Start" refers to enter, and "select"
+refers to tab, or 0 on the numeric pad. If you are using a dvorak
+keyboard, or a keyboard without a number pad, you can remap the keys
+in Interface Options / Map Keys.
+</p>
+<p>In addition, unless mapped otherwise, the arrow keys will always
+control player 1.</p>
+
 <h2>Starting the Game</h2>
     <p>To play the game, just select "Play Game" from the menu. Use
 left, right, and start, to select what directions you want to
 use, how many people you want playing, and whether you want to use the
-song selector or random endless songs. Once in the song selector, use
-left and right to select a song, up and down to change your difficulty,
-and start to start playing.</p>
+song selector, course selector, or random endless songs. Once in the song
+selector, use left and right to select a song, up and down to change your
+difficulty, and start to start playing.</p>
     <p>Oh wait, now there's all these arrows scrolling up the screen -
     what should you do? Actually, it's pretty simple. When the arrows
     get to the top (which is in time with the music), step on the
@@ -66,10 +71,10 @@ keyboard).</p>
     <h2>Nonstop Mode</h2>
     <p>From the normal song selector you can set up <em>Nonstop
     Mode</em>. Select a song and difficulty you want to play, and
-    press down left. That song is now on your nonstop playlist. You
+    press up left. That song is now on your nonstop playlist. You
     can add a lot of songs this way, then play them all in succession
     without returning to the song selector. To remove a song, press
-    up left.</p>
+    down left.</p>
     <h2>Endless Mode</h2>
     <p>The <em>Endless Mode</em> option on the Play Game menu takes
     you into a different selector. In this one, you can select a
@@ -89,13 +94,40 @@ keyboard).</p>
     (note that this is the only configuration file Windows systems
     will read). Files are read in the order listed above.</p>
     <h2>Adding Songs</h2>
-    <p>To add songs, you just need to put the .step file, music file,
+    <p>To add songs, you just need to put the .dance file, music file,
     and (if they exist) background and banner files into one of your
     song directories. This is the <tt>songdir</tt> configuration
     variable. On POSIX systems this is /usr/share/games/pydance/songs,
     /usr/local/share/games/pydance/songs, and ~/.pydance/songs. On
     Windows, this is anywhere in the directory pydance was installed
-    in. On Mac OS X, this is the 'pydance Songs' folder in your Music folder.</p>
+    in. On Mac OS X, this is the 'pydance Songs' folder in your Music
+    folder. You can change this by editing pydance.cfg.</p>
+<p>If your files are .sm, .dwi, or .ksf instead of .dance, then you
+have to use a specific directory layout. The files need to go in
+<tt>&lt;tsongdir&gt;/Mix Name/Song Name/</tt>. This is a limitation of
+the DWI and SM formats.</p>
+
+<h2>Adding Courses</h2>
+<p>To add courses, put them in one of the directories in your
+"coursedir" configuration variable (replace "songs" with "courses" in
+the above examples to find out where this is by default), or a
+subdirectory of that directory. In addition, if the file is named
+<tt>Course.crs</tt>, then if a file named <tt>Course.png</tt> is
+found, it will be displayed with the course in the course selection
+screen.</p>
+
+<h2>Adding Graphics</h2>
+<p>If you want folders to have banners in the song select (like songs
+do), you can put them in a banners directory (replace "songs" in
+the examples with "banners", again). Within the banners directory,
+create subdirectories like "mix", "title", and "artist". Then, when a
+a folder named "Foo" in a display mode is found, it checks
+<tt>&lt;banners&gt;/&lt;display_mode&gt;/Foo.png</tt>. For example, if
+you want to have a banner associated with the folder "Dancing Stage
+MegaMix" when you're sorting by mix, make the image
+<tt>&lt;banners&gt;/mix/Dancing Stage MegaMix.png</tt>.</p>
+
+
     <!-- FIXME - adding themes -->
     <h2>pydance.cfg</h2>
     <h3>Gameplay Options</h3>
@@ -229,9 +261,15 @@ selector.</p></dd>
     <dl class="options">
       <dt>songdir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)</dt>
       <dd><p>This is a list of directories where pydance should look for
-      songs (.step files, backgrounds and banners, and the audio
+      songs (.dance files, backgrounds and banners, and the audio
       itself). Generally installing pydance gives you a system-wide
       location to place songs (that all users will have access to),
+      and a local one in your home directory.</p></dd>
+      <dt>coursedir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)</dt>
+      <dd><p>This is a list of directories where pydance should look for
+      courses (.crs files).
+      Installing pydance gives you a system-wide
+      location to place courses (that all users will have access to),
       and a local one in your home directory.</p></dd>
     </dl>
     <h3>Obscure Options</h3>
@@ -264,6 +302,12 @@ Don't ever turn this option on.</dd>
     port adapter that comes with <a href="http://www.buynshop.com">BNS
     pads</a>. Any other 6 axis, 12 button or 4 axis, 16 button
     joysticks that behave like those two adapters will also work.</p>
+<p>If you use a mat, you may need to remap your keyboard or joystick
+buttons. From the main menu, go to Interface Options, then Map
+    Keys. From here you can rebind your joystick or keyboard
+    buttons. In addition, you will need to go here if you plug in a
+    joystick while pydance is running; otherwise it will not be
+    detected until you restart.</p>
     <h2>GNU/Linux</h2>
     <p>For parallel adapters, you can use the ddrmat.o driver available at
     <a href="http://icculus.org/pyddr/get.php">http://icculus.org/pyddr/get.php</a>
@@ -322,6 +366,6 @@ a terminal.</p>
 	the <a href="http://www.freenode.net">Freenode IRC
 	  network</a>. Surprisingly, the channel is named
 	<tt>#pyddr</tt>. The main developers are often in the channel as
-	P2E (Brendan), piman (Joe), and DShadow (John).</p>
+	P2E (Brendan) and piman (Joe).</p>
   </body>
 </html>
