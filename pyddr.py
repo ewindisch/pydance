@@ -2341,7 +2341,7 @@ KEYCONFIG = { E_QUIT:       [K_ESCAPE],
               E_DOWN2:      [p2d],
               E_START2:     [K_2],
               E_SELECT:     [K_r],
-              E_MARK:       [K_t]
+              E_MARK:       [K_m]
             }
 
 EMS2CONFIG= { E_QUIT:       [],

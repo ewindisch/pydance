@@ -15,6 +15,15 @@ goals
 1.0.x - menus
 
 ----- - CURRENT
+0.6.1 - The second one
++ Experimental install system
+  + Currently only works on Windows (and doesn't do much) and UNIX.
+  + Manual pages included with pyDDR now.
+  + New directory layout
++ Major code cleanups and bug fixes.
++ Initial support for Nonstop mode, use the 'm' key to tag songs.
++ Support multiple song directories, use : or ; to separate paths.
+
 0.6.0 - Stop! DDR TIME!
 + TWO PLAYER SUPPORT ("2" in song selector, or pick versus in menu)
   + THE KEYS HAVE CHANGED - arrows are now player 2, IJKL is player 1

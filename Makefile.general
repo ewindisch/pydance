@@ -10,4 +10,4 @@ distclean: clean
 	rm -f pyddr.cfg Makefile
 
 cvsclean: distclean
-	rm -rf CVS */CVS */*/CVS menuhelp
+	rm -rf CVS */CVS */*/CVS */*/*/CVS */*/*/*/CVS menuhelp
