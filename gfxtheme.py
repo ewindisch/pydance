@@ -246,6 +246,10 @@ class TopArrow(Listener, pygame.sprite.Sprite):
     self.rect.top = ypos
     self.rect.left = left
 
+  def set_song(self, pid, bpm, diff, count, holds, feet):
+    self.endpresstime = -1
+    self._pressed = False
+
   # The arrow was pressed, so we have to change it for some time (s state).
   def stepped(self, pid, dir, time, rating, combo):
     if self.pid != pid or self.dir != dir or rating == "M": return
@@ -271,6 +275,7 @@ class ArrowFX(Listener, pygame.sprite.Sprite):
     self.baseimg = Arrow(theme, "n", direction, 0, 0).get_images()[-1]
     self.baseimg = self.baseimg.convert()
     self.tintimg = pygame.Surface(self.baseimg.get_size())
+    self.tintimg.blit(self.baseimg, [0, 0])
 
     self.blackbox = pygame.surface.Surface([game.width] * 2)
     self.blackbox.set_colorkey(0)
@@ -286,13 +291,6 @@ class ArrowFX(Listener, pygame.sprite.Sprite):
     style = mainconfig['explodestyle']
     self.rotating, self.scaling = style & 1, style & 2
     
-  def set_song(self, pid, bpm, diff, count, holds, feet):
-    self.tick = toRealTime(bpm, 1)
-
-  def change_bpm(self, pid, curtime, newbpm):
-    if self.pid != pid: return
-    self.tick = toRealTime(newbpm, 1)
-
   def holding(self, yesorno):
     self.holdtype = yesorno
   
@@ -303,11 +301,11 @@ class ArrowFX(Listener, pygame.sprite.Sprite):
     self.combo = combo
     self.presstime = time
     self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
-    self.tintimg.blit(self.baseimg, (0,0))
+    self.tintimg.blit(self.baseimg, [0, 0])
     tinter = pygame.surface.Surface(self.baseimg.get_size())
     tinter.fill(self.colors.get(tinttype, [0, 0, 255]))
     tinter.set_alpha(127)
-    self.tintimg.blit(tinter,(0,0))
+    self.tintimg.blit(tinter, [0, 0])
     self.tintimg.set_colorkey(self.tintimg.get_at([0, 0]))
     self.tintimg = self.tintimg.convert()
     if self.direction == 1: self.direction = -1

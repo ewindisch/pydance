@@ -456,7 +456,7 @@ class Player(object):
     if self.game.double:
       for i in range(2):
         if len(self.steps[i].lastbpmchangetime) == 0:
-          cur_beat = (time - self.steps[i].offset) / 60.0 / self.bpm
+          cur_beat = (time - self.steps[i].offset) / (60.0 / self.bpm)
         else:
           cur_beat = 0
           oldbpmsub = [self.steps[i].offset, self.steps[i].bpm]
