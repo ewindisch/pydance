@@ -26,7 +26,10 @@ else:
   print "POSIX, and then just let it crash."
 
 # Run pyDDR from anywhere
-pyddr_path = os.path.split(os.path.abspath(sys.argv[0]))[0]
+pyddr_path = sys.argv[0]
+if osname == "posix":
+  pyddr_path = os.path.split(os.path.realpath(pyddr_path))[0]
+else: pyddr_path = os.path.split(os.path.abspath(pyddr_path))[0]
 sys.path.append(pyddr_path)
 os.chdir(pyddr_path)
 
@@ -131,9 +134,6 @@ theme = mainconfig['gfxtheme']
 songdir = mainconfig['songdir']
 anncname = mainconfig['djtheme']
 annc = Announcer(os.path.join('themes','dj',anncname,'djtheme.cfg'))
-
-if songdir[0] == "~":
-  songdir = os.environ["HOME"]+songdir[1:]
 
 p1d = p1u = p1l = p1r = p2l = p2r = p2u = p2d = 0
 
@@ -1651,15 +1651,17 @@ class Song:
 # with absolute paths.
 def find (path, pattern):
   matches = []
-  list = os.listdir(path)
-  for f in list:
-    filepath = '%s/%s' % (path, f)
-    mode = os.stat(filepath)[ST_MODE]
-    if S_ISDIR(mode):
-      matches.extend(find(filepath, pattern))
-    else:
-      if fnmatch.fnmatch(filepath, pattern):
-        matches.append(filepath)
+  path = os.path.expanduser(path)
+
+  if os.path.isdir(path):
+    list = os.listdir(path)
+    for f in list:
+      filepath = os.path.join(path, f)
+      if os.path.isdir(filepath):
+        matches.extend(find(filepath, pattern))
+      else:
+        if fnmatch.fnmatch(filepath, pattern):
+          matches.append(filepath)
   return matches
 
 class fastSong:
@@ -2700,7 +2702,11 @@ def main():
     text_fadeon(screen, font, "Looking for songs..", (320, 240))
     print 'Searching for STEP files..'
     # Search recursively for all STEP files
-    fileList = find(songdir, '*.step')
+    fileList = []
+    for dir in songdir.split(os.pathsep):
+      print "searching", dir
+      fileList += find(dir, '*.step')
+
     for f in fileList:
       print "file: ", f
     totalsongs = len(fileList)
