@@ -1714,6 +1714,7 @@ class ArrowSprite(CloneSprite):
     
     if self.arrowscale != 1:
       arrscale = int(float((self.rect.top-64)/416.0)*64)
+      arrscale = min(64, max(0, arrscale))
       if self.arrowscale > 1: # grow
       	arrscale = 64 - arrscale
       self.cimage = pygame.transform.scale(self.bimage, (arrscale, arrscale))
