@@ -911,11 +911,11 @@ class SongItem(object):
 
     for k in ("filename",):
       if self.info[k] and not os.path.isfile(self.info[k]):
-        raise RuntimeError("%s is missing %s" % (filename, k))
+        raise RuntimeError("Music not found for %s" % (filename, k))
 
-    for k in ("banner", "background"):
+    for k in ("banner", "background", "cdtitle"):
       if self.info[k] and not os.path.isfile(self.info[k]):
-        self.info[k] == None
+        self.info[k] = None
 
     for k in ("startat", "endat", "gap", "bpm"):
       self.info[k] = float(self.info[k])
