@@ -1213,7 +1213,7 @@ class LifeBarDisp(pygame.sprite.Sprite):
         
         self.life += (self.prevlife-25)
         
-        if self.life < 0: #FAILED but we don't do anything yet
+        if self.life <= 0: #FAILED but we don't do anything yet
           self.failed = 1
           self.life = 0
         elif self.life > 52:
@@ -1635,7 +1635,7 @@ class Song:
 
       #figure out how long the song is
       pygame.mixer.music.load(self.osfile)
-      pygame.mixer.music.set_volume(0.2)
+      pygame.mixer.music.set_volume(0) #we don't want to hear it. it sounds lame.
       self.length = 1
       lastgp = 1
       while 1:
@@ -1645,7 +1645,7 @@ class Song:
           break
         lastgp = pygame.mixer.music.get_pos()
         self.length += 1
-      print "this song is",self.length,"secongs long"
+      print "this song is",self.length,"seconds long"
 
     except IOError:
       print "file not found"
@@ -1653,7 +1653,6 @@ class Song:
 #    print "cached"
     
   def init (self):
-#    ss = pygame.movie.Movie(self.osfile)
     try:
       pygame.mixer.music.load(self.osfile)
     except pygame.error:
@@ -3628,21 +3627,19 @@ def songSelect(songs, players):
         print "single song, no taglist"
         taglist = []
         taglist.append(currentSong)
-
-      megajudge = Judge(1,1,1,1,"NONSTOP")
-      if players == 2:
-        megajudge2 = Judge(1,1,1,1,"NONSTOP")
+      
+      megajudge = []
+      lifebars = []
+      for playerID in range(players):
+        megajudge.append(Judge(1, 1, 1, 1, 'Nonstop'))
+        lifebars.append(None)
+      
       for thisSong in taglist:
-        try:
-          tmptmp = lifebars
-        except:
-          lifebars = [None, None]
-
         biggerdifflist = [diffList[difficulty]]
-        combos = [megajudge.combo]
         if players == 2:
           biggerdifflist.append(diffList[difficulty2])
-          combos.append(megajudge2.combo)
+        
+        combos = map(lambda plr: plr.combo, megajudge)
 
         fooblah = thisSong.fooblah
         mrsong = Song(fooblah)
@@ -3650,18 +3647,16 @@ def songSelect(songs, players):
         oldfoo = 1
         prevscr = pygame.transform.scale(screen, (640,480))
         screen.fill(BLACK)
-        thisjudging, lifebars, prevscr = dance(mrsong,players,biggerdifflist,lifebars,combos,prevscr)
-        megajudge.munch(thisjudging[0])
-        if players == 2:
-          megajudge2.munch(thisjudging[1])
+        
+        thisjudging, lifebars, prevscr = dance(mrsong, players, biggerdifflist, lifebars, combos, prevscr)
+        
+        for playerID in range(players):
+          megajudge[playerID].munch(thisjudging[playerID])
 
         thisSong.listimage.blit(pygame.surface.Surface((12,16)),(536,28))
           
       if mainconfig['grading']:
-        if players == 2:
-          grade = GradingScreen([megajudge, megajudge2])
-        else:
-          grade = GradingScreen([megajudge])
+        grade = GradingScreen(megajudge)
 
         if grade.make_gradescreen(screen):
           grade.make_waitscreen(screen)
@@ -4408,10 +4403,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
   except:
     pass
     
-  if players == 2:
-    return [playerContents[0]['judge'], playerContents[1]['judge']] , [playerContents[0]['lifebar'], playerContents[1]['lifebar']] , pygame.transform.scale(screen, (640,480))
-  else:
-    return [playerContents[0]['judge']] , [playerContents[0]['lifebar']] , pygame.transform.scale(screen, (640,480))
+  return map(lambda x: x['judge'], playerContents), map(lambda x: x['lifebar'], playerContents), pygame.transform.scale(screen, (640,480));
 
   song.kill()
   print "proper exit"
