@@ -305,6 +305,7 @@ class Judge:
         del self.steps[j]
         for i in range(n):
           self.miss += 1
+#          print "got a miss"
           self.recentsteps.insert(0, "MISS")
           self.recentsteps.pop()
   
@@ -1583,6 +1584,7 @@ class ArrowSprite(CloneSprite):
       self.playedsound = 1
 
     if curtime > self.timef + (0.001*(60000.0/curbpm)):
+#      print "killing sprite"
       self.kill()
       return
       
@@ -1693,6 +1695,7 @@ class HoldArrowSprite(CloneSprite):
       self.playedsound = 1
 
     if curtime > self.timef2:  #+ (0.001*(60000.0/curbpm)):
+      print "killing sprite"
       self.kill()
       return
       
@@ -2121,13 +2124,6 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
   else:
     background.fill(colors.BLACK)
 
-  suddenval = mainconfig['sudden']
-
-  if int(64.0*mainconfig['hidden']): hidden = 1
-  else: hidden = 0
-  
-  hiddenval = float(mainconfig['hidden'])
-  
   # so the current combos get displayed
   global holdkey
 
@@ -2347,7 +2343,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
             if (bpm != plr.judge.getbpm()):
               plr.judge.changingbpm(ev.bpm)
           elif ev.extra == 'TSTOP' and plr.pid == 0:
-            #only pause for the first player
+            # FIXME only pause for the first player
             pygame.time.wait(ev.bpm)
           if ev.feet:
             for (dir,num) in zip(DIRECTIONS,ev.feet):
@@ -2357,7 +2353,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
         for ev in nevents:
           #print "future event: %r"%ev
           if ev.extra == 'CHBPM' and plr.pid == 0:
-            song.lastbpmchangetime.append([ev.when,ev.bpm])
+            plr.song.lastbpmchangetimeappend([ev.when,ev.bpm])
             print [ev.when,ev.bpm], "was added to the bpm changelist"
           
           if ev.feet:
@@ -2381,23 +2377,8 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
         print "Last changed BPM at", song.lastbpmchangetime
         bpmchanged = 0
      
-    for plr in playerContents:
-      for [fxtext, fxdir, fxtime] in plr.fx_data:
-        if (fxtext == 'MARVELOUS') or (fxtext == 'PERFECT') or (fxtext == 'GREAT'):
-          for checkspr in plr.arrow_group.sprites():
-            try:  #because holds and other sprites will cause this to break
-              if (checkspr.timef == fxtime) and (checkspr.dir == fxdir):
-                checkspr.kill()  #they hit this arrow, kill it
-            except: pass
-          plr.toparrfx[fxdir].stepped(curtime, fxtext)
-    
-      plr.judge.expire_arrows(curtime)
-      for spr in plr.arrow_group.sprites():
-        spr.update(curtime, plr.judge.getbpm(), song.lastbpmchangetime, hiddenval, suddenval)
-      for arrowID in DIRECTIONS:
-        plr.toparr[arrowID].update(curtime+(song.offset*1000.0))
-        plr.toparrfx[arrowID].update(curtime, plr.judge.combo)
-    
+    for plr in playerContents: plr.check_sprites(curtime)
+
     if(mainconfig['strobe']):
       extbox.update(curtime+(song.offset*1000.0))
     

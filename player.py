@@ -31,6 +31,13 @@ class Player:
     self.evt = None
     self.mode = mode
 
+    self.sudden = mainconfig['sudden']
+    
+    if int(64.0*mainconfig['hidden']): self.hidden = 1
+    else: self.hidden = 0
+  
+  hiddenval = float(mainconfig['hidden'])
+
   def start_song(self, Judge, combos): # FIXME factor these out
     difflist = self.song.modediff[self.mode]
     self.song.play(self.mode, self.difficulty, self.pid == 0)
@@ -50,7 +57,7 @@ class Player:
       for d in self.toparr:
         self.toparr[d].tick = toRealTime(newbpm, 1)
         self.toparrfx[d].tick = toRealTime(newbpm, 1)
-    self.judge.changebpm(nbpm)
+    self.judge.changebpm(newbpm)
 
   def combo_update(self, curtime):
     self.combos.update(self.judge.combo, curtime - self.judge.steppedtime)
@@ -61,3 +68,19 @@ class Player:
     self.lifebar.update(self.judge)
     self.holdtext.update(curtime)
     
+  def check_sprites(self, curtime):
+    self.judge.expire_arrows(curtime)
+    for text, dir, time in self.fx_data:
+      if (text == "MARVELOUS" or text == "PERFECT" or text == "GREAT"):
+        for spr in self.arrow_group.sprites():
+          try:
+            if (spr.timef == time) and (spr.dir == dir): spr.kill()
+          except: pass
+        self.toparrfx[dir].stepped(curtime, text)
+
+    for spr in self.arrow_group.sprites():
+      spr.update(curtime, self.judge.getbpm(), self.song.lastbpmchangetime,
+                 self.hidden, self.sudden)
+    for d in DIRECTIONS:
+      self.toparr[d].update(curtime + self.song.offset * 1000)
+      self.toparrfx[d].update(curtime, self.judge.combo)
