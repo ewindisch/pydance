@@ -64,7 +64,6 @@ def load_files(screen, files, type, Ctr, args):
 
   return objects
 
-
 def main():
   print "pydance", VERSION, "<pyddr-discuss@icculus.org> - irc.freenode.net/#pyddr"
 

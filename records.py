@@ -10,31 +10,30 @@ record_fn = os.path.join(rc_path, "records")
 try: records = pickle.load(file(record_fn, "r"))
 except: records = {}
   
-# records maps the last three significant parts of a filename (the
-# filename and two directories ) onto a tuple of (rank, game, name) where
-# rank is a floating point number from 0 to 1; and name is the name of
-# the player who made the score. A score is considered "beaten" (and
-# therefore deserving of a new name value) when the new rank is
-# greater than the old rank.
+# records maps the title, mix, difficulty, and game onto a tuple
+# (rank, name) where rank is a floating point number from 0 to 1; and
+# name is the name of the player who made the score.
 
-# The actual "grade" is calculated via grades.py, from the rank.
+# A score is considered "beaten" (and therefore deserving of a new name
+# value) when the new rank is greater than the old rank.
 
-def add(filename, diff, game, rank, name):
+# The actual "grade" is calculated via grades.py, from the rank. This is
+# done in the song selector.
+
+def add(recordkey, diff, game, rank, name):
   game = games.VERSUS2SINGLE.get(game, game)
-  newfn = os.path.join(*filename.split(os.sep)[-3:])
-  if (newfn, diff, game) in records:
-    if rank > records[(newfn, diff, game)][0]:
-      records[(newfn, diff, game)] = (rank, name)
+  if (recordkey, diff, game) in records:
+    if rank > records[(recordkey, diff, game)][0]:
+      records[(recordkey, diff, game)] = (rank, name)
       return True
     return False
   else:
-    records[(newfn, diff, game)] = (rank, name)
+    records[(recordkey, diff, game)] = (rank, name)
     return True
 
-def get(filename, diff, game):
+def get(recordkey, diff, game):
   game = games.VERSUS2SINGLE.get(game, game)
-  newfn = os.path.join(*filename.split(os.sep)[-3:])
-  return records.get((newfn, diff, game), (-1, ""))
+  return records.get((recordkey, diff, game), (-1, ""))
 
 def write():
   pickle.dump(records, file(record_fn, "w"))

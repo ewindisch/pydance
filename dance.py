@@ -10,7 +10,12 @@ from announcer import Announcer
 from pygame.sprite import RenderUpdates
 
 from pygame.mixer import music
-import fontfx, gradescreen, steps, fileparsers, games, error, colors
+import fontfx
+import gradescreen
+import steps
+import fileparsers
+import games, error
+import colors
 import records
 
 import os
@@ -214,7 +219,11 @@ def play(screen, playlist, configs, songconf, playmode):
   if songs_played == 1 and not players[0].escaped:
     for p in players:
       if not p.failed:
-        records.add(songfn, diff[p.pid], playmode, p.grade.rank(), " ")
+        records.add(current_song.info["recordkey"], diff[p.pid],
+                    playmode, p.grade.rank(), " ")
+      else:
+        records.add(current_song.info["recordkey"], diff[p.pid],
+                    playmode, -2, " ")
 
 def dance(screen, song, players, prevscr, ready_go, game):
   songFailed = False

@@ -925,6 +925,13 @@ class SongItem(object):
 
     self.info["valid"] = int(self.info["valid"])
 
+    if "recordkey" not in self.info:
+      recordkey = self.info["mix"] + self.info["title"]
+      if self.info["subtitle"]: recordkey += self.info["subtitle"]
+      recordkey = recordkey.lower()
+      recordkey = u''.join([c for c in recordkey if c.isalnum()])
+      self.info["recordkey"] = recordkey
+
     self.steps = song.steps
     if song.lyrics: self.lyrics = song.lyrics
     else: self.lyrics = []

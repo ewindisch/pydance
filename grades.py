@@ -12,6 +12,7 @@ class DancePointsGrade(AbstractGrade):
     elif rank >= 0.80: return "A"
     elif rank >= 0.65: return "B"
     elif rank >= 0.45: return "C"
+    elif rank == -2: return "F"
     elif rank == -1: return "?"
     else: return "D"
     
