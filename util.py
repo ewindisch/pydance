@@ -39,7 +39,7 @@ def toRealTime(bpm, steps):
 # with absolute paths.
 def find (path, patterns):
   matches = []
-  path = os.path.expanduser(path)
+  path = os.path.abspath(os.path.expanduser(path))
 
   if os.path.isdir(path):
     list = os.listdir(path)
