@@ -4,6 +4,7 @@
 import pygame
 from constants import *
 
+from ui import ui
 from pad import pad
 
 import fontfx, menudriver, fileparsers, audio, colors
@@ -19,13 +20,12 @@ def SetDisplayMode(mainconfig):
     elif mainconfig["fullscreen"]: flags |= FULLSCREEN
     screen = pygame.display.set_mode([640, 480], flags, 16)
   except:
-    print "Can't get a 16 bit display!" 
+    print "E: Can't get a 16 bit display!" 
     sys.exit()
   return screen
 
 def main():
-  print "pydance", VERSION, "<pydance-discuss@icculus.org>"
-  print "Initializing..."
+  print "pydance", VERSION, "<pydance-discuss@icculus.org> - irc.freenode.net/#pyddr"
 
   if mainconfig["usepsyco"]:
     try:
@@ -71,8 +71,7 @@ def main():
     pygame.display.update(screen.blit(img, r))
     parsedsongs += 100
 
-  ev = pad.poll()
-  while ev[1] != pad.PASS: ev = pad.poll()
+  ui.empty()
 
   if len(songs) < 1:
     error.ErrorMessage(screen,

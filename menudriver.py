@@ -1,6 +1,6 @@
 # Code to construct pydance's menus
 
-import pygame, menus, os, sys, copy, colors, games, pad
+import pygame, menus, os, sys, copy, colors, games, ui, pad
 from constants import *
 from announcer import Announcer
 from gfxtheme import ThemeFile
@@ -107,25 +107,25 @@ def wrap_ctr(Obj, args):
 
 def do(screen, songdata):
 
-  onoff_opt = { pad.START: switch_onoff, menus.CREATE: get_onoff,
-                 pad.LEFT: off_onoff, pad.RIGHT: on_onoff }
-  offon_opt = { pad.START: switch_offon, menus.CREATE: get_offon,
-                 pad.LEFT: off_offon, pad.RIGHT: on_offon }
-  rotate_opt = { pad.START: switch_rotate,
-                 pad.LEFT: switch_rotate_back,
-                 pad.RIGHT: switch_rotate,
+  onoff_opt = { ui.START: switch_onoff, menus.CREATE: get_onoff,
+                 ui.LEFT: off_onoff, ui.RIGHT: on_onoff }
+  offon_opt = { ui.START: switch_offon, menus.CREATE: get_offon,
+                 ui.LEFT: off_offon, ui.RIGHT: on_offon }
+  rotate_opt = { ui.START: switch_rotate,
+                 ui.LEFT: switch_rotate_back,
+                 ui.RIGHT: switch_rotate,
                  menus.CREATE: get_rotate }
-  rotate_index_opt = { pad.START: switch_rotate_index,
-                       pad.LEFT: switch_rotate_index_back,
-                       pad.RIGHT: switch_rotate_index,
+  rotate_index_opt = { ui.START: switch_rotate_index,
+                       ui.LEFT: switch_rotate_index_back,
+                       ui.RIGHT: switch_rotate_index,
                        menus.CREATE: get_rotate_index }
-  tuple_opt = { pad.START: switch_tuple,
-                pad.LEFT: switch_tuple_back,
-                pad.RIGHT: switch_tuple,
+  tuple_opt = { ui.START: switch_tuple,
+                ui.LEFT: switch_tuple_back,
+                ui.RIGHT: switch_tuple,
                 menus.CREATE: get_tuple }
 
 
-  m = (["Play Game", {pad.START: wrap_ctr}, (GameSelect, songdata)],
+  m = (["Play Game", {ui.START: wrap_ctr}, (GameSelect, songdata)],
        ("Game Options",
         ["Autofail", onoff_opt, ("autofail",)],
         ["Assist Mode", onoff_opt, ("assist",)],
@@ -173,12 +173,11 @@ def do(screen, songdata):
         ["Back", None, None]
         ),
        ("Interface Options",
-        ["Map Keys", {pad.START: wrap_ctr}, (pad.PadConfig, (screen,))],
+        ["Map Keys", {ui.START: wrap_ctr}, (pad.PadConfig, (screen,))],
         ["Save Input", onoff_opt, ('saveinput',)],
         ["Song Previews", onoff_opt, ('previewmusic',)],
         ["Folders", onoff_opt, ("folders",)],
         ["Timer Display", onoff_opt, ('fpsdisplay',)],
-        ["Gratuitous Extras", onoff_opt, ('gratuitous',)],
         ["Back", None, None]
         )
        )

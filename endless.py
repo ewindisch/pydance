@@ -3,7 +3,7 @@
 import random, copy, colors, audio, error, optionscreen, dance, util
 from constants import *
 
-from pad import pad
+import ui
 
 RESOLUTION = (640, 480)
 BACKGROUND = os.path.join(image_path, "endless-bg.png")
@@ -109,13 +109,13 @@ class Endless(object):
 
     self.render()
 
-    ev = (0, pad.PASS)
+    ev = (0, ui.PASS)
 
-    while ev[1] != pad.QUIT:
-      ev = pad.wait()
+    while ev[1] != ui.QUIT:
+      ev = ui.ui.wait()
 
       # Start game
-      if ev[1] == pad.START:
+      if ev[1] == ui.START:
 
         if optionscreen.player_opt_driver(screen, self.player_configs):
           dance.play(screen, FakePlaylist(songitems, self.constraints,
@@ -125,21 +125,21 @@ class Endless(object):
         audio.load(os.path.join(sound_path, "menu.ogg"))
         audio.play(4, 0.0)
 
-        while ev[1] != pad.PASS: ev = pad.poll()
+        while ev[1] != ui.PASS: ev = ui.ui.poll()
 
-      if ev[1] == pad.SELECT:
+      if ev[1] == ui.SELECT:
         optionscreen.game_opt_driver(screen, self.game_config)
 
       # Ignore unknown events
       elif ev[0] >= len(self.constraints): pass
 
-      elif ev[1] == pad.LEFT and self.constraints[ev[0]].kind != "name":
+      elif ev[1] == ui.LEFT and self.constraints[ev[0]].kind != "name":
         self.constraints[ev[0]].kind = "name"
         self.constraints[ev[0]].value = diffs[0]
-      elif ev[1] == pad.RIGHT and self.constraints[ev[0]].kind != "number":
+      elif ev[1] == ui.RIGHT and self.constraints[ev[0]].kind != "number":
         self.constraints[ev[0]].kind = "number"
         self.constraints[ev[0]].value = [1, 3]
-      elif ev[1] == pad.UP: # easier
+      elif ev[1] == ui.UP: # easier
         if self.constraints[ev[0]].kind == "name":
           newi = max(0, diffs.index(self.constraints[ev[0]].value) - 1)
           self.constraints[ev[0]].value = diffs[newi]
@@ -147,7 +147,7 @@ class Endless(object):
           newmin = max(self.constraints[ev[0]].value[0] - 1, 1)
           self.constraints[ev[0]].value = [newmin, newmin + 2]
 
-      elif ev[1] == pad.DOWN: # harder
+      elif ev[1] == ui.DOWN: # harder
         if self.constraints[ev[0]].kind == "name":
           newi = min(len(diffs) - 1,
                      diffs.index(self.constraints[ev[0]].value) + 1)
@@ -156,7 +156,7 @@ class Endless(object):
           newmin = min(self.constraints[ev[0]].value[0] + 1, 9)
           self.constraints[ev[0]].value = [newmin, newmin + 2]
 
-      elif ev[1] == pad.FULLSCREEN:
+      elif ev[1] == ui.FULLSCREEN:
         pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
 

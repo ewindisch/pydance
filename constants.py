@@ -1,14 +1,12 @@
-# Event types.
-E_PASS,E_QUIT,E_FULLSCREEN,E_SCREENSHOT,E_UPRIGHT,E_DOWNRIGHT,E_SELECT,E_DOWNLEFT,E_UP,E_DOWN,E_LEFT,E_RIGHT,E_START,E_CREATE,E_UNSELECT,E_CLEAR,E_UPLEFT, E_CENTER = range(18)
+# Constants used in the game and some simple initialization routines
+# This file should be kept as small as possible, probably.
 
-E_SORT = E_SCREENSHOT
-
-E_UNMARK, E_PGUP, E_MARK, E_PGDN = E_UPLEFT, E_UPRIGHT, E_DOWNLEFT, E_DOWNRIGHT
-
-VERSION = "0.8.1"
+VERSION = "0.8.2"
 
 import sys, os, config, pygame
 import games
+
+from pygame.locals import *
 
 # Detect the name of the OS - MacOS X is not really UNIX.
 osname = None
@@ -26,9 +24,6 @@ else:
 if osname == 'posix': # We need to force stereo in many cases.
   try: pygame.mixer.pre_init(44100, -16, 2)
   except: pass
-
-# K_* constants, mostly
-from pygame.locals import *
 
 # Find out our real directory - resolve symlinks, etc
 pydance_path = sys.argv[0]

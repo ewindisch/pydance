@@ -108,8 +108,6 @@ class Pad(object):
     self.handler.set_blocked(range(NUMEVENTS))
     self.handler.set_allowed((KEYUP, KEYDOWN, JOYBUTTONUP, JOYBUTTONDOWN))
 
-    self.joysticks = []
-
     self.states = {}
     self.events = {}
 
@@ -190,7 +188,7 @@ class Pad(object):
   # Poll the event handler and normalize the result. If we don't know
   # about the event but the device is the keyboard, return (-2, key).
   # Otherwise, return pass.
-  def poll(self):
+  def poll(self, passthrough = False):
     ev = self.handler.poll()
     t = ''
     v = 0
@@ -199,17 +197,18 @@ class Pad(object):
     elif ev.type == KEYDOWN or ev.type == KEYUP:
       t, v = -1, ev.key
     else:
-      return (-2, PASS)
+      return (-1, PASS)
 
-    if ev.type == KEYDOWN or ev.type == KEYUP: default = (-2, ev.key)
-    else: default = (-2, PASS)
+    # Pass in all keyboard keys pressed, so the ui handler can get them.
+    if ev.type == KEYDOWN and passthrough: default = (-2, ev.key * 100)
+    else: default = (-1, PASS)
 
     ret = self.events.get((t, v), default)
 
-    if ev.type == JOYBUTTONUP or ev.type == KEYUP:
+    if ev.type == JOYBUTTONUP or ev.type == KEYUP and ret[0] != -2:
       self.states[ret] = False
       ret = (ret[0], -ret[1])
-    elif ev.type == JOYBUTTONDOWN or ev.type == KEYDOWN:
+    elif ev.type == JOYBUTTONDOWN or ev.type == KEYDOWN and ret[0] != -2:
       self.states[ret] = True
 
     return ret

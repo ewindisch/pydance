@@ -1,6 +1,5 @@
-import pygame, colors
+import pygame, colors, ui
 from constants import *
-from pad import pad
 from fontfx import TextZoomer
 
 # Hooray! Less magic numbers
@@ -13,7 +12,7 @@ LEFT_OFFSET, TOP_OFFSET = 425, 100
 TRANSPARENT, SOLID = 128, 255
 DISPLAYED_ITEMS = 6
 
-CREATE, SELECT, UNSELECT = -1, -2, -3
+CREATE, SELECT, UNSELECT = 1000, 2000, 3000
 
 button_bg = pygame.image.load(os.path.join(image_path, "button.png"))
 
@@ -51,8 +50,8 @@ class MenuItem(object):
       self.alpha = TRANSPARENT
       self.render()
     elif self.callbacks == None:
-      if ev == pad.START or ev == pad.RIGHT or ev == pad.LEFT:
-        return pad.QUIT # This is a back button
+      if ev == ui.START or ev == ui.RIGHT or ev == ui.LEFT:
+        return ui.QUIT # This is a back button
       else: return ev # Shouldn't happen
     elif callable(self.callbacks.get(ev)):
       text, subtext = self.callbacks[ev](*self.args)
@@ -116,7 +115,7 @@ class Menu(object):
     self.image.set_alpha(self.alpha)
 
   def activate(self, ev):
-    if ev == pad.START or ev == pad.RIGHT:
+    if ev == ui.START or ev == ui.RIGHT:
       self.display()
     elif ev == SELECT:
       self.rgb = colors.WHITE
@@ -142,13 +141,13 @@ class Menu(object):
 
     self.items[curitem].activate(SELECT)
 
-    ev = pad.PASS
-    while ev != pad.QUIT:
+    ev = ui.PASS
+    while ev != ui.QUIT:
       r = []
-      ev = pad.poll()[1]
+      ev = ui.ui.poll()[1]
 
       # Scroll down through the menu
-      if ev == pad.DOWN:
+      if ev == ui.DOWN:
         Menu.move_sound.play()
         ev = self.items[curitem].activate(UNSELECT)
         curitem += 1
@@ -160,7 +159,7 @@ class Menu(object):
         ev = self.items[curitem].activate(SELECT)
 
       # Same as above, but up
-      elif ev == pad.UP:
+      elif ev == ui.UP:
         Menu.move_sound.play()
         ev = self.items[curitem].activate(UNSELECT)
         curitem -= 1
@@ -171,9 +170,14 @@ class Menu(object):
           topitem = curitem
         ev = self.items[curitem].activate(SELECT)
 
+      elif ev == ui.FULLSCREEN:
+        pygame.display.toggle_fullscreen()
+        mainconfig["fullscreen"] ^= 1
+
+
       # Otherwise, if the event actually happened, pass it on to the button.
-      elif ev != pad.PASS and ev != pad.QUIT:
-        if ev == pad.START: Menu.click_sound.play()
+      elif ev != ui.PASS and ev != ui.QUIT:
+        if ev == ui.START: Menu.click_sound.play()
         ev = self.items[curitem].activate(ev)
         changed = True
 
@@ -191,6 +195,6 @@ class Menu(object):
       pygame.display.update(r)
       clock.tick(30)
 
-    if ev == pad.QUIT:
+    if ev == ui.QUIT:
       Menu.back_sound.play()
       self.items[curitem].activate(UNSELECT)

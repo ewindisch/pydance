@@ -4,7 +4,7 @@ from constants import *
 from songselect import SongSelect
 from endless import Endless
 
-from pad import pad
+import ui
 
 import colors
 import games
@@ -133,19 +133,19 @@ class GameSelect(object):
     if self.values[idx] != None: index = choices.index(self.values[idx])
     else: index = 0
 
-    ev = pad.PASS
-    while ev != pad.QUIT:
+    ev = ui.PASS
+    while ev != ui.QUIT:
 
       # FIXME: If the player ID is > 0, limit the available game types
       # to 2 player modes.
-      pid, ev = pad.poll()
+      pid, ev = ui.ui.poll()
 
-      if ev == pad.LEFT: index -= 1
-      elif ev == pad.RIGHT: index += 1
-      elif ev == pad.START:
+      if ev == ui.LEFT: index -= 1
+      elif ev == ui.RIGHT: index += 1
+      elif ev == ui.START:
         return choices[index]
 
-      elif ev == pad.FULLSCREEN:
+      elif ev == ui.FULLSCREEN:
         mainconfig["fullscreen"] ^= 1
         pygame.display.toggle_fullscreen()
 

@@ -4,8 +4,7 @@
 import os, string, pygame, random, copy, dance
 from constants import *
 
-import announcer, audio, colors, optionscreen, error, games
-from pad import pad
+import announcer, audio, colors, optionscreen, error, games, ui
 
 # FIXME: this needs to be moved elsewhere if we want theming
 ITEM_BG = pygame.image.load(os.path.join(image_path, "ss-item-bg.png"))
@@ -280,7 +279,7 @@ class SongSelect(object):
     players = games.GAMES[gametype].players
 
     self.bg = pygame.image.load(BACKGROUND).convert()
-    ev = (0, pad.PASS)
+    ev = (0, ui.PASS)
     self.numsongs = len(self.songs)
 
     self.gametype = gametype
@@ -302,7 +301,7 @@ class SongSelect(object):
       self.player_configs.append(copy.copy(player_config))
       self.player_diff_names.append(diff_name)
 
-    pad.set_repeat(500, 30)
+    ui.ui.set_repeat(500, 30)
 
     self.diff_list = []
     self.song_list = []
@@ -328,39 +327,39 @@ class SongSelect(object):
       self.songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
     self.render(True)
 
-    while ev[1] != pad.QUIT:
+    while ev[1] != ui.QUIT:
       loop_start_time = pygame.time.get_ticks()
 
       self.oldindex = self.index
       changed = False
 
-      ev = pad.poll()
+      ev = ui.ui.poll()
 
       # Skip events from a player that isn't in this game.
       if ev[0] >= players: continue
 
-      if ev[1] in [pad.LEFT, pad.RIGHT, pad.UP, pad.DOWN, pad.UPLEFT,
-                   pad.UPRIGHT, pad.DOWNLEFT, pad.DOWNRIGHT]:
+      if ev[1] in [ui.LEFT, ui.RIGHT, ui.UP, ui.DOWN, ui.MARK,
+                   ui.UNMARK, ui.PGUP, ui.PGDN, ui.CLEAR]:
         MOVE_SOUND.play()
 
       # Scroll up the menu list
-      if ev[1] == pad.LEFT:
+      if ev[1] == ui.LEFT:
         self.index = (self.index - 1) % self.numsongs
 
-      elif ev[1] == pad.PGUP:
+      elif ev[1] == ui.PGUP:
         self.scroll_out(self.index)
         self.index = (self.index - 7) % self.numsongs
 
       # Down the menu list
-      elif ev[1] == pad.RIGHT:
+      elif ev[1] == ui.RIGHT:
         self.index = (self.index + 1) % self.numsongs
   
-      elif ev[1] == pad.PGDN:
+      elif ev[1] == ui.PGDN:
         self.scroll_out(self.index)
         self.index = (self.index + 7) % self.numsongs
 
       # Easier difficulty
-      elif ev[1] == pad.UP:
+      elif ev[1] == ui.UP:
         if not self.songs[self.index].isfolder:
           self.player_diffs[ev[0]] -= 1
           self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
@@ -368,7 +367,7 @@ class SongSelect(object):
           changed = True
 
       # Harder difficulty
-      elif ev[1] == pad.DOWN:
+      elif ev[1] == ui.DOWN:
         if not self.songs[self.index].isfolder:
           self.player_diffs[ev[0]] += 1
           self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
@@ -376,15 +375,15 @@ class SongSelect(object):
           changed = True
 
       # Open up a new folder
-      elif ev[1] == pad.START and self.songs[self.index].isfolder:
+      elif ev[1] == ui.START and self.songs[self.index].isfolder:
         OPEN_SOUND.play()
         self.scroll_out(self.index)
         self.set_up_songlist(self.songs[self.index].name)
-        pad.empty()
+        ui.ui.empty()
         changed = True
 
       # Start the dancing!
-      elif ev[1] == pad.START:
+      elif ev[1] == ui.START:
         # If we added the current song with E_MARK earlier, don't readd it
         try: self.title_list[-1].index(self.current_song.info["title"])
         except: self.add_current_song()
@@ -395,7 +394,7 @@ class SongSelect(object):
           while ann.chan.get_busy(): pygame.time.wait(1)
         except: pass
 
-        pad.set_repeat()
+        ui.ui.set_repeat()
         if optionscreen.player_opt_driver(screen, self.player_configs):
           audio.fadeout(500)
 
@@ -406,11 +405,11 @@ class SongSelect(object):
 
           preview = SongPreview()
 
-          pad.empty()
+          ui.ui.empty()
           self.screen.blit(self.bg, (0, 0))
           pygame.display.flip()
 
-        pad.set_repeat(500, 30)
+        ui.ui.set_repeat(500, 30)
         changed = True
 
         # Reset the playlist
@@ -419,13 +418,13 @@ class SongSelect(object):
         self.title_list = []
 
       # Add the current song to the playlist
-      elif ev[1] == pad.MARK:
+      elif ev[1] == ui.MARK:
         if not self.songs[self.index].isfolder:
           self.add_current_song()
           changed = True
 
       # Remove the most recently added song
-      elif ev[1] == pad.UNMARK:
+      elif ev[1] == ui.UNMARK:
 	if self.title_list != []:
           self.title_list.pop()
           self.diff_list.pop()
@@ -433,13 +432,13 @@ class SongSelect(object):
           changed = True
 
       # Remove all songs on the playlist
-      elif ev[1] == pad.CLEAR:
+      elif ev[1] == ui.CLEAR:
         self.title_list = []
         self.diff_list = []
         self.song_list = []
         changed = True
 
-      elif ev[1] == pad.SELECT:
+      elif ev[1] == ui.SELECT:
         if optionscreen.game_opt_driver(screen, self.game_config):
           self.scroll_out(self.index)
           OPEN_SOUND.play()
@@ -454,7 +453,7 @@ class SongSelect(object):
                                         "good random one can't be chosen."])
 	changed = True
 
-      elif ev[1] == pad.SORT:
+      elif ev[1] == ui.SORT:
         s = self.songs[self.index]
         self.scroll_out(self.index)
         mainconfig["sortmode"] = (mainconfig["sortmode"] + 1) % NUM_SORTS
@@ -473,7 +472,7 @@ class SongSelect(object):
           self.oldindex = self.index # We're cheating!
         changed = True
 
-      elif ev[1] == pad.FULLSCREEN:
+      elif ev[1] == ui.FULLSCREEN:
         pygame.display.toggle_fullscreen()
         mainconfig["fullscreen"] ^= 1
         changed = True
@@ -482,7 +481,7 @@ class SongSelect(object):
       if not self.songs[self.index].isfolder:
         self.current_song = self.songs[self.index].song
 
-      if locked and ev[1] in [pad.UP, pad.DOWN]:
+      if locked and ev[1] in [ui.UP, ui.DOWN]:
         for i in range(len(self.player_diffs)):
           self.player_diffs[i] = self.player_diffs[ev[0]]
           self.player_diff_names[i] = self.player_diff_names[ev[0]]
@@ -515,11 +514,11 @@ class SongSelect(object):
     audio.load(os.path.join(sound_path, "menu.ogg"))
     audio.set_volume(1.0)
     audio.play(4, 0.0)
-    pad.set_repeat()
+    ui.ui.set_repeat()
     player_config.update(self.player_configs[0]) # Save player 1's settings
 
   def render(self, changed):
-    self.screen.blit(self.bg, (0,0))
+    self.screen.blit(self.bg, [0, 0])
 
     # Difficulty list rendering
     if not self.songs[self.index].isfolder:
