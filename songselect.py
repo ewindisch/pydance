@@ -349,6 +349,9 @@ class SongSelect(InterfaceWindow):
 
       elif ev == ui.CANCEL:
         self._create_folder_list()
+        for d in self._diff_widgets:
+          d.set("None", [127, 127, 127], 0, "?")
+
         self._index = root_idx
 
       elif ev == ui.FULLSCREEN:
