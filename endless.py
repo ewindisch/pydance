@@ -1,6 +1,6 @@
 # Support for endless song playing!
 
-import random, copy, colors, fontfx, gradescreen, util, audio
+import random, copy, colors, audio, error
 from constants import *
 
 RESOLUTION = (640, 480)
@@ -58,7 +58,7 @@ class FakePlaylist:
 
   def next(self):
     if len(self.songs) == 0:
-      util.ErrorMessage(self.screen,
+      error.ErrorMessage(self.screen,
                         ("The difficulty settings you chose result",
                          "in no songs being available to play."))
       raise StopIteration
@@ -85,7 +85,7 @@ class Endless:
     diffs.sort(python_sucks_sort)
 
     if len(diffs) == 0:
-      util.ErrorMessage(screen, ("You need more songs to play Endless Mode.",
+      error.ErrorMessage(screen, ("You need more songs to play Endless Mode.",
                                  "Otherwise, it's just really boring."))
       return
 

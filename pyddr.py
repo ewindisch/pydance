@@ -21,7 +21,7 @@ from pygame.sprite import RenderUpdates
 
 import fontfx, menudriver, fileparsers, colors, gradescreen, steps, audio
 
-import os, sys, random, operator, string, util, getopt
+import os, sys, random, operator, string, error, util, getopt
 
 os.chdir(pyddr_path)
 
@@ -864,7 +864,7 @@ def main():
   while ev[1] != E_PASS: ev = event.poll()
 
   if len(songs) < 1:
-    util.ErrorMessage(screen,
+    error.ErrorMessage(screen,
                       ("You don't have any songs or step files. Check out",
                        "http://icculus.org/pyddr/get.php",
                        "and download some free ones."
@@ -1080,7 +1080,7 @@ def dance(song, players, prevscr):
   song.init()
 
   if song.crapout != 0:
-    util.ErrorMessage(screen, ("The audio file for this song", song.filename,
+    error.ErrorMessage(screen, ("The audio file for this song", song.filename,
                                "could not be found."))
     return False # The player didn't fail.
 
