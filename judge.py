@@ -139,7 +139,9 @@ class BeatJudge(AbstractJudge):
   def _is_miss(self, curtime, time): return time < curtime - self._b
 
 judges = [TimeJudge, BeatJudge]
-judge_opt = [(0, "Time",
-              "Judging is based on how many seconds you are from the correct time."),
-             (1, "Beat",
-              "Judging is based on how many beats you are from the correct time.")]
+judge_opt = [
+  (0, "Time",
+   "Judging is based on how many seconds you are from the correct time."),
+  (1, "Beat",
+   "Judging is based on how many beats you are from the correct time."),
+  ]

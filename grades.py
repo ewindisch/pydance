@@ -49,6 +49,8 @@ class EndlessGrade(DancePointsGrade):
   def grade(self, failed): return DancePointsGrade.grade(self, False)
 
 grades = [DancePointsGrade, EndlessGrade]
-grade_opt = [(0, "Dance Points", ""),
-             (1, "Endless",
-              "Like dance points, but failing doesn't result in an F.")]
+grade_opt = [
+  (0, "Dance Points", ""),
+  (1, "Endless",
+   "Like dance points, but failing doesn't result in an F."),
+  ]
