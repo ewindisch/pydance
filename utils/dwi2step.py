@@ -130,7 +130,7 @@ class Pause:
     self.pause = pause
 
   def getLine(self):
-    return "waits " + repr(self.pause / 1000) + "\n"
+    return "tstop " + repr(self.pause / 1000) + "\n"
 
   def getPause(self):
     return self.pause / 1000

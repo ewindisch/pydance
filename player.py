@@ -87,7 +87,7 @@ class Player:
         self.toparrfx[dir].stepped(curtime, text)
 
     for spr in self.arrow_group.sprites():
-      spr.update(curtime, self.judge.getbpm(), self.steps.lastbpmchangetime,
+      spr.update(curtime, self.judge.bpm, self.steps.lastbpmchangetime,
                  self.hidden, self.sudden)
     for d in DIRECTIONS:
       self.toparr[d].update(curtime + self.steps.offset * 1000)

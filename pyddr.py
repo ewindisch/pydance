@@ -154,9 +154,6 @@ class Judge:
     self.oldbpm = copy
     self.bpm = bpm
         
-  def getbpm(self):
-    return self.bpm
-
   def numholds(self):
     return len(self.holdsub)
     
@@ -975,33 +972,13 @@ def main():
   # set up the screen and all that other stuff
   pygame.init()
 
-  players = 1
+  # FIXME Debug mode has been broken for like, 4 releases, take it out
 
-  # DEBUG MODE - user just wants to test a step file
-  debugmode = 0
-  if len(sys.argv) > 1:
-    debugmode = 1
-    stepspecd = sys.argv[1]
-    if stepspecd[-5:] != ".step":
-      stepspecd += ".step"
-    stepspecd = os.path.join(songdir,stepspecd)
-    if len(sys.argv) > 2:
-      difficulty = [string.upper(sys.argv[2])]
-      if len(sys.argv) > 3:
-        difficulty.append(string.upper(sys.argv[3]))
-        players = 2
-    else:
-      difficulty = ['BASIC']
-
-  if debugmode:
-    print "Entering debug mode. Not loading the song list."
-    totalsongs = 1
-  else:
-    # Search recursively for all STEP files
-    fileList = []
-    for dir in songdir.split(os.pathsep):
-      print "Searching", dir
-      fileList += find(dir, '*.step')
+  # Search recursively for files
+  fileList = []
+  for dir in songdir.split(os.pathsep):
+    print "Searching", dir
+    fileList += find(dir, '*.step')
 
   totalsongs = len(fileList)
   parsedsongs = 0
@@ -1027,7 +1004,7 @@ def main():
   r.center = (320, 240)
   for f in fileList:
 #    try: songs.append(fileparsers.SongItem(f))
-    songs.append(fileparsers.SongItem(f))
+    songs.append(fileparsers.SongItem(f, False))
 #    except:
 #      print "Error loading " + f
     img = pbar.render(parsedsongs / totalsongs)
@@ -1038,8 +1015,8 @@ def main():
   while ev[1] != E_PASS: ev = event.poll()
 
   if len(songs) < 1:
-    print "You don't have any songs, and you need one. Go here: http://icculus.org/pyddr/"
-    sys.exit()
+    print "You don't have any songs, and you need one. Go to http://icculus.org/pyddr/"
+    sys.exit(1)
 
   menudriver.do(screen, (songs, screen, playSequence))
   mainconfig.write(os.path.join(rc_path, "pyddr.cfg"))
@@ -1419,29 +1396,29 @@ def dance(song, players, ARROWPOS, prevscr):
         for ev in events:
           #print "current event: %r"%ev
           if ev.extra == 'CHBPM':
-            if (ev.bpm != plr.judge.getbpm()):
+            if (ev.bpm != plr.judge.bpm):
               plr.judge.changingbpm(ev.bpm)
-          elif ev.extra == 'TSTOP' and plr.pid == 0:
-            # FIXME only pause for the first player
-            pygame.time.wait(ev.bpm)
+          elif ev.extra == 'TSTOP':
+            pass # Just do a delay for now
           if ev.feet:
             for (dir,num) in zip(DIRECTIONS,ev.feet):
-              if num & 8:
+              if num & 1:
                 plr.judge.handle_arrow(dir, curtime, ev.when)
          
         for ev in nevents:
           #print "future event: %r"%ev
-          if ev.extra == 'CHBPM' and plr.pid == 0:
+          if ev.extra == 'CHBPM':
             plr.steps.lastbpmchangetime.append([ev.when,ev.bpm])
             print [ev.when,ev.bpm], "was added to the bpm changelist"
+            print players.index(plr), plr.steps.lastbpmchangetime
           
           if ev.feet:
             for (dir,num) in zip(DIRECTIONS, ev.feet):
-              if num & 8:
-                if not (num & 128):
+              if num & 1:
+                if not (num & 2):
                   ArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, ev.when, ev.bpm, plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
 
-              if num & 128:
+              if num & 2:
                 holdindex = plr.steps.holdref.index((DIRECTIONS.index(dir),ev.when))
                 HoldArrowSprite(plr.theme.arrows[dir+repr(int(ev.color)%colortype)].c, curtime, plr.steps.holdinfo[holdindex], ev.bpm, plr.steps.lastbpmchangetime[0], plr.pid, ARROWPOS).add([plr.arrow_group, rgroup])
 
@@ -1449,9 +1426,10 @@ def dance(song, players, ARROWPOS, prevscr):
       if len(plr.steps.lastbpmchangetime) > 1:
         if (curtime >= plr.steps.lastbpmchangetime[1][0]):
           nbpm = plr.steps.lastbpmchangetime[1][1]
-          for plr in players:  plr.change_bpm(nbpm)
-          print "Last changed BPM at", plr.steps.lastbpmchangetime
-          plr.steps.lastbpmchangetime.pop(0)
+          for plr in players:
+            plr.change_bpm(nbpm)
+            print "Last changed BPM at", plr.steps.lastbpmchangetime
+            plr.steps.lastbpmchangetime.pop(0)
      
     for plr in players: plr.check_sprites(curtime)
 

@@ -3,9 +3,9 @@ from constants import *
 
 import colors
 
-BEATS = { 'sixty': 0.25, 'thrty': 0.5, 'twtfr': 2.0/3.0,
-          'steps': 1.0, 'tripl': 4.0/3.0, 'eight': 2.0,
-          'qurtr': 4.0, 'halfn': 8.0, 'whole': 16.0 }
+BEATS = { 'x': 0.25, 't': 0.5, 'f': 2.0/3.0,
+          's': 1.0, 'w': 4.0/3.0, 'e': 2.0,
+          'q': 4.0, 'h': 8.0, 'o': 16.0 }
 
 class SongEvent:
   def __init__ (self, bpm, when=0.0, feet=None, next=None,
@@ -60,27 +60,18 @@ class Steps:
 
     tail = self.events
 
-    for line in song.steps[playmode][difficulty]:
-      fsplit = line.split()
-      firstword = fsplit[0]
-      if len(fsplit) > 1: nextword, rest = fsplit[1], fsplit[1:]
-      else: nextword, rest = None, None
+    for words in song.steps[playmode][difficulty]:
 
-      if firstword == "end":
-        if self.length < cur_time + toRealTime(cur_bpm, BEATS['halfn']):
-          self.length = cur_time + toRealTime(cur_bpm, BEATS['halfn'])
-          coloring_mod = 0
-          break
-      elif firstword == "atsec":
-        cur_time = float(nextword)
-        cur_time = float(nextword)
-      elif firstword == 'waits':
-        cur_time += float(nextword)
-      elif firstword == 'ready':
+#     if firstword == "atsec":
+#       cur_time = float(nextword)
+#       cur_time = float(nextword)
+      if words[0] == 'W':
+        cur_time += float(words[1])
+      elif words[0] == 'R':
         tail.next = SongEvent(when=cur_time,bpm=cur_bpm,extra='READY')
         coloring_mod = 0
         tail = tail.next
-      elif firstword in BEATS.keys():
+      elif words[0] in BEATS.keys():
         cando = True
         if ((little == 1 and (coloring_mod % 4 == 1 or
                               coloring_mod % 4 == 3)) or
@@ -89,15 +80,14 @@ class Steps:
 
         # Don't create arrow events with no arrows
         arrowcount = 0
-        for i in rest: arrowcount += int(i)
+        for i in words[1:]: arrowcount += int(i)
 
         if cando and arrowcount != 0:
-          feetstep = [int(x, 16) for x in rest]
-
+          feetstep = words[1:]
           # Check for jumps on this note
           arrowcount = 0
           for jump in range(len(feetstep)):
-            if (feetstep[jump] & 8 and arrowcount != 0 and
+            if (feetstep[jump] & 1 and arrowcount != 0 and
                 mainconfig['badknees'] and holding[jump] == 0):
               feetstep[jump] == 0
             arrowcount += 1
@@ -105,14 +95,14 @@ class Steps:
           # Check for holds
           for hold in range(len(feetstep)):
             didnothold = True
-            if feetstep[hold] & 128 and holding[hold] == 0:
+            if feetstep[hold] & 2 and holding[hold] == 0:
               holdtimes.insert(self.numholds, cur_time)
               holdlist.insert(self.numholds, hold)
               holding[hold] = self.numholds
               self.numholds += 1
               didnothold = False
 
-            elif ((feetstep[hold] & 128 or feetstep[hold] & 8) and
+            elif ((feetstep[hold] & 2 or feetstep[hold] & 1) and
                   holding[hold] and didnothold):
               releasetimes.insert(holding[hold], cur_time)
               releaselist.insert(holding[hold], hold)
@@ -120,41 +110,39 @@ class Steps:
               holding[hold] = 0
 
           tail.next = SongEvent(when = cur_time, bpm = cur_bpm,
-                                feet = feetstep, extra = firstword,
+                                feet = feetstep, extra = words[0],
                                 color = coloring_mod % 4)
 
           for arrowadder in feetstep:
-            if arrowadder & 8:
+            if arrowadder & 1:
               self.totalarrows += 1
 
           tail = tail.next
 
-        cur_time += toRealTime(cur_bpm, BEATS[firstword])
+        cur_time += toRealTime(cur_bpm, BEATS[words[0]])
 
-        coloring_mod += BEATS[firstword]
+        coloring_mod += BEATS[words[0]]
 
-      elif firstword == "delay":
-        cur_time += toRealTime(cur_bpm,
-                               BEATS['qurtr'] * float(nextword))
-        coloring_mod += 4 * float(nextword)
+      elif words[0] == "D":
+        cur_time += toRealTime(cur_bpm, BEATS['q'] * words[1])
+        coloring_mod += 4 * words[1]
 
-      elif firstword == "chbpm":
-        cur_bpm = float(nextword)
+      elif words[0] == "B":
+        cur_bpm = words[1]
         tail.next = SongEvent(when = cur_time, bpm = cur_bpm,
                               extra = "CHBPM")
         tail = tail.next
 
-      elif firstword == "tstop":
-        tail.next = SongEvent(when = cu_time, bpm = cur_bpm,
+      elif words[0] == "S":
+        tail.next = SongEvent(when = cur_time, bpm = cur_bpm,
                               extra = "TSTOP")
-        cur_time += float(nextword) / 1000
+        cur_time += words[1] / 1000
         tail = tail.next
 
-      elif firstword == "lyric" and lyrics:
-        lyrics.addlyric(cur_time - 0.4, " ".join(rest), 1)
+      elif words[0] == "L" and lyrics:
+        lyrics.addlyric(cur_time - 0.4, words[2], words[1])
 
-      elif firstword == 'trans' and lyrics:
-        lyrics.addlyric(cur_time - 0.4, " ".join(rest), 0)
+    self.length = cur_time + toRealTime(cur_bpm, BEATS['h'])
 
     self.holdinfo = zip(holdlist, holdtimes, releasetimes)
     self.holdref = zip(holdlist, holdtimes)
@@ -165,14 +153,10 @@ class Steps:
     self.head = self.fhead = self.events
     self.playingbpm = self.bpm
 
-  def get_time(self):
-    self.curtime = float(pygame.mixer.music.get_pos())/1000.0
-    return self.curtime
-
   def get_events(self):
     # FIXME These optimizations probably are useless
     events, nevents = [], []
-    time = self.get_time()
+    time = self.curtime = float(pygame.mixer.music.get_pos())/1000.0
     head = self.head
     fhead = self.fhead
     arrowtime = None

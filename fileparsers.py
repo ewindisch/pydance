@@ -1,22 +1,14 @@
-# This thing parses step files, in theory.
+import os
 
-import sys, os, copy
+class StepFile: 
+  METADATA, GAMETYPE, LYRICS, STEPS, WAITING = range(5)
+  word_trans = { "whole": "o", "halfn": "h", "qurtr": "q", "eight": "e",
+                 "tripl": "w", "steps": "s", "twtfr": "f", "thrty": "t",
+                 "sixty": "x", "ready": "R", "chbpm": "B", "waits": "W",
+                 "delay": "D", "tstop": "S",
+                 "00": 0, "08": 1, "88": 3, "80": 2 }
 
-DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "TRICK", "ANOTHER", "STANDARD",
-                "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI"]
-
-def order_sort(a, b):
-  if a in DIFFICULTIES and b in DIFFICULTIES:
-    return cmp(DIFFICULTIES.index(a), DIFFICULTIES.index(b))
-  else: return cmp(a, b)
-
-def sorted_diff_list(difflist):
-  keys = difflist.keys()
-  keys.sort((lambda a, b: cmp(difflist[a], difflist[b]) or order_sort(a, b)))
-  return keys
-
-class StepFile:
-  def __init__(self, filename):
+  def __init__(self, filename, need_steps):
     self.filename = filename
     self.steps = {}
     self.difficulty = {}
@@ -24,46 +16,17 @@ class StepFile:
     self.lyrics = []
     f = open(filename)
     # parser states
-    METADATA, GAMETYPE, LYRICS, STEPS, WAITING = range(5)
-    state = METADATA
-    sec = diff = line = None 
+    state = StepFile.METADATA
+    state_data = [None, None] # sec, diff
+    parsers = [self.parse_metadata, self.parse_gametype,
+               self.parse_lyrics, self.parse_steps, self.parse_waiting]
+
+    if not need_steps: parsers[StepFile.STEPS] = self.parse_dummy_steps
+
     for line in f:
       line = line.strip()
       if line == "" or line[0] == "#": continue
-      elif state == METADATA:
-        if line == "LYRICS": state = LYRICS
-        else:
-          parts = line.split()
-          if len(parts) == 1:
-            state = GAMETYPE
-            sec = line
-            if self.steps.get(sec) == None: self.steps[sec] = {}
-            if self.difficulty.get(sec) == None: self.difficulty[sec] = {}
-          else:
-            self.info[parts[0].lower()] = " ".join(parts[1:])
-      elif state == GAMETYPE:
-        state = STEPS
-        parts = line.split()
-        diff = parts[0]
-        self.steps[sec][diff] = []
-        self.difficulty[sec][diff] = int(parts[1])
-      elif state == STEPS:
-        if line == "end": state = WAITING
-        self.steps[sec][diff].append(line)
-      elif state == LYRICS:
-        if line == "end": state = WAITING
-        self.lyrics.append(line)
-      elif state == WAITING:
-        if line == "LYRICS": state = LYRICS
-        elif line == line.upper():
-          state = GAMETYPE
-          sec = line
-          if self.steps.get(sec) == None: self.steps[sec] = {}
-          if self.difficulty.get(sec) == None: self.difficulty[sec] = {}
-      else:
-        print "Unknown state", state
-        print "This is bad, bailing now."
-        sys.exit(1)
+      else: state, state_data = parsers[state](line, state_data)
 
     dir, name = os.path.split(filename)
 
@@ -92,6 +55,9 @@ class StepFile:
       self.info["background"] = self.info["bg"]
       del(self.info["bg"])
 
+    self.find_subtitle()
+
+  def find_subtitle(self):
     if not self.info.has_key("subtitle"):
       for pair in (("[", "]"), ("(", ")"), ("~", "~")):
         if pair[0] in self.info["title"] and pair[1] in self.info["title"]:
@@ -102,16 +68,82 @@ class StepFile:
             self.info["title"] = self.info["title"][:l]
             break
 
+  def parse_metadata(self, line, data):
+    if line == "LYRICS": return StepFile.LYRICS, data
+    else:
+      parts = line.split()
+      if len(parts) == 1:
+        data[0] = line
+        if self.steps.get(line) == None: self.steps[line] = {}
+        if self.difficulty.get(line) == None: self.difficulty[line] = {}
+        return StepFile.GAMETYPE, data
+      else:
+        self.info[parts[0].lower()] = " ".join(parts[1:])
+        return StepFile.METADATA, data
+
+  def parse_gametype(self, line, data):
+    parts = line.split()
+    data[1] = parts[0]
+    self.steps[data[0]][data[1]] = []
+    self.difficulty[data[0]][data[1]] = int(parts[1])
+    return StepFile.STEPS, data
+
+  def parse_dummy_steps(self, line, data):
+    if line == "end": return StepFile.WAITING, data
+    else: return StepFile.STEPS, data
+
+  def parse_steps(self, line, data):
+    if line == "end": return StepFile.WAITING, data
+    parts = line.split()
+    i = 0
+    for p in parts:
+      try: parts[i] = StepFile.word_trans[p]
+      except KeyError:
+        try: parts[i] = int(p)
+        except ValueError:
+          try: parts[i] = float(p)
+          except ValueError: pass
+      i += 1
+    if parts[0] == "lyric": parts = ["L", 1, " ".join(parts[1:])]
+    elif parts[0] == "trans": parts = ["L", 0, " ".join(parts[1:])]
+    self.steps[data[0]][data[1]].append(parts)
+    return StepFile.STEPS, data
+
+  def parse_lyrics(self, line, data):
+    if line == "end": return StepFile.WAITING, data
+    self.lyrics.append(line)
+    return StepFile.LYRICS, data
+
+  def parse_waiting(self, line, data):
+    if line == "LYRICS": return StepFile.LYRICS, data
+    elif line == line.upper():
+      self.sec = line
+      if not self.steps.has_key(data[0]): self.steps[data[0]] = {}
+      if not self.difficulty.has_key(data[0]): self.difficulty[data[0]] = {}
+      return StepFile.GAMETYPE, data
+
 formats = ((".step", StepFile), )
 
+DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "TRICK", "ANOTHER", "STANDARD",
+                "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI"]
+
+def order_sort(a, b):
+  if a in DIFFICULTIES and b in DIFFICULTIES:
+    return cmp(DIFFICULTIES.index(a), DIFFICULTIES.index(b))
+  else: return cmp(a, b)
+
+def sorted_diff_list(difflist):
+  keys = difflist.keys()
+  keys.sort((lambda a, b: cmp(difflist[a], difflist[b]) or order_sort(a, b)))
+  return keys
 
 # Encapsulates and abstracts the above classes
 class SongItem:
-  def __init__(self, filename):
+  def __init__(self, filename, need_steps = True):
     song = None
     for pair in formats:
       if filename[-len(pair[0]):].lower() == pair[0]:
-        song = pair[1](filename)
+        song = pair[1](filename, need_steps)
         break
     if song == None:
       print filename, "is in an unsupported format."
