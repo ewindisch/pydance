@@ -100,7 +100,7 @@ elif osname == "macosx":
 
 mainconfig.load("pyddr.cfg")
 mainconfig.load(os.path.join(rc_path, "pyddr.cfg"))
-mainconfig["sortmode"] %= 5
+mainconfig["sortmode"] %= 4
 
 pygame.init()
 
