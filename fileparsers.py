@@ -690,8 +690,10 @@ class KSFFile(MSDFile):
         self.info["background"] = fullname
 
     self.find_mixname()
-    self.info["title"] = self.info["title"].decode("cp949").encode("utf-8")
-    self.info["artist"] = self.info["artist"].decode("cp949").encode("utf-8")
+    try:
+      self.info["title"] = self.info["title"].decode("cp949").encode("utf-8")
+      self.info["artist"] = self.info["artist"].decode("cp949").encode("utf-8")
+    except LookupError: pass # Encoding support not available.
 
   def parse_ksf(self, filename):
     steps = []
@@ -841,7 +843,10 @@ class SongItem(object):
         raise RuntimeError(filename + " is missing: " + k)
 
     for k in ("subtitle", "title", "artist", "author", "mix"):
-      if self.info.has_key(k): self.info[k] = self.info[k].decode("utf-8")
+      try:
+        if self.info.has_key(k): self.info[k] = self.info[k].decode("utf-8")
+      except UnicodeError:
+        print "W: Non-Unicode key in %s: %s" % (filename, k)
 
     # Default values
     for k in ("subtitle", "background", "banner",
