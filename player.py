@@ -554,6 +554,7 @@ class HoldArrowSprite(pygame.sprite.Sprite):
     self.timef1 = times[1]
     self.timef2 = times[2]
     self.timef = times[2]
+    if self.timef2 is None: self.timef2 = self.timef1
     self.image = arrow.image.convert()
     self.rect = arrow.image.get_rect()
     self.rect.left = arrow.left
