@@ -895,6 +895,7 @@ class Player(object):
               ns = HoldArrowSprite(arrow_gfx[dirstr], time,
                                    steps.holdinfo[holdindex], self, song)
               newsprites.append(ns)
+                       
       arrows.add(newsprites)
 
 

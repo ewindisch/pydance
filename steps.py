@@ -97,27 +97,27 @@ class Steps(object):
         if arrowcount != 0:
           feetstep = words[1:]
 
+          if last_event_was_freeze:
+            time_to_add = last_event_was_freeze
+            last_event_was_freeze = False
+          else: time_to_add = cur_time
+
           # Check for holds
           for hold in range(len(feetstep)):
             if feetstep[hold] & 2 and holding[hold] == 0:
-              holdtimes.insert(self.numholds, cur_time)
+              holdtimes.insert(self.numholds, time_to_add)
               holdlist.insert(self.numholds, hold)
               releasetimes.append(None)
               releaselist.append(None)
               holding[hold] = self.numholds
               self.numholds += 1
 
-            elif ((feetstep[hold] & 2 or feetstep[hold] & 1) and
-                  holding[hold]):
-              releasetimes[holding[hold] - 1] = cur_time
+            elif (feetstep[hold] and holding[hold]):
+              releasetimes[holding[hold] - 1] = time_to_add
               releaselist[holding[hold] - 1] = hold
-              feetstep[hold] = 0 # broken stepfile, junk the event
+              feetstep[hold] = 0
               holding[hold] = 0
               
-          if last_event_was_freeze:
-            time_to_add = last_event_was_freeze
-            last_event_was_freeze = False
-          else: time_to_add = cur_time
           self.events.append(SongEvent(when = time_to_add, bpm = cur_bpm,
                                        feet = feetstep, extra = words[0],
                                        beat = cur_beat,
@@ -166,6 +166,8 @@ class Steps(object):
 
     if self.ready == None:
       self.ready = self.events[1].when - toRealTime(self.events[1].bpm, 16)
+
+    print self.holdinfo, self.holdref
 
   def play(self):
     self.curtime = 0.0

@@ -340,7 +340,62 @@ class StepFile(GenericFile):
       if not self.difficulty.has_key(data[0]): self.difficulty[data[0]] = {}
       return StepFile.GAMETYPE, data
 
-class DWIFile(GenericFile):
+# Parse a file using MSD-style syntax, that is:
+# #TAG:FIELD1:FIELD2:...; // indicate comments until the end of the line.
+# Whitespace is stripped before and after each tag/field.
+# Newlines are allowed within fields and should be removed.
+# We'll assume newlines are mandatory after ;, I've never seen another
+# case in the wild.
+class MSDFile(GenericFile):
+  def __init__(self, filename, need_steps):
+    GenericFile.__init__(self, filename, need_steps)
+    lines = []
+    f = open(filename)
+    for line in f:
+      if line.find("//") != -1: line = line[:line.find("//")]
+      line = line.strip()
+
+      if len(line) == 0: continue
+      elif line[0] == "#": lines.append(line[1:]) # A new tag
+      else: lines[-1] += line
+
+    for i in range(len(lines)):
+      line = lines[i]
+      while line[-1] == ";": line = line[:-1] # Some lines have two ;s.
+      lines[i] = line.split(":")
+
+    # Return a list of lists, [tag, field1, field2, ...]
+    return lines
+
+  # Return a list of all the images in the directory, sorted by file size
+  def find_images(self):
+    files = self.find_files([".png", ".jpg", ".jpeg", ".bmp"])
+    files.sort(lambda a, b: cmp(os.stat(a).st_size, os.stat(b).st_size))
+    return files
+
+  # Find all audio files
+  def find_audio(self):
+    return self.find_files([".ogg", ".mp3", ".wav", ".xm"])
+
+  # Find all step files
+  def find_othersteps(self):
+    return self.find_files([f[0] for f in SongItem.formats])
+
+  def find_files(self, formats):
+    files = []
+
+    dir = os.path.split(self.filename)[0]
+    if dir == "": dir = "."
+
+    # FIXME: Make this a list comprehension, for speed...
+    for f in os.path.listdir():
+      fullname = os.path.join(dir, f)
+      for ext in formats:
+        if fullname.lower()[-len(ext):] == ext:
+          files.append(fullname)
+
+# The DWI format, from Dance With Intensity.
+class DWIFile(MSDFile):
   modes = { "{": 0.25, "[": 2.0/3.0, "(": 1.0, "`": 1.0/12.0,
             "'": 2.0, ")": 2.0, "]": 2.0, "}": 2.0 }
   steps = {
@@ -362,6 +417,7 @@ class DWIFile(GenericFile):
                 },
     }
 
+  # FIXME: Is double mapping actually the same?
   steps["DOUBLE"] = steps["COUPLE"] = steps["SINGLE"]
 
   diff_map = { "ANOTHER": "TRICK", "SMANIAC": "HARDCORE",
@@ -370,31 +426,21 @@ class DWIFile(GenericFile):
   game_map = { "SOLO": "6PANEL" }
 
   def __init__(self, filename, need_steps):
-    GenericFile.__init__(self, filename, need_steps)
-    self.comment = "//"
+    lines = MSDFile.__init__(self, filename, need_steps)
 
     self.bpms = []
     self.freezes = []
 
-    lines = []
-    f = open(filename)
-    for line in f:
-      if line.find("//") != -1:
-        line = line[:line.find("//")]
-      
-      line = line.strip()
-      if len(line) == 0: continue
-      elif line[0] == "#": lines.append(line[1:])
-      else: lines[-1] += line
-
-    for line in lines:
-      while line[-1] == ";": line = line[:-1] # Some lines have two ;s.
-      parts = line.split(":")
+    for parts in lines:
       if len(parts) > 3:
         parts[0] = DWIFile.game_map.get(parts[0], parts[0])
         parts[1] = DWIFile.diff_map.get(parts[1], parts[1])
 
       rest = ":".join(parts[1:])
+
+      # I think this is the fault of the SM editor; some DWIs have blank
+      # fields (not many; basically all SMs do).
+      if rest == "": continue
 
       # don't support filenames. They're useless cross-platform.
       # Don't support genre, it's a dumbass tag
@@ -412,14 +458,13 @@ class DWIFile(GenericFile):
           self.info["preview"][1] = self.parse_time(rest)
         else: self.info["preview"] = [45, self.parse_time(rest)]
       elif parts[0] == "CHANGEBPM":
-        for change in parts[1].split(","):
-          beat, bpm = change.split("=")
-          self.bpms.append((float(beat), float(bpm)))
+        rest = rest.replace(" ", "")
+        self.bpms = [(float(beat), float(bpm)) for beat, bpm in
+                     [change.split("=") for change in rest.split(",")]]
       elif parts[0] == "FREEZE":
-        for change in parts[1].split(","):
-          beat, wait = change.split("=")
-          self.freezes.append((float(beat), float(wait)/1000.0))
-
+        rest = rest.replace(" ", "")
+        self.freezes = [(float(beat), float(wait)/1000) for beat, wait in
+                        [change.split("=") for change in rest.split(",")]]
       elif len(parts) == 4 and parts[0] not in games.COUPLE:
         if not self.difficulty.has_key(parts[0]):
           self.difficulty[parts[0]] = {}
@@ -457,7 +502,13 @@ class DWIFile(GenericFile):
         step = list(dwifile_steps[steps.pop(0)])
         if len(steps) > 0 and steps[0] == "!":
           steps.pop(0)
-          holdstep = dwifile_steps[steps.pop(0)]
+          possible = steps.pop(0)
+          if possible in dwifile_steps:
+            holdstep = dwifile_steps[possible]
+          elif possible in DWIFile.modes:
+            # Some DWI files have things like ...2!(2...
+            step_type = DWIFile.modes[possible]
+            holdstep = dwifile_steps[steps.pop(0)]
           for i in range(len(holdstep)):
             if holdstep[i]: step[i] |= 2
         steplist.append([step_type] + step)
@@ -498,7 +549,7 @@ class DWIFile(GenericFile):
       
     return ret
 
-class SMFile(GenericFile):
+class SMFile(MSDFile):
 
   gametypes = { "dance-single": "SINGLE", "dance-double": "DOUBLE",
                 "dance-couple": "COUPLE", "dance-solo": "6PANEL",
@@ -510,27 +561,17 @@ class SMFile(GenericFile):
   step = [0, 1, 3, 1]
 
   def __init__(self, filename, need_steps):
-    GenericFile.__init__(self, filename, need_steps)
-    self.comment = "//"
+    lines = MSDFile.__init__(self, filename, need_steps)
 
     self.bpms = []
     self.freezes = []
 
-    lines = []
-    f = open(filename)
+    for parts in lines:
 
-    for line in f:
-      if line.find("//") != -1:
-        line = line[:line.find("//")]
-      
-      line = line.strip()
-      if len(line) == 0: continue
-      elif line[0] == "#": lines.append(line[1:])
-      else: lines[-1] += line
+      rest = ":".join(parts[1:])
 
-    for line in lines:
-      while line[-1] == ";": line = line[:-1] # Some lines have two ;s.
-      parts = line.split(":")
+      # A lot of SM files have blank fields; I blame the editor.
+      if rest == "": continue
 
       if parts[0] == "OFFSET": self.info["gap"] = float(parts[1]) * 1000
       elif parts[0] == "TITLE": self.info["title"] = ":".join(parts[1:])
@@ -550,16 +591,14 @@ class SMFile(GenericFile):
           self.info["preview"][1] = float(parts[1])
         else: self.info["preview"] = [45, float(parts[1])]
       elif parts[0] == "BPMS":
-        for change in parts[1].split(","):
-          if "=" in change:
-            beat, bpm = change.split("=")
-            self.bpms.append((float(beat), float(bpm)))
+        rest = rest.replace(" ", "")
+        self.bpms = [(float(beat), float(bpm)) for beat, bpm in
+                     [change.split("=") for change in rest.split(",")]]
         self.info["bpm"] = self.bpms.pop(0)[1]
       elif parts[0] == "STOPS":
-        for change in parts[1].split(","):
-          if "=" in change:
-            beat, wait = change.split("=")
-            self.freezes.append((float(beat), float(wait)))
+        rest = rest.replace(" ", "")
+        self.freezes = [(float(beat), float(wait)) for beat, wait in
+                     [change.split("=") for change in rest.split(",")]]
       elif parts[0] == "NOTES":
         if parts[1] in SMFile.gametypes:
           game = SMFile.gametypes[parts[1]]
@@ -631,11 +670,6 @@ class SMFile(GenericFile):
 
     return stepdata
 
-formats = ((".step", StepFile),
-           (".dance", DanceFile),
-           (".dwi", DWIFile),
-           (".sm", SMFile))
-
 DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "ANOTHER", "STANDARD", "TRICK",
                 "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "SMANIAC", "ONI"]
 
@@ -652,6 +686,11 @@ def sorted_diff_list(difflist):
 # Encapsulates and abstracts the above classes
 class SongItem(object):
 
+  formats = ((".step", StepFile),
+             (".dance", DanceFile),
+             (".dwi", DWIFile),
+             (".sm", SMFile))
+
   defaults = { "valid": 1,
                "mix": "No Mix",
                "endat": 0.0,
@@ -662,7 +701,7 @@ class SongItem(object):
   
   def __init__(self, filename, need_steps = True):
     song = None
-    for pair in formats:
+    for pair in SongItem.formats:
       if filename[-len(pair[0]):].lower() == pair[0]:
         song = pair[1](filename, need_steps)
         break
