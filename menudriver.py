@@ -18,17 +18,17 @@ def get_rotate(name, list):
   return None, mainconfig[name], None
 
 def switch_rotate(name, list):
-  if list.index(mainconfig[name]):
-    new_i = list.index(mainconfig[name]) + 1 % len(list)
+  try:
+    new_i = (list.index(mainconfig[name]) + 1) % len(list)
     mainconfig[name] = list[new_i]
-  else: mainconfig[name] = list[0]
+  except ValueError: mainconfig[name] = list[0]
   return get_rotate(name, list)
 
 def switch_rotate_back(name, list):
-  if list.index(mainconfig[name]):
-    new_i = list.index(mainconfig[name]) - 1 % len(list)
+  try:
+    new_i = (list.index(mainconfig[name]) - 1) % len(list)
     mainconfig[name] = list[new_i]
-  else: mainconfig[name] = list[-1]
+  except ValueError: mainconfig[name] = list[-1]
   return get_rotate(name, list)
 
 # Rotate through a list of option strings, but use the index as the value.
@@ -109,6 +109,7 @@ def do(screen, songselect, songdata):
         ),
        ("Graphic Options",
         ["Fullscreen", {E_START: fullscreen_toggle}, (None,)],
+#        ["Graphics Theme", rotate_opt, ('gfxtheme', ['classic', 'bryan'])],
         ["Exploding", rotate_index_opt,
          ('explodestyle', ('none', 'rotate', 'scale', 'rotate & scale'))],
         ["Backgrounds", onoff_opt, ('showbackground',)],

@@ -60,6 +60,8 @@ class MenuItem:
       if subtext: self.subtext = subtext
       if rgb: self.rgb = rgb
       self.render()
+      return E_PASS
+    else: return E_PASS
 
   # Render the image. If subtext is present, the main text gets smaller.
   def render(self):
@@ -144,13 +146,12 @@ class Menu:
       # Otherwise, if the event actually happened, pass it on to the button.
       elif ev != E_PASS and ev != E_QUIT:
         try:
-          ev = self.items[curitem].activate(ev)
+          self.items[curitem].activate(ev)
         except AttributeError:
           if ev == E_START1 or ev == E_START2:
             # Except if we're not a button and the event was START, go to
             # the new menu.
             self.items[curitem].display(screen)
-            changed = 1
             screen.fill((0,0,0)) # Reset buffer.
 
       zoom += zoomdelta
