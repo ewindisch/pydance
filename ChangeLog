@@ -39,7 +39,7 @@ legend:
 * Correctly encode/decode KSF, SM, DWI, and .dance file metadata.
  * KSF requires the Python Koco codecs package for CP949 support.
 * DWI parsing for braindead constructs like "2!(2".
-* Arrows now always draw in order (earlier under later).
+* No more out of order arrows and "jumping back" on stops.
 * Many crashes fixed (stops with holds, oni lifebar selection, an edge-case
   in endless mode with two players).
 * Parsing for all files is now more informative and less error-prone.

@@ -374,6 +374,11 @@ class ArrowSprite(pygame.sprite.Sprite):
       self.kill()
       return
 
+    if curbpm < 0.0001: return # We're stopped
+    # We can't just keep going if we're stopped, because the bpm change to
+    # 0 is out of lbct, and so we only use curbpm, which is 0, meaning
+    # we always end up at the top.
+
     top = self.top
 
     beatsleft = 0
@@ -524,6 +529,8 @@ class HoldArrowSprite(pygame.sprite.Sprite):
       self.kill()
       return
       
+    if curbpm < 0.0001: return # We're stopped
+
     top = self.top
     bottom = self.top
 
