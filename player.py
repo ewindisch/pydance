@@ -170,10 +170,10 @@ class LifeBarDisp(pygame.sprite.Sprite):
 
       self.oldlife = self.life
 
-      self.image.set_clip()
       self.image.blit(self.empty, (0, 0))
       self.image.set_clip((0, 0, int(202 * self.life / 100.0), 28))
       self.image.blit(self.full, (0, 0))
+      self.image.set_clip()
 
       if self.failed:
         self.image.blit(self.failtext, (70, 2) )
