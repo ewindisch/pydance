@@ -2,6 +2,14 @@
 
 # Data on many algorithms taken from www.aaroninjapan.com/ddr2.html
 
+# N = Number of steps in the song.
+# F = Feet rating of the song.
+# S(N) = N * (N + 1) / 2.
+# n = Current step number.
+# L(r) = Lookup function for the current step's rating.
+# C = Current combo count.
+# V(n) = The point value of the nth step.
+
 import colors, pygame, fontfx
 
 from listener import Listener
@@ -40,9 +48,8 @@ class AbstractScore(Listener, pygame.sprite.Sprite):
 # scores "fair" between different difficulty modes, and is similar
 # to DDR 3rd Mix's in that respect.
 
-# Each song has a maximum score of 50e6, 40e6 from steps, 10e6 from combos.
-# Steps are scored between 4 and 0 based only on their rating; combos
-# are scored by a monotonically increasing function.
+# L(V) = 4, L(P) = 3.5, L(G) = 2.5, L(O) = 0.5
+# V(n) = L(r) * 10,000,000 / N + 10,000,000 / S(N) * C
 class PydanceScore(AbstractScore):
   def set_song(self, text, count, feet):
     AbstractScore.set_song(self, text, count, feet)
@@ -57,11 +64,9 @@ class PydanceScore(AbstractScore):
     self.score += self.inc.get(rating, 0)
     self.score += combo * self.combo_coeff
 
-# "DDR 1st Mix's scoring system. For every step:
-# Multiplier (M) = (# of steps in your current combo / 4) rounded down
-# "Good" step = M * 100 (and this ends your combo)
-# "Great" step = M * M * 100
-# "Perfect" step = M * M * 300"
+# M = floor(C / 4)
+# L(V) = L(P) = M * 300, L(G) = M * 100, L(O) = 100
+# V(n) = M * L(r)
 class FirstScore(AbstractScore):
   def __init__(self, pid, text, game):
     AbstractScore.__init__(self, pid, text, game)
@@ -81,20 +86,8 @@ class FirstScore(AbstractScore):
       else: # Must be a better-than-great.
         self.score += self.combo * self.combo / 4 * 300
 
-# "First, we need to calculate the base step score P:
-
-#       Let N = Total number of steps in song
-#       P = 1,000,000 / (N * (N + 1) / 2) 
-
-# From this, if the step is "Perfect", multiply P by 10.
-# Likewise, if the step is "Great", multiply P by 5.
-# Finally, a "Good" is just the value of P.
-
-# Let us call this new value S
-
-# If this is the 2nd step, multiply S by 2,
-# If this is the 3rd step, multiply S by 3,
-# and so on... "
+# L(V) = L(P) = 10, L(G) = 5, L(O) = 1
+# V(n) = L(r) * 1,000,000 / S(N) * n
 class ThirdScore(AbstractScore):
   def set_song(self, text, count, feet):
     AbstractScore.set_song(self, text, count, feet)
@@ -108,13 +101,17 @@ class ThirdScore(AbstractScore):
     self.arrow += 1
     self.score += self.inc.get(rating, 0) * self.arrow
 
-# Very simple; RTFS.
+# L(V) = L(P) = 777, L(G) = 555
+# V(n) = L(r) + C * 333
 class FourthScore(AbstractScore):
   def stepped(self, cur_time, rating, combo):
     base = {"V": 777, "P": 777, "G": 555 }
     self.score += base.get(rating, 0) + combo * 333
 
-# We don't calculate the grade bonus at the end.
+# L(V) = L(P) = 10, L(G) = 5
+# V(n) = L(r) * 500,000 * (F + 1) / S(N) * n
+
+# The bonus for your combo or final grade is not implemented yet.
 class FifthScore(AbstractScore):
   def set_song(self, text, count, feet):
     AbstractScore.set_song(self, text, count, feet)
@@ -126,14 +123,8 @@ class FifthScore(AbstractScore):
     self.arrow += 1
     self.score += self.inc.get(rating, 0) * self.arrow
 
-# "A single step's points are calculated as follows:
-#   Let p = score multiplier (Marv. = 10, Perfect = 9, Great = 5, other = 0)
-#    N = total number of steps and freeze steps
-#    n = number of the current step or freeze step (varies from 1 to N)
-#    B = Base value of the song (1,000,000 X the number of feet difficulty)
-# So, the score for one step is:
-#       one_step_score = p * (B/S) * n
-# Where S = The sum of all integers from 1 to N."
+# L(V) = 10, L(P) = 9, L(G) = 5
+# V(n) = L(r) * 1,000,000 * F / S(N) * n
 
 # The special scoring mode for Nonstop is not implemented.
 
