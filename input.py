@@ -168,10 +168,10 @@ class EventManager:
     v = self.events.get((t, v))
     if v != None:
       if ev.type == JOYBUTTONUP or ev.type == KEYUP:
-        self.states[v] = min(self.states[v] - 1, 0)
+        self.states[v] = False
         v = (v[0], -v[1])
       elif ev.type == JOYBUTTONDOWN or ev.type == KEYDOWN:
-        self.states[v] += 1
+        self.states[v] = True
     else:
       v = (0, E_PASS)
 
