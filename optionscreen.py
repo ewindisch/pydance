@@ -62,7 +62,7 @@ def game_opt_driver(screen, config):
 class OptionScreen(object):
 
   bg = pygame.image.load(os.path.join(pyddr_path, "images", "option-bg.png"))
-  bg.set_colorkey(bg.get_at((0, 0)))
+  bg.set_colorkey(bg.get_at([0, 0]))
   bg.set_alpha(220)
 
   # Players is a list of hashes, not Player objects; it should have all
@@ -70,8 +70,8 @@ class OptionScreen(object):
   def __init__(self, players, title, menu, colors):
     self.players = players
     self.current = [0] * len(players)
-    self.title = title + ": Options"
     self.menu = menu
+    self.title = title
     self.colors = colors
 
   def display(self, screen):
@@ -146,8 +146,8 @@ class OptionScreen(object):
 
   def render(self, screen):
     rect = ((45, 5), (570, 470))
-    blankimage = pygame.surface.Surface(rect[1])
-    blankimage.set_colorkey(blankimage.get_at((0,0)))
+    blankimage = pygame.surface.Surface(rect[1]).convert_alpha()
+    blankimage.fill([0, 0, 0, 0])
 
     for i in range(len(self.menu)):
       color = None
@@ -200,6 +200,10 @@ class OptionScreen(object):
       r = textimage.get_rect()
       r.center = (blankimage.get_rect().centerx, 450)
       blankimage.blit(textimage, r)
+
+
+    text = FONTS[40].render(self.title, 1, colors.WHITE)
+    blankimage.blit(text, (45, 64-text.get_height()))
 
     screen.blit(self.baseimage, (0, 0))
     screen.blit(blankimage, rect)
