@@ -14,6 +14,9 @@ class GameType(object):
     # The maximum number of players for this game mode.
     self.players = 2
 
+    self.centered = False
+    self.theme_default = "default"
+
     #  Whether or not to parse the step data in coupled format, that is
     # as different steps depending on player ID.
     self.couple = False
@@ -48,10 +51,11 @@ class GameType(object):
     # The center of the playfield, for non-arrow sprites (score, lifebar, etc)
     self.sprite_center = 320 / self.players
 
-  # In double modes, we need to have the fields adjacent and dependent on pid.
+  # In double and centered modes, we need to have the fields adjacent and
+  # dependent on pid.
   # sprite_center will be fine; player_offset will be fine.
   def left_off(self, pid):
-    if not self.double: return self.left_offset
+    if not self.double and not self.centered: return self.left_offset
     elif pid & 1: return 0
     else: return self.left_offset * 2
 
@@ -100,6 +104,16 @@ GAMES = {
   "PARADOUBLE": GameType(players = 1, double = True, dirs = "lkuzr",
                       width = 48, theme = "para"),
 
+  "DMX": GameType(players = 1, dirs = "lkzr", width = 32, theme = "dmx",
+                  theme_default = "dmxesque"),
+  "DMXVERSUS": GameType(players = 2, dirs = "lkzr", width = 32,
+                        centered = True, theme = "dmx",
+                        theme_default = "dmxesque"),
+  "DMXCOUPLE": GameType(players = 2, couple = True, dirs = "lkzr",
+                        theme_default = "dmxesque", width = 32,
+                        centered = True, theme = "dmx"),
+  "DMXDOUBLE": GameType(players = 2, double = True, dirs = "lkzr", width = 32,
+                        theme_default = "dmxesque", theme = "dmx"),
   }
 
 SINGLE = [mode for mode in GAMES if (GAMES[mode].players == 1 and

@@ -94,7 +94,7 @@ default_conf = { # Wow we have a lot of options
   }
 
 for dummy, game in games.GAMES.items():
-  default_conf["%s-theme" % game.theme] = "default"
+  default_conf["%s-theme" % game.theme] = game.theme_default
 
 mainconfig = config.Config(default_conf)
 

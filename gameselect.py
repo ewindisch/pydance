@@ -44,6 +44,11 @@ MODES = {
   ("PARA", "VERSUS"): "PARAVERSUS",
   ("PARA", "COUPLE"): "PARACOUPLE",
   ("PARA", "DOUBLE"): "PARADOUBLE",
+
+  ("DMX", "SINGLE"): "DMX",
+  ("DMX", "VERSUS"): "DMXVERSUS",
+  ("DMX", "COUPLE"): "DMXCOUPLE",
+  ("DMX", "DOUBLE"): "DMXDOUBLE",
   }
 
 # Descriptions to output on the screen for each mode.
@@ -54,11 +59,12 @@ DESCRIPTIONS = {
   "8P": "Dance around the whole pad.",
   "9P": "Every button is used.",
   "PARA": "Wave your arms (or feet) around.",
+  "DMX": "Crazy kung-fu action.",
 
   "SINGLE": "Play by yourself.",
   "VERSUS": "Challenge an opponent to the same steps.",
   "COUPLE": "Two people dance complementary steps.",
-  "DOUBLE": "Try dancing on both pads at once.",
+  "DOUBLE": "Try playing on both sides at once.",
 
   "Normal": "One song at a time, or set up a playlist.",
   "Endless": "Keep dancing until you fail."
@@ -103,7 +109,8 @@ class GameSelect(object):
         state = 0
 
   def select_mode(self):
-    return self.select_general(0, ["4P", "5P", "6P", "8P", "9P", "PARA"])
+    return self.select_general(0, ["4P", "5P", "6P", "8P", "9P",
+                                   "PARA", "DMX"])
 
   def select_submode(self):
     return self.select_general(1, ["SINGLE", "VERSUS", "COUPLE", "DOUBLE"])

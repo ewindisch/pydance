@@ -150,6 +150,8 @@ def do(screen, songdata):
           ("9ps-theme", ThemeFile.list_themes("9VERSUS"))],
          ["Parapara", rotate_opt,
           ("para-theme", ThemeFile.list_themes("PARAPARA"))],
+         ["DMX", rotate_opt,
+          ("dmx-theme", ThemeFile.list_themes("DMX"))],
          ["Back", None, None]
          ),
         ["Back", None, None]
