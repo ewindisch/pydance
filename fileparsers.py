@@ -829,9 +829,10 @@ class SongItem(object):
 
   # A table of equivalencies between step sets; if the value doesn't
   # exist, it should be made the same as the key.
-  # FIXME: This probably belongs in games.py somewhere.
   equivs = { "SINGLE": "VERSUS",
-             "5PANEL": "5VERSUS" }
+             "5PANEL": "5VERSUS",
+             "6PANEL": "6VERSUS",
+             }
   
   def __init__(self, filename, need_steps = True):
     song = None
