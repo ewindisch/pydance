@@ -250,7 +250,9 @@ class CourseSelector(InterfaceWindow):
                                                          len(self._courses)))
     while not (ev == ui.CANCEL and
                (not self._folders or self._course.isfolder)):
-      if pid >= len(self._configs): pass # Inactive player
+      # Inactive player. If the event isn't set to ui.PASS, we try to use
+      # the pid later, which will be bad.
+      if pid >= len(self._diffs): ev = ui.PASS
       
       elif ev == ui.UP: self._index -= 1
       elif ev == ui.DOWN: self._index += 1
