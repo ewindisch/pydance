@@ -37,7 +37,7 @@ class Dance:
     self.moves.append(bc)
 
   def addPause(self, pause):
-    self.moves.append(Pause(pause))
+    self.moves.append(pause)
     
   def getDance(self):
     ret = "SINGLE\n%s %d\n" % (self.category, self.difficulty)
@@ -132,10 +132,10 @@ class Pause:
     self.pause = pause
 
   def getLine(self):
-    return "waits "+repr(self.pause/1000)+"\n"
+    return "waits " + repr(self.pause / 1000) + "\n"
 
   def getPause(self):
-    return delay_times[delay_beats.index(xyz)]/1000
+    return self.pause / 1000
 
 def main():
   print "dwi2step, by theGREENzebra (tgz@clickass.org)"
