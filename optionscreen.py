@@ -11,7 +11,7 @@ class OptionScreen:
     ("Speed", "speed", [(0.25, ".25x"), (0.5, ".5x"), (1, "1x"), (2, "2x"),
                         (3, "3x"), (4, "4x"), (8, "8x")]),
     ("Spin", "spin", [(0, "Off"), (1, "On")]),
-    ("Size", "scale", [(0, "Shrink"), (1, "Normal"), (2, "Grow")]),
+    ("Size", "scale", [(1, "Normal"), (0, "Shrink"), (2, "Grow")]),
     ("Sudden", "sudden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
                           (3, "Hide 3")]),
     ("Hidden", "hidden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
@@ -37,18 +37,19 @@ class OptionScreen:
     bg.set_alpha(200)
 
     # Animate the menu opening
-    t = pygame.time.get_ticks()
-    eyecandyimage = pygame.surface.Surface((640, 480))
-    while pygame.time.get_ticks() - t < 300:
-      p = float(pygame.time.get_ticks() - t) / 300
-      eyecandyimage.blit(baseimage, (0,0))
-      scaledbg = pygame.transform.scale(bg,(int(580 * p), 480))
-      scaledbg.set_alpha(200)
-      r = scaledbg.get_rect()
-      r.center = (320, 240)
-      up = eyecandyimage.blit(scaledbg, r)
-      screen.blit(eyecandyimage, (0, 0))
-      pygame.display.update(up)
+    if mainconfig['gratuitous']:
+      t = pygame.time.get_ticks()
+      eyecandyimage = pygame.surface.Surface((640, 480))
+      while pygame.time.get_ticks() - t < 300:
+        p = float(pygame.time.get_ticks() - t) / 300
+        eyecandyimage.blit(baseimage, (0,0))
+        scaledbg = pygame.transform.scale(bg,(int(580 * p), 480))
+        scaledbg.set_alpha(200)
+        r = scaledbg.get_rect()
+        r.center = (320, 240)
+        up = eyecandyimage.blit(scaledbg, r)
+        screen.blit(eyecandyimage, (0, 0))
+        pygame.display.update(up)
     
     baseimage.blit(bg, (30, 0))
 

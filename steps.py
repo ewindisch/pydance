@@ -95,7 +95,7 @@ class Steps:
           arrowcount = 0
           for jump in range(len(feetstep)):
             if (feetstep[jump] & 1):
-              if (arrowcount != 0 and player.jumps and
+              if (arrowcount != 0 and not player.jumps and
                   holding[jump] == 0):
                 feetstep[jump] = 0
               arrowcount += 1
