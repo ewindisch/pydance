@@ -84,6 +84,11 @@ def make_box(color = [111, 255, 148], size = [130, 40]):
     r.left += 1
   return s
 
+def folder_name(name, type):
+  if type == "mix": return name
+  elif type == "bpm": return "%s BPM" % name
+  else: return "%s: %s" % (type.capitalize(), name)
+
 def load_banner(filename):
   banner = pygame.image.load(filename)
   size = banner.get_rect().size
@@ -132,16 +137,19 @@ class SongItemDisplay(object):
 class FolderDisplay(object):
   def __init__(self, name, type, count):
     self.name = name
+    self._name = folder_name(name, type)
     self._type = type
     self.isfolder = True
     self.banner = None
     self.clip = None
     self.info = {}
-    self.info["title"] = name
+    self.info["title"] = self._name
     self.info["artist"] = "%d songs" % count
-    self.info["subtitle"] = "Sort by %s" % type
+    self.info["subtitle"] = None
 
   def render(self):
+    if self.banner: return
+
     name = self.name.encode("ascii", "ignore")
     for path in [rc_path, pydance_path]:
       filename = os.path.join(path, "banners", self._type, name+".png")
@@ -158,6 +166,31 @@ class FolderDisplay(object):
             self.banner, self.clip = load_banner(fn)
 
     if self.banner == None: self.banner = SongItemDisplay.no_banner
+
+class TextDisplay(pygame.sprite.Sprite):
+  def __init__(self, font, size, topleft, str = " "):
+    pygame.sprite.Sprite.__init__(self)
+    self._text = " "
+    self._font = font
+    self._size = size
+    self._topleft = topleft
+    self._render()
+
+  def _render(self):
+    self._needs_update = False
+    self.image = pygame.Surface(self._size, SRCALPHA, 32)
+    self.image.fill([0, 0, 0, 0])
+    img = fontfx.shadow(self._text, self._font, 1, [255, 255, 255], [0, 0, 0])
+    self.image.blit(img, [0, 0])
+    self.rect = self.image.get_rect()
+    self.rect.topleft = self._topleft
+
+  def set_text(self, text):
+    self._text = text
+    self._needs_update = True
+
+  def update(self, time):
+    if self._needs_update: self._render()
 
 # Crossfading help text along the top of the screen.
 class HelpText(pygame.sprite.Sprite):
@@ -265,7 +298,9 @@ class ListBox(pygame.sprite.Sprite):
     self._render()
 
   def set_items(self, items):
-    self._items = items
+    c2 = [c / 8 for c in self._color]
+    self._items = [fontfx.shadow(i, self._font, 1, self._color, c2) for
+                   i in items]
     self._needs_update = True
 
   def set_index(self, idx):
@@ -276,6 +311,7 @@ class ListBox(pygame.sprite.Sprite):
   def update(self, time):
     if self._idx != self._oldidx or self._needs_update:
       self._oldidx = self._idx
+      self._needs_update = False
       self._render()
 
   def _render(self):
@@ -285,8 +321,7 @@ class ListBox(pygame.sprite.Sprite):
     for i, y in zip(range(self._count),
                     range(self._h / 2, self._h * self._count, self._h)):
       idx = (self._idx + i) % len(self._items)
-      t = fontfx.shadow(self._items[idx], self._font, 1, self._color,
-                        [c / 8 for c in self._color])
+      t = self._items[idx]
       r = t.get_rect()
       r.centery = y
       r.left = 5
@@ -306,11 +341,20 @@ class BannerDisplay(pygame.sprite.Sprite):
     self._idx = 1
 
   def set_song(self, song):
-    self._next_update = -1
+    c1, c2 = [255, 255, 255], [30, 30, 30]
+    self._next_update = -2 # Magic value
+
     song.render()
-    self._title = song.info["title"]
-    self._subtitle = song.info["subtitle"]
-    self._artist = song.info["artist"]
+
+    self._title = fontfx.shadow(song.info["title"],
+                                pygame.font.Font(None, 20), 1, c1, c2)
+    self._artist = fontfx.shadow(song.info["artist"],
+                                 pygame.font.Font(None, 20), 1, c1, c2)
+
+    if song.info["subtitle"]:
+      self._subtitle = fontfx.shadow(song.info["subtitle"],
+                                     pygame.font.Font(None, 20), 1, c1, c2)
+    else: self._subtitle = None
     self._clip = song.clip
     self._banner = song.banner
 
@@ -324,30 +368,27 @@ class BannerDisplay(pygame.sprite.Sprite):
     self.image.blit(self._banner, r_b)
     self.image.set_clip(None)
     
-    c1, c2 = [255, 255, 255], [30, 30, 30]
-
-    title = fontfx.shadow(self._title, pygame.font.Font(None, 32), 2, c1, c2)
-    r_t = title.get_rect()
+    r_t = self._title.get_rect()
     r_t.center = [179, 240]
-    self.image.blit(title, r_t)
+    self.image.blit(self._title, r_t)
 
-    artist = fontfx.shadow(self._artist, pygame.font.Font(None, 26), 2, c1, c2)
-    r_a = artist.get_rect()
+    r_a = self._artist.get_rect()
     r_a.center = [179, 320]
-    self.image.blit(artist, r_a)
+    self.image.blit(self._artist, r_a)
 
     if self._subtitle:
-      subtitle = fontfx.shadow(self._subtitle, pygame.font.Font(None, 20),
-                               1, c1, c2)
-      r_s = subtitle.get_rect()
+      r_s = self._subtitle.get_rect()
       r_s.center = [179, 270]
-      self.image.blit(subtitle, r_s)
+      self.image.blit(self._subtitle, r_s)
 
     self.rect = self.image.get_rect()
     self.rect.center = self._center
 
   def update(self, time):
-    if time > self._next_update:
+    if self._next_update == -2:
+      self._next_update = time + 300
+      self._render()
+    elif time > self._next_update:
       self._next_update = time + 300
       if ((self._delta > 0 and self._color[self._idx] == 255) or
           (self._delta < 0 and self._color[self._idx] == 0)):
@@ -425,6 +466,7 @@ class MainWindow(object):
       self._create_folder_list()
     else:
       self._folders = None
+      self._base_text = "All Songs"
       self._songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
       self._list.set_items([s.info["title"] for s in self._songs])
       self._random_songs = [s for s in self._songs if s.info["valid"]]
@@ -465,6 +507,9 @@ class MainWindow(object):
     self._banner.add(self._sprites)
     self._sprites.add(HelpText(SS_HELP, [255, 255, 255], [0, 0, 0],
                                pygame.font.Font(None, 22), [206, 20]))
+
+    self._title = TextDisplay(pygame.font.Font(None, 30), [218, 32], [415, 15])
+    self._sprites.add(self._title)
     self._screen.blit(self._bg, [0, 0])
     pygame.display.update()
     self.loop()
@@ -479,6 +524,8 @@ class MainWindow(object):
   def loop(self):
     pid, ev = ui.ui.poll()
     self._list.set_index(self._index - 7)
+    self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
+                                                         len(self._songs)))
     while not (ev == ui.CANCEL and (not self._folders or self._song.isfolder)):
       if pid >= len(self._diffs): pass # Inactive player
       
@@ -519,6 +566,7 @@ class MainWindow(object):
       elif ev == ui.CONFIRM:
         if self._song.isfolder:
           self._create_song_list(self._song.name)
+          self._index = 0
         else:
           music.fadeout(500)
           diffs = [self._song.diff_list[self._game][self._diffs[i]]
@@ -546,12 +594,16 @@ class MainWindow(object):
           self._diffs[i] = self._diffs[pid]
           self._diff_names[i] = self._diff_names[pid]
 
-      if ev in [ui.CANCEL, ui.UP, ui.DOWN, ui.SELECT]:
+      if ev in [ui.CANCEL, ui.UP, ui.DOWN, ui.SELECT, ui.CONFIRM]:
         self._preview.preview(self._song)
         self._banner.set_song(self._song)
 
-      if ev in [ui.UP, ui.DOWN, ui.SELECT, ui.SORT]:
+      if ev in [ui.CANCEL, ui.UP, ui.DOWN, ui.SELECT, ui.CONFIRM, ui.SORT]:
         self._list.set_index(self._index - 7)
+        self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
+                                                             len(self._songs)))
+
+      if ev in [ui.UP, ui.DOWN, ui.SELECT, ui.SORT, ui.CONFIRM]:
         if not self._song.isfolder:
           for i in range(len(self._diffs)):
             name = self._diff_names[i]
@@ -559,7 +611,7 @@ class MainWindow(object):
               self._diffs[i] = self._song.diff_list[self._game].index(name)
             else: self._diffs[i] %= len(self._song.diff_list[self._game])
           
-      if ev in [ui.UP, ui.DOWN, ui.LEFT, ui.RIGHT, ui.SELECT]:
+      if ev in [ui.UP, ui.DOWN, ui.LEFT, ui.RIGHT, ui.SELECT, ui.CONFIRM]:
         if not self._song.isfolder:
           for i in range(len(self._diffs)):
             name = self._song.diff_list[self._game][self._diffs[i]]
@@ -571,7 +623,7 @@ class MainWindow(object):
                                     grade)
 
       self.update()
-      self._clock.tick(60)
+      self._clock.tick(20)
       pid, ev = ui.ui.poll()
 
   def update(self):
@@ -630,6 +682,8 @@ class MainWindow(object):
     self._list.set_items([s.info["title"] for s in self._songs])
     self._random_songs = self._songs
     
+    self._base_text = "Sort by %s" % sort.capitalize()
+    
   def _create_song_list(self, folder):
     sort = SORT_NAMES[mainconfig["sortmode"]]
     songlist = self._folders[sort][folder]
@@ -638,3 +692,4 @@ class MainWindow(object):
     self._songs = songlist
     self._list.set_items([s.info["title"] for s in self._songs])
     self._random_songs = [s for s in self._songs if s.info["valid"]]
+    self._base_text = folder_name(folder, sort)
