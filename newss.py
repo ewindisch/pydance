@@ -350,7 +350,9 @@ class MainWindow(InterfaceWindow):
         self._banner.set_song(self._song)
 
       if ev in [ui.CANCEL, ui.UP, ui.DOWN, ui.SELECT, ui.CONFIRM, ui.SORT]:
-        self._list.set_index(self._index)
+        if ev == ui.UP: self._list.set_index(self._index, -1)
+        elif ev == ui.DOWN: self._list.set_index(self._index, 1)
+        else: self._list.set_index(self._index)
         self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
                                                              len(self._songs)))
 

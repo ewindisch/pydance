@@ -142,7 +142,8 @@ class MainWindow(InterfaceWindow):
           SELECTORS[SS[indices[2]]](self._songs, self._courses, self._screen,
                                     MODES.get((values[0][indices[0]],
                                                values[1][indices[1]])))
-          indices = [0, 0, 0]
+          #indices = [0, 0, 0]
+          #for l in self._lists: l.set_index(0)
           active = 0
           self._screen.blit(self._bg, [0, 0])
           pygame.display.update()
@@ -152,7 +153,8 @@ class MainWindow(InterfaceWindow):
       indices[active] %= len(values[active])
 
       if ev in [ui.UP, ui.DOWN]:
-        self._lists[active].set_index(indices[active])
+        if ev == ui.UP: self._lists[active].set_index(indices[active], -1)
+        else: self._lists[active].set_index(indices[active], 1)
         self._selected.set_text(values[active][indices[active]])
         self._description.set_text(DESCRIPTIONS[values[active][indices[active]]])
 
