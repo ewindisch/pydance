@@ -161,9 +161,8 @@ class SongSelect(InterfaceWindow):
     songs = [s for s in songs if s.difficulty.has_key(game)]
 
     if len(songs) == 0:
-      error.ErrorMessage(screen, ["You don't have any songs",
-                                  "for the game mode (%s)" % game,
-                                  "that you selected."])
+      error.ErrorMessage(screen, "You don't have any songs for the game mode ("
+                         + game + ") that you selected.")
       return
 
     self._songs = [SongItemDisplay(s) for s in songs]
@@ -271,18 +270,17 @@ class SongSelect(InterfaceWindow):
             self._create_song_list(fol)
             self._index = self._songs.index(self._song)      
           else:
-            error.ErrorMessage(screen, ["You don't have any songs",
-                                        "that are marked \"valid\"",
-                                        "for random selection."])
+            error.ErrorMessage(screen,
+                               "You don't have any songs that are marked " +
+                               "\"valid\" for random selection.")
         else:
           valid_songs = [s for s in self._songs if s.info["valid"]]
           if len(valid_songs) > 0:
             self._song = random.choice(valid_songs)
             self._index = self._songs.index(self._song)
           else:
-            error.ErrorMessage(screen, ["You don't have any songs",
-                                        "here that are marked \"valid\"",
-                                        "for random selection."])
+            error.ErrorMessage(screen, "You don't have any songs here that " +
+                               "are marked \"valid\" for random selection.")
 
       elif ev == ui.START:
         options.OptionScreen(self._configs, self._config, self._screen)

@@ -53,8 +53,8 @@ class FakePlaylist(object):
   def next(self):
     if len(self.songs) == 0:
       error.ErrorMessage(self.screen,
-                        ["The difficulty settings you chose result",
-                         "in no songs being available to play."])
+                         "The difficulty settings you chose result " +
+                         "in no songs being available to play.")
       raise StopIteration
     elif len(self.working) == 0: self.working = copy.copy(self.songs)
     i = random.randint(0, len(self.working) - 1)
@@ -85,8 +85,8 @@ class Endless(object):
     diffs.sort(util.difficulty_sort)
 
     if len(diffs) == 0:
-      error.ErrorMessage(screen, ("You need more songs to play Endless Mode.",
-                                 "Otherwise, it's just really boring."))
+      error.ErrorMessage(screen, "You need more songs to play Endless Mode. " +
+                         "Otherwise, it's just really boring.")
       return
 
     mainconfig["autofail"] = 1

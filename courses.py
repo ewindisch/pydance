@@ -100,7 +100,7 @@ class AbstractCourse(object):
         if folder in self.all_songs:
           songs = self.all_songs[folder].values()
         else:
-          error.ErrorMessage(self.screen, [folder, "was not found."])
+          error.ErrorMessage(self.screen, folder + " was not found.")
           raise StopIteration
 
       else:
@@ -111,7 +111,7 @@ class AbstractCourse(object):
       songs = [s for s in songs if self._find_difficulty(s, diff)]
 
       if len(songs) == 0:
-        error.ErrorMessage(self.screen, ["No valid songs were found."])
+        error.ErrorMessage(self.screen, "No valid songs were found.")
         raise StopIteration
       else:
         song = random.choice(songs)
@@ -140,7 +140,7 @@ class AbstractCourse(object):
     if not fullname:
       if len(name[0]) > 1:
         name = "Player's %s #%d" % (name[0].capitalize(), name[1])
-      error.ErrorMessage(self.screen, [name, "was not found."])
+      error.ErrorMessage(self.screen, name + "was not found.")
       raise StopIteration
 
     self.index += 1

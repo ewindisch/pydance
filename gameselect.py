@@ -1,4 +1,4 @@
-# FIXME: This file needs documentation.
+# The basic game selector.
 
 from constants import *
 from interface import *
@@ -15,6 +15,7 @@ GS_HELP = [
   "Enjoy pydance %s!" % VERSION,
   ]
 
+# The game, type, and interfaces available on the screen.
 GAMES = ["4 panel", "5 panel", "6 panel", "8 panel", "9 panel",
          "Parapara", "DMX", "EZ2", "EZ2 Real", "3 panel"]
 TYPES = ["Single", "Versus", "Double", "Couple"]
@@ -22,6 +23,7 @@ SS = ["Normal", "Nonstop", "Endless"]
 
 VALUES = [GAMES, TYPES, SS]
 
+# Shrink and put two of the same image, staggered .
 def make_versus(oldimage):
   surf = pygame.Surface([350, 300], SRCALPHA, 32)
   surf.fill([0, 0, 0, 0])
@@ -30,6 +32,7 @@ def make_versus(oldimage):
   surf.blit(newimage, [100, 100])
   return surf
 
+# Shrink and put two of the same image, in a line.
 def make_double(oldimage):
   surf = pygame.Surface([350, 300], SRCALPHA, 32)
   surf.fill([0, 0, 0, 0])
@@ -38,6 +41,7 @@ def make_double(oldimage):
   surf.blit(newimage, [175, 80])
   return surf
 
+# Put the two images staggered and slightly rotated in different directions.
 def make_couple(oldimage):
   surf = pygame.Surface([350, 300], SRCALPHA, 32)
   surf.fill([0, 0, 0, 0])
@@ -47,6 +51,8 @@ def make_couple(oldimage):
   surf.blit(image2, [60, 20])
   return surf
 
+# Filenames for each mode, or functions to call with the previous image
+# to construct the new image.
 IMAGES = {
     "3 panel": "select-3p.png",
     "4 panel": "select-4p.png",
@@ -65,12 +71,14 @@ IMAGES = {
     "Endless": "select-endless.png",
     }
 
+# Constructors for the different interfaces.
 SELECTORS = {
   "Endless": endless.Endless,
   "Nonstop": courseselect.CourseSelector,
   "Normal": songselect.SongSelect,
   }
 
+# Map the game and type onto an internal name for SongItem.difficulty.
 MODES = {
   ("4 panel", "Single"): "SINGLE",
   ("4 panel", "Versus"): "VERSUS",
@@ -124,14 +132,16 @@ MODES = {
 }
 
 DESCRIPTIONS = {
-  "4 panel": "The standard up, down, left and right arrows (like Dance Dance Revolution)",
+  "4 panel": ("The standard up, down, left and right arrows " +
+              "like Dance Dance Revolution)"),
   "3 panel": "Practice using up left and up right with easier steps.",
   "5 panel": "Diagonal arrows and the center (like Pump It Up)",
   "6 panel": "Four panel plus the upper diagonal arrows (like DDR Solo)",
   "8 panel": "Everything but the center (like Technomotion)",
   "9 panel": "Everything! (like Pop'n'Stage)",
   "Parapara": "Wave your arms (or feet) around",
-  "DMX": "Crazy kung-fu action (like Dance ManiaX / Freaks). Use left, up left, up right, and right.",
+  "DMX": ("Crazy kung-fu action (like Dance ManiaX / Freaks). " +
+          "Use left, up left, up right, and right."),
 
   "EZ2": "Three panels, two sensors, using left and right.",
   "EZ2 Real": "Three panels and four sensors.",
@@ -152,10 +162,12 @@ class MainWindow(InterfaceWindow):
     self._songs = songs
     self._courses = courses
     self._indicator_y = [152, 322, 414]
+    # Displayed in the upper right.
     self._message = ["Select a Game", "Select a Mode", "Select Type"]
-    if len(courses) == 0 and "Nonstop" in SS: SS.remove("Nonstop")
 
     font = Font(None, 26)
+
+    # Three lists, one for each type of selection.
     self._lists = [ListBox(font, [255, 255, 255], 26, 9, 220, [408, 53]),
                    ListBox(font, [255, 255, 255], 26, 3, 220, [408, 300]),
                    ListBox(font, [255, 255, 255], 26, 3, 220, [408, 393])]
@@ -163,8 +175,12 @@ class MainWindow(InterfaceWindow):
     self._lists[1].set_items(TYPES)
     self._lists[2].set_items(SS)
 
+    # Title in the upper right (from self._message).
     self._title = TextDisplay(24, [210, 28], [414, 26])
+
+    # Currently selected object.
     self._selected = TextDisplay(48, [400, 28], [15, 380])
+    # Description of the currently selected object.
     self._description = WrapTextDisplay(30, 360, [25, 396])
     self._title.set_text(self._message[0])
     self._selected.set_text("4 panel")
@@ -175,6 +191,7 @@ class MainWindow(InterfaceWindow):
     self._sprites.add(HelpText(GS_HELP, [255, 255, 255], [0, 0, 0],
                                Font(None, 22), [206, 20]))
     self._sprites.add(self._lists)
+    # The image displayed on the main part of the screen.
     self._image = FlipImageDisplay(IMAGES.get("4 panel"), [200, 200])
     self._sprites.add(self._image)
 
@@ -186,8 +203,8 @@ class MainWindow(InterfaceWindow):
     self.loop()
 
   def loop(self):
-    active = 0
-    indices = [0, 0, 0]
+    active = 0 # 0 = game select, 1 = type select, 2 = ui select
+    indices = [0, 0, 0] # currently selected indices
     pid, ev = ui.ui.poll()
     
     while not (ev == ui.CANCEL and active == 0):
@@ -203,6 +220,7 @@ class MainWindow(InterfaceWindow):
         active -= 1
       elif ev in [ui.CONFIRM, ui.START]:
         if active == 2:
+          # Start the selected UI, and clean up afterwards
           SELECTORS[SS[indices[2]]](self._songs, self._courses, self._screen,
                                     MODES.get((VALUES[0][indices[0]],
                                                VALUES[1][indices[1]])))
@@ -211,7 +229,6 @@ class MainWindow(InterfaceWindow):
           pygame.display.update()
         else:
           active += 1
-
           if active == 1: self._oldimage = self._image._image # FIXME
 
       indices[active] %= len(VALUES[active])

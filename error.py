@@ -5,21 +5,23 @@ from constants import mainconfig
 import fontfx
 import ui
 
-# FIXME: We should word-wrap text so we don't have to pass in a list.
-
 class ErrorMessage(InterfaceWindow):
-  def __init__(self, screen, lines):
+  def __init__(self, screen, line):
     InterfaceWindow.__init__(self, screen, "error-bg.png")
     text = fontfx.shadow("Error!", 60, [255, 255, 255], offset = 2)
     text_rect = text.get_rect()
-    text_rect.center = (320, 50)
+    text_rect.center = [320, 50]
     screen.blit(text, text_rect)
 
-    for i in range(len(lines)):
-      text = fontfx.shadow(lines[i], 32, [200, 200, 200])
-      text_rect = text.get_rect()
-      text_rect.center = [320, 36 * (i + 3)]
-      screen.blit(text, text_rect)
+    # FIXME: Remove this when I'm sure that nothing uses the old calling
+    # method. (Pre-1.0)
+    if isinstance(line, list): lines = " ".join(line)
+
+    font = fontfx.WrapFont(32, 440)
+    b = font.render(line, shdw = True, centered = True)
+    r = b.get_rect()
+    r.center = [320, 240]
+    screen.blit(b, r)
 
     text = fontfx.shadow("Press Enter/Start/Escape", 32, [160, 160, 160])
     textpos = text.get_rect()
@@ -28,8 +30,8 @@ class ErrorMessage(InterfaceWindow):
 
     pygame.display.update()
     ui.ui.empty()
-    pid, ev = ui.ui.poll()
 
+    pid, ev = (0, ui.PASS)
     while ev not in [ui.START, ui.CONFIRM, ui.QUIT]:
       if ev == ui.FULLSCREEN:
         pygame.display.toggle_fullscreen()

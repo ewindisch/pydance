@@ -193,8 +193,8 @@ def play(screen, playlist, configs, songconf, playmode):
   for songfn, diff in playlist:
     try: current_song = fileparsers.SongItem(songfn)
     except None:
-      error.ErrorMessage(screen, ["There was an error loading",
-                                  os.path.split(songfn)[1]])
+      error.ErrorMessage(screen, "There was an error loading " +
+                         os.path.split(songfn)[1])
       first = True
       continue
 
@@ -207,7 +207,8 @@ def play(screen, playlist, configs, songconf, playmode):
       players[pid].set_song(current_song, diff[pid], songdata.lyricdisplay)
 
     print "Playing", songfn
-    print songdata.title.encode("ascii", "replace"), "by", songdata.artist.encode("ascii", "replace")
+    print songdata.title.encode("ascii", "replace"), "by",
+    print songdata.artist.encode("ascii", "replace")
 
     if dance(screen, songdata, players, prevscr, first, game):
       first = False
@@ -302,11 +303,9 @@ def dance(screen, song, players, prevscr, ready_go, game):
   song.init()
 
   if song.crapout != 0:
-    error.ErrorMessage(screen, ["The audio file for this song", song.filename,
-                               "could not be found."])
+    error.ErrorMessage(screen, "The audio file for this song " +
+                       song.filename + " could not be found.")
     return False # The player didn't fail.
-
-  screenshot = 0
 
   if mainconfig['assist']: music.set_volume(0.6)
   else: music.set_volume(1.0)
@@ -318,7 +317,8 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
   screenshot = False
   pad.empty()
-  while 1:
+
+  while True:
     if autofail:
       songFailed = True
       for plr in players:

@@ -1,19 +1,11 @@
-# FontFX, by Brendan Becker  ( http://clickass.org/ )
-# use this anywhere you want, just give me a little credit =]
-#
-# Implement with:
-# import fontfx
-# [....]
-#  asdf = fontfx.effect("text",size,effect_amt,(rectsizex,rectsizey),(r,g,b))
-#  asdfpos = asdf.get_rect()
-#  asdfpos.centerx = screen.get_rect().centerx
-#  asdfpos.top = 16
-#  screen.blit(asdf,asdfpos)
+# A bunch of font-related effects routines used all over pydance.
 
-import pygame, pygame.font
+import pygame
 import random
 from constants import *
 
+# Text that wraps at a particular width (in pixels), automatically. No
+# limit is placed on height.
 class WrapFont(object):
   def __init__(self, size, width):
     self._font = pygame.font.Font(None, size)
@@ -23,6 +15,9 @@ class WrapFont(object):
 
   def get_linesize(self): return self._ls
 
+  # Return the number of lines a bit of text will require. indent lets you
+  # set an indent (in characters) that will go before all lines after the
+  # first.
   def lines(self, text, indent = ""):
     lines = 1
     words = text.split()
@@ -38,6 +33,8 @@ class WrapFont(object):
   def size(self, text, indent = ""):
     return [self._width, self.lines(text, indent) * self._ls + self._ds]
 
+  # Render some text, optionally with shadowing, indentation, and centering.
+  # Using indentation with centered display is untested.
   def render(self, text, color = [255, 255, 255], shdw = True, indent = "",
              centered = False):
     lines = []
@@ -72,43 +69,19 @@ class WrapFont(object):
         image.blit(lines[i], [0, i * self._font.get_linesize()])
     return image
 
-# SINKBLUR - sinking "motion blur" effect (middle is brightest)
-def sinkblur(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
-  displaysurface = pygame.Surface(displaysize)
-  displayrect = displaysurface.get_rect()
-  if amount*2 > textsize:
-    amount = textsize / 2
-  for i in range(amount):
-    font = pygame.font.Font(None, textsize-(i*2))
-    camt = amount-i
-    r = trgb[0]/camt
-    g = trgb[1]/camt
-    b = trgb[2]/camt
-    if r < 0:  r = 0
-    if g < 0:  g = 0
-    if b < 0:  b = 0
-    text = font.render(textstring, 1, (r,g,b) )
-    textrect = text.get_rect()
-    displaysurface.blit(text, (displayrect.centerx-textrect.centerx,displayrect.centerx-textrect.centerx) )
-  return displaysurface
-
 # EMBFADE - does a 3d emboss-like effect
-def embfade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
+def embfade(textstring, textsize, amount, displaysize, trgb = [255, 255, 255]):
   displaysurface = pygame.Surface(displaysize)
   font = pygame.font.Font(None, textsize)
   for i in range(amount):
-    camt = i + 1
-    r = trgb[0]/camt
-    g = trgb[1]/camt
-    b = trgb[2]/camt
-    if r < 0:  r = 0
-    if g < 0:  g = 0
-    if b < 0:  b = 0
-    text = font.render(textstring, 1, (r,g,b) )
-    displaysurface.blit(text, (0+i,0+i))
+    text = font.render(textstring, True, [c / (i + 1) for c in trgb])
+    displaysurface.blit(text, [i, i])
   return displaysurface
 
+# Do a simple drop-shadow on text, with a darker color offset by a certain
+# number of pixels.
 def shadow(text, font, color, offset = 1, color2 = None):
+  # Allow integers or fonts for 'font'.
   if isinstance(font, int): font = pygame.font.Font(None, font)
   if color2 == None: color2 = [c / 9 for c in color]
   t1 = font.render(text, True, color)
@@ -122,18 +95,12 @@ def shadow(text, font, color, offset = 1, color2 = None):
 def shadefade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
   displaysurface = pygame.Surface(displaysize, SRCALPHA, 32)
   font = pygame.font.Font(None, textsize)
-  for i in range(amount):
-    camt = amount-i
-    r = trgb[0]/camt
-    g = trgb[1]/camt
-    b = trgb[2]/camt
-    if r < 0:  r = 0
-    if g < 0:  g = 0
-    if b < 0:  b = 0
-    text = font.render(textstring, 1, (r,g,b) )
-    displaysurface.blit(text, (camt,camt))
+  for i in range(amount - 1, 0, -1):
+    text = font.render(textstring, True, [c / i for c in trgb])
+    displaysurface.blit(text, [i, i])
   return displaysurface
 
+# The rotating text on the main menu screen
 class TextZoomer(object):
   def __init__(self, text, font, size, fore, back):
     self.tempsurface = pygame.surface.Surface(size)
@@ -154,18 +121,18 @@ class TextZoomer(object):
     self.mrangle += 2
 
     zoomsurface = pygame.transform.scale(self.tempsurface,
-                                         (self.size[0] + 16,
-                                          self.size[1] + 16))
+                                         [self.size[0] + 16,
+                                          self.size[1] + 16])
     zoomsurface = pygame.transform.rotate(self.tempsurface,self.mrangle)
     zoomsurface.set_alpha(120)
     zsrect = zoomsurface.get_rect()
-    zsrect.center = (self.size[0] / 2, self.size[1] / 2)
+    zsrect.center = [self.size[0] / 2, self.size[1] / 2]
     self.tempsurface.fill(self.back)
     self.tempsurface.blit(zoomsurface, zsrect)
-    text = self.font.render(self.zoomtext,1, self.fore)
+    text = self.font.render(self.zoomtext, True, self.fore)
     trect = text.get_rect()
-    self.tempsurface.blit(text, (320-(trect.size[0]/2),
-                                      32-(trect.size[1]/2)))
+    self.tempsurface.blit(text, [320 - (trect.size[0]/2),
+                                 32 - (trect.size[1]/2)])
 
 # From the PCR (http://www.pygame.org/pcr/progress_text/index.php),
 # by Pete Shinners.
@@ -177,7 +144,7 @@ class TextProgress(object):
     self.bgcolor = bgcolor
     self.offcolor = [c^40 for c in color]
     self.notcolor = [c^0xFF for c in color]
-    self.text = font.render(message, 0, (255,0,0), self.notcolor)
+    self.text = font.render(message, False, [255, 0, 0], self.notcolor)
     self.text.set_colorkey(1, RLEACCEL)
     self.outline = self.textHollow(font, message, color)
     self.bar = pygame.Surface(self.text.get_size())
@@ -236,40 +203,41 @@ def render_outer(string, width, font):
     right = center + remove/2
     s = string[:left] + "..." + string[right:]
   return s
-  
+
+# Text that zooms in, then out.
+# FIXME: Put some timer controls on this
 class zztext(pygame.sprite.Sprite):
-    def __init__(self, text, x, y):
-      pygame.sprite.Sprite.__init__(self)
-      self.cent = [x, y]
-      self.zoom = 0
-      self.baseimage = pygame.surface.Surface([320, 24])
-      self.rect = self.baseimage.get_rect()
+  def __init__(self, text, x, y):
+    pygame.sprite.Sprite.__init__(self)
+    self.cent = [x, y]
+    self.zoom = 0
+    self.baseimage = pygame.surface.Surface([320, 24])
+    self.rect = self.baseimage.get_rect()
+    self.rect.center = self.cent
+
+    for i in (0, 1, 2, 3, 4, 5, 6, 7, 8, 15):
+      font = pygame.font.Font(None, 9 + i)
+      gtext = font.render(text, True, [i * 16] * 3)
+      textpos = gtext.get_rect()
+      textpos.center = [160, 12]
+      self.baseimage.blit(gtext, textpos)
+
+    self.baseimage.set_colorkey(self.baseimage.get_at([0, 0]), RLEACCEL)
+    self.image = self.baseimage
+
+  def zin(self):
+    self.zoom = 1
+    self.zdir = 1
+      
+  def zout(self):
+    self.zoom = 31
+    self.zdir = -1
+      
+  def update(self, time):
+    if 32 > self.zoom > 0:
+      self.image = pygame.transform.rotozoom(self.baseimage, 0, self.zoom/32.0)
+      self.rect = self.image.get_rect()
       self.rect.center = self.cent
-
-      for i in (0, 1, 2, 3, 4, 5, 6, 7, 8, 15):
-        font = pygame.font.Font(None, 9+i)
-        gtext = font.render(text, True, [i * 16] * 3)
-        textpos = gtext.get_rect()
-        textpos.center = [160, 12]
-        self.baseimage.blit(gtext, textpos)
-
-      self.baseimage.set_colorkey(self.baseimage.get_at([0, 0]), RLEACCEL)
-      self.image = self.baseimage
-
-    def zin(self):
-      self.zoom = 1
-      self.zdir = 1
-      
-    def zout(self):
-      self.zoom = 31
-      self.zdir = -1
-      
-    def update(self, time):
-      if 32 > self.zoom > 0:
-        self.image = pygame.transform.rotozoom(self.baseimage, 0,
-                                               self.zoom/32.0)
-        self.rect = self.image.get_rect()
-        self.rect.center = self.cent
-        self.zoom += self.zdir
-      else:
-        self.zdir = 0
+      self.zoom += self.zdir
+    else:
+      self.zdir = 0

@@ -174,12 +174,11 @@ def main():
 
   if len(songs) < 1:
     ErrorMessage(screen,
-                 ("You don't have any songs or step files. Check out",
-                  "http://icculus.org/pyddr/get.php#songs",
-                  "and download some free ones."
-                  " ", " ", " ",
-                  "If you already have some, make sure they're in",
-                  mainconfig["songdir"]))
+                 ("You don't have any songs or step files. Check out "
+                  "http://icculus.org/pyddr/get.php#songs "
+                  "and download some free ones. "
+                  "If you already have some, make sure they're in ") +
+                 mainconfig["songdir"])
     raise SystemExit("You don't have any songs. Check http://icculus.org/pyddr/get.php#songs .")
 
   menudriver.do(screen, (songs, crs, screen))
