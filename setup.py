@@ -29,7 +29,7 @@ def sanity_check():
 
 def detect_real_os():
   sys.stdout.write("Detecting your operating system... ")
-  if os.name == "win32":
+  if os.name == "nt":
     print "Windows"
     return "win32"
   elif os.name == "posix":

@@ -15,7 +15,7 @@ import sys, os, config, pygame
 
 # Detect the name of the OS - MacOS X is not really UNIX.
 osname = None
-if os.name == "nt": osname = "nt"
+if os.name == "nt": osname = "win32"
 elif os.name == "posix":
   if os.path.islink("/System/Library/CoreServices/WindowServer"):
     osname = "macosx"
@@ -49,7 +49,7 @@ if osname == "posix":
   rc_path = os.path.join(os.environ["HOME"], ".pyddr")
 elif osname == "macosx":
   rc_path = os.path.join(os.environ["HOME"], "Library", "Preferences", "pyDDR")
-elif osname == "nt":
+elif osname == "win32":
   rc_path = "."
 
 if not os.path.isdir(rc_path): os.mkdir(rc_path)
