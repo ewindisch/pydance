@@ -15,6 +15,3 @@ cvsclean: distclean
 
 zip:
 	zip pydance.zip $(PYMODS)
-
-doc:
-	lynx -dump docs/README.html > README
