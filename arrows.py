@@ -90,14 +90,14 @@ class AbstractArrow(pygame.sprite.Sprite):
 
     if self.top < self.bottom: 
       if top > self.suddenzone:
-        alp = 256 - 4 * (top - self.suddenzone) / self.speed
+        alp = 256 - 4 * (top - self.suddenzone)
       elif self.rect.top < self.hiddenzone:
-        alp = 256 - 4 * (self.hiddenzone - top) / self.speed
+        alp = 256 - 4 * (self.hiddenzone - top)
     else:
       if top < self.suddenzone:
-        alp = 256 - 4 * (self.suddenzone - top) / self.speed
+        alp = 256 - 4 * (self.suddenzone - top)
       elif top > self.hiddenzone:
-        alp = 256 - 4 * (top - self.hiddenzone) / self.speed
+        alp = 256 - 4 * (top - self.hiddenzone)
 
     if alp > 256: alp = 256
     elif alp < 0: alp = 0
