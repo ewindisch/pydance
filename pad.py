@@ -178,7 +178,7 @@ class Pad(object):
     for (device, key), (p, e) in self.events.items():
       if p == pid and e == event:
         if keyboard and device == -1: return pygame.key.name(key)
-        elif not keyboard and device != -1: return "js%d:%d" % (device, key)
+        elif not keyboard and device != -1: return "%d:%d" % (device, key)
     return "n/a"
 
   def delete_events(self, pid):
@@ -234,18 +234,19 @@ pad = Pad()
 class PadConfig(object):
 
   bg = pygame.image.load(os.path.join(image_path, "bg.png"))
+  pad = pygame.image.load(os.path.join(image_path, "big-pad.png"))
 
-  xys = {UP: [160, 100],
-         UPLEFT: [100, 100],
-         LEFT: [100, 250],
-         DOWNLEFT: [100, 400],
-         DOWN: [160, 400],
-         DOWNRIGHT: [220, 400],
-         RIGHT: [220, 250],
-         UPRIGHT: [220, 100],
-         CENTER: [160, 250],
-         SELECT: [106, 25],
-         START: [212, 25]
+  xys = {UP: [105, 65],
+         UPLEFT: [35, 65],
+         LEFT: [35, 135],
+         DOWNLEFT: [35, 205],
+         DOWN: [105, 205],
+         DOWNRIGHT: [175, 205],
+         RIGHT: [175, 135],
+         UPRIGHT: [175, 65],
+         CENTER: [105, 135],
+         SELECT: [45, 15],
+         START: [165, 15]
          }
 
   directions = range(2, 13)
@@ -263,23 +264,18 @@ class PadConfig(object):
   def render(self):
     self.screen.blit(PadConfig.bg, [0, 0])
     for i in range(2):
+      pgfx = pygame.Surface(PadConfig.pad.get_size())
+      pgfx.blit(PadConfig.pad, [0, 0])
+
       for d in PadConfig.directions:
         x, y = PadConfig.xys[d]
-
-        t_name = FONTS[16].render(NAMES[d], 1, [0, 0, 0])
-        r_name = t_name.get_rect()
-        r_name.center = (x + 320 * i, y)
-
         text = pad.device_key_for(True, i, d)
-        t_key = FONTS[16].render(text, 1, [0, 0, 0])
-        r_key = t_key.get_rect()
-        r_key.center = (x + 320 * i, y + 16)
+        text += " / " + pad.device_key_for(False, i ,d)
+        tgfx = FONTS[16].render(text, 1, [0, 0, 0])
+        r = tgfx.get_rect()
+        r.center = [x, y]
+        pgfx.blit(tgfx, r)
 
-        text = pad.device_key_for(False, i ,d)
-        t_but = FONTS[16].render(text, 1, [0, 0, 0])
-        r_but = t_but.get_rect()
-        r_but.center = (x + 320 * i, y + 32)
-
-        self.screen.blit(t_name, r_name)
-        self.screen.blit(t_key, r_key)
-        self.screen.blit(t_but, r_but)
+      r = pgfx.get_rect()
+      r.center = [160 + 320 * i, 240]
+      self.screen.blit(pgfx, r)
