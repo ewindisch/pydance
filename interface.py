@@ -553,7 +553,7 @@ class InterfaceWindow(object):
     if screenshot:
       fn = os.path.join(rc_path, "screenshot.bmp")
       print "Saving a screenshot to", fn
-      pygame.image.save(screen, fn)
+      pygame.image.save(self._screen, fn)
 
     self._sprites.clear(self._screen, self._bg)
     self._clock.tick(45)
