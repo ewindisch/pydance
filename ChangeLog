@@ -7,14 +7,14 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
-0.8.2 - I"M GONNA EAT YOU!!!1					[2003.09.XX]
+0.8.2 - I"M GONNA EAT YOU!!!1					[2003.11.16]
 + Input keys/buttons can now be remapped in the game.
  + Default keys are the numeric pad for player 1 and uiojklnm, for player 2.
  + Arrow keys, if unmapped, work for player 1 as well.
  ! The 'keyboard' option is gone.
  ! The 'saveinput' option saves an input.cfg file (in . or ~/.pydance) on
    exit. Delete this file to reset your mappings to defaults.
-+ Animated arrows in the 'ddresque' and 'soloesque' themes.
++ Animated arrows in the 'ddresque', 'vividesque', and 'soloesque' themes.
  - This release may be slower, especially for animated arrows.
 + Courses (Oni/Nonstop) support; put the files in ~/.pydance/courses
   courses/ under your pydance installation directory. Currently only
