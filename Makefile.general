@@ -10,7 +10,7 @@ distclean: clean
 	rm -f pydance.cfg Makefile
 
 cvsclean: distclean
-	rm -rf CVS */CVS */*/CVS */*/*/CVS */*/*/*/CVS menuhelp ddrmat
+	rm -rf CVS */CVS */*/CVS */*/*/CVS */*/*/*/CVS
 
 doc:
 	lynx -dump docs/README.html > README

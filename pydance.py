@@ -1,16 +1,12 @@
 #! /usr/bin/env python
-# pydance - Dancing game written in Python
-
-#import psyco
-#psyco.jit()
-#from psyco.classes import *
+# pydance - dancing game written in Python
 
 import pygame
 from constants import *
 
 import fontfx, menudriver, fileparsers, audio, colors
 
-import os, sys, random, operator, error, util, getopt, math
+import os, sys, error, util, getopt
 
 os.chdir(pydance_path)
 
@@ -26,8 +22,8 @@ def SetDisplayMode(mainconfig):
   return screen
 
 def main():
-  print "pydance, by theGREENzebra (tgz@clickass.org)"
-  print "Initialising.."
+  print "pydance", VERSION, "<pydance-discuss@icculus.org>"
+  print "Initializing..."
 
   if mainconfig["usepsyco"]:
     try:
