@@ -3455,7 +3455,8 @@ def songSelect(songs, players):
       pygame.mixer.music.load("menu.ogg")
       pygame.mixer.music.play(4, 0.0)
       pygame.mixer.music.set_volume(1.0)
-      return fooblah
+      fooblah = currentSong.fooblah
+      break
     elif event < 0:                                  pass # key up
     elif event == E_PASS:                            pass
     elif event == E_FULLSCREEN:
