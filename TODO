@@ -4,16 +4,19 @@ add to it.
 0.6.3
  - Have installer files for Mac OS X.
  - better help in game (context-sensitive menu help, key maps)
- - Clean up the main select/dance/judge loop. (half done)
+ - Clean up the main select/dance/judge loop. (3/4th done)
  - Player-as-object patch
    - Removal of keykludge
  - Separate Song (makes arrow events out of patterns), and SongFile.
    (loads file, gets metadata, creates Song given a difficulty)
-   - This should remove fastSong.
- - DWI loader natively using the SongFile interface.
- - New song select
+   - Removes fastSong (done)
+   - 'Song' removal probably not until 0.6.4?
+ - New song select (done)
  - Themable menus?
  - Support A2B8 pads.
+
+0.6.4
+ - DWI loader natively using the SongFile interface.
 
 Misc:
 md5 checksums in .step files for the music they go with (wait for rewrite)

@@ -1,12 +1,26 @@
 # This thing parses step files, in theory.
 
-import sys, os
+import sys, os, copy
+
+DIFFICULTIES = ["BEGINNER", "BASIC", "TRICK", "MANIAC", "SMANIAC"]
+
+def sorted_diff_list(difficulty_hash):
+  diffs = []
+  dhash = copy.copy(difficulty_hash)
+  for d in DIFFICULTIES:
+    if dhash.has_key(d):
+      diffs.append(d)
+      del(dhash[d])
+  for key in dhash: diffs.append(key)
+  return diffs
+
 
 class StepFile:
-  def __init__(self, filename, read_steps = True):
+  def __init__(self, filename):
     self.filename = filename
     self.steps = {}
     self.difficulty = {}
+    self.diff_list = {}
     self.info = {}
     self.lyrics = []
     f = open(filename)
@@ -36,10 +50,10 @@ class StepFile:
         self.difficulty[sec][diff] = int(parts[1])
       elif state == STEPS:
         if line == "end": state = WAITING
-        elif read_steps: self.steps[sec][diff].append(line)
+        self.steps[sec][diff].append(line)
       elif state == LYRICS:
         if line == "end": state = WAITING
-        elif read_steps: self.lyrics.append(line)
+        self.lyrics.append(line)
       elif state == WAITING:
         if line == "LYRICS": state = LYRICS
         elif line == line.upper():
@@ -63,4 +77,50 @@ class StepFile:
       if self.info.has_key(d):
         # Stupid fucking Windows. 
         self.info[d] = os.path.normpath(self.info[d])
-    
+        self.info[d] = os.path.join(os.path.split(filename)[0], self.info[d])
+
+    for key in self.difficulty:
+      self.diff_list[key] = sorted_diff_list(self.difficulty[key])
+
+    if not self.info.has_key("subtitle"):
+      try:
+        l, r = self.info["song"].index("["), self.info["song"].rindex("]")
+        self.info["subtitle"] = self.info["song"][l+1:r]
+        self.info["song"] = self.info["song"][:l]
+      except ValueError:
+        try:
+          l, r = self.info["song"].index("("), self.info["song"].rindex(")")
+          self.info["subtitle"] = self.info["song"][l+1:r]
+          self.info["song"] = self.info["song"][:l]
+        except ValueError:
+          try:
+            l, r = self.info["song"].index("~"), self.info["song"].rindex("~")
+            if l != r:
+              self.info["subtitle"] = self.info["song"][l+1:r]
+              self.info["song"] = self.info["song"][:l]
+          except ValueError:
+            pass
+
+formats = ((".step", StepFile), )
+
+
+# Encapsulates and abstracts the above classes
+class SongItem:
+  def __init__(self, filename):
+    song = None
+    for pair in formats:
+      if filename[-len(pair[0]):].lower() == pair[0]:
+        song = pair[1](filename)
+        break
+    if song == None:
+      print filename, "is in an unsupported format."
+      raise NotImplementedError()
+    self.info = song.info
+    self.info["bpm"] = float(self.info["bpm"])
+    if self.info.has_key("offset"):
+      self.info["offset"] = int(self.info["offset"])
+    self.steps = song.steps
+    self.lyrics = song.lyrics
+    self.difficulty = song.difficulty
+    self.diff_list = song.diff_list
+    self.filename = filename

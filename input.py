@@ -21,7 +21,10 @@ KEYCONFIG = {
   K_r: E_SELECT,
   K_PAGEUP: E_PGUP,
   K_PAGEDOWN: E_PGDN,
-  K_m: E_MARK
+  K_m: E_MARK,
+  K_BACKSPACE: E_UNMARK,
+  K_TAB: E_SELECT,
+  K_DELETE: E_CLEAR
 }
 
 # 6 axis, 12 button joystick (BNS parallel adapter)
