@@ -13,6 +13,9 @@ A Comprehensive List of Features for pydance 1.2
    animation/fading/etc. This is kind of a vague goal, but I
    think at this point the UI should be developed iteratively.
 
+* Testing
+   pydance has no regression or unit tests. It could.
+
 * Records in courses
    Your record in a course should be stored (best and "best passed").
 
