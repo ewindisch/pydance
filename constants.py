@@ -9,6 +9,12 @@ VERSION = "0.7.3"
 
 import sys, os, config, pygame
 
+try:
+  import psyco
+  print "Psyco optimizing compiler found. Using psyco.full()."
+  psyco.full()
+except ImportError: pass
+
 # Detect the name of the OS - MacOS X is not really UNIX.
 osname = None
 if os.name == "nt": osname = "win32"
