@@ -2,3 +2,9 @@ Problem:
  On slow systems, some missed arrows won't actually get counted as a MISS.
 Possible cause:
  The sprite kills itself before expire_arrows is called.
+
+Problem:
+ Arrow press on/near a bpm changes are missed.
+
+Solutions:
+ Both of these probably need a judge rewrite.
