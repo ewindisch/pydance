@@ -44,7 +44,8 @@ class Player:
     j = Judge(self.song.bpm, self.holds,
               self.song.modeinfo[self.mode][difflist.index(self.difficulty)][1],
               self.song.totarrows[self.difficulty],
-              self.difficulty)
+              self.difficulty,
+              self.lifebar)
     if self.judge != None: j.munch(self.judge)
     self.judge = j
 
@@ -143,13 +144,8 @@ class LifeBarDisp(pygame.sprite.Sprite):
         self.bugbar = pygame.Surface((2,24))
         self.bugbar.fill((192,192,192))
         self.grade = None
-        self.vamt = 0.4
-        self.pamt = 0.25
-        self.gamt = 0
-        self.oamt = -0.5
-        self.bamt = -2
-        self.mamt = -4
-        
+        self.deltas = {"V": 0.4, "P": 0.25, "G": 0.0,
+                       "O": -0.5, "B": -2, "M": -4}
         self.redbar = pygame.image.load(os.path.join(theme.path,
                                                      'redbar.png')).convert()
         self.orgbar = pygame.image.load(os.path.join(theme.path,
@@ -187,28 +183,31 @@ class LifeBarDisp(pygame.sprite.Sprite):
 
     def failed(self):
        return self.failed
+
+    def update_life(self, rating):
+      if self.deltas.has_key(rating):
+        self.oldlife = self.life
+        self.life += self.deltas[rating]
+        self.life = min(self.life, 52)
        
     def update(self, judges):
       if self.life >= 0: #If you failed, you failed. You can't gain more life afterwards
-        self.life = 25 + self.prevlife + (judges.marvelous * self.vamt) + (judges.perfect * self.pamt) + (judges.great * self.gamt) + (judges.ok * self.oamt) + (judges.boo * self.bamt) + (judges.miss * self.mamt)
-        
         if self.life <= 0: #FAILED but we don't do anything yet
           self.failed = 1
           judges.failed_out = True
           self.life = 0
         elif self.life > 52:
-          self.life = 52
+          self.life = 52.0
         
-        self.life = int(self.life)
         if self.life != self.oldlife:
           self.oldlife = self.life
 #          print "life went to",self.life
-          for j in range(52-self.life-1):
+          for j in range(52 - int(self.life) - 1):
             self.image.blit(self.blkbar, ((2+int(self.life+j)*4), 2) )
 
           self.image.blit(self.bugbar,(202,2))   # because the damn bar eraser bugs out all the time
 
-          for j in range(self.life):
+          for j in range(int(self.life)):
             barpos = int(self.life-(j+1))
             if barpos <= 10:
               self.redbar_pos.left = 2+ barpos*4

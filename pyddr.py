@@ -122,7 +122,7 @@ class BGmovie(pygame.sprite.Sprite):
         self.oldframe = curframe
 
 class Judge:
-  def __init__ (self, bpm, holds, feet, stepcount, diff):
+  def __init__ (self, bpm, holds, feet, stepcount, diff, lifebar):
     self.steps = {}
     self.actualtimes = {}
     self.tick = toRealTime(bpm, 1)
@@ -136,6 +136,7 @@ class Judge:
     self.bpm = bpm
     self.failed_out = False
     self.oldbpm = bpm
+    self.lifebar = lifebar
     self.diff = diff
     # DDR Extreme scoring
     scorecoeff = (1000000.0 * feet) / ((stepcount * (stepcount + 1.0)) / 2.0)
@@ -231,17 +232,20 @@ class Judge:
           self.marvelous += 1
           self.score += 10 * self.score_coeff * self.arrow_count
           self.dance_score += 2
+          self.lifebar.update_life("V")
           text = "MARVELOUS"
           anncrange = (80, 100)
         elif 1 < off <= 4:
           self.perfect += 1
           self.score += 9 * self.score_coeff * self.arrow_count
           self.dance_score += 2
+          self.lifebar.update_life("P")
           text = "PERFECT"
           anncrange = (80, 100)
         else:
           self.great += 1
           self.score += 5 * self.score_coeff * self.arrow_count
+          self.lifebar.update_life("G")
           self.dance_score += 1
           text = "GREAT"
           anncrange = (70, 94)
@@ -253,10 +257,12 @@ class Judge:
         self.combo = 0
         if off < 9:
           self.ok += 1
+          self.lifebar.update_life("O")
           text = "OK"
           anncrange = (40, 69)
         else:
           self.boo += 1
+          self.lifebar.update_life("B")
           self.dance_score -= 4
           text = "BOO"
           anncrange = (20, 39)
@@ -289,6 +295,7 @@ class Judge:
         for i in range(n):
           self.miss += 1
           self.recentsteps.insert(0, "MISS")
+          self.lifebar.update_life("M")
           self.dance_score -= 8
           self.arrow_count += 1
           self.recentsteps.pop()
@@ -1980,7 +1987,7 @@ def dance(song, players):
   
     for keyAction in key:
       playerID = keyAction[0]
-      if playerID < players:
+      if playerID < len(players):
         keyPress = keyAction[1]
         players[playerID].toparr[keyPress].stepped(1, curtime+(song.offset*1000))
         players[playerID].fx_data.append(players[playerID].judge.handle_key(keyPress, curtime) )
