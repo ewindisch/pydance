@@ -120,11 +120,11 @@ GAMES = {
 
   "EZ2REAL": GameType(players = 1, dirs = "klwdgrz", width = 56,
                         theme = "ez2", theme_default = "ez2"),
-  "REALVERSUS": GameType(players = 2, dirs = "klwdgrz", width = 56,
+  "REALVERSUS": GameType(players = 2, dirs = "klwdgrz", width = 32,
                         theme = "ez2", theme_default = "ez2"),
-  "REALCOUPLE": GameType(players = 2, dirs = "klwdgrz", width = 56,
+  "REALCOUPLE": GameType(players = 2, dirs = "klwdgrz", width = 32,
                         theme = "ez2", theme_default = "ez2", couple = True),
-  "REALDOUBLE": GameType(players = 1, dirs = "klwdgrz", width = 56,
+  "REALDOUBLE": GameType(players = 1, dirs = "klwdgrz", width = 32,
                         theme = "ez2", theme_default = "ez2", double = True),
 
   "PARAPARA": GameType(players = 1, dirs = "lkuzr", width = 48,
