@@ -190,6 +190,8 @@ def do(screen, songdata):
 
   m = (["Play Game", {ui.START: wrap_ctr, ui.CONFIRM: wrap_ctr},
 	(GameSelect, songdata)],
+       ["Map Keys", {ui.START: wrap_ctr, ui.CONFIRM: wrap_ctr},
+        (pad.PadConfig, (screen,))],
        ("Game Options",
         ["Autofail", onoff_opt, ("autofail",)],
         ["Assist Mode", tuple_opt, ("assist",
@@ -220,6 +222,10 @@ def do(screen, songdata):
           ("para-theme", ThemeFile.list_themes("PARAPARA"))],
          ["DMX", rotate_opt,
           ("dmx-theme", ThemeFile.list_themes("DMX"))],
+         ["EZ2", rotate_opt,
+          ("ez2-theme", ThemeFile.list_themes("EZ2SINGLE"))],
+         ["EZ2 Real", rotate_opt,
+          ("ez2real-theme", ThemeFile.list_themes("EZ2REAL"))],
          ["Back", None, None]
          ),
         ["Back", None, None]
@@ -243,8 +249,6 @@ def do(screen, songdata):
         ["Back", None, None]
         ),
        ("Interface Options",
-        ["Map Keys", {ui.START: wrap_ctr, ui.CONFIRM: wrap_ctr},
-         (pad.PadConfig, (screen,))],
         ["Save Input", onoff_opt, ('saveinput',)],
         ["Song Previews", onoff_opt, ('previewmusic',)],
         ["Folders", onoff_opt, ("folders",)],
