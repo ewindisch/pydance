@@ -844,6 +844,7 @@ class SongItem(object):
         if self.info.has_key(k): self.info[k] = self.info[k].decode("utf-8")
       except UnicodeError:
         print "W: Non-Unicode key in %s: %s" % (filename, k)
+        self.info[k] = self.info[k].decode("ascii", "ignore")
 
     # Default values
     for k in ("subtitle", "background", "banner",
