@@ -136,11 +136,12 @@ class Judge:
     self.bpm = bpm
     self.oldbpm = bpm
     self.diff = diff
-    scorecoeff = (((5000000.0 * (feet + 1.0)) / 10.0) /
-                  (stepcount * (stepcount + 1.0) / 2.0)) # 5th mix
+    # DDR Extreme scoring
+    scorecoeff = (1000000.0 * feet) / ((stepcount * (stepcount + 1.0)) / 2.0)
     self.score_coeff = int(scorecoeff) + 1
     self.score = 0
     self.badholds = 0
+    self.arrow_count = 0
     self.announcer = Announcer(mainconfig["djtheme"])
     self.holdsub = []
     for i in range(holds):
@@ -214,6 +215,7 @@ class Judge:
     anncrange = (0, 100)
     off = abs(off)
     if done == 1:
+      self.arrow_count += 1
       if off < 7:
         self.steppedtime = curtime
         self.combo += 1
@@ -224,17 +226,17 @@ class Judge:
 
         if off <= 1:
           self.marvelous += 1
-          self.score += 20 * self.score_coeff * self.combo
+          self.score += 10 * self.score_coeff * self.arrow_count
           text = "MARVELOUS"
           anncrange = (80, 100)
         elif 1 < off <= 4:
           self.perfect += 1
-          self.score += 10 * self.score_coeff * self.combo
+          self.score += 9 * self.score_coeff * self.arrow_count
           text = "PERFECT"
           anncrange = (80, 100)
         else:
           self.great += 1
-          self.score += 5 * self.score_coeff * self.combo
+          self.score += 5 * self.score_coeff * self.arrow_count
           text = "GREAT"
           anncrange = (70, 94)
 
@@ -246,7 +248,6 @@ class Judge:
         if off < 9:
           self.ok += 1
           text = "OK"
-          self.score += 2 * self.score_coeff
           anncrange = (40, 69)
         elif off < 11:
           self.crap += 1
@@ -286,6 +287,7 @@ class Judge:
           self.miss += 1
 #          print "got a miss"
           self.recentsteps.insert(0, "MISS")
+          self.arrow_count += 1
           self.recentsteps.pop()
   
   def handle_arrow(self, key, time, etime):
