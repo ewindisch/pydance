@@ -321,6 +321,7 @@ class Judge:
     self.steps = {}
     self.actualtimes = {}
     self.tick = toRealTime(bpm, 1)
+    self.oldtick = toRealTime(bpm, 1)
     self.marvelous = self.perfect = self.great = self.ok = self.crap = self.shit = self.miss = 0
     self.combo = self.bestcombo = self.broke = 0
     self.steppedtime = -1000
@@ -340,9 +341,13 @@ class Judge:
     for i in range(holds):
       self.holdsub.append(0)
     
+  def changingbpm(self, bpm):
+    self.oldtick = toRealTime(bpm, 1)
+    self.oldbpm = copy.copy(bpm)
+
   def changebpm(self, bpm):
     self.tick = toRealTime(bpm, 1)
-    self.oldbpm = copy.copy(self.bpm)
+    self.oldbpm = copy.copy(bpm)
     self.bpm = copy.copy(bpm)
         
   def getbpm(self):
@@ -453,27 +458,30 @@ class Judge:
           self.recentsteps.pop()
   
   def handle_arrow(self, key, time, etime):
-    tick_6 = self.tick / 6
-    curtick = round((time + 2*self.tick) / tick_6)
-    self.times = self.steps.keys()
-    self.actualtimes[curtick] = etime
-    if curtick in self.times:
-      self.steps[curtick] += key
-    else:
-      self.steps[curtick] = key
+      multicheck = self.tick
+      tick_6 = multicheck / 6
+      curtick = round((time + 2*multicheck) / tick_6)
       self.times = self.steps.keys()
-
-    self.times.sort()
-    isdl = 0
-    for i in range(len(self.times)-1,-1,-1):
-      if self.times[i] < curtick - 24:
-        dellist = self.times[0:i+1]
-        isdl = 1
-        break
-    if isdl:
-      for i in dellist:
-        del self.steps[i]
-      self.times = self.steps.keys()
+      self.actualtimes[curtick] = etime
+      if curtick in self.times:
+        self.steps[curtick] += key
+        match = 1
+      else:
+        self.steps[curtick] = key
+        self.times = self.steps.keys()
+        match = 1
+        
+      self.times.sort()
+      isdl = 0
+      for i in range(len(self.times)-1,-1,-1):
+        if self.times[i] < curtick - 24:
+          dellist = self.times[0:i+1]
+          isdl = 1
+          break
+      if isdl:
+        for i in dellist:
+          del self.steps[i]
+        self.times = self.steps.keys()
 
   def grade(self):
     totalsteps = (self.marvelous + self.perfect + self.great + self.ok +
@@ -2125,6 +2133,16 @@ class ArrowSprite(CloneSprite):
     self.bpm = bpm
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
+    self.playedsound = None
+    if mainconfig.get_value('assist',default='0'):
+      if self.dir == 'u':
+        self.sample = pygame.mixer.Sound("assist-u.wav")
+      elif self.dir == 'd':
+        self.sample = pygame.mixer.Sound("assist-d.wav")
+      elif self.dir == 'l':
+        self.sample = pygame.mixer.Sound("assist-l.wav")
+      elif self.dir == 'r':
+        self.sample = pygame.mixer.Sound("assist-r.wav")
     self.r = 0
     self.playernum = playernum-1
     self.bimage = self.image
@@ -2134,6 +2152,11 @@ class ArrowSprite(CloneSprite):
     self.centerx = copy.copy(self.rect.centerx)+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
+    # assist
+    if (self.playedsound is None) and (curtime >= self.timef -0.0125): #- (0.001*(60000.0/curbpm))):
+      self.sample.play()
+      self.playedsound = 1
+
     if curtime > self.timef + (0.001*(60000.0/curbpm)):
       self.kill()
       return
@@ -2217,6 +2240,16 @@ class HoldArrowSprite(CloneSprite):
     self.playernum = playernum-1
     self.curalpha = -1
     self.dir = spr.fn[-7:-6]
+    self.playedsound = None
+    if mainconfig.get_value('assist',default='0'):
+      if self.dir == 'u':
+        self.sample = pygame.mixer.Sound("assist-u.wav")
+      elif self.dir == 'd':
+        self.sample = pygame.mixer.Sound("assist-d.wav")
+      elif self.dir == 'l':
+        self.sample = pygame.mixer.Sound("assist-l.wav")
+      elif self.dir == 'r':
+        self.sample = pygame.mixer.Sound("assist-r.wav")
     self.r = 0
     self.oimage = pygame.surface.Surface((64,32))
     self.oimage.blit(self.image,(0,-32))
@@ -2232,7 +2265,12 @@ class HoldArrowSprite(CloneSprite):
     self.centerx = copy.copy(self.rect.centerx)+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
-    if curtime > self.timef2:
+    # assist
+    if (self.playedsound is None) and (curtime >= self.timef1 -0.0125): #- (0.001*(60000.0/curbpm))):
+      self.sample.play()
+      self.playedsound = 1
+
+    if curtime > self.timef2:  #+ (0.001*(60000.0/curbpm)):
       self.kill()
       return
       
@@ -4136,7 +4174,10 @@ def dance(song,players,difficulty):
   if players == 2:
     song2.play(playmode, difficulty[1],0)
 
-  pygame.mixer.music.set_volume(1.0)
+  if mainconfig.get_value('assist',default='0'):
+    pygame.mixer.music.set_volume(0.6)
+  else:
+    pygame.mixer.music.set_volume(1.0)
 
   holds = len(song.holdref[song.modediff[playmode].index(difficulty[0])])
   if players == 2:
@@ -4361,8 +4402,10 @@ def dance(song,players,difficulty):
       for ev in events:
 #        print "current event: %r"%ev
         if ev.extra == 'CHBPM':
-          if (bpm != dajudge.getbpm()):            bpmchanged = 1
-#        print ev.bpm, "at", ev.when
+          if (bpm != dajudge.getbpm()):
+            dajudge.changingbpm(ev.bpm)
+            if players == 2:
+              dajudge2.changingbpm(ev.bpm)
         if ev.extra == 'TSTOP':
           time.sleep(float(ev.bpm/1000))
         if ev.feet:
