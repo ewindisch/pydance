@@ -179,15 +179,33 @@ class SongSelect:
         self.index = (self.index - 1) % self.numsongs
         MOVE_SOUND.play()
 
+      elif ev[1] == E_PGUP:
+        self.index = (self.index - 7) % self.numsongs
+        MOVE_SOUND.play()
+        scroll_wait = 0
+
+      elif event.states[(0, E_PGUP)] and scroll_wait > 7:
+        self.index = (self.index - 7) % self.numsongs
+        MOVE_SOUND.play()
+
       # Down the menu list
       elif ev[1] == E_RIGHT:
         self.index = (self.index + 1) % self.numsongs
         MOVE_SOUND.play()
         scroll_wait = 0
-
+  
       elif ((event.states[(0, E_RIGHT)] or event.states[(1, E_RIGHT)]) and
             scroll_wait > 7):
         self.index = (self.index + 1) % self.numsongs
+        MOVE_SOUND.play()
+
+      elif ev[1] == E_PGDN:
+        self.index = (self.index + 7) % self.numsongs
+        MOVE_SOUND.play()
+        scroll_wait = 0
+
+      elif event.states[(0, E_PGDN)] and scroll_wait > 7:
+        self.index = (self.index + 7) % self.numsongs
         MOVE_SOUND.play()
 
       # Easier difficulty
