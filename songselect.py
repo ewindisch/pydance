@@ -22,6 +22,7 @@ difficulty_colors = { "BEGINNER": colors.color["white"],
                       "STANDARD": colors.color["red"],
                       "TRICK": colors.color["red"],
                       "MEDIUM": colors.color["red"],
+                      "DOUBLE": colors.color["red"],
                       "ANOTHER": colors.color["red"],
                       "NORMAL": colors.color["red"],
                       "MANIAC": colors.color["green"],
@@ -29,6 +30,7 @@ difficulty_colors = { "BEGINNER": colors.color["white"],
                       "HEAVY": colors.color["green"],
                       "HARDCORE": colors.color["purple"],
                       "SMANIAC": colors.color["purple"],
+                      "S-MANIAC": colors.color["purple"], # Very common typo
                       "CHALLENGE": colors.color["purple"],
                       "CRAZY": colors.color["purple"],
                       }
@@ -61,7 +63,7 @@ SORT_NAMES = ["mix", "title", "artist", "bpm"]
 
 NUM_SORTS = len(SORT_NAMES)
 
-# Make a box of a specific color - these are used for difficulty ratings
+# Make a beveled box of a specific color - used for difficulty ratings
 def make_box(color):
   img = pygame.surface.Surface(DIFF_BOX_SIZE)
   light_color = colors.brighten(color)
@@ -105,6 +107,8 @@ class SongItemDisplay(object):
           banner.set_colorkey(banner.get_at((0,0)), RLEACCEL)
           self.banner = pygame.transform.rotozoom(banner, -45, 1.0)
       else:
+        # FIXME: We can probably generate an okay-looking banner from the
+        # song metadata.
         self.banner = NO_BANNER
         self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
       self.banner_rect = self.banner.get_rect()
@@ -136,6 +140,7 @@ class SongItemDisplay(object):
       grouptext = FONTS[20].render(st, 1, color)
       self.menuimage.blit(grouptext, (15, 36))
 
+# Handle previewing songs, fading in/out.
 class SongPreview(object):
   def __init__(self):
     self.playing = False
@@ -148,9 +153,12 @@ class SongPreview(object):
   def preview(self, song):
     if mainconfig["previewmusic"] and not song.isfolder:
       if len(song.song.info["preview"]) == 2:
+        # A DWI/SM/dance-style preview, an offset in the song and a length
+        # to play starting at the offset.
         self.start, length = song.song.info["preview"]
         self.filename = song.song.info["filename"]
       else:
+        # KSF-style preview, a separate filename to play.
         self.start, length = 0, 100
         self.filename = song.song.info["preview"]
       if self.playing: audio.fadeout(500)
@@ -159,19 +167,19 @@ class SongPreview(object):
       self.end_time = int(self.start_time + length * 1000)
     elif song.isfolder: audio.fadeout(500)
 
-  def update(self, time):
+  def update(self, time = pygame.time.get_ticks()):
     if self.filename is None: pass
     elif time < self.start_time: pass
     elif not self.playing:
       try:
         audio.load(self.filename)
-        audio.set_volume(0.01)
+        audio.set_volume(0.01) # 0.0 stops pygame.mixer.music.
         audio.play(0, self.start)
         self.playing = True
       except: # Filename not found? Song is too short? SMPEG blows?
         audio.stop()
         self.playing = False
-    elif time < self.start_time + 1000:
+    elif time < self.start_time + 1000: # mixer.music can't fade in, only out.
       audio.set_volume((time - self.start_time) / 1000.0)
     elif time > self.end_time - 1000:
       audio.fadeout(1000)
@@ -187,6 +195,8 @@ class FolderDisplay(object):
     self.menuimage = None
     self.numsongs = numsongs
 
+  # Folder banners can be either in rc_path/banners/sorttype/name.png, or
+  # common for DWIs, mixdir/banner.png (for mixdir/songdir/song.dwi).
   def find_banner(self):
     name = self.name.encode("ascii", "ignore")
     for path in (rc_path, pyddr_path):
@@ -240,10 +250,11 @@ class FolderDisplay(object):
 class SongSelect(object):
   def __init__(self, songitems, screen, gametype):
     clock = pygame.time.Clock()
+
+    # FIXME: We can probably do this in the wrap_ctr stage, since all
+    # selectors will use it.
     self.songs = [SongItemDisplay(s) for s in songitems
                   if s.difficulty.has_key(gametype)]
-
-    self.all_songs = self.songs
 
     if len(self.songs) == 0:
       error.ErrorMessage(screen,
@@ -253,15 +264,34 @@ class SongSelect(object):
                           " ", "Install more songs, or try a different mode."])
       return
 
+    # Save the list of all the songs available, since self.songs will be
+    # shortened in the case of folders.
+    self.all_songs = self.songs
+
+    players = games.GAMES[gametype].players
+
     self.bg = pygame.image.load(BACKGROUND).convert()
     ev = (0, E_PASS)
     self.numsongs = len(self.songs)
 
     self.gametype = gametype
-    self.player_image = [pygame.image.load(os.path.join(image_path,
-                                                        "player0.png"))]
+    self.player_image = []
+    self.player_diffs = []
+    self.player_configs = []
+    self.player_diff_names = []
 
+    # In locked modes all players must have the same difficulty.
     locked = games.GAMES[gametype].couple
+
+    diff_name = self.songs[0].song.diff_list[self.gametype][0]
+
+    # Set up the data for each player.
+    for i in range(players):
+      image_fn = os.path.join(image_path, "player%d.png" % i)
+      self.player_image.append(pygame.image.load(image_fn))
+      self.player_diffs.append(0)
+      self.player_configs.append(copy.copy(player_config))
+      self.player_diff_names.append(diff_name)
 
     event.set_repeat(500, 30)
 
@@ -269,21 +299,15 @@ class SongSelect(object):
     self.song_list = []
     self.title_list = []
     self.screen = screen
- 
-    audio.fadeout(500)
+
+    audio.fadeout(500) # The menu music.
 
     pygame.display.update(self.screen.blit(self.bg, (0, 0)))
     
     self.index = 0
     preview = SongPreview()
 
-    self.maxplayers = games.GAMES[gametype].players
-
     self.game_config = copy.copy(game_config)
-
-    self.player_diffs = [0]
-    self.player_configs = [copy.copy(player_config)]
-    self.player_diff_names = [self.songs[self.index].song.diff_list[self.gametype][self.player_diffs[0]]]
 
     if self.numsongs > 60 and mainconfig["folders"]:
       self.set_up_folders()
@@ -300,9 +324,11 @@ class SongSelect(object):
 
       self.oldindex = self.index
       changed = False
-      current_time = pygame.time.get_ticks()
 
       ev = event.poll()
+
+      # Skip events from a player that isn't in this game.
+      if ev[0] >= players: continue
 
       if ev[1] in [E_LEFT, E_RIGHT, E_UP, E_DOWN, E_PGUP, E_PGDN, E_MARK]:
         MOVE_SOUND.play()
@@ -324,7 +350,7 @@ class SongSelect(object):
         self.index = (self.index + 7) % self.numsongs
 
       # Easier difficulty
-      elif (ev[1] == E_UP and ev[0] < len(self.player_diffs)):
+      elif ev[1] == E_UP:
         if not self.songs[self.index].isfolder:
           self.player_diffs[ev[0]] -= 1
           self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
@@ -332,38 +358,12 @@ class SongSelect(object):
           changed = True
 
       # Harder difficulty
-      elif (ev[1] == E_DOWN and ev[0] < len(self.player_diffs)):
+      elif ev[1] == E_DOWN:
         if not self.songs[self.index].isfolder:
           self.player_diffs[ev[0]] += 1
           self.player_diffs[ev[0]] %= len(self.current_song.diff_list[gametype])
           self.player_diff_names[ev[0]] = self.current_song.diff_list[gametype][self.player_diffs[ev[0]]]
           changed = True
-
-      # Player n+1 hit start, so add a new player
-      elif (ev[1] == E_START and ev[0] == len(self.player_diffs) and
-            ev[0] < self.maxplayers):
-        self.player_diffs.append(self.player_diffs[0])
-        self.player_diff_names.append(self.player_diff_names[0])
-
-        file = os.path.join(image_path, "player" + str(ev[0]) + ".png")
-        self.player_image.append(pygame.image.load(file))
-        self.player_configs.append(copy.copy(player_config))
-        self.diff_list = []
-        self.song_list = []
-        self.title_list = []
-        changed = True
-
-      # Player n hit start, and was already active. Remove player n and
-      # everything after. Questionable UI, but we need a way to turn p2 off.
-      elif ev[1] == E_START and ev[0] > 0:
-        while len(self.player_diffs) > ev[0]:
-          self.player_diffs.pop()
-          self.player_diff_names.pop()
-          self.player_configs.pop()
-        self.diff_list = []
-        self.song_list = []
-        self.title_list = []
-        changed = True
 
       # Open up a new folder
       elif ev[1] == E_START and ev[0] == 0 and self.songs[self.index].isfolder:
@@ -374,7 +374,7 @@ class SongSelect(object):
         changed = True
 
       # Start the dancing!
-      elif ev[1] == E_START and ev[0] == 0:
+      elif ev[1] == E_START:
         # If we added the current song with E_MARK earlier, don't readd it
         try: self.title_list[-1].index(self.current_song.info["title"])
         except: self.add_current_song()
@@ -465,12 +465,11 @@ class SongSelect(object):
         mainconfig["fullscreen"] ^= 1
         changed = True
 
-      # This has to be after events, otherwise we do stuff to the
-      # wrong song.
+      # This has to be after events, otherwise we do stuff to the wrong song.
       if not self.songs[self.index].isfolder:
         self.current_song = self.songs[self.index].song
 
-      if locked and ev[1] in [E_UP, E_DOWN] and ev[0] < len(self.player_diffs):
+      if locked and ev[1] in [E_UP, E_DOWN]:
         for i in range(len(self.player_diffs)):
           self.player_diffs[i] = self.player_diffs[ev[0]]
           self.player_diff_names[i] = self.player_diff_names[ev[0]]
@@ -480,9 +479,8 @@ class SongSelect(object):
           name = self.player_diff_names[i]
           if name in self.current_song.diff_list[self.gametype]:
             self.player_diffs[i] = self.current_song.diff_list[self.gametype].index(name)
-        not_changed_since = current_time
 
-      preview.update(current_time)
+      preview.update()
 
       if self.index != self.oldindex:
         preview.preview(self.songs[self.index])
@@ -505,6 +503,7 @@ class SongSelect(object):
     audio.set_volume(1.0)
     audio.play(4, 0.0)
     event.set_repeat()
+    player_config.update(self.player_configs[0]) # Save player 1's settings
 
   def render(self, changed):
     self.screen.blit(self.bg, (0,0))
@@ -659,7 +658,7 @@ class SongSelect(object):
       q = min(1, max(0, (end_time - cur_time) / 200.0))
       p = 1 - q
       self.screen.blit(self.bg, (0,0))
-      for k in range(-4, 5): # Redraw screen
+      for k in range(-4, 5): # Redraw the song items
         idx = (index + k) % self.numsongs
         self.songs[idx].render()
         x = max(240 + int((866 - 240) * p) - 50 * k, ITEM_X[abs(k)])
@@ -677,7 +676,7 @@ class SongSelect(object):
       q = min(1, max(0, (end_time - cur_time) / 150.0))
       p = 1 - q
       self.screen.blit(self.bg, (0,0))
-      for k in range(-4, 5): # Redraw screen
+      for k in range(-4, 5): # Redraw song items
         idx = (index + k) % self.numsongs
         self.songs[idx].render()
         x = max(214 + int((840 - 214) * q) - 50 * k, ITEM_X[abs(k)])
@@ -692,7 +691,7 @@ class SongSelect(object):
     new_diff = map((lambda i: self.current_song.diff_list[self.gametype][i%l]),
                    self.player_diffs)
     self.diff_list.append(new_diff)
-    # Pseudo-pretty difficulty tags
+    # Pseudo-pretty difficulty tags for each player.
     text = self.current_song.info["title"] + " "
     for d in self.diff_list[-1]: text += "/" + d[0]
     self.title_list.append(text)
