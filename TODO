@@ -154,7 +154,8 @@ A Comprehensive List of Features for pydance 1.2
 * Metadata from songs
    The title, subtitle (VERSION), and artist can be gotten from the
    audio file itself. It might also be possible to embed a DWI-like
-   syntax into an Ogg comment directly, and load that.
+   syntax into an Ogg comment directly, and load that. But that's probably
+   a bad idea.
 
 * File format convertor
    There should be something to convert DWI and SM files to .dance, and
