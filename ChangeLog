@@ -15,6 +15,49 @@ goals
 1.0.x - menus
 
 ----- - CURRENT
+0.6.0 - Stop! DDR TIME!
++ TWO PLAYER SUPPORT ("2" in song selector, or pick versus in menu)
+  + grading screen displays both grades nicely =]
++ don't have to edit pyddr.cfg if you have an EMSUSB2, now autodetected!
++ a little bit of MENUING
+  + finally have a use for the menu music again, it's also loading music
+  - doesn't let you know if the option you pick is implemented (most are)
+  - doesn't let you know if you need to restart for the option to work
++ newish song selector
+  + okay, it's the same selector, but it looks loads better
+  + has in-songselector help with keys and buttons and what they do
+  + proper banner rotation on the larger, newer, higher quality banners
++ ASSIST mode - useful to hear the beats of the arrows
+  + different sounds played for different arrows when they should be hit
+  + since sounds are different, blind people can now learn DDR steps
+  ? if the arrow's hit too early, the sound doesn't play, good or bad?
++ speedups (a lot of things will be faster but take a lil more memory)
+  + removed a lot of prerendering, and other blit fixes (thanks pete!)
+  + hold arrows shouldn't make game jump as much
++ preliminary "total stops" support (tstop <ms> in step files)
++ added SCORING (currently based on 5th mix)
++ cosmetic fixes
+  + better hold arrow + bpm handling
+  + arrows now scroll "through" guide arrows when judging worse than GREAT
+  + better alpha and transparency effects
+  * fixed movie playback on fast machines
+  + TRANSITIONS$%#!@$!
+* fixed stereo to NOT force on windows machines, caused scratchy sound =\
++ DWI2STEP updates
+  + almost always produces synced STEP files now.
+  + better bpmchange/"total stop" detection
++ lyrictag, stepshrink (now in python), and findbpm all more friendly now
++ split a few classes off from the main file
+  + announcer rewrites, announcer.py
+    + NOTE! CUSTOM ANNOUNCER CFG FILES WILL NEED TO BE REWRITTEN
+  + rewrote configuration parser, config.py
++ more path and inter-platform friendly and configurable
+  + some OSX code, joystick, and fullscreen fixes 
+  + per-user (~/.pyddr/pyddr.cfg) and global configuration files allowed
+  + songdir allows ~ at the front of the pathname now
+  + pyDDR tries to figure out where it's run from and add it to the path
++ removed numeric dependency
+  
 0.5.8 - Doth mine ears deceive me?
 + the game now forces 44khz stereo 16bit for misbehaving song files
 + if 'file' is not specified in the step file, it is searched for.

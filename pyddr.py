@@ -2,7 +2,6 @@
 
 # pyDDR - DDR clone written in Python
 # I know the dependencies suck, but in terms of programming so do I.
-# SONG SELECTOR
 
 #import psyco
 #psyco.jit()
@@ -46,10 +45,6 @@ if not os.path.isdir(rscdir): os.mkdir(rscdir)
 import fontfx
 from pygame.locals import *
 from stat import *
-
-#phasing out numeric/surfarray
-#import pygame.surfarray
-#from Numeric import *
 
 USE_GL = 0
 
@@ -151,23 +146,6 @@ elif mainconfig["keyboard"] == "dvorak":
 
 if mainconfig["p1_keys"]: p1u, p1d, p1l, p1r = eval(mainconfig["p1_keys"])
 if mainconfig["p2_keys"]: p2u, p2d, p2l, p2r = eval(mainconfig["p2_keys"])
-
-"""
-def colorMultiply(surf,color):
-  size = surf.rect.width*surf.rect.height
-  surf=surf.image
-  try:
-    narray=_pixels3d(surf).astype(Float32)
-    reshape(narray,[size,3])
-    narray*=array(color).astype(Float32)
-    _blit_array(surf,narray.astype(Int8))
-  except:
-    surfNew=surf.convert(32)
-    narray=_pixels3d(surfNew).astype(Float32)
-    narray*=array(color).astype(Float32)
-    _blit_array(surfNew,narray.astype(Int8))
-    surf.blit(surfNew,(0,0))
-"""
 
 class Theme:
   def __init__(self,name,themeDir=DefaultThemeDir):
@@ -3169,7 +3147,7 @@ def domenu(songs):
                 ]],
               ('HELP', help_strings),
               ('CREDITS', (lambda : sys.stdout.write("credits strings\n"))),
-              ('EXIT GAME', sys.exit)
+              ('EXIT GAME', lambda : blatantplug() )
              ]
 
   blah = Menu(mainmenu)
@@ -3195,7 +3173,7 @@ def domenu(songs):
 
       elif k.key == K_ESCAPE:
         if lastmenu == []:
-          sys.exit()
+          blatantplug()
         else:
           blah = Menu(lastmenu[-1:][0])
           lastmenu = lastmenu[:-1]
@@ -3262,7 +3240,7 @@ def blatantplug():
   pygamelogorect.centerx = 320;  pygamelogorect.centery = 256
   xiphlogorect.centerx = 320;  xiphlogorect.centery = 384
     
-  pygame.mixer.music.load("plugmusic.ogg")
+  pygame.mixer.music.load("menu.ogg")
   pygame.mixer.music.play(0,14.75)
   pygame.mixer.music.set_volume(0)
   
@@ -3282,7 +3260,7 @@ def blatantplug():
   pygame.time.delay(450)
   
   tfont = pygame.font.Font(None,48)
-  plugtext = ["You have been playing:","pyDDR","by:","Brendan Becker","which is available at:","http://clickass.org"," ","Say hi to him if you like it!"," ","it was made possible by:","Python, SDL,  Pygame,  and Xiph.org"]
+  plugtext = ["You have been playing pyDDR","by Brendan Becker","which is available at:","http://icculus.org/pyddr/"," ","If you like it, please donate a few bucks!","The programmer is unemployed! =]"," ","it was made possible by:","Python, SDL,  Pygame,  and Xiph.org"]
   for i in plugtext:
     mrtext = tfont.render(i,1,(plugtext.index(i)*8,plugtext.index(i)*8,plugtext.index(i)*8))
     mrtextrect = mrtext.get_rect()
@@ -3290,14 +3268,22 @@ def blatantplug():
     mrtextrect.top = plugtext.index(i)*43
     screen.blit(mrtext,mrtextrect)
     pygame.display.flip()
-    pygame.time.delay(45)
+    pygame.time.delay(450)
 
-  pygame.time.delay(2250)
+  pygame.time.delay(4500)
+
+  fadeout = pygame.surface.Surface((640,480))
+  fadeout.fill((0,0,0))
+  fadeout.set_alpha(12)
 
   for i in range(26):
     pygame.mixer.music.set_volume((26-i)/2.0)
-    pygame.time.delay(4)
-    
+    screen.blit(fadeout,(0,0))
+    pygame.display.flip()
+    pygame.time.delay(32)
+
+  print "pyDDR exited properly."
+  sys.exit()    
 
 def songSelect(songs, players):
   global screen,background,eventManager,currentTheme,playmode,fooblah
@@ -3364,9 +3350,6 @@ def songSelect(songs, players):
       sortmode -= 1
       songChanged = 1
 
-      print "fooblah (%s)"%repr(fooblah)
-      print "oldfoo (%s)"%repr(oldfoo)
-
     if oldfoo:
       newlist = []
       for sorti in songs:
@@ -3376,7 +3359,6 @@ def songSelect(songs, players):
       songChanged = 1
       oldfoo = 0
       
-    boink = 0
     pygame.time.wait(1)
     dirtyRects=[]
     dirtyRects2=[]
@@ -3541,7 +3523,6 @@ def songSelect(songs, players):
       oldfoo = 1
       screen.fill(BLACK)
       dance(mrsong,players,biggerdifflist)
-      #blatantplug()
 
       totalredraw = 1
 #      return currentSong,biggerdifflist
@@ -4548,6 +4529,7 @@ def dance(song,players,difficulty):
                           "screenshot.bmp")
         screenshot = 0
   song.kill()
+  print "proper exit"
 # "end"
 
 if __name__ == '__main__': main()
