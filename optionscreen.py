@@ -12,6 +12,8 @@ def player_opt_driver(screen, configs):
   menu = [
     ("Speed", "speed", [(0.25, ".25x"), (0.5, ".5x"), (1, "1x"), (2, "2x"),
                         (3, "3x"), (4, "4x"), (8, "8x")]),
+    ("Steps", "arrows", [(0, "Normal",), (1, "Mirror"), (2, "Left"),
+                         (3, "Right"), (-1, "Shuffle")]),
     ("Sudden", "sudden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
                           (3, "Hide 3")]),
     ("Hidden", "hidden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
@@ -148,8 +150,8 @@ class OptionScreen:
 
       item = self.menu[i]
       name, opt, values = item
-      text = FONTS[32].render(name, 1, color)
-      blankimage.blit(text, (10, 70 + 35 * i))
+      text = FONTS[28].render(name, 1, color)
+      blankimage.blit(text, (10, 70 + 32 * i))
       width = 480 / (len(values) + 1)
       for k in range(len(values)):
         color = None
@@ -161,8 +163,8 @@ class OptionScreen:
             else: color = colors.average(color, newcolor)
         if not color: color = colors.WHITE
 
-        text = FONTS[32].render(values[k][1], 1, color)
-        blankimage.blit(text, (120 + width * k, 70 + 35 * i))
+        text = FONTS[28].render(values[k][1], 1, color)
+        blankimage.blit(text, (120 + width * k, 70 + 32 * i))
 
     if len(self.current) > 1:
       faketext = " / ".join([str(i+1) for i in range(len(self.current))])

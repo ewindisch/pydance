@@ -1,5 +1,3 @@
 Our MP3 support is pretty bad. We need a way to set the volume in pyao.
 
 Hold arrows don't work with growing/shrinking.
-
-Floating point inaccuracies mess up arrow coloring.

@@ -1,7 +1,7 @@
 # These parse various file formats describing steps.
 # Please read docs/fileparsers.txt and docs/dance-spec.txt
 
-import colors, audio
+import colors, audio, random, copy
 
 from lyrics import Lyrics
 from util import toRealTime
@@ -10,6 +10,16 @@ from constants import *
 BEATS = { 'x': 0.25, 't': 0.5, 'u': 1.0/3.0, 'f': 2.0/3.0,
           's': 1.0, 'w': 4.0/3.0, 'e': 2.0,
           'q': 4.0, 'h': 8.0, 'o': 16.0, 'n': 1/12.0 }
+
+# 0 - Normal
+# 1 - Mirror
+# 2 - Left
+# 3 - Right
+# -1 - Shuffle (calculated elsewhere)
+STEP_MAPPINGS = {
+  "SINGLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
+  "COUPLE": [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]],
+  }
 
 # FIXME: This can probably be replaced by something smaller, like a tuple.
 
@@ -52,6 +62,11 @@ class Steps:
     self.lastbpmchangetime = []
     self.totalarrows = 0
     self.ready = None
+
+    if player.arrows == -1:
+      self.mapping = copy.copy(STEP_MAPPINGS[playmode][0])
+      random.shuffle(self.mapping)
+    else: self.mapping = STEP_MAPPINGS[playmode][player.arrows]
 
     holdlist = []
     holdtimes = []
@@ -96,7 +111,10 @@ class Steps:
         for i in words[1:]: arrowcount += int(i)
 
         if cando and arrowcount != 0:
-          feetstep = words[1:]
+          origsteps = words[1:]
+          feetstep = copy.copy(origsteps)
+          for i in range(len(origsteps)):
+            feetstep[self.mapping[i]] = origsteps[i]
           # Check for jumps on this note
           arrowcount = 0
           for jump in range(len(feetstep)):
@@ -126,7 +144,7 @@ class Steps:
           self.events.append(SongEvent(when = cur_time, bpm = cur_bpm,
                                        feet = feetstep, extra = words[0],
                                        beat = cur_beat,
-                                       color = coloring_mod))
+                                       color = coloring_mod % 4))
 
           for arrowadder in feetstep:
             if arrowadder & 1:
@@ -134,8 +152,12 @@ class Steps:
 
         cur_time += toRealTime(cur_bpm, BEATS[words[0]])
         cur_beat += BEATS[words[0]]
+        coloring_mod += BEATS[words[0]]
 
-        coloring_mod += BEATS[words[0]] % 4
+        if int(coloring_mod + 0.0001) > int(coloring_mod):
+          coloring_mod = float(int(coloring_mod + 0.0001))
+        if int(cur_beat + 0.0001) > int(cur_beat):
+          cur_beat = float(int(cur_beat + 0.0001))
 
       elif words[0] == "D":
         cur_time += toRealTime(cur_bpm, BEATS['q'] * words[1])
