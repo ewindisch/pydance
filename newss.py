@@ -7,7 +7,7 @@ import ui
 import records
 import grades
 import dance
-import optionscreen
+import random
 
 from constants import *
 from pygame.mixer import music
@@ -239,12 +239,13 @@ class ListBox(pygame.sprite.Sprite):
 class BannerDisplay(pygame.sprite.Sprite):
   def __init__(self, size, center):
     pygame.sprite.Sprite.__init__(self)
-    self._color = [255, 0, 0]
-    self._box = make_box(self._color, [350, 350])
     self.isfolder = False
     self._center = center
     self._clip = None
-    self.update(0)
+    self._color = [255, 0, 255]
+    self._next_update = -1
+    self._delta = 5
+    self._idx = 1
 
   def set_song(self, song):
     song.render()
@@ -253,9 +254,9 @@ class BannerDisplay(pygame.sprite.Sprite):
     self._artist = song.info["artist"]
     self._clip = song.clip
     self._banner = song.banner
-    self._render()
 
   def _render(self):
+    self._box = make_box(self._color, [350, 350])
     self.image = pygame.Surface(self._box.get_size(), SRCALPHA, 32)
     self.image.blit(self._box, [0, 0])
     self.image.set_clip(self._clip)
@@ -287,7 +288,15 @@ class BannerDisplay(pygame.sprite.Sprite):
     self.rect.center = self._center
 
   def update(self, time):
-    pass
+    if time > self._next_update:
+      self._next_update = time + 300
+      if ((self._delta > 0 and self._color[self._idx] == 255) or
+          (self._delta < 0 and self._color[self._idx] == 0)):
+        self._idx = random.choice([i for i in range(3) if i != self._idx])
+        if self._color[self._idx]: self._delta = -3
+        else: self._delta = 3
+      self._color[self._idx] += self._delta
+      self._render()
 
 class SongPreview(object):
   def __init__(self):
