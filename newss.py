@@ -207,8 +207,6 @@ class MainWindow(InterfaceWindow):
     self._config = dict(game_config)
     self._all_songs = self._songs
 
-    self._random_songs = [s for s in self._songs if s.info["valid"]]
-
     self._list = ListBox(pygame.font.Font(None, 26),
                          [255, 255, 255], 26, 16, 220, [408, 56])
     if len(self._songs) > 60 and mainconfig["folders"]:
@@ -220,7 +218,6 @@ class MainWindow(InterfaceWindow):
       self._base_text = "All Songs"
       self._songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
       self._list.set_items([s.info["title"] for s in self._songs])
-      self._random_songs = [s for s in self._songs if s.info["valid"]]
 
     self._preview = SongPreview()
     self._preview.preview(self._songs[self._index])
@@ -433,7 +430,6 @@ class MainWindow(InterfaceWindow):
                  folder in lst]
     self._songs = new_songs
     self._list.set_items([s.info["title"] for s in self._songs])
-    self._random_songs = self._songs
     
     self._base_text = "Sort by %s" % sort.capitalize()
     
@@ -444,5 +440,4 @@ class MainWindow(InterfaceWindow):
 
     self._songs = songlist
     self._list.set_items([s.info["title"] for s in self._songs])
-    self._random_songs = [s for s in self._songs if s.info["valid"]]
     self._base_text = folder_name(folder, sort)

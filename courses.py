@@ -1,44 +1,10 @@
 # Like DWI and SM files, CRS files are a variant of the MSD format.
 
-# NB - If you are reading this code and are a better programmer than me,
-# I apologize for this file.
-
 from constants import *
-from pygame.mixer import music
-import optionscreen
 import pygame
-import dance
 import random
-import games
-import colors
 import util
 import error
-import ui
-
-NO_BANNER = pygame.image.load(os.path.join(image_path, "no-banner.png"))
-
-difficulty_colors = { "BEGINNER": colors.color["white"],
-                      "LIGHT": colors.color["orange"],
-                      "EASY": colors.color["orange"],
-                      "BASIC": colors.color["orange"],
-                      "STANDARD": colors.color["red"],
-                      "STANDER": colors.color["red"], # Shit you not, 3 people.
-                      "TRICK": colors.color["red"],
-                      "MEDIUM": colors.color["red"],
-                      "DOUBLE": colors.color["red"],
-                      "ANOTHER": colors.color["red"],
-                      "PARA": colors.color["red"], # This seems to be random
-                      "NORMAL": colors.color["red"],
-                      "MANIAC": colors.color["green"],
-                      "HARD": colors.color["green"],
-                      "HEAVY": colors.color["green"],
-                      "HARDCORE": colors.color["purple"],
-                      "SMANIAC": colors.color["purple"],
-                      "S-MANIAC": colors.color["purple"], # Very common typo
-                      "CHALLENGE": colors.color["purple"],
-                      "CRAZY": colors.color["purple"],
-                      "EXPERT": colors.color["purple"]
-                      }
 
 class CRSFile(object):
   # Map modifier names to internal pydance names.
@@ -88,9 +54,6 @@ class CRSFile(object):
       while line[-1] == ";": line = line[:-1] # Some lines have two ;s.
       lines[i] = line.split(":")
 
-    if os.path.split(self.filename)[0][-7:] != "courses":
-      self.mixname = os.path.split(os.path.split(self.filename)[0])[1]
-
     for line in lines:
       if line[0] == "COURSE": self.name = ":".join(line[1:])
       elif line[0] == "SONG":
@@ -114,13 +77,6 @@ class CRSFile(object):
             mods[key] = value
         
         self.songs.append((name, diff, mods))
-
-      image_name = self.filename[:-3] + "png"
-      if os.path.exists(image_name):
-        self.image = pygame.image.load(image_name).convert()
-      else:
-        self.image = NO_BANNER
-        self.image.set_colorkey(self.image.get_at([0, 0]))
 
   def setup(self, screen, player_configs, game_config, gametype):
     self.player_configs = player_configs
@@ -203,104 +159,3 @@ class CRSFile(object):
     self.index += 1
 
     return (fullname, [diff] * len(self.player_configs))
-
-class CourseSelector(object):
-  def __init__(self, songitems, courses, screen, gametype):
-
-    self.courses = courses
-    self.player_configs = [dict(player_config)]
-    clock = pygame.time.Clock()
-
-    if games.GAMES[gametype].players == 2:
-      self.player_configs.append(dict(player_config))
-
-    self.game_config = dict(game_config)
-    self.gametype = gametype
-
-    self.courses.sort(lambda a, b: cmp(a.filename, b.filename))
-
-    screen.fill(colors.BLACK)
-
-    self.course_idx = 0
-
-    ev = ui.ui.poll()
-
-    while ev[1] != ui.QUIT:
-      ev = ui.ui.poll()
-
-      if ev[1] in [ui.START, ui.CONFIRM]:
-
-        if optionscreen.player_opt_driver(screen, self.player_configs):
-          self.play(screen)
-
-        music.load(os.path.join(sound_path, "menu.ogg"))
-        music.play(4, 0.0)
-
-        ui.ui.clear()
-
-      elif ev[1] == ui.SELECT:
-        optionscreen.game_opt_driver(screen, self.game_config)
-
-      elif ev[1] == ui.LEFT:
-        self.course_idx = (self.course_idx - 1) % len(self.courses)
-      elif ev[1] == ui.RIGHT:
-        self.course_idx = (self.course_idx + 1) % len(self.courses)
-      elif ev[1] == ui.FULLSCREEN:
-        mainconfig["fullscreen"] ^= 1
-        pygame.display.toggle_fullscreen()
-
-      self.render(screen)
-      clock.tick(30)
-
-    player_config.update(self.player_configs[0])
-
-  def play(self, screen):
-    course = self.courses[self.course_idx]
-    course.setup(screen, self.player_configs, self.game_config, self.gametype)
-    dance.play(screen, course, self.player_configs,
-               self.game_config, self.gametype)
-    course.done()
-
-  def render(self, screen):
-    screen.fill(colors.BLACK)
-
-    course = self.courses[self.course_idx]
-    img = course.image
-    r = img.get_rect()
-    r.center = [320, 160]
-    screen.blit(img, r)
-    txt = FONTS[48].render(course.name, True, colors.WHITE)
-    r = txt.get_rect()
-    r.center = [320, 100]
-    screen.blit(txt, r)
-    txt = FONTS[32].render(course.mixname, True, colors.WHITE)
-    r = txt.get_rect()
-    r.center = [320, 50]
-    screen.blit(txt, r)
-
-    s = min(280 / len(course.songs), 24)
-    font = pygame.font.Font(None, s)
-
-    for i in range(len(course.songs)):
-      if "*" in course.songs[i][0]:
-        t1 = font.render("???????? - ", True, colors.WHITE)
-      else:
-        parts = course.songs[i][0].split("/")
-        t1 = font.render(parts[-1] + " - ", True, colors.WHITE)
-
-      if "." in course.songs[i][1]:
-        t2 = font.render("????", True, colors.WHITE)
-      else:
-        t2 = font.render(course.songs[i][1], True,
-                          difficulty_colors.get(course.songs[i][1],
-                                                colors.WHITE))
-
-      r1 = t1.get_rect()
-      r2 = t2.get_rect()
-      r1.top = r2.top = 200 + font.get_linesize() * i
-      r1.left = 320 - (t1.get_width() + t2.get_width()) / 2
-      r2.right = 320 + (t1.get_width() + t2.get_width()) / 2
-      screen.blit(t1, r1)
-      screen.blit(t2, r2)
-
-    pygame.display.update()

@@ -29,8 +29,8 @@ class ErrorMessage(object):
     screen.blit(text, textpos)
 
     pygame.display.flip()
-    ev = (0, ui.PASS)
+    ev = (0, ui.QUIT)
+    while ev[1] != ui.PASS: ev = ui.ui.poll()
     while ev[1] != ui.START and ev[1] != ui.QUIT:
       pygame.time.wait(50)
       ev = ui.ui.poll()
-

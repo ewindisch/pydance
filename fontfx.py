@@ -14,6 +14,57 @@ import pygame, pygame.font
 import random
 from constants import *
 
+class WrapFont(object):
+  def __init__(self, size, width):
+    self._font = pygame.font.Font(None, size)
+    self._width = width
+    self._ls = self._font.get_linesize()
+    self._ds = - self._font.get_descent()
+
+  def get_linesize(self): return self._ls
+
+  def lines(self, text, indent = ""):
+    lines = 1
+    words = text.split()
+    start = 0
+    for i in range(len(words)):
+      if start == 0: line = " ".join(words[start:i+1])
+      else: line = indent + " ".join(words[start:i+1])
+      if self._font.size(line)[0] > self._width:
+        lines += 1
+        start = i
+    return lines
+
+  def size(self, text, indent = ""):
+    return [self._width, self.lines(text, indent) * self._ls + self._ds]
+
+  def render(self, text, color = [255, 255, 255], shdw = True, indent = ""):
+    lines = []
+    words = text.split()
+    start = 0
+    for i in range(len(words)):
+      if start == 0: line = " ".join(words[start:i+1])
+      else: line = indent + " ".join(words[start:i+1])
+      if self._font.size(line)[0] > self._width:
+        if start == 0: line = " ".join(words[start:i])
+        else: line = indent + " ".join(words[start:i])
+        if shdw: t = shadow(line, self._font, color)
+        else: t = self._font.render(line, True, color)
+        lines.append(t)
+        start = i
+    if start == 0: line = " ".join(words[start:])
+    else: line = indent + " ".join(words[start:])
+    if shdw: t = shadow(line, self._font, color)
+    else: t = self._font.render(line, True, color)
+    lines.append(t)        
+
+    image = pygame.Surface([self._width, len(lines) * self._ls + self._ds],
+                           SRCALPHA, 32)
+    image.fill([0, 0, 0, 0])
+    for i in range(len(lines)):
+      image.blit(lines[i], [0, i * self._font.get_linesize()])
+    return image
+
 # SINKBLUR - sinking "motion blur" effect (middle is brightest)
 def sinkblur(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
   displaysurface = pygame.Surface(displaysize)
@@ -50,7 +101,9 @@ def embfade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
     displaysurface.blit(text, (0+i,0+i))
   return displaysurface
 
-def shadow(text, font, offset, color, color2):
+def shadow(text, font, color, offset = 1, color2 = None):
+  if isinstance(font, int): font = pygame.font.Font(None, font)
+  if color2 == None: color2 = [c / 9 for c in color]
   t1 = font.render(text, True, color)
   t2 = font.render(text, True, color2)
   s = pygame.Surface([i + offset for i in t1.get_size()], SRCALPHA, t1)

@@ -39,13 +39,10 @@ class GenericFile(object):
   # Recognize ()s, []s, --s, or ~~s.
   def find_subtitle(self):
     if "subtitle" not in self.info:
-      for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
-        if pair[0] in self.info["title"] and self.info["title"][-1] == pair[1]:
-          l = self.info["title"][0:-1].rindex(pair[0])
-          if l != 0:
-            self.info["subtitle"] = self.info["title"][l:]
-            self.info["title"] = self.info["title"][:l]
-            break
+      title, subtitle = util.find_subtitle(self.info["title"])
+      if subtitle:
+        self.info["title"] = title
+        self.info["subtitle"] = subtitle
 
   # If a filename isn't found, try joining it with the path of the song's
   # filename.

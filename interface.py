@@ -34,7 +34,7 @@ class TextDisplay(pygame.sprite.Sprite):
   def _render(self):
     self._needs_update = False
     font = fontfx.max_size(self._text, self._size[0], self._font)
-    img = fontfx.shadow(self._text, font, 1, [255, 255, 255], [0, 0, 0])
+    img = fontfx.shadow(self._text, font, [255, 255, 255])
     self.image = img
     self.rect = self.image.get_rect()
     self.rect.midleft = self._midleft
@@ -46,7 +46,50 @@ class TextDisplay(pygame.sprite.Sprite):
   def update(self, time):
     if self._needs_update: self._render()
 
+class ScrollingImage(pygame.sprite.Sprite):
+  def __init__(self, image, topleft, height):
+    pygame.sprite.Sprite.__init__(self)
+    self._height = height
+    self._image = image
+    self._topleft = topleft
+    self.set_image(image)
+
+  def set_image(self, image):
+    if image.get_height() > self._height:
+      self._scrolling = True
+      self._start = pygame.time.get_ticks() + 2000
+      self.image = pygame.Surface([image.get_width(), self._height],
+                                  SRCALPHA, 32)
+      self._image = image
+      self.image.blit(image, [0, 0])
+      self.update(pygame.time.get_ticks())
+    else:
+      self._scrolling = False
+      self.image = image
+      self._image = None
+      self.rect = self.image.get_rect()
+      self.rect.topleft = self._topleft
+
+  def update(self, time):
+    if self._scrolling and self._start < time:
+      self.image.fill([0, 0, 0, 0])
+      y = int(30 * ((time - self._start) / 1000.0))
+      y %= self._image.get_height()
+      self.image.blit(self._image, [0, -y])
+      self.image.blit(self._image, [0, self._image.get_height() - y])
+
 class ImageDisplay(pygame.sprite.Sprite):
+  def __init__(self, image, topleft):
+    pygame.sprite.Sprite.__init__(self)
+    self._topleft = topleft
+    self.set_image(image)
+
+  def set_image(self, image):
+    self.image = image
+    self.rect = image.get_rect()
+    self.rect.topleft = self._topleft
+
+class FlipImageDisplay(pygame.sprite.Sprite):
   def __init__(self, filename, center):
     pygame.sprite.Sprite.__init__(self)
     self._cache = {None: pygame.Surface([0, 0])}
@@ -86,7 +129,6 @@ class ImageDisplay(pygame.sprite.Sprite):
       self.image = pygame.transform.scale(self._oldimage, [x, y])
     self.rect = self.image.get_rect()
     self.rect.center = self._center
-  
 
 # Crossfading help text along the top of the screen.
 class HelpText(pygame.sprite.Sprite):
@@ -165,12 +207,11 @@ class DifficultyBox(pygame.sprite.Sprite):
     f = pygame.font.Font(None, 24)
     self.image = make_box(color)
 
-    t1 = fontfx.shadow(diff, f, 1, [255, 255, 255], [0, 0, 0])
+    t1 = fontfx.shadow(diff, f, [255, 255, 255])
     r1 = t1.get_rect()
     r1.center = [self.image.get_width()/2, 14]
 
-    t2 = fontfx.shadow("x%d - %s" % (feet, grade), f, 1,
-                       [255, 255, 255],[0, 0, 0])
+    t2 = fontfx.shadow("x%d - %s" % (feet, grade), f, [255, 255, 255])
     r2 = t2.get_rect()
     r2.center = [self.image.get_width()/2, 34]
 
@@ -207,7 +248,7 @@ class ListBox(pygame.sprite.Sprite):
 
     for i in items:
       txt = fontfx.render_outer(i, self._w - 7, self._font)
-      img = fontfx.shadow(txt, self._font, 1, self._color, c2)
+      img = fontfx.shadow(txt, self._font, self._color)
       self._items.append(img)
     self._idx = self._oldidx = 0 - self._count / 2 # Reset index to 0.
     self._needs_update = True
@@ -272,12 +313,12 @@ class BannerDisplay(pygame.sprite.Sprite):
 
     self._title = fontfx.shadow(song.info["title"],
                                 fontfx.max_size(song.info["title"], 340, 60),
-                                1, c1, c2)
+                                c1)
     self._r_t = self._title.get_rect()
     self._r_t.center = [179, 240]
     self._artist = fontfx.shadow(song.info["artist"],
                                  fontfx.max_size(song.info["artist"], 250, 40),
-                                 1, c1, c2)
+                                 c1)
 
     self._r_a = self._artist.get_rect()
     self._r_a.center = [179, 320]
@@ -287,7 +328,7 @@ class BannerDisplay(pygame.sprite.Sprite):
                                      fontfx.max_size(song.info["subtitle"],
                                                      300, 24),
 
-                                     1, c1, c2)
+                                     c1)
       self._r_s = self._subtitle.get_rect()
       self._r_s.center = [179, 270]
     else: self._subtitle = None
@@ -323,31 +364,15 @@ class BannerDisplay(pygame.sprite.Sprite):
       self._render()
 
 class WrapTextDisplay(pygame.sprite.Sprite):
-  def __init__(self, font, size, topleft, str = " "):
+  def __init__(self, font, width, topleft, str = " "):
     pygame.sprite.Sprite.__init__(self)
     self._text = " "
-    self._font = font
-    self._size = size
+    self._font = fontfx.WrapFont(font, width)
     self._topleft = topleft
     self._render()
 
   def _render(self):
-    self._needs_update = False
-    lines = []
-    words = self._text.split()
-    start = 0
-    for i in range(len(words)):
-      if self._font.size(" ".join(words[start:i + 1]))[0] > self._size[0]:
-        t = self._font.render(" ".join(words[start:i]), True, [255, 255, 255])
-        lines.append(t)
-        start = i
-    t = self._font.render(" ".join(words[start:]), True, [255, 255, 255])
-    lines.append(t)        
-
-    self.image = pygame.Surface(self._size, SRCALPHA, 32)
-    self.image.fill([0, 0, 0, 0])
-    for i in range(len(lines)):
-      self.image.blit(lines[i], [0, i * self._font.get_linesize()])
+    self.image = self._font.render(self._text, shdw = False)
     self.rect = self.image.get_rect()
     self.rect.topleft = self._topleft
 

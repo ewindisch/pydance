@@ -18,6 +18,17 @@ def difficulty_sort(a, b):
   elif b in DIFFICULTY_LIST: return 1
   else: return cmp(a, b)
 
+# Return the subtitle of a song...
+def find_subtitle(title):
+  for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
+    if pair[0] in title and title[-1] == pair[1]:
+      l = title[0:-1].rindex(pair[0])
+      if l != 0:
+        subtitle = title[l:]
+        title = title[:l]
+        return title, subtitle
+  else: return title, ""
+
 # FIXME: We should inline this. Really.
 # Or not, Psyco does it for us, basically.
 def toRealTime(bpm, steps):

@@ -5,7 +5,7 @@ from interface import *
 from pygame.font import Font
 
 import ui
-import newss, courses, endless, songselect
+import newss, courses, endless, songselect, courseselect
 
 GS_HELP = [
   "Up / Down moves through list",
@@ -18,7 +18,7 @@ GS_HELP = [
 GAMES = ["4 panel", "5 panel", "6 panel", "8 panel", "9 panel",
          "Parapara", "DMX"]
 TYPES = ["Single", "Versus", "Double", "Couple"]
-SS = ["Normal", "Nonstop", "Endless", "Testing"]
+SS = ["Normal", "Nonstop", "Endless", "Testing", "Nonstop Testing"]
 
 VALUES = [GAMES, TYPES, SS]
 
@@ -35,7 +35,7 @@ IMAGES = {
 SELECTORS = {
   "Normal": songselect.SongSelect,
   "Endless": endless.Endless,
-  "Nonstop": courses.CourseSelector,
+  "Nonstop": courseselect.CourseSelector,
   "Testing": newss.MainWindow,
   }
 
@@ -93,7 +93,7 @@ DESCRIPTIONS = {
   "Normal": "One song at a time.",
   "Endless": "Keep dancing until you fail.",
   "Nonstop": "Several songs in a row.",
-  "Testing": "Try out the incomplete new song selector."
+  "Testing": "Try out the incomplete new song selector.",
   }
 
 class MainWindow(InterfaceWindow):
@@ -115,7 +115,7 @@ class MainWindow(InterfaceWindow):
 
     self._title = TextDisplay(24, [210, 28], [414, 26])
     self._selected = TextDisplay(48, [400, 28], [15, 380])
-    self._description = WrapTextDisplay(Font(None, 30), [360, 340], [25, 396])
+    self._description = WrapTextDisplay(30, 360, [25, 396])
     self._title.set_text(self._message[0])
     self._selected.set_text("4 panel")
     self._description.set_text(DESCRIPTIONS["4 panel"])
@@ -125,7 +125,7 @@ class MainWindow(InterfaceWindow):
     self._sprites.add(HelpText(GS_HELP, [255, 255, 255], [0, 0, 0],
                                Font(None, 22), [206, 20]))
     self._sprites.add(self._lists)
-    self._image = ImageDisplay(IMAGES.get("4 panel"), [200, 200])
+    self._image = FlipImageDisplay(IMAGES.get("4 panel"), [200, 200])
     self._sprites.add(self._image)
 
     self._screen.blit(self._bg, [0, 0])
