@@ -1,151 +1,52 @@
-Congratulations, you just installed pyDDR by untarring it. Don't you feel 
-special?
+pyDDR INSTALLATION INSTRUCTIONS
+-------------------------------
 
-If you want to install another song, just make sure you have a .STEP file 
-and its corresponding music file (usually an MP3) in the pyDDR directory, 
-and do:
+pyDDR currently is known to run on Windows, UNIX and GNU/Linux, and
+MacOS X systems. In theory, it will run anywhere Pygame and Python do.
+pyDDR can be gotten from http://www.icculus.org/pyddr.
 
-./pyddr.py
-or
-python ./pyddr.py
+In all installations, you need the following things:
+ - A sufficiently recent SDL and SDL_mixer.
+ - SMPEG, if you want MP3 support
+ - Libvorbis, if you want Ogg Vorbis support (you need this or SMPEG.)
+ - Python 2.2 or higher (2.1 may work, but is not recommended).
+ - Pygame 1.5.5 or higher.
 
-What? This doesn't look any different from the normal way you'd run pyDDR? 
-That's because it's not, pyDDR will pick up on all the step files in its 
-directory and automatically let you pick them in the song selector.
+If you are running a UNIX distribution, all these probably come with
+your OS. Otherwise, you can find them at http://www.libsdl.org,
+http://www.xiph.org, http://www.python.org, and http://www.pygame.org.
 
-If you would like to store your songs in another directory, just specify 
-it in pyddr.cfg and everything should work.
+Installing under UNIX or GNU/Linux
+----------------------------------
+ $ python setup.py
+ $ su -c 'make install'
 
-If you have a song from another clone that uses DWI or MSD format files, 
-convert the tune to an mp3 and do this:
+The first step checks to make sure you have appropriate versions of
+Python and Pygame installed. The second one copies files into the
+appropriate places on your system (according to the FHS).
 
-./msd2step.py msdfile
-or
-./dwi2step.py dwifile
+If you need to install it somewhere else, you can set DESTDIR (to
+install to an alternate root entirely), or PREFIX (which is /usr/local
+by default).
 
-Then run the song. You can delete the DWI/MSD and WAV files after 
-conversion  if you don't need them. The STEP file will probably need some 
-fine tuning. If the steps are in the right place but the arrows flash 
-off-beat, you need to change the nunmber after "offset" in the STEP file.
+The default configuration file looks in /usr/share/games/pyddr/songs,
+/usr/local/share/games/pyddr/songs, and ~/.pyddr/songs for Ogg/MP3
+and step files.
 
-A few things to note:
--The offset is in milliseconds.
--If you find you have to step BEFORE the arrows hit, increase the offset.
--If your arrows are severely late, get rid of some 'eight 00 00 00 00's
--If you find you have to step AFTER the arrows hit, decrease the offset.
--If your arrows are severely early, add some 'eight 00 00 00 00's
--The top arrow flashing is divided down quite a bit into 'ticks'.
--Once arrows appear ontime, change offset by 20 tops to get the top arrows ontime.
+Installing under Windows
+------------------------
+ X:\pyddr> python setup.py
 
-----------------------------------------------------------------
-CONFIGURATION FILE OPTIONS AND EXPLANATIONS OF WHAT THEY DO:
+That's it. Copy your song and step files to the same directory as pyDDR,
+or to a ..\songs directory.
 
-gfxtheme is the graphics theme. you can design your own or use:
-bryan - the pyddr arrows theme
-classic - classic looking ddr arrows
-
-djtheme is the announcer theme. you can design your own or use:
-mrt - the default Mr. T theme
-none - no announcer
-
-onboardaudio is a tweak for laptops and machines with built in audio that 
-tend to play 44khz sound at 48khz. set this to 1 if your music seems to be 
-going too fast for the steps.
-
-masteroffset is a 'master' offset for all step files. some windows nt 
-users will find the steps happen a beat too late on ALL steps. try setting 
-this to something like -200 if that happens. the value is in milliseconds.
-
-mixerclock will tell pyDDR to get the time from SDL_mixer instead of the 
-system clock. If you're having a problem with desync but can't nail it 
-down, and you're sure it's not an offset or a speed problem, try setting 
-this to 1.
-
-arrowcolors will make even offbeat arrows get colored the same (kind of 
-like legacy pyDDR) - this can make the arrows easier to read for some and 
-more challenging to read for others.
-
-explodestyle tells the game how the arrows should explode when a PERFECT 
-or GREAT is achieved. set this to 1 for rotating, 2 for scaling, or 3 for 
-both. to do neither, set it to 0.
-
-reversescroll, when set to 1, will make arrows scroll from top to bottom 
-instead of bottom to top. 
-
-scrollspeed is a pump it up - style speed adjuster. the arrows will still 
-need to be pressed at the same time, but the arrows will spend less time 
-on the screen because they are scrolling faster. if you're pretty good at 
-DDR, try setting this to 4, 6, or 8 for a challenge. The value can be a 
-decimal value.
-
-killsongonfail is an 'autofail' equivalent. the game will end if you fail.
-
-sudden means the arrows will not appear until a certain time. set the 
-sudden value to the number of beats you would like to MASK. for example, 
-'sudden 2' will mask two beats from the bottom of the screen and they will 
-appear about 1/3 up from the bottom of the screen.
-
-hidden is like sudden except the arrows DISAPPEAR instead of appear at a 
-certain point. set the hidden value to how many beats you would like to 
-mask, starting at the top arrows. 'hidden 3.5' means that arrows will 
-disappear after they are halfway up the screen or so.
-
-little will remove arrows from the song to make it slightly easier. 
-'little 1' removes sixteenth notes, 'little 2' removes eighth notes, and 
-'little 3' removes both sixteenth and eighth notes. turn it off with 0.
-
-supereasy is currently unimplemented.
-
-showlyrics decides whether lyrics will be shown onscreen or not if they 
-are present in the STEP file.
-
-showtoparrows should be set to 1. if you set this to 0, the arrows at the 
-top of the screen that blink to the beat will NOT be displayed. good for a 
-challenge.
-
-showcombo tells the game whether or not to show combos, period.
-
-lowestcombo defines the lowest combo you have to achieve before it is 
-displayed under the PERFECT/GREAT judging.
-
-stickyjudge defines whether the judging stays on the screen after the user 
-has been given time to read it.
-
-stickycombo defines whether the combo stays on the screen after the user 
-has been given time to read it.
-
-totaljudgings can be set to 1, 2, or 3. setting this to 3, for example, 
-will display the three most recent judgings of the player. works best with 
-'stickyjudge 1' when 2 or 3.
-
-fpsdisplay will display the number of loops per second the game makes in 
-the lower right corner. there aren't really 'frames' with the way the 
-screen is drawn now, but it should be a good gauge of how well pyDDR is 
-running on your system.
-
-grading is capable of turning the grading screen on or off. setting this 
-to 0 will completely turn off grading. useful for when you want to test 
-files for sync, practice a lot, or just don't care about your grade.
-
-joy_left is the joystick button number that should press the left arrow.
-
-joy_right is the joystick button number that should press the right arrow.
-
-joy_up is the joystick button number that should press the left arrow.
-
-joy_down is the joystick button number that should press the down arrow.
-
-joy_select doesn't really do anything right now.
-
-joy_start is the joystick button number that should press the start arrow.
-
-mat_axes is how many axes your joystick driver reports for your mat. with 
-linux boxes, this is usually 6. with windows boxes, this seems to be 4. 
-set to whatever makes your mat work.
-
-mat_buttons is how many buttons your joystick driver reports for the mat. 
-with linux boxes this is 12 most of the time, and windows seems to report 
-16. set it to what makes your mat work.
-
-for joystick help, run pyjoy.py, press buttons, and watch the console for 
-the number of the buttons you press. ESC exits.
+Troubleshooting
+---------------
+If you are having trouble with pyDDR, first check your OS distributor
+for updates. Debian and Gentoo GNU/Linux both have packages for pyDDR,
+and this is the recommended installation method for these systems.
+Also, visit http://www.icculus.org/pyddr and see if a new version has
+been released, or if there is a package for your platform. If that
+fails, drop by #pyddr on irc.freenode.net and see if anyone knows how
+to help you. However, if you ask for help, expect to answer a lot of
+questions about your OS and the software on it.
