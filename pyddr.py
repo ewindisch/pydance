@@ -61,9 +61,6 @@ pygame.sprite.Sprite.zindex = DEFAULTZINDEX
 #  narray*=array(color).astype(Float32)
 #  _blit_array(surf,narray.astype(Int8))
 
-MAXPLAYERS = 2
-DIRECTIONS = ['l', 'd', 'u', 'r']
-
 songdir = mainconfig['songdir']
 
 class SongEvent:
@@ -91,12 +88,6 @@ DIFFICULTIES   = emptyDictFromList(DIFFICULTYLIST)
 MODELIST = ['SINGLE','DOUBLE']
 MODES = emptyDictFromList(MODELIST)
 BEATS = {'sixty':0.25,'thrty':0.5,'twtfr':2.0/3.0,'steps':1.0,'tripl':4.0/3.0,'eight':2.0,'qurtr':4.0,'halfn':8.0,'whole':16.0} 
-
-def toRealTime(bpm,steps):
-  if bpm != 0:
-    return steps*0.25*60.0/bpm
-  else:
-    return steps*0.25*60.0/146
 
 class BGmovie(pygame.sprite.Sprite):
   def __init__ (self, filename):
@@ -941,81 +932,6 @@ class Blinky(pygame.sprite.Sprite):
     if self.frame != self.oldframe:
       self.image = self.topimg[self.frame]
       self.oldframe = self.frame
-
-class ArrowFX(pygame.sprite.Sprite):
-  def __init__ (self, bpm, direction, ypos, playernum, theme):
-    pygame.sprite.Sprite.__init__(self)        #call Sprite initializer
-    self.presstime = -1000000
-    self.tick = toRealTime(bpm, 1);
-    self.centery = ypos + 32
-    self.centerx = {'l':44, 'd':120, 'u':196, 'r':272}[direction]
-    self.playernum = playernum
-    
-    fn = os.path.join(theme.path, 'arr_n_' + direction + '_3.png')
-    self.baseimg = pygame.image.load(fn).convert(16)
-    self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
-
-    self.blackbox = pygame.surface.Surface((64,64))
-    self.blackbox.set_colorkey(0)
-    self.image = self.blackbox
-    self.rect = self.image.get_rect()
-    self.displaying = 1
-    self.direction = 1
-    self.holdtype = 0
-
-    style = mainconfig['explodestyle']
-    self.rotating, self.scaling = {3:(1,1), 2:(0,1), 1:(1,0), 0:(0,0)}[style]
-    
-  def holding(self, yesorno):
-    self.holdtype = yesorno
-  
-  def stepped(self, time, tinttype):
-    self.presstime = time
-    self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
-    self.tintimg.blit(self.baseimg, (0,0))
-    tinter = pygame.surface.Surface((64,64))
-    if tinttype == 'MARVELOUS':
-      tinter.fill((255,255,255))
-    elif tinttype == 'PERFECT':
-      tinter.fill((255,255,0))
-    elif tinttype == 'GREAT':
-      tinter.fill((0,255,0))
-    tinter.set_alpha(127)
-    self.tintimg.blit(tinter,(0,0))
-    self.tintimg.set_colorkey(self.tintimg.get_at((0,0)))
-    self.tintimg = self.tintimg.convert() #_alpha() #rotozoom wants _alpha 
-    if self.direction == 1: self.direction = -1
-    else: self.direction = 1
-
-  def update(self, time, combo):
-    steptimediff = time - self.presstime
-    if (steptimediff < 0.2) or self.holdtype:
-      self.displaying = 1
-      self.image = self.tintimg
-      if self.scaling:
-        if self.holdtype:
-          scale = 1.54
-        else:
-          scale = 1.0 + (steptimediff * 4.0) * (1.0+(combo/256.0))
-        newsize = [int(x*scale) for x in self.image.get_size()]
-        self.image = pygame.transform.scale(self.image, newsize)
-      if self.rotating:
-        angle = steptimediff * 230.0 * self.direction
-        self.image = pygame.transform.rotate(self.image, angle)
-      if self.holdtype == 0:
-        tr = 224-int(1024.0*steptimediff)
-      else:
-        tr = 112
-      self.image.set_alpha(tr)
-            
-    if self.displaying:
-      if steptimediff > 0.2 and (self.holdtype == 0):
-        self.image = self.blackbox
-        self.displaying = 0
-      self.rect = self.image.get_rect()
-      self.rect.center = self.centerx, self.centery
-
-      self.rect.left += (320*self.playernum)
 
 class LifeBarDisp(pygame.sprite.Sprite):
     def __init__(self, playernum, theme, previously = None):
@@ -1961,7 +1877,7 @@ def SetDisplayMode(mainconfig):
     sys.exit()
 
 def main():
-  global screen,background,eventManager,currentTheme,playmode
+  global screen,background,eventManager,playmode
   print "pyDDR, by theGREENzebra (tgz@clickass.org)"
   print "Initialising.."
 
@@ -2119,11 +2035,9 @@ def blatantplug():
 
 
 def playSequence(players, diffList, songList):
-  global screen,currentTheme
+  global screen
   megajudge = []
   lifebars = []
-
-  currentTheme = GFXTheme(mainconfig['gfxtheme'])
 
   print diffList
   for playerID in range(players):
@@ -2150,13 +2064,15 @@ def playSequence(players, diffList, songList):
   return megajudge
 
 def dance(song,players,difficulty,prevlife,combos,prevscr):
-  global screen,background,eventManager,currentTheme,playmode
+  global screen,background,eventManager,playmode
 
   songL = [song]
   for i in range(1, players):
     songL.append(copy.copy(song))
 
   pygame.mixer.init()
+
+  currentTheme = GFXTheme(mainconfig["gfxtheme"])
 
   # render group, almost[?] every sprite that gets rendered
   rgroup = RenderLayered()
@@ -2214,13 +2130,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
   
   # so the current combos get displayed
   global holdkey
-  
-  totalJudgings = mainconfig['totaljudgings']
-  if totalJudgings > 3:
-    totalJudgings = 3
-  elif totalJudgings < 0 :
-    totalJudgings = 0
-  
+
   playerContents = []
   for playerID in range(players):
     plr = Player(playerID,
@@ -2237,7 +2147,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
     plr.lifebar.add(tgroup)
     plr.holdtext.add(tgroup)
 
-    for i in range(totalJudgings):
+    for i in range(mainconfig['totaljudgings']):
       pj = JudgingDisp(playerID)
       plr.judging_list.append(pj)
       pj.add(tgroup)
@@ -2332,23 +2242,13 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
   else:
     pygame.mixer.music.set_volume(1.0)
 
-  difflist = song.modediff[playmode]
-  
   if (mainconfig['strobe']):
     extbox = Blinky(song.bpm)
     extbox.add(tgroup)
-    
+
   for plr in playerContents:
-    plr.song.play(playmode, plr.difficulty, plr.pid == 0)
-    plr.holds = len(song.holdref[song.modediff[playmode].index(plr.difficulty)])
-    plr.judge = Judge(song.bpm, plr.holds, song.modeinfo[playmode][difflist.index(plr.difficulty)][1], song.totarrows[plr.difficulty], plr.difficulty)
-    plr.judge.combo = combos[plr.pid]
+    plr.start_song(Judge, combos)
     for arrowID in DIRECTIONS:
-      plr.toparr[arrowID] = TopArrow(song.bpm, arrowID, ARROWTOP,
-                                     plr.pid, currentTheme)
-      plr.toparrfx[arrowID] = ArrowFX(song.bpm, arrowID, ARROWTOP,
-                                      plr.pid, currentTheme)
-      
       if mainconfig['explodestyle'] > -1:
         plr.toparrfx[arrowID].add(fgroup)
       if mainconfig['showtoparrows']:
@@ -2367,9 +2267,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
       if songFailed:
         song.kill()
 
-    for plr in playerContents:
-      plr.get_events()
-      plr.fx_data = []
+    for plr in playerContents: plr.get_next_events()
 
     if playerContents[0].evt is None:
       if song.isOver():
@@ -2473,25 +2371,14 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
                 holdindex = song.holdref[diffnum].index((DIRECTIONS.index(dir),ev.when))
                 HoldArrowSprite(arrowSet[dir+repr(int(ev.color)%colortype)].c, curtime, song.holdinfo[diffnum][holdindex], ev.bpm, song.lastbpmchangetime[0], plr.pid).add([plr.arrow_group, rgroup])
           
-    if len(song.lastbpmchangetime)>1:
+    if len(song.lastbpmchangetime) > 1:
       if (curtime >= song.lastbpmchangetime[1][0]):
         nbpm = song.lastbpmchangetime[1][1]
-        print "BPM tried to change from ",oldbpm, " to ", nbpm, " at ",curtime,"..",
-        if song.lastbpmchangetime[1][1] is not None:
-          for plr in playerContents:
-            for arrID in DIRECTIONS:
-              if mainconfig['showtoparrows']:
-                plr.toparr[arrID].remove(sgroup)
-              plr.toparr[arrID] = TopArrow(nbpm, arrID, ARROWTOP, plr.pid, currentTheme)
-              if mainconfig['showtoparrows']:
-                plr.toparr[arrID].add(sgroup)
-            plr.judge.changebpm(nbpm)
-          oldbpm = nbpm
-          print "succeeded."
-        else:
-          print "failed."
+        for plr in playerContents:  plr.change_bpm(nbpm)
+        oldbpm = nbpm
         song.lastbpmchangetime = song.lastbpmchangetime[1:]
-        print "lastbpmchangetime is now",song.lastbpmchangetime
+        print "BPM changed from", oldbpm, "to", nbpm
+        print "Last changed BPM at", song.lastbpmchangetime
         bpmchanged = 0
      
     for plr in playerContents:
@@ -2501,8 +2388,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
             try:  #because holds and other sprites will cause this to break
               if (checkspr.timef == fxtime) and (checkspr.dir == fxdir):
                 checkspr.kill()  #they hit this arrow, kill it
-            except:
-              nothing = None  #dummy
+            except: pass
           plr.toparrfx[fxdir].stepped(curtime, fxtext)
     
       plr.judge.expire_arrows(curtime)
@@ -2518,15 +2404,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
     song.lyricdisplay.update(curtime)
     song.transdisplay.update(curtime)
 
-    for plr in playerContents:
-      plr.combos.update(plr.judge.combo, curtime-plr.judge.steppedtime)
-    
-    # make sure the combo displayed at the bottom is current and the correct size
-      plr.score.update(plr.judge.score)
-      for i in range(totalJudgings):
-        plr.judging_list[i].update(i, curtime - plr.judge.steppedtime, plr.judge.recentsteps[i])
-      plr.lifebar.update(plr.judge)
-      plr.holdtext.update(curtime)
+    for plr in playerContents: plr.combo_update(curtime)
     
 #    dancer.update()
     backimage.update()

@@ -7,6 +7,9 @@ E_PASS,E_QUIT,E_FULLSCREEN,E_SCREENSHOT,E_PGUP,E_PGDN,E_SELECT,E_MARK,E_UP,E_DOW
 # Z index constants
 DEFAULTZINDEX,PADZINDEX,ARROWZINDEX,XANIMZINDEX,BARSZINDEX = range(5)
 
+DIRECTIONS = ['l', 'd', 'u', 'r']
+MAXPLAYERS = 2
+
 import sys, os, config, pygame
 
 # Detect the name of the OS - MacOS X is not really UNIX.
@@ -93,3 +96,11 @@ event = input.EventManager()
 FONTS = {}
 for s in (192, 60, 48, 40, 32, 28, 26, 20, 16, 14):
   FONTS[s] = pygame.font.Font(None, s)
+
+# FIXME - Get this out of here!
+def toRealTime(bpm,steps):
+  if bpm != 0:
+    return steps*0.25*60.0/bpm
+  else:
+    return steps*0.25*60.0/146
+
