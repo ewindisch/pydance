@@ -1,18 +1,16 @@
 # GFXTheme and associated classes.
 # These handle loading the various graphics themes for pydance.
 
-# In general, this is wrapped in what's probably way too many layers of
-# abstraction. We should be able to remove some of these classes, or at
-# least many of the accessor functions.
-
-import dircache, os, games, zipfile
+import os
+import games
+import zipfile
+import dircache
 
 from cStringIO import StringIO
 
 from listener import Listener
 
 from constants import *
-from util import toRealTime
 
 # Wrapper classes for loading files from themes.
 # Eventually, we can use ZipFile + StringIO to make it load from zip files.
