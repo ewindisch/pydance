@@ -201,7 +201,6 @@ def play(screen, playlist, configs, songconf, playmode):
       continue
 
     songs_played += 1
-    pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
     songdata = steps.SongData(current_song, songconf)
 
@@ -236,8 +235,6 @@ def play(screen, playlist, configs, songconf, playmode):
 
 def dance(screen, song, players, prevscr, ready_go, game):
   songFailed = False
-
-  pygame.mixer.init()
 
   # text group, e.g. judgings and combos
   tgroup =  RenderUpdates()
