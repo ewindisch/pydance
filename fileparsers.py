@@ -698,6 +698,8 @@ class KSFFile(MSDFile):
 
     name = os.path.split(filename)[1]
 
+    holding = []
+
     parts = name.split("_")
     if len(parts) == 1:
       couple = True
@@ -730,13 +732,52 @@ class KSFFile(MSDFile):
       elif line[0] == "2": break
       elif self.need_steps:
         if couple:
-          s = [int(i) for i in line[0:5]]
+          s = []
+          for i in range(5):
+            if line[i] == "4":
+              if i not in holding:
+                holding.append(i)
+                s.append(3)
+              else: s.append(0)
+            elif line[i] == "1": s.append(1)
+            elif line[i] == "0":
+              if i in holding:
+                holding.remove(i)
+                steps[0][-1][i + 1] = 1
+                s.append(0)
+              else: s.append(0)
           steps[0].append([note_type] + s)
-          s = [int(i) for i in line[5:10]]
+
+          s = []
+          for i in range(5, 10):
+            if line[i] == "4":
+              if i not in holding:
+                holding.append(i)
+                s.append(3)
+              else: s.append(0)
+            elif line[i] == "1": s.append(1)
+            elif line[i] == "0":
+              if i in holding:
+                holding.remove(i)
+                steps[1][-1][i - 4] = 1
+                s.append(0)
+              else: s.append(0)
           steps[1].append([note_type] + s)
-          pass
         else:
-          s = [int(i) for i in line[0:5]]
+          s = []
+          for i in range(5):
+            if line[i] == "4":
+              if i not in holding:
+                holding.append(i)
+                s.append(3)
+              else: s.append(0)
+            elif line[i] == "1": s.append(1)
+            elif line[i] == "0":
+              if i in holding:
+                holding.remove(i)
+                steps[-1][i + 1] = 1
+                s.append(0)
+              else: s.append(0)
           steps.append([note_type] + s)
       else: break
 
