@@ -4,7 +4,6 @@
 import dircache, os, games
 
 from constants import *
-from spritelib import *
 from util import toRealTime
 
 class GFXTheme:
@@ -189,11 +188,7 @@ class ArrowFX(pygame.sprite.Sprite):
 class ScrollingArrow:
   def __init__ (self, path, dir, color, left):
     self.dir = dir
-    states = {}
-    for state in ("c",):
-      filename = os.path.join(path,
-                              "_".join(("arr", state, dir, color))+".png")
-      states[state] = SimpleSprite(file=filename)
-      states[state].rect.left = left
-    # allow access by instance.n or instance.states['n']
-    for n in states: self.__dict__[n] = states[n]
+    self.left = left
+    fn = "_".join(["arr", "c", dir, color]) + ".png"
+    self.image = pygame.image.load(os.path.join(path, fn)).convert()
+    self.image.set_colorkey(self.image.get_at([0, 0]), RLEACCEL)

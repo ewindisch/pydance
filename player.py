@@ -3,7 +3,7 @@ from util import toRealTime
 from gfxtheme import GFXTheme
 from judge import Judge
 
-import fontfx, spritelib, colors
+import fontfx, colors
 
 # Display the score overlaying the song difficulty
 class ScoringDisp(pygame.sprite.Sprite):

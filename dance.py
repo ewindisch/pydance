@@ -1,16 +1,15 @@
 import pygame
 from constants import *
 
-from spritelib import *
 from util import toRealTime
 from player import Player
 from announcer import Announcer
 
 from pygame.sprite import RenderUpdates
 
-import fontfx, gradescreen, steps, audio, fileparsers, games, error
+import fontfx, gradescreen, steps, audio, fileparsers, games, error, colors
 
-import random, sys, os
+import random, sys, os, copy
 
 class BGmovie(pygame.sprite.Sprite):
   def __init__ (self, filename):
@@ -193,7 +192,7 @@ class TimeDisp(pygame.sprite.Sprite):
     else:
       self.blahmod += 1
 
-class ArrowSprite(SimpleSprite):
+class ArrowSprite(pygame.sprite.Sprite):
 
   # Assist mode sound samples
   samples = {}
@@ -201,13 +200,16 @@ class ArrowSprite(SimpleSprite):
     samples[d] = pygame.mixer.Sound(os.path.join(sound_path,
                                                  "assist-" + d + ".ogg"))
   
-  def __init__ (self, spr, curtime, endtime, player, song):
-    SimpleSprite.__init__(self, spr=spr)
+  def __init__ (self, arrow, curtime, endtime, player, song):
+    pygame.sprite.Sprite.__init__(self)
     self.endtime = endtime
     self.life  = endtime - curtime
     self.curalpha = -1
-    self.dir = spr.fn[-7:-6]
+    self.dir = arrow.dir
+    self.image = arrow.image.convert()
     self.battle = song.battle
+    self.rect = arrow.image.get_rect()
+    self.rect.left = arrow.left
 
     if mainconfig['assist']: self.sample = ArrowSprite.samples[self.dir]
     else: self.sample = None
@@ -331,12 +333,15 @@ class ArrowSprite(SimpleSprite):
 
     if alp != self.image.get_alpha():  self.image.set_alpha(alp)
 
-class HoldArrowSprite(SimpleSprite):
-  def __init__ (self, spr, curtime, times, player, song):
-    SimpleSprite.__init__(self, spr = spr)
+class HoldArrowSprite(pygame.sprite.Sprite):
+  def __init__ (self, arrow, curtime, times, player, song):
+    pygame.sprite.Sprite.__init__(self)
     self.timef1 = times[1]
     self.timef2 = times[2]
     self.timef = times[2]
+    self.image = arrow.image.convert()
+    self.rect = arrow.image.get_rect()
+    self.rect.left = arrow.left
     self.life  = times[2]-curtime
     self.battle = song.battle
     if player.scrollstyle == 2:
@@ -361,7 +366,7 @@ class HoldArrowSprite(SimpleSprite):
 
     self.diff = self.top - self.bottom
     self.curalpha = -1
-    self.dir = spr.fn[-7:-6]
+    self.dir = arrow.dir
     self.playedsound = None
     if mainconfig['assist']:
       self.sample = pygame.mixer.Sound(os.path.join(sound_path, "assist-" + self.dir + ".ogg"))
@@ -608,8 +613,6 @@ def play(screen, playlist, configs, songconf, playmode):
 def dance(screen, song, players, prevscr, ready_go, game):
   songFailed = False
 
-  background = SimpleSprite(res = screen.get_size())
-
   pygame.mixer.init()
 
   # text group, EG. judgings and combos
@@ -801,13 +804,13 @@ def dance(screen, song, players, prevscr, ready_go, game):
               groups = (plr.arrow_group)
               if num & 1:
                 if not (num & 2):
-                  ArrowSprite(plr.theme.arrows[dirstr].c,
+                  ArrowSprite(plr.theme.arrows[dirstr],
                               curtime, ev.when, plr, song).add(groups)
 
               if num & 2:
                 holdindex = plr.steps.holdref.index((game.dirs.index(dir),
                                                      ev.when))
-                HoldArrowSprite(plr.theme.arrows[dirstr].c, curtime,
+                HoldArrowSprite(plr.theme.arrows[dirstr], curtime,
                                 plr.steps.holdinfo[holdindex], plr, song).add(groups)
 
     for plr in players:
