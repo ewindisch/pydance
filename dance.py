@@ -9,7 +9,8 @@ from announcer import Announcer
 
 from pygame.sprite import RenderUpdates
 
-import fontfx, gradescreen, steps, audio, fileparsers, games, error, colors
+from pygame.mixer import music
+import fontfx, gradescreen, steps, fileparsers, games, error, colors
 
 import random, sys, os, copy
 
@@ -297,8 +298,8 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
   screenshot = 0
 
-  if mainconfig['assist']: audio.set_volume(0.6)
-  else: audio.set_volume(1.0)
+  if mainconfig['assist']: music.set_volume(0.6)
+  else: music.set_volume(1.0)
 
   song.play()
   for plr in players: plr.start_song()
@@ -319,7 +320,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
     for plr in players: plr.get_next_events(song)
 
     if song.is_over(): break
-    else: curtime = audio.get_pos()/1000.0
+    else: curtime = music.get_pos()/1000.0
 
     key = []
 

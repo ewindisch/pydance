@@ -4,7 +4,8 @@
 import os, string, pygame, random, copy, dance
 from constants import *
 
-import announcer, audio, colors, optionscreen, error, games, ui
+import announcer, colors, optionscreen, error, games, ui
+from pygame.mixer import music
 
 # FIXME: this needs to be moved elsewhere if we want theming
 ITEM_BG = pygame.image.load(os.path.join(image_path, "ss-item-bg.png"))
@@ -152,8 +153,8 @@ class SongPreview(object):
     self.filename = None
     self.end_time = self.start_time = 0
     if not mainconfig["previewmusic"]:
-      audio.load(os.path.join(sound_path, "menu.ogg"))
-      audio.play(4, 0.0)
+      music.load(os.path.join(sound_path, "menu.ogg"))
+      music.play(4, 0.0)
 
   def preview(self, song):
     if mainconfig["previewmusic"] and not song.isfolder:
@@ -166,11 +167,11 @@ class SongPreview(object):
         # KSF-style preview, a separate filename to play.
         self.start, length = 0, 100
         self.filename = song.song.info["preview"]
-      if self.playing: audio.fadeout(500)
+      if self.playing: music.fadeout(500)
       self.playing = False
       self.start_time = pygame.time.get_ticks() + 500
       self.end_time = int(self.start_time + length * 1000)
-    elif song.isfolder: audio.fadeout(500)
+    elif song.isfolder: music.fadeout(500)
 
   # Python evaluates default parameters at instantiate-time or something,
   # so we can't set a default value of time = pygame.time.get_ticks() here.
@@ -179,17 +180,17 @@ class SongPreview(object):
     elif time < self.start_time: pass
     elif not self.playing:
       try:
-        audio.load(self.filename)
-        audio.set_volume(0.01) # 0.0 stops pygame.mixer.music.
-        audio.play(0, self.start)
+        music.load(self.filename)
+        music.set_volume(0.01) # 0.0 stops pygame.mixer.music.
+        music.play(0, self.start)
         self.playing = True
       except: # Filename not found? Song is too short? SMPEG blows?
-        audio.stop()
+        music.stop()
         self.playing = False
     elif time < self.start_time + 1000: # mixer.music can't fade in, only out.
-      audio.set_volume((time - self.start_time) / 1000.0)
+      music.set_volume((time - self.start_time) / 1000.0)
     elif time > self.end_time - 1000:
-      audio.fadeout(1000)
+      music.fadeout(1000)
       self.playing = False
       self.filename = None
 
@@ -306,7 +307,7 @@ class SongSelect(object):
     self.title_list = []
     self.screen = screen
 
-    audio.fadeout(500) # The menu music.
+    music.fadeout(500) # The menu music.
 
     pygame.display.update(self.screen.blit(self.bg, (0, 0)))
     
@@ -393,12 +394,12 @@ class SongSelect(object):
         except: pass
 
         if optionscreen.player_opt_driver(screen, self.player_configs):
-          audio.fadeout(500)
+          music.fadeout(500)
 
           dance.play(screen, zip(self.song_list, self.diff_list),
                      self.player_configs, self.game_config, gametype)
 
-          audio.fadeout(500) # This is the just-played song
+          music.fadeout(500) # This is the just-played song
 
           preview = SongPreview()
 
@@ -505,12 +506,12 @@ class SongSelect(object):
       self.render(changed)
       clock.tick(20)
 
-    audio.fadeout(500)
+    music.fadeout(500)
     pygame.time.wait(500)
     # FIXME Does this belong in the menu code? Probably.
-    audio.load(os.path.join(sound_path, "menu.ogg"))
-    audio.set_volume(1.0)
-    audio.play(4, 0.0)
+    music.load(os.path.join(sound_path, "menu.ogg"))
+    music.set_volume(1.0)
+    music.play(4, 0.0)
 
     player_config.update(self.player_configs[0]) # Save player 1's settings
 

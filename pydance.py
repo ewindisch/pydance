@@ -7,8 +7,10 @@ from constants import *
 from ui import ui
 from pad import pad
 
-import fontfx, menudriver, fileparsers, audio, colors
+import fontfx, menudriver, fileparsers, colors
 from courses import CRSFile
+
+from pygame.mixer import music
 
 import os, sys, error, util, getopt
 
@@ -87,8 +89,8 @@ def main():
   pygame.display.set_caption('pydance ' + VERSION)
   pygame.mouse.set_visible(0)
 
-  audio.load(os.path.join(sound_path, "menu.ogg"))
-  audio.play(4, 0.0)
+  music.load(os.path.join(sound_path, "menu.ogg"))
+  music.play(4, 0.0)
 
   songs = load_files(screen, song_list, "songs",
                      fileparsers.SongItem, (False,))
@@ -119,7 +121,7 @@ def main():
     sys.exit(1)
 
   menudriver.do(screen, (songs, courses, screen))
-  audio.stop()
+  music.stop()
   pygame.display.quit()
   mainconfig.write(os.path.join(rc_path, "pydance.cfg"))
   if mainconfig["saveinput"]:

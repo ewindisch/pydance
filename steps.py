@@ -1,11 +1,13 @@
 # These parse various file formats describing steps.
 # Please read docs/dance-spec.txt
 
-import colors, audio, games, stepfilters
+import colors, games, stepfilters
 
 from lyrics import Lyrics
 from util import toRealTime
 from constants import *
+
+from pygame.mixer import music
 
 # FIXME: This can probably be replaced by something smaller, like a tuple.
 class SongEvent(object):
@@ -200,7 +202,7 @@ class Steps(object):
     events, nevents = [], []
     idx = self.event_idx
     nidx = self.nevent_idx
-    time = self.curtime = float(audio.get_pos())/1000.0
+    time = self.curtime = float(music.get_pos())/1000.0
     while (idx < len(self.events) and
            self.events[idx].when <= time + 2 * toRealTime(self.events[idx].bpm, 1)):
       events.append(self.events[idx])
@@ -242,22 +244,20 @@ class SongData(object):
       self.lyricdisplay.addlyric(*lyr)
 
   def init(self):
-    try: audio.load(self.filename)
+    try: music.load(self.filename)
     except:
       print "Not a supported file type:", self.filename
       self.crapout = 1
-    if self.startat > 0:
-      print "Skipping %f seconds." % self.startat
 
   def play(self):
-    audio.play(0, self.startat)
+    music.play(0, self.startat)
 
   def kill(self):
-    audio.stop()
+    music.stop()
 
   def is_over(self):
-    if not audio.get_busy(): return True
-    elif self.endat and audio.get_pos() > self.endat * 1000:
-      audio.stop()
+    if not music.get_busy(): return True
+    elif self.endat and music.get_pos() > self.endat * 1000:
+      music.stop()
       return True
     else: return False

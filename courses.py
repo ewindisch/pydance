@@ -6,7 +6,7 @@
 # parsing CRS files quickly on your own, and then come back to this.
 
 from constants import *
-import audio
+from pygame.mixer import music
 import optionscreen
 import pygame
 import dance
@@ -235,8 +235,8 @@ class CourseSelector(object):
         if optionscreen.player_opt_driver(screen, self.player_configs):
           self.play(screen)
 
-        audio.load(os.path.join(sound_path, "menu.ogg"))
-        audio.play(4, 0.0)
+        music.load(os.path.join(sound_path, "menu.ogg"))
+        music.play(4, 0.0)
 
         ui.ui.clear()
 

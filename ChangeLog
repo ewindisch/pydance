@@ -19,8 +19,9 @@ Legend:
 + Courses (Oni/Nonstop) support; put the files in ~/.pydance/courses
   courses/ under your pydance installation directory. Currently only
   DWI/SM-style .crs files are supported.
-! The 'mrt' theme is now distributed separately from the main source.
-* Several crashes were fixed.
+! The 'mrt' announcer theme is now distributed separately from the main source.
+! Support for MAD/AO audio output was removed. It didn't work reliably anyway.
+* Many crashes and bugs were fixed.
 
 0.8.1 - Standard caution on the Probulator			[2003.09.12]
 + pydance, DDR 1st/2nd, 3rd, 4th, 5th/Max2/Ex, Ex Oni, or Ex Nonstop scoring.

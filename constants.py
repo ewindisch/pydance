@@ -81,7 +81,7 @@ default_conf = {
   "grading": 1,
   "saveinput": 1,
   "strobe": 0,
-  "usemad": 1, "usepsyco": 1,
+  "usepsyco": 1,
   "autogen": 1,
   }
 

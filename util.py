@@ -19,6 +19,7 @@ def difficulty_sort(a, b):
   else: return cmp(a, b)
 
 # FIXME: We should inline this. Really.
+# Or not, Psyco does it for us, basically.
 def toRealTime(bpm, steps):
   return steps*0.25*60.0/bpm
 

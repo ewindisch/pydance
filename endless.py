@@ -1,6 +1,7 @@
 # Support for endless song playing!
 
-import random, copy, colors, audio, error, optionscreen, dance, util
+import random, copy, colors, error, optionscreen, dance, util
+from pygame.mixer import music
 from constants import *
 
 import ui
@@ -104,8 +105,8 @@ class Endless(object):
     self.screen = screen
     self.firsttime = True
 
-    audio.load(os.path.join(sound_path, "menu.ogg"))
-    audio.play(4, 0.0)
+    music.load(os.path.join(sound_path, "menu.ogg"))
+    music.play(4, 0.0)
 
     self.render()
 
@@ -122,8 +123,8 @@ class Endless(object):
                                   screen, gametype),
                      self.player_configs, self.game_config, gametype)
 
-        audio.load(os.path.join(sound_path, "menu.ogg"))
-        audio.play(4, 0.0)
+        music.load(os.path.join(sound_path, "menu.ogg"))
+        music.play(4, 0.0)
 
         ui.ui.clear()
 
