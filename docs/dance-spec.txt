@@ -1,5 +1,5 @@
-This document describes the .dance format version 1.0. It was published
-on June 1st, 2003.
+This document describes the .dance format version 1.1. It was published
+on June 4th, 2003.
 
 The "Dance" Format
 ------------------
@@ -75,7 +75,7 @@ Step Sections:
 
 Note Sequences:
 <Buttons> ::= <NoteType> <Whitespace> <ButtonPresses>
-<NoteType> ::= "x" | "t" | "f" | "s" | "w" | "e" | "q" | "h" | "o"
+<NoteType> ::= "u" | "n" | "x" | "t" | "f" | "s" | "w" | "e" | "q" | "h" | "o"
 <ButtonPresses> ::= (0 | 1 | 2 | 3)+
 
 Song Commands:
@@ -204,8 +204,9 @@ w   12th note
 s   16th note
 f   24th note
 t   32nd note
+u   48th note (not recommended, here for SM conversion)
 x   64th note
-n   129nd note (not recommended, only here because DWI uses it)
+n   192nd note (not recommended, only here because DWI uses it)
 
 After the note comes a string of buttons. All these strings should be
 the same length across game modes. Example strings might "1001" or "0020".
@@ -263,7 +264,7 @@ Changes:
 --------
 2003.06.03
  - Version 1.1
- - Add 192nd notes with 'n'.
+ - Add 192nd notes with 'n', 48th with 'u'.
 
 2003.06.01
  - Version 1.0

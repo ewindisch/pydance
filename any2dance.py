@@ -8,8 +8,8 @@ if os.name == "posix":
   sys.path.append(os.path.split(os.path.realpath(pyddr_path))[0])
 else: sys.path.append(os.path.split(os.path.abspath(pyddr_path))[0])
 
-VERSION = "0.1"
-FORMATS = ('*.step', '*.dance', '*.dwi')
+VERSION = "0.2"
+FORMATS = ('*.step', '*.dance', '*.dwi', '*.sm'))
 
 import fileparsers
 

@@ -1,6 +1,7 @@
 import os, stat, util
 
 # FIXME: DanceFile and StepFile can easily share a parent class.
+# FIXME: This file needs major refactoring and cleanups
 
 class DanceFile:
   WAITING, METADATA, DESCRIPTION, LYRICS, GAMETYPE, STEPS = range(6)
@@ -67,7 +68,7 @@ class DanceFile:
     parts = line.split()
     steps = [parts[0]]
     if parts[0] in ("B", "W", "S", "D"): steps.append(float(parts[1]))
-    elif parts[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x", "n"):
+    elif parts[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x", "n", "u"):
       steps.extend([int(s) for s in parts[1]])
     elif parts[0] == "L": steps.extend((int(parts[1]), " ".join(parts[2:])))
 
@@ -268,7 +269,6 @@ class DWIFile:
         if need_steps: self.parse_steps(parts[0], parts[1], parts[3])
         
       else: # This is some sort of metadata key
-        # FIXME : Support samplestart and samplelength
         # don't support filenames. They're useless cross-platform.
         # Don't support genre, it's a dumbass tag
         if parts[0] == "GAP": self.info["gap"] = -int(parts[1])
@@ -428,12 +428,152 @@ class DWIFile:
       elif steps[0] == " ": steps.pop(0)
       else: steps.pop(0)
 
+class SMFile:
+
+  gametypes = { "dance-single": "SINGLE",
+                "dance-double": "DOUBLE",
+                "dance-couple": "COUPLE" }
+
+  notecount = { "SINGLE": 4,
+                "DOUBLE": 8,
+                "COUPLE": 8 }
+
+  notetypes = {
+    192: "n",
+    64: "x",
+    48: "u",
+    32: "t",
+    24: "f",
+    16: "s",
+    12: "w",
+    8: "e",
+    4: "q",
+    2: "h",
+    1: "o" }
+
+  step = [0, 1, 3, 1]
+
+  def __init__(self, filename, need_steps):
+    self.filename = filename
+    self.description = None
+    self.lyrics = []
+    self.steps = {}
+    self.difficulty = {}
+    self.info = {}
+
+    self.bpms = []
+    self.freezes = []
+
+    f = open(filename)
+    tokens = "".join([self.strip_line(line) for line in f])
+    tokens = tokens.replace(";", "")
+    tokens = tokens.split("#")
+
+    for token in tokens:
+      if len(token) == 0: continue
+      parts = token.split(":")
+      if parts[0] == "OFFSET": self.info["gap"] = float(parts[1]) * 1000
+      elif parts[0] == "TITLE": self.info["title"] = ":".join(parts[1:])
+      elif parts[0] == "ARTIST": self.info["artist"] = ":".join(parts[1:])
+      elif parts[0] == "MUSIC": self.info["filename"] = ":".join(parts[1:])
+      elif parts[0] == "BANNER": self.info["banner"] = ":".join(parts[1:])
+      elif parts[0] == "BACKGROUND":
+        self.info["background"] = ":".join(parts[1:])
+      elif parts[0] == "MD5": self.info["md5sum"] = parts[1]
+      elif parts[0] == "SAMPLESTART":
+        if self.info.has_key("preview"):
+          self.info["preview"][0] = float(parts[1])
+        else: self.info["preview"] = [float(parts[1]), 10]
+      elif parts[0] == "SAMPLELENGTH":
+        if self.info.has_key("preview"):
+          self.info["preview"][1] = float(parts[1])
+        else: self.info["preview"] = [45, float(parts[1])]
+      elif parts[0] == "BPMS":
+        for change in parts[1].split(","):
+          if "=" in change:
+            beat, bpm = change.split("=")
+            self.bpms.append((float(beat), float(bpm)))
+        self.info["bpm"] = self.bpms.pop(0)[1]
+      elif parts[0] == "STOPS":
+        for change in parts[1].split(","):
+          if "=" in change:
+            beat, wait = change.split("=")
+            self.freezes.append((float(beat), float(wait)/1000.0))
+      elif parts[0] == "NOTES":
+        game = SMFile.gametypes[parts[1]]
+        if not self.difficulty.has_key(game):
+          self.difficulty[game] = {}
+          self.steps[game] = {}
+        self.difficulty[game][parts[2].upper()] = int(parts[4])
+        if need_steps:
+          self.steps[game][parts[2].upper()] = self.parse_steps(parts[6], game)
+
+    dir, name = os.path.split(filename)
+    for t in ("banner", "filename", "movie", "background"):
+      if self.info.has_key(t):
+        if not os.path.isfile(self.info[t]):
+          self.info[t] = os.path.join(dir, self.info[t])
+          if not os.path.isfile(self.info[t]): del(self.info[t])
+
+    self.find_subtitle()
+          
+    mixname = os.path.split(os.path.split(dir)[0])[1]
+    if mixname != "songs": self.info["mix"] = mixname
+
+  def find_subtitle(self):
+    if not self.info.has_key("subtitle"):
+      for pair in (("[", "]"), ("(", ")"), ("~", "~")):
+        if pair[0] in self.info["title"] and pair[1] in self.info["title"]:
+          l = self.info["title"].index(pair[0])
+          r = self.info["title"].rindex(pair[1])
+          if l != 0 and r > l + 1:
+            self.info["subtitle"] = self.info["title"][l+1:r]
+            self.info["title"] = self.info["title"][:l]
+            break
+
+  def parse_steps(self, steps, gametype):
+    stepdata = []
+    beat = 0
+    count = SMFile.notecount[gametype]
+    bpmidx = 0
+    freezeidx = 0
+    measures = steps.split(",")
+    for measure in measures:
+      measure = measure.replace(" ", "")
+      note = SMFile.notetypes[len(measure)/count]
+      while len(measure) != 0:
+        sd = measure[0:4]
+        measure = measure[4:]
+        step = [note]
+        step.extend([SMFile.step[int(s)] for s in sd])
+        stepdata.append(step)
+        beat += 4.0 / count
+
+        for xyz in self.bpms[bpmidx:]:
+          if beat >= xyz[0]:
+            stepdata.append(["B", float(xyz[1])])
+            bpmidx += 1
+        for xyz in self.freezes[freezeidx:]:
+          if beat >= xyz[0]:
+            stepdata.append(["S", float(xyz[1])])
+            freezeidx += 1
+
+    return stepdata
+
+  def strip_line(self, line):
+    try:
+      i = line.index("//")
+      line = line[0:i]
+    except ValueError: pass
+    return line.strip()
+
 formats = ((".step", StepFile),
            (".dance", DanceFile),
-           (".dwi", DWIFile))
+           (".dwi", DWIFile),
+           (".sm", SMFile))
 
 DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "ANOTHER", "STANDARD", "TRICK",
-                "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI"]
+                "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "SMANIAC", "ONI"]
 
 def order_sort(a, b):
   if a in DIFFICULTIES and b in DIFFICULTIES:

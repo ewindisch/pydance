@@ -9,9 +9,9 @@ legend:
 0.7.0 - Applesauce makes the apples go yonder                   [2003.06.04]
 + More optimizations from JZig (movies this time)
 + New file formats
-  + Native DWI support
+  + Native DWI and SM support
   + ".dance" instead of ".step" is now pyDDR's official format.
-  + 'any2dance.py' converter for files (handles DWI and .step so far).
+  + 'any2dance.py' converter for files.
 * Judge rewrite!
   * Proper speed change handling in Judge
   * Proper miss handling in Judge
