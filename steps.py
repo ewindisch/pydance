@@ -11,6 +11,7 @@ BEATS = { 'x': 0.25, 't': 0.5, 'f': 2.0/3.0,
           's': 1.0, 'w': 4.0/3.0, 'e': 2.0,
           'q': 4.0, 'h': 8.0, 'o': 16.0 }
 
+# FIXME: This can probably be replaced by something smaller, like a tuple.
 class SongEvent:
   def __init__ (self, bpm, when=0.0, feet=None, next=None,
                 extra=None, color=None):
@@ -34,19 +35,19 @@ class SongEvent:
 #FIXME Why are we using a linked list? We should be using a python list
 class Steps:
   def __init__(self, song, difficulty, playmode="SINGLE",
-               lyrics = None): # FIXME - New lyrics system
+               lyrics = None):
     self.playmode = playmode
     self.difficulty = difficulty
     self.feet = song.difficulty[playmode][difficulty]
     self.length = 0.0
-    self.offset = float(song.info["gap"] +
-                        mainconfig['masteroffset']) / -1000.0
+    self.offset = -(song.info["gap"] + mainconfig['masteroffset']) / 1000.0
+    self.bpm = song.info["bpm"]
 
     if mainconfig['onboardaudio']:
-      self.offset = self.offset * float(48000/44128.0)
+      self.offset = int(self.offset * 48000.0/44128.0)
+      self.bpm = self.bpm * 48000.0/44128.0
 
-    self.bpm = song.info["bpm"]
-    self.lastbpmchangetime = [[0.0, self.bpm]]
+    self.lastbpmchangetime = []
     self.totalarrows = 0
 
     holdlist = []
@@ -60,7 +61,6 @@ class Steps:
     cur_time = float(self.offset)
     cur_bpm = self.bpm
     self.speed = mainconfig['scrollspeed']
-    self.minbpm = self.bpm
     self.lastbpmchangetime = []
     self.events = SongEvent(when = cur_time, bpm = cur_bpm,
                             extra = song.difficulty[playmode][difficulty])
@@ -69,16 +69,13 @@ class Steps:
 
     for words in song.steps[playmode][difficulty]:
 
-#     if firstword == "atsec":
-#       cur_time = float(nextword)
-#       cur_time = float(nextword)
       if words[0] == 'W':
         cur_time += float(words[1])
       elif words[0] == 'R':
         tail.next = SongEvent(when=cur_time,bpm=cur_bpm,extra='READY')
         coloring_mod = 0
         tail = tail.next
-      elif words[0] in BEATS.keys():
+      elif words[0] in BEATS:
         cando = True
         if ((little == 1 and (coloring_mod % 4 == 1 or
                               coloring_mod % 4 == 3)) or
@@ -138,9 +135,9 @@ class Steps:
       elif words[0] == "B":
         cur_bpm = words[1]
         self.lastbpmchangetime.append([cur_time, cur_bpm])
-        if cur_bpm < self.minbpm: self.minbpm = cur_bpm
 
       elif words[0] == "S":
+        # We can treat stops as a BPM change to zero with a wait.
         self.lastbpmchangetime.append([cur_time, 1e-127]) # This is zero
         cur_time += float(words[1])
         self.lastbpmchangetime.append([cur_time, cur_bpm])
@@ -160,7 +157,6 @@ class Steps:
     self.playingbpm = self.bpm
 
   def get_events(self):
-    # FIXME These optimizations probably are useless
     events, nevents = [], []
     time = self.curtime = float(pygame.mixer.music.get_pos())/1000.0
     head = self.head
@@ -207,7 +203,7 @@ class SongData:
       self.crapout = 1
     if self.startat > 0:
       print "Skipping %f seconds." % self.startat
-      
+
   def play(self):
     pygame.mixer.music.play(0, self.startat)
 
