@@ -106,7 +106,7 @@ class EventManager:
       keys[0][K_i], keys[0][K_k], keys[0][K_j], keys[0][K_l] = dirs
       keys[1][K_UP], keys[1][K_DOWN], keys[1][K_LEFT], keys[1][K_RIGHT] = dirs
     elif mainconfig["keyboard"] == "rqwerty":
-      keys[0][K_UP], keys[0][K_DOWN], keys[0][K_LEFT], keys[1][K_RIGHT] = dirs
+      keys[0][K_UP], keys[0][K_DOWN], keys[0][K_LEFT], keys[0][K_RIGHT] = dirs
       keys[1][K_i], keys[1][K_k], keys[1][K_j], keys[1][K_l] = dirs
     elif mainconfig["keyboard"] == "dvorak":
       keys[0][K_c], keys[0][K_t], keys[0][K_h], keys[0][K_n] = dirs
