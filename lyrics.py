@@ -5,22 +5,22 @@ from constants import *
 
 class LyricChannel(pygame.sprite.Sprite):
   def __init__(self, top, color):
-      pygame.sprite.Sprite.__init__(self)
-      self._lyrics = []
-      self._times = []
-      self._prender = []
-      self._lasttime = -1000
- 
-      self.image = pygame.surface.Surface([0, 0])
- 
-      self._oldlyric = -1
-      self._color = color
-      self._darkcolor = colors.darken_div(color)
-      self._top = top
+    pygame.sprite.Sprite.__init__(self)
+    self._lyrics = []
+    self._times = []
+    self._prender = []
+    self._lasttime = -1000
 
-      self.rect = self.image.get_rect()
-      self.rect.top = self._top
-      self.rect.centerx = 320
+    self.image = pygame.surface.Surface([0, 0])
+
+    self._oldlyric = -1
+    self._color = color
+    self._darkcolor = colors.darken_div(color)
+    self._top = top
+
+    self.rect = self.image.get_rect()
+    self.rect.top = self._top
+    self.rect.centerx = 320
        
   def addlyric(self, time, lyric):
     self._lyrics.append(lyric)
@@ -74,6 +74,3 @@ class Lyrics(object):
     self._channels[chan].addlyric(time, lyric)
 
   def channels(self): return self._channels.values()
-
-  def update(self, curtime):
-    for i in self._channels.values(): i.update(curtime)

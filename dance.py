@@ -1,3 +1,5 @@
+# This is the main loop, which passes events to the Player objects.
+
 import pygame
 from constants import *
 
@@ -14,72 +16,72 @@ import fontfx
 import gradescreen
 import steps
 import fileparsers
-import games, error
+import games
+import error
 import colors
 import records
 
 import os
 
-class BGmovie(pygame.sprite.Sprite):
+# A simple movie-playing sprite. It can only do MPEG1 though.
+class BGMovie(pygame.sprite.Sprite):
   def __init__ (self, filename):
     pygame.sprite.Sprite.__init__(self)
     self.filename = filename
-    self.image = pygame.surface.Surface((640,480))
+    self.image = pygame.surface.Surface([640, 480])
     
-    if filename and not os.path.isfile(filename):
-      print "The movie file for this song is missing."
-      self.filename = None
-    
-    if self.filename:
-      self.movie = pygame.movie.Movie(filename)
-      self.movie.set_display(self.image,[(0,0),(640,480)])
-    else:
-      self.image.set_alpha(0, RLEACCEL) 
+    self.movie = pygame.movie.Movie(filename)
+    self.movie.set_display(self.image,[[0, 0], [640, 480]])
     self.rect = self.image.get_rect()
     self.rect.top = 0
     self.rect.left = 0
     self.oldframe = -1
-    self.changed = 0
+    self.changed = False
     
   def resetchange(self):
-    self.changed = 0
+    self.changed = False
 
   def update(self,curtime):
-    if self.filename:
-      curframe = int((curtime * 29.97) )
-      if self.oldframe != curframe:
-        self.changed = 1
-        self.movie.render_frame(curframe)
-        self.oldframe = curframe
+    curframe = int(curtime * 29.97)
+    if self.oldframe != curframe:
+      self.changed = True
+      self.movie.render_frame(curframe)
+      self.oldframe = curframe
 
+# Display the current FPS and store the average FPS for the song.
 class FPSDisp(pygame.sprite.Sprite):
   def __init__(self):
     pygame.sprite.Sprite.__init__(self)
-    self.oldtime = -10000000
-    self.image = pygame.surface.Surface((1,1))
-    self.clock = pygame.time.Clock()
-    self.cycles = 0
-    self.totalcount = 0
+    self.image = pygame.surface.Surface([1, 1])
+    self._oldtime = -10000000
+    self._clock = pygame.time.Clock()
+    self._cycles = 0
+    self._totalcount = 0
+    self._font = FONTS[16]
 
+  # Return the average of the average FPS rather than just the average
+  # FPS. This avoids the average FPS shooting up incredibly fast at
+  # the end of the song when no arrows are left.
   def fps(self):
-    return self.totalcount / self.cycles
+    return self._totalcount / self._cycles
 
   def update(self, time):
-    self.clock.tick()
+    self._clock.tick()
 
-    loops = int(self.clock.get_fps())
-    self.totalcount += loops
-    self.cycles += 1
+    loops = int(self._clock.get_fps())
+    self._totalcount += loops
+    self._cycles += 1
 
-    if (time - self.oldtime) > 1:
-      text = repr(loops) + " fps"
-      self.image = FONTS[16].render(text, True, [160, 160, 160])
+    if (time - self._oldtime) > 1:
+      text = "%d fps" % loops
+      self.image = self._font.render(text, True, [160, 160, 160])
       self.rect = self.image.get_rect()
-      self.image.set_colorkey(self.image.get_at([0, 0]), RLEACCEL)
       self.rect.bottom = 480
       self.rect.right = 640
-      self.oldtime = time
+      self._oldtime = time
 
+# Puts a little blinking square in the bottom corner, for use with
+# a custom lighting setup. This doesn't deal with BPM changes correctly.
 class Blinky(pygame.sprite.Sprite):
   def __init__ (self, bpm):
     pygame.sprite.Sprite.__init__(self)
@@ -110,76 +112,77 @@ class Blinky(pygame.sprite.Sprite):
       self.image = self.topimg[self.frame]
       self.oldframe = self.frame
 
+# Display the time at the top of the screen, in seconds.
 class TimeDisp(pygame.sprite.Sprite):
   def __init__(self):
     pygame.sprite.Sprite.__init__(self)
-    self.oldtime = "-1000"
-    self.image = pygame.surface.Surface((1,1))
+    self._oldtime = -1
+    self.image = pygame.surface.Surface([1, 1])
     self.rect = self.image.get_rect()
     self.rect.top = 0
     self.rect.centerx = 320
-    self.blahmod = 0
-        
+    self._font = FONTS[32]
+
   def update(self, time):
-    nowtime = repr(time)[:repr(time).index('.')+3]
-    if (nowtime != self.oldtime) and (self.blahmod > 1):
-      self.image = FONTS[40].render(nowtime,1,(224,224,224))
-      self.image.set_colorkey(self.image.get_at((0,0)), RLEACCEL)
-      self.oldtime = nowtime
+    if (time - self._oldtime) > 0.1: # Update 10 times a second at most
+      time_str = "%0.1f" % time
+      self.image = self._font.render(time_str, True, [224, 224, 224])
+      self._oldtime = time
       self.rect = self.image.get_rect()
       self.rect.top = 0
       self.rect.centerx = 320
-      self.blahmod = 0
-    else:
-      self.blahmod += 1
 
+# The "Ready? Go!" that appears before most songs.
 class ReadyGoSprite(pygame.sprite.Sprite):
   def __init__(self, time):
     pygame.sprite.Sprite.__init__(self)
     ready = os.path.join(pydance_path, "images", "ready.png")
     go = os.path.join(pydance_path, "images", "go.png")
-    self.time = time
-    self.ready = pygame.image.load(ready).convert()
-    self.ready.set_colorkey(self.ready.get_at((0, 0)), RLEACCEL)
-    self.go = pygame.image.load(go).convert()
-    self.go.set_colorkey(self.go.get_at((0, 0)), RLEACCEL)
-    self.pick_image(min(0, time))
+    self._time = time
+    self._ready = pygame.image.load(ready).convert()
+    self._ready.set_colorkey(self._ready.get_at([0, 0]), RLEACCEL)
+    self._go = pygame.image.load(go).convert()
+    self._go.set_colorkey(self._go.get_at([0, 0]), RLEACCEL)
+    self._pick_image(min(0, time))
 
   def update(self, cur_time):
-    if cur_time > self.time: self.kill()
-    elif self.alive(): self.pick_image(cur_time)
+    if cur_time > self._time: self.kill()
+    elif self.alive(): self._pick_image(cur_time)
 
-  def pick_image(self, cur_time):
-    ttl = self.time - cur_time # time to live
+  def _pick_image(self, cur_time):
+    ttl = self._time - cur_time # time to live
     if ttl < 0.25:
-      self.image = self.go
+      self.image = self._go
       alpha = ttl / 0.25
     elif ttl < 0.750:
-      self.image = self.go
+      self.image = self._go
       alpha = 1
     elif ttl < 1.00:
-      self.image = self.go
+      self.image = self._go
       alpha = (1 - ttl) / 0.25
     elif ttl < 1.5:
-      self.image = self.ready
+      self.image = self._ready
       alpha = (ttl - 1.0) / 0.5
     elif cur_time < 0.5:
-      self.image = self.ready
+      self.image = self._ready
       alpha = cur_time / 0.5
     else:
-      self.image = self.ready
+      self.image = self._ready
       alpha = 1
 
     self.image.set_alpha(int(256 * alpha))
     self.rect = self.image.get_rect()
     self.rect.center = (320, 240)
 
+# Run through a playlist of songs and play each one until people quit.
 def play(screen, playlist, configs, songconf, playmode):
   numplayers = len(configs)
 
   game = games.GAMES[playmode]
 
   songs_played = 0
+  # Decides whether or not the Ready?/Go! should be displayed before
+  # the song.
   first = True
 
   players = []
@@ -194,7 +197,7 @@ def play(screen, playlist, configs, songconf, playmode):
                                   os.path.split(songfn)[1]])
       first = True
       continue
-      
+
     songs_played += 1
     pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
@@ -215,7 +218,8 @@ def play(screen, playlist, configs, songconf, playmode):
     grade = gradescreen.GradingScreen(screen, players)
 
   # If we only play one song (all the way through), then it's safe to enter
-  # a grade. This means course grades are going to get kind of messy.
+  # a grade. This means course grades are going to get kind of messy,
+  # and have to be handled by the course stuff rather than here.
   if songs_played == 1 and not players[0].escaped:
     for p in players:
       if not p.failed:
@@ -230,80 +234,70 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
   pygame.mixer.init()
 
-  # text group, EG. judgings and combos
-  tgroup =  RenderUpdates()  
-  
+  # text group, e.g. judgings and combos
+  tgroup =  RenderUpdates()
   # lyric display group
   lgroup = RenderUpdates()
 
-  background = pygame.Surface((640, 480))
+  background = pygame.Surface([640, 480])
 
   if song.movie != None:
-    backmovie = BGmovie(song.movie)
-    background.fill(colors.BLACK)
+    backmovie = BGMovie(song.movie)
   else:
-    backmovie = BGmovie(None)
+    backmovie = None
     
   background.fill(colors.BLACK)
+  screen.fill(colors.BLACK)
 
-  ready_go_time = 100
-  for player in players: ready_go_time = min(player.ready, ready_go_time)
-  rgs = ReadyGoSprite(ready_go_time)
-  if ready_go: tgroup.add(rgs)
+  if ready_go:
+    ready_go_time = min(100, *[plr.ready for plr in players])
+    tgroup.add(ReadyGoSprite(ready_go_time))
 
   if mainconfig['showbackground'] > 0:
-    if backmovie.filename == None:
+    if backmovie is None:
       bgkludge = pygame.image.load(song.background).convert()
       bgkrect = bgkludge.get_rect()
       if (bgkrect.size[0] == 320) and (bgkrect.size[1] == 240):
         bgkludge = pygame.transform.scale2x(bgkludge)
       else:
-        bgkludge = pygame.transform.scale(bgkludge,(640,480))
+        bgkludge = pygame.transform.scale(bgkludge, [640, 480])
       bgkludge.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
       
       q = mainconfig['bgbrightness'] / 256.0
+      # FIXME
       for i in range(0, 101, 5):
         p = i / 100.0
-        bgkludge.set_alpha(256 * p * q, RLEACCEL)
         prevscr.set_alpha(256 * (1 - p) * q, RLEACCEL)
         screen.fill(colors.BLACK)
-        screen.blit(prevscr,(0,0))
-        screen.blit(bgkludge,(0,0))
+        screen.blit(prevscr, [0, 0])
+        screen.blit(bgkludge, [0, 0])
         pygame.display.update()
         pygame.time.delay(1)
 
-      background.blit(bgkludge, (0, 0))
+      background.blit(bgkludge, [0, 0])
     else:
-      background.fill(colors.BLACK)
-      screen.fill(colors.BLACK)
       pygame.display.update()
   else:
-    background.fill(colors.BLACK)
-    screen.fill(colors.BLACK)
     pygame.display.update()
 
-  # Store these values so we don't look them up during the main loop
-  strobe = mainconfig["strobe"]
-  if strobe:
-    extbox = Blinky(song.bpm)
-    extbox.add(tgroup)
+  if mainconfig["strobe"]: tgroup.add(Blinky(song.bpm))
 
-  fpsdisplay = mainconfig["fpsdisplay"]
-  if fpsdisplay:
+  if mainconfig["fpsdisplay"]:
     fpstext = FPSDisp()
     timewatch = TimeDisp()
     tgroup.add([fpstext, timewatch])
   else: fpstext = None
 
-  if mainconfig['showlyrics']: lgroup.add(song.lyricdisplay.channels())
+  if mainconfig['showlyrics']:
+    lgroup.add(song.lyricdisplay.channels())
 
-  songtext = fontfx.zztext(song.title, 480,12)
-  grptext = fontfx.zztext(song.artist, 160,12)
+  songtext = fontfx.zztext(song.title, 480, 12)
+  grptext = fontfx.zztext(song.artist, 160, 12)
 
   songtext.zin()
   grptext.zin()
 
-  tgroup.add((songtext, grptext))
+  tgroup.add([songtext, grptext])
 
   song.init()
 
@@ -378,30 +372,20 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
     rectlist = []
 
-    if backmovie.filename:
+    if backmovie:
       backmovie.update(curtime)
       if backmovie.changed or (fpstext.fps() > 30):
         backmovie.resetchange()
-        screen.blit(backmovie.image,(0,0))
+        screen.blit(backmovie.image, [0, 0])
 
     for plr in players: rectlist.extend(plr.game_loop(curtime, screen))
 
-    if strobe: extbox.update(curtime + song.soffset)
-
-    song.lyricdisplay.update(curtime)
-
-    songtext.update()
-    grptext.update()
-    rgs.update(curtime)
-
-    if fpsdisplay:
-      fpstext.update(curtime)
-      timewatch.update(curtime)
-
+    lgroup.update(curtime)
+    tgroup.update(curtime)
     rectlist.extend(tgroup.draw(screen))
     rectlist.extend(lgroup.draw(screen))
 
-    if not backmovie.filename: pygame.display.update(rectlist)
+    if backmovie is None: pygame.display.update(rectlist)
     else: pygame.display.update()
 
     if screenshot:
@@ -410,9 +394,9 @@ def dance(screen, song, players, prevscr, ready_go, game):
       pygame.image.save(screen, fn)
       screenshot = False
 
-    if not backmovie.filename:
-      lgroup.clear(screen,background)
-      tgroup.clear(screen,background)
+    if backmovie is None:
+      lgroup.clear(screen, background)
+      tgroup.clear(screen, background)
       for plr in players: plr.clear_sprites(screen, background)
 
     if ((curtime > players[0].length - 1) and
