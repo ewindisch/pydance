@@ -114,7 +114,7 @@ OPTIONS = {
               "The scoring algorithm.",
               scores.score_opt),
   "grade": (False, "Grades",
-            "The gradinging algorithm.",
+            "The grading algorithm.",
             grades.grade_opt),
   "combo": (False, "Combos",
              "How your combo increases.",
