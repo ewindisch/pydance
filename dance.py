@@ -198,7 +198,7 @@ def play(screen, playlist, configs, songconf, playmode):
       if dance(screen, songdata, players, prevscr, first, game):
         break # Failed
       first = False
-    except:
+    except None:
       error.ErrorMessage(screen, ["There was an error playing",
                                   os.path.split(songfn)[0]])
       first = True

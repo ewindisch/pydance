@@ -19,7 +19,7 @@ def player_opt_driver(screen, configs):
     ("Size", "size", [(1, "Tiny"), (2, "Little"), (0, "Off"), (3, "Big"),
                       (4, "Quick"), (5, "Skippy")]),
     ("Fade", "fade", [(0, "Off"), (1, "Sudden"), (2, "Hidden"),
-                        (3, "Peek")]),
+                        (3, "Peek"), (4, "Cycle")]),
     ("Accel", "accel", [(2, "Brake"), (0, "None"), (1, "Boost")]),
     ("Scale", "scale", [(0, "Shrink"), (1, "Normal"), (2, "Grow")]),
     ("Scroll", "scrollstyle", [(0, "Normal"), (1, "Reverse"), (2, "Center")]),

@@ -1,4 +1,5 @@
 import os, random, pygame
+from math import sin
 
 from constants import *
 
@@ -57,7 +58,8 @@ class AbstractArrow(pygame.sprite.Sprite):
       self.suddenzone -= self.vector * 160
     if player.fade & 2: # Hidden, fade out early.
       self.hiddenzone += self.vector * 160
-        
+
+    self.fade = player.fade
 
     self.spin = player.spin
     self.scale = player.scale
@@ -101,6 +103,31 @@ class AbstractArrow(pygame.sprite.Sprite):
       beatsleft += bpmdoom / onefbeat
 
     return beatsleft
+
+  def get_alpha(self, curtime, beatsleft, top):
+    alp = 256
+
+    if self.fade == 4: alp = int(alp * abs(sin(beatsleft * 1.5708)))
+
+    if self.top < self.bottom: 
+      if top > self.suddenzone:
+        alp = 256 - 4 * (top - self.suddenzone) / self.speed
+      elif self.rect.top < self.hiddenzone:
+        alp = 256 - 4 * (self.hiddenzone - top) / self.speed
+    else:
+      if top < self.suddenzone:
+        alp = 256 - 4 * (self.suddenzone - top) / self.speed
+      elif top > self.hiddenzone:
+        alp = 256 - 4 * (top - self.hiddenzone) / self.speed
+
+    if alp > 256: alp = 256
+    elif alp < 0: alp = 0
+
+    if self.secret: alp /= 5
+
+    if self.hold and self.broken and curtime > self.endtime + 0.025: alp /= 2
+
+    return alp
 
   def update(self, curtime, curbpm, lbct):
     if self.sample and curtime >= self.timef1:
@@ -179,25 +206,7 @@ class ArrowSprite(AbstractArrow):
     pct = abs(float(top - self.top) / self.diff)
 
     self.rect, self.image = self.scale_spin_battle(self.baseimage, top, pct)
-
-    alp = 256
-    if self.top < self.bottom: 
-      if top > self.suddenzone:
-        alp = 256 - 4 * (top - self.suddenzone) / self.speed
-      elif top < self.hiddenzone:
-        alp = 256 - 4 * (self.hiddenzone - top) / self.speed
-    else:
-      if top < self.suddenzone:
-        alp = 256 - 4 * (self.suddenzone - top) / self.speed
-      elif top > self.hiddenzone:
-        alp = 256 - 4 * (top - self.hiddenzone) / self.speed
-
-    if alp > 256: alp = 256
-    elif alp < 0: alp = 0
-
-    if self.secret: alp /= 5
-
-    self.image.set_alpha(alp)
+    self.image.set_alpha(self.get_alpha(curtime, beatsleft, top))
 
 class HoldArrowSprite(AbstractArrow):
   def __init__ (self, arrow, secret, curtime, times, player, song):
@@ -273,25 +282,4 @@ class HoldArrowSprite(AbstractArrow):
     image.blit(self.bottom_image, [0, holdsize + self.width / 2])
 
     self.rect, self.image = self.scale_spin_battle(image, top, pct)
-
-    alp = 256
-    if self.top < self.bottom: 
-      if top > self.suddenzone:
-        alp = 256 - 4 * (top - self.suddenzone) / self.speed
-      elif self.rect.top < self.hiddenzone:
-        alp = 256 - 4 * (self.hiddenzone - top) / self.speed
-    else:
-      if top < self.suddenzone:
-        alp = 256 - 4 * (self.suddenzone - top) / self.speed
-      elif top > self.hiddenzone:
-        alp = 256 - 4 * (top - self.hiddenzone) / self.speed
-
-    if alp > 256: alp = 256
-    elif alp < 0: alp = 0
-
-    if self.broken and (curtime > self.timef1+(0.00025*(60000.0/curbpm))):
-      alp /= 2
-
-    if self.secret: alp /= 5
-
-    self.image.set_alpha(alp)
+    self.image.set_alpha(self.get_alpha(curtime, beatsleft_top, top))
