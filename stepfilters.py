@@ -410,7 +410,7 @@ class PanelTransform(Transform):
   # Actually perform the transformation on the data.
   def _transform(self, steps):
     # This is not a note, it's a BPM change / delay / etc
-    if not isinstance(steps[0], float): return copy.copy(steps)
+    if not isinstance(steps[0], float): return list(steps)
 
     new_steps = [0] * (len(self.transform_mapping) + 1)
     new_steps[0] = steps[0]
@@ -422,20 +422,54 @@ class PanelTransform(Transform):
 
     return new_steps
 
+# This lets us cover the common case of DDR steps for KSF files, and avoid
+# losing steps in the downscaling.
+class FiveToFourTransform(Transform):
+
+  def __init__(self, orig_panels, new_panels, rand):
+    self.holding_center = False
+    self.rand = rand # A NonRandom instance preseeded.
+
+  def _update_state(self, steps):
+    if not isinstance(steps[0], float): return
+    if steps[3] & 2: holding_center = True
+    elif steps[3] & 1: holding_center = False
+
+  def _transform(self, steps):
+    if not isinstance(steps[0], float): return list(steps)
+    new_steps = [steps[0], steps[1], steps[2], steps[4], steps[5]]
+
+    if 0 in new_steps:
+      possible = [i for i in range(len(new_steps)) if new_steps[i] == 0]
+      new_steps[self.rand.choice(possible)] |= steps[3]
+    return new_steps
+
 # Transform a song's steps from one mode and difficulty to a target mode.
 def generate_mode(song, difficulty, target_mode, pid):
+  equiv = {"SINGLE": "5PANEL", "VERSUS": "5VERSUS",
+           "COUPLE": "5COUPLE", "DOUBLE": "5DOUBLE" }
+
   if target_mode in games.SINGLE: mode = "SINGLE"
   elif target_mode in games.VERSUS: mode = "VERSUS"
   elif target_mode in games.ONLY_COUPLE: mode = "COUPLE"
   elif target_mode in games.DOUBLE: mode = "DOUBLE"
 
-  steps = song.steps[mode][difficulty]
+  if song.steps.has_key(mode):
+    steps = song.steps[mode][difficulty]
+    T = PanelTransform
+  elif song.steps.has_key(equiv[mode]):
+    steps = song.steps[equiv[mode]][difficulty]
+    mode = equiv[mode]
+    if len(games.GAMES[target_mode].dirs) == 4: T = FiveToFourTransform
+    else: T = PanelTransform
+  else: print "This shouldn't happen! Email pyddr-devel@icculus.org."
+
   if mode in games.COUPLE: steps = steps[pid]
 
   seed = song.info["bpm"]
   if song.info["gap"] != 0: seed *= song.info["gap"]
 
-  trans = PanelTransform(games.GAMES[mode].dirs, games.GAMES[target_mode].dirs,
-                         NonRandom(int(song.info["bpm"])))
+  trans = T(games.GAMES[mode].dirs, games.GAMES[target_mode].dirs,
+            NonRandom(int(song.info["bpm"])))
 
   return [trans.transform(s) for s in steps]

@@ -889,17 +889,31 @@ class SongItem(object):
       for game in games.GAMES:
         if game in self.difficulty: continue # This mode is defined already.
 
-        elif game in games.SINGLE and "SINGLE" in self.difficulty:
-          self.difficulty[game] = copy.copy(self.difficulty["SINGLE"])
+        # Try to do "real DDR" modes first, then Pump modes.
+
+        elif game in games.SINGLE:
+          if "SINGLE" in self.difficulty:
+            self.difficulty[game] = copy.copy(self.difficulty["SINGLE"])
+          elif "5PANEL" in self.difficulty:
+            self.difficulty[game] = copy.copy(self.difficulty["5PANEL"])
         
-        elif game in games.VERSUS and "VERSUS" in self.difficulty:
-          self.difficulty[game] = copy.copy(self.difficulty["VERSUS"])
+        elif game in games.VERSUS:
+          if "VERSUS" in self.difficulty:
+            self.difficulty[game] = copy.copy(self.difficulty["VERSUS"])
+          elif "5VERSUS" in self.difficulty:
+            self.difficulty[game] = copy.copy(self.difficulty["5VERSUS"])
 
-        elif game in games.DOUBLE and "DOUBLE" in self.difficulty:
-          self.difficulty[game] = copy.copy(self.difficulty["DOUBLE"])
+        elif game in games.DOUBLE:
+          if "DOUBLE" in self.difficulty:
+            self.difficulty[game] = copy.copy(self.difficulty["DOUBLE"])
+          elif "5DOUBLE" in self.difficulty:
+            self.difficulty[game] = copy.copy(self.difficulty["5DOUBLE"])
 
-        elif game in games.COUPLE and "COUPLE" in self.difficulty:
-          self.difficulty[game] = copy.copy(self.difficulty["COUPLE"])
+        elif game in games.COUPLE:
+          if "COUPLE" in self.difficulty:
+            self.difficulty[game] = copy.copy(self.difficulty["COUPLE"])
+          elif "5COUPLE" in self.difficulty:
+            self.difficulty[game] = copy.copy(self.difficulty["5COUPLE"])
 
     self.diff_list = {}
     for key in self.difficulty:    
