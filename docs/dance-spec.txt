@@ -101,6 +101,7 @@ filename asong.ogg
 title A Song
 subtitle Crazy Mix
 artist Someone
+# This is a comment
 end
 DESCRIPTION
  This is an example song.
@@ -109,6 +110,7 @@ end
 SINGLE
 BASIC 0
 q 1010
+# This is another comment.
 q 0101
 q 3030
 q 1010
@@ -291,6 +293,9 @@ DOUBLE - Doubles, one player on both pads.
 
 Changes:
 --------
+2004.01.16
+ - Include comments in the example.
+
 2003.12.23
  - 3 panel modes.
  - bpmdisplay metadata key.
