@@ -381,7 +381,7 @@ class Player(object):
             else: spr.kill()
 
     arrows.update(curtime, self.bpm, curbeat, steps.lastbpmchangetime)
-    self.toparr_group.update(curtime, steps.offset)
+    self.toparr_group.update(curtime, curbeat)
 
   def should_hold(self, steps, direction, curtime):
     l = steps.holdinfo

@@ -17,6 +17,12 @@ from util import toRealTime
 # Wrapper classes for loading files from themes.
 # Eventually, we can use ZipFile + StringIO to make it load from zip files.
 class ThemeFile(object):
+  # The amount of rotation needed, from an arrow pointing left, to
+  # make the direction.
+
+  rotate = { "ldur": { "l": 0, "r": 180, "u": -90, "d": 90 },
+             "kzwg": { "k": 0, "z": -90, "g": 180, "w": 90 },
+             "c": { "c": 0 } }
 
   # List all themes available for a game type (given as a string)
   def list_themes(cls, gametype):
@@ -45,11 +51,14 @@ class ThemeFile(object):
       return False
     else:
       for dir in game.dirs:
-        possible = os.path.join(filename, "arr_%s_%s_0.png" % ("%s", dir))
-        if not (os.path.exists(possible % "c") and
-                os.path.exists(possible % "n")):
-          return False
-    return True
+        for dirset in ThemeFile.rotate:
+          if dir in dirset:
+            for d in dirset:
+              possible = "arr_%s_%s_0.png" % ("%s", d)
+              if (os.path.exists(os.path.join(filename, possible % "c")) and
+                  os.path.exists(os.path.join(filename, possible % "n"))):
+                return True
+    return False
 
   is_theme = classmethod(is_theme)
 
@@ -65,10 +74,13 @@ class ThemeFile(object):
       zip.close()
       if "is-theme" not in files: return False
       for dir in game.dirs:
-        possible = "arr_%s_%s_0.png" % ("%s", dir)
-        if not (possible % "c" in files and possible % "n" in files):
-          return False
-      return True
+        for dirset in ThemeFile.rotate:
+          if dir in dirset:
+            for d in dirset:
+              possible = "arr_%s_%s_0.png" % ("%s", d)
+              if  (possible % "c" in files and possible % "n" in files):
+                return True
+      return False
 
   is_zip_theme = classmethod(is_zip_theme)
 
@@ -96,10 +108,23 @@ class ThemeFile(object):
   # Get an arrow based on its type/direction/color.
   # If the desired arrow coloring wasn't found, fall back to the default
   # coloring (which is_theme makes sure we have).
+  # If the desired direction wasn't found, try and make it.
   def get_arrow(self, type, dir, num):
+    rotate = 0
     fn = "arr_%s_%s_%d.png" % (type, dir, num)
-    if not self.has_image(fn): fn = "arr_%s_%s_%d.png" % (type, dir, 0)
-    return self.get_image(fn)
+    if not self.has_image(fn):
+      fn = "arr_%s_%s_%d.png" % (type, dir, 0)
+    if not self.has_image(fn):
+      for dirset in ["ldur", "kzwg", "c"]:
+        if dir in dirset:
+          for d in dirset:
+            rotate = (ThemeFile.rotate[dirset][dir] -
+                      ThemeFile.rotate[dirset][d])
+            fn = "arr_%s_%s_%d.png" % (type, d, num)
+            if self.has_image(fn): break
+            fn = "arr_%s_%s_%d.png" % (type, d, 0)
+            if self.has_image(fn): break
+    return self.get_image(fn), rotate
 
 # An even higher-level interface than ThemeFile, that sets up the sprites
 # for many of the images.
@@ -143,7 +168,7 @@ class ArrowSet(object):
       for cnum in range(4):
         if cnum == 3: color = 1
         else: color = cnum
-        arrows[dir+repr(cnum)] = ScrollingArrow(theme, dir, color, left)
+        arrows[dir+repr(cnum)] = Arrow(theme, "c", dir, color, left)
 
     # allow access by instance.l or instance.arrows['l']
     for n in arrows: self.__dict__[n] = arrows[n] 
@@ -153,34 +178,48 @@ class ArrowSet(object):
   def __getitem__ (self,item):
     return getattr(self,item)
 
-# Preload images/left offset for each arrow. 
-class ScrollingArrow(object):
-  def __init__ (self, theme, dir, color, left):
-    self.dir = dir
+# The basic arrow that animates itself with the beat of the music. It's
+# used for displaying the scrolling arrows and the top arrows.
+class Arrow(object):
+  def __init__(self, theme, type, dir, color, left):
     self.left = left
-    self._image = theme.get_arrow("c", dir, color).convert()
+    self.dir = dir
+    self._image, rotate = theme.get_arrow(type, dir, color)
+    # This arrow is animated
     if self._image.get_width() != self._image.get_height():
       w = self._image.get_width()
       h = self._image.get_height()
       frames = h / w
-      if frames * w != h: raise RuntimeError("Theme image is %dx%d." % (w, h))
+      if frames * w != h:
+        raise RuntimeError("Theme image is not evenly divisible: %dx%d."%(w,h))
+      elif frames % 4 != 0:
+        raise RuntimeError("%d frames not evenly divisble by 4." % frames)
 
+      # Chop up the image.
       self._images = []
       for i in range(frames):
         s = pygame.Surface([w, w])
         s.blit(self._image, [0, -i * w])
+        s = pygame.transform.rotate(s, rotate)
+        s.set_colorkey(s.get_at([0, 0]))
         self._images.append(s)
-      self._beatcount = len(self._images) / 4
+      self._beatcount = len(self._images) / 4 # 4 frames per beat
       self._image = None
+    else:
+      self._image.set_colorkey(self._image.get_at([0, 0]))
+      self._image = pygame.transform.rotate(self._image, rotate)
+
+  def get_images(self):
+    if self._image: return [self._image]
+    else: return self._images
 
   def get_image(self, beat):
-    if self._image: return self._image
-    else:
-      beat %= self._beatcount
-      beat /= self._beatcount
-      pct = beat - int(beat)
-      i = int(float(len(self._images)) * pct)
-      return self._images[i]
+      if self._image: return self._image
+      else:
+        beat /= self._beatcount
+        pct = beat - int(beat)
+        i = int(float(len(self._images)) * pct)
+        return self._images[i]
 
 # FIXME: What follows probably doesn't belong here, but elsewhere. There's
 # too much logic for it to be just theming data.
@@ -192,52 +231,31 @@ class TopArrow(Listener, pygame.sprite.Sprite):
     pygame.sprite.Sprite.__init__(self)
     self.pid = pid
     self.endpresstime = -1
-    self.frame = 0
-    self.oldframe = -1
-    self.adder = 0
+    self._pressed = False
     self.dir = direction
-    self.topimg = []
+    left = (game.left_off(pid) + game.player_offset * pid +
+            game.dirs.index(direction) * game.width)
 
     # The 'n' state is the normal state for the top arrows. After being
     # pressed, they change to the 's' state images for a short time.
-    for i in range(4):
-      self.topimg.append(theme.get_arrow("n", direction, i).convert())
-      self.topimg[i].set_colorkey(self.topimg[i].get_at((0, 0)), RLEACCEL)
-    for i in range(4, 8):
-      self.topimg.append(theme.get_arrow("s", direction, i).convert())
-      self.topimg[i].set_colorkey(self.topimg[i].get_at((0, 0)), RLEACCEL)
+    self.narrow = Arrow(theme, "n", direction, 0, left)
+    self.sarrow = Arrow(theme, "s", direction, 4, left)
 
-    self.image = self.topimg[0]
+    self.image = self.narrow.get_image(0)
     self.rect = self.image.get_rect()
     self.rect.top = ypos
-    self.rect.left = (game.left_off(pid) + game.player_offset * pid +
-                      game.dirs.index(direction) * game.width)
+    self.rect.left = left
 
   # The arrow was pressed, so we have to change it for some time (s state).
   def stepped(self, pid, dir, time, rating, combo):
     if self.pid != pid or self.dir != dir or rating == "M": return
-
-    self.adder = 4
+    self._pressed = True
     self.endpresstime = time + 0.25 # Number of seconds to change it for.
 
-  def set_song(self, pid, bpm, diff, count, holds, feet):
-    self.tick = toRealTime(bpm, 1)
-
-  def change_bpm(self, pid, curtime, newbpm):
-    if self.pid != pid: return
-    self.tick = toRealTime(newbpm, 1)
-
-  def update(self, time, offset):
-    if time > self.endpresstime: self.adder = 0
-
-    time += 1000 * offset
-    self.keyf = int(time / (self.tick / 2)) % 8
-    if self.keyf > 3: self.keyf = 3
-    self.frame = self.adder + self.keyf
-
-    if self.frame != self.oldframe:
-      self.image = self.topimg[self.frame]
-      self.oldframe = self.frame
+  def update(self, time, beat):
+    if time > self.endpresstime: self._pressed = False
+    if self._pressed: self.image = self.sarrow.get_image(beat)
+    else: self.image = self.narrow.get_image(beat)
 
 class ArrowFX(Listener, pygame.sprite.Sprite):
   def __init__ (self, direction, ypos, pid, theme, game):
@@ -250,7 +268,8 @@ class ArrowFX(Listener, pygame.sprite.Sprite):
 
     self.dir = direction
 
-    self.baseimg = theme.get_arrow("n", direction, 3).convert()
+    self.baseimg = Arrow(theme, "n", direction, 0, 0).get_images()[-1]
+    self.baseimg = self.baseimg.convert()
     self.tintimg = pygame.Surface(self.baseimg.get_size())
 
     self.blackbox = pygame.surface.Surface([game.width] * 2)
