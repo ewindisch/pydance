@@ -92,11 +92,11 @@ class Steps(object):
       T = stepfilters.rotate[player.transform]
       song_steps = T(playmode).transform(song_steps)
 
+    if not player.holds:
+      song_steps = stepfilters.RemoveHoldTransform().transform(song_steps)
     if player.size: stepfilters.size(song_steps, player.size)
     if player.jumps != 1:
       song_steps = stepfilters.jumps[player.jumps]().transform(song_steps)
-    if not player.holds:
-      song_steps = stepfilters.RemoveHoldTransform().transform(song_steps)
 
     if not player.secret_kind:
       song_steps = stepfilters.RemoveSecret().transform(song_steps)

@@ -149,6 +149,7 @@ rotate = [Transform, MirrorTransform, LeftTransform, RightTransform,
 
 # Apply myriad additions/deletions to the step pattern
 # FIXME: Return a list rather than in-place modify.
+# Shit this is ugly because of that.
 def size(steps, opt):
   if opt == 1: little(steps, 4) # Tiny
   elif opt == 2: little(steps, 2) # Little
@@ -159,10 +160,23 @@ def size(steps, opt):
 # Remove steps that aren't on the beat
 def little(steps, mod):
   beat = 0.0
+  # We have to be careful here to end hold arrows at the correct time,
+  # even if the end falls on an off-beat. Otherwise they can run off into
+  # infinity.
+  holds = []
   for s in steps:
     if s[0] not in NOT_STEPS:
-      if beat % mod != 0: s[1:] = [0] * (len(s) - 1)
+      old_s = s[:]
+      if beat % mod != 0:
+        s[1:] = [0] * (len(s) - 1)
+      for i in holds[:]:
+        if old_s[i] & 1:
+          s[i] |= 1
+          holds.remove(i)
       beat += s[0]
+      for i in range(1, len(s)):
+        if i not in holds and s[i] & 2: holds.append(i)
+
     elif s[0] == "D": beat += s[1]
 
 # Insert taps if a note falls on a interval-even beat, and the next step
