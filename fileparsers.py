@@ -2,7 +2,7 @@
 
 import sys, os, copy
 
-DIFFICULTIES = ["BEGINNER", "BASIC", "TRICK", "MANIAC", "SMANIAC"]
+DIFFICULTIES = ["BEGINNER", "BASIC", "TRICK", "MANIAC", "HARDCORE"]
 
 def sorted_diff_list(difficulty_hash):
   diffs = []

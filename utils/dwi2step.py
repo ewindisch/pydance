@@ -253,8 +253,8 @@ def convert(msdfile):
 
             if i == 'ANOTHER': # this is trick.
               i = 'TRICK'
-            if i == 'SMANIAC': # this is oni.
-              i = 'ONI'
+            if i == 'SMANIAC': # this is hardcore.
+              i = 'HARDCORE'
 
             print "\ndifficulty SINGLE %s, %s feet. reading steps.." % (i, difficulty)
             dance = Dance(i, difficulty)

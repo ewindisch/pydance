@@ -81,7 +81,7 @@ def emptyDictFromList(lst):
   for n in lst: d[n]=None
   return d
 
-DIFFICULTYLIST = ['BASIC','TRICK','MANIAC','ONI']
+DIFFICULTYLIST = ['BASIC','TRICK','MANIAC','HARDCORE']
 DIFFICULTIES   = emptyDictFromList(DIFFICULTYLIST)
 MODELIST = ['SINGLE','DOUBLE']
 MODES = emptyDictFromList(MODELIST)

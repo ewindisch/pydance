@@ -17,7 +17,7 @@ difficulty_colors = { "BEGINNER": colors.color["yellow"],
                       "BASIC": colors.color["orange"],
                       "TRICK": colors.color["red"],
                       "MANIAC": colors.color["green"],
-                      "SMANIAC": colors.color["purple"]
+                      "HARDCORE": colors.color["purple"]
                      }
 
 ITEM_SIZE = (344, 60)
