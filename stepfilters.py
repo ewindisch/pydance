@@ -447,6 +447,13 @@ def generate_mode(song, difficulty, target_mode, pid):
   elif target_mode in games.DOUBLE: mode = "DOUBLE"
 
   if song.steps.has_key(mode):
+    # Dance ManiaX can be found as DWI files, with exact visual mappings.
+    # Cheat and use that.
+    if target_mode[:3] == "DMX":
+      if target_mode in games.COUPLE:
+        return song.steps[mode][difficulty][pid]
+      else: return song.steps[mode][difficulty]
+
     steps = song.steps[mode][difficulty]
     T = PanelTransform
   elif song.steps.has_key(equiv[mode]):
