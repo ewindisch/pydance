@@ -1318,7 +1318,7 @@ class Song:
     for key in MODELIST: modes[key]=DIFFICULTIES.copy()
     curTime = 0.0
     curBPM = 0.0
-    self.length = None
+    self.length = 0.0
     self.offset = 0.0
     self.isValid = 0
     self.crapout = 0
@@ -1368,6 +1368,11 @@ class Song:
         elif len(chompNext) == 2:
           modeDict, tail = chompNext
           if firstword == 'end':
+            # mark the end of the song
+            if self.length < curTime + toRealTime(curBPM,BEATS['halfn']):
+              self.length = curTime + toRealTime(curBPM,BEATS['halfn'])
+
+            # reset the colormask to the first one          
             coloringmod = 0
 
             # append the hold info for this mode
@@ -1555,21 +1560,6 @@ class Song:
     # open / read / close
     try:
       open(self.osfile).read()
-
-      #figure out how long the song is
-      pygame.mixer.music.load(self.osfile)
-      pygame.mixer.music.set_volume(0) #we don't want to hear it. it sounds lame.
-      self.length = 1
-      lastgp = 1
-      while 1:
-        pygame.mixer.music.play(0, self.startsec + self.length)
-        if (pygame.mixer.music.get_pos() == 0) and (lastgp == 0):
-          self.length -= 2
-          break
-        lastgp = pygame.mixer.music.get_pos()
-        self.length += 1
-      print "this song is",self.length,"seconds long"
-
     except IOError:
       print "file not found"
       self.crapout = 2
@@ -3348,7 +3338,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
     
     for plr in playerContents:
       plr['evt'] = plr['song'].get_events()
-      plr['fxData'] = None
+      plr['fxData'] = []
     
     if playerContents[0]['evt'] is None:
       if song.isOver():
@@ -3397,7 +3387,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
         keyPress = keyAction[0]
         playerContents[playerID]['toparr'][keyPress].stepped(1, curtime+(song.offset*1000))
         holdkey[playerID].pressed(keyPress)
-        playerContents[playerID]['fxData'] = playerContents[playerID]['judge'].handle_key(keyPress, curtime)
+        playerContents[playerID]['fxData'].append( playerContents[playerID]['judge'].handle_key(keyPress, curtime) )
     
 
     # This maps the old holdkey system to the new event ID one
@@ -3480,9 +3470,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
         bpmchanged = 0
      
     for plr in playerContents:
-      if plr['fxData'] is not None:
-        fxtext, fxdir, fxtime = plr['fxData']
-        
+      for [fxtext, fxdir, fxtime] in plr['fxData']:
         if (fxtext == 'MARVELOUS') or (fxtext == 'PERFECT') or (fxtext == 'GREAT'):
           for checkspr in plr['arrowGroup'].sprites():
             try:  #because holds and other sprites will cause this to break
