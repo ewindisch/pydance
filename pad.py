@@ -279,7 +279,7 @@ class PadConfig(object):
     while (ev.type != wanted_type and
            (ev.type != KEYDOWN or ev.key != K_ESCAPE)):
       ev = pygame.event.wait()
-    if ev.key != K_ESCAPE:
+    if ev.type != KEYDOWN or ev.key != K_ESCAPE:
       if keyb: dev = -1
       else: dev = ev.joy
       pad.delete_event(pid, keyb, dir)
