@@ -246,4 +246,16 @@ def make_players(all_songs, recordkeys):
     courses.append(CodedCourse(all_songs, recordkeys, randname,
                                "random.choose(songs)", randsongs))
 
+  d1 = ["MANIAC", "HEAVY", "HARD"]
+  d2 = ["HARDCORE", "CRAZY", "SMANIAC", "EXPERT"]
+  songs1 = []
+  songs2 = []
+  for i in [29, 23, 19, 17, 13, 11, 7, 5, 3, 2]:
+    songs1.append((("WORST", i), d1, {}))
+    songs2.append((("WORST", i), d2, {}))
+
+  courses.append(CodedCourse(all_songs, recordkeys, "Primal Fear (Easy)",
+                              "Player's Picks", songs1))
+  courses.append(CodedCourse(all_songs, recordkeys, "Primal Fear (Hard)",
+                              "Player's Picks", songs2))
   return courses
