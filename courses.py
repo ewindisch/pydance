@@ -45,6 +45,7 @@ class CRSFile:
     self.filename = filename
     self.songs = []
     self.name = "A Course"
+    self.mixname = " "
     lines = []
     f = open(filename)
     for line in f:
@@ -59,6 +60,9 @@ class CRSFile:
       line = lines[i]
       while line[-1] == ";": line = line[:-1] # Some lines have two ;s.
       lines[i] = line.split(":")
+
+    if os.path.split(self.filename)[0][-7:] != "courses":
+      self.mixname = os.path.split(os.path.split(self.filename)[0])[1]
 
     for line in lines:
       if line[0] == "COURSE": self.name = ":".join(line[1:])
@@ -172,5 +176,9 @@ class CourseSelector(object):
     txt = FONTS[48].render(course.name, True, colors.WHITE)
     r = txt.get_rect()
     r.center = [320, 100]
+    screen.blit(txt, r)
+    txt = FONTS[32].render(course.mixname, True, colors.WHITE)
+    r = txt.get_rect()
+    r.center = [320, 50]
     screen.blit(txt, r)
     pygame.display.update()
