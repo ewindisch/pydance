@@ -1,3 +1,5 @@
+# The course selection screen.
+
 import os
 import math
 import pygame
@@ -39,30 +41,6 @@ CS_HELP = [
   "Start: Switch to Options screen",
   "F11: Toggle fullscreen - S: Change the sort mode",
   ]
-
-# FIXME: This is redundant with the song selector.
-def folder_name(name, type):
-  if type == "mix": return name
-  else: return "%s: %s" % (type.capitalize(), name)
-
-# FIXME: This is redundant with the song selector,
-def load_banner(filename):
-  banner = pygame.image.load(filename)
-  size = banner.get_size()
-  if size <= (100, 100): # Parapara-style... no idea what to do.
-    return banner, None
-  elif size == (177, 135): # KSF-style 1
-    return banner, None
-  elif size == (300, 200): # KSF-style 2
-    banner.set_colorkey(banner.get_at([0, 0]), RLEACCEL)
-    return banner, None
-  elif abs(size[0] - size[1]) < 3: # "Square", need to rotate.
-    banner = banner.convert()
-    banner.set_colorkey(banner.get_at([0, 0]), RLEACCEL)
-    return pygame.transform.rotozoom(banner, -45, 1.0), [51, 50, 256, 80]
-  else: # 256x80, standard banner, I hope.
-    if size != (256, 80): banner = pygame.transform.scale(banner, [256, 80])
-    return banner, None
 
 class CourseDisplay(object):
   no_banner = pygame.image.load(NO_BANNER)
