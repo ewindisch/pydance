@@ -61,8 +61,8 @@ class PydanceScore(AbstractScore):
                  "G": 2.5 * score_coeff, "O": 0.5 * score_coeff }
 
   def stepped(self, pid, dir, cur_time, rating, combo):
-    self.score += self.inc.get(rating, 0)
-    self.score += combo * self.combo_coeff
+    if rating == None: return
+    self.score += self.inc.get(rating, 0) + combo * self.combo_coeff
 
 # M = floor(C / 4)
 # L(V) = L(P) = M * 300, L(G) = M * 100, L(O) = 100
@@ -73,6 +73,7 @@ class FirstScore(AbstractScore):
     self.combo = 0
 
   def stepped(self, pid, dir, cur_time, rating, combo):
+    if rating == None: return
     if self.combo == combo == 0: return # No points when combo is 0.
 
     self.combo += 1
@@ -101,6 +102,7 @@ class ThirdScore(AbstractScore):
     self.inc = { "V": p * 10, "P": p * 10, "G": p * 5, "O": p }
 
   def stepped(self, pid, dir, curtime, rating, combo):
+    if rating == None: return
     self.arrow += 1
     self.score += self.inc.get(rating, 0) * self.arrow
 
@@ -108,6 +110,7 @@ class ThirdScore(AbstractScore):
 # V(n) = L(r) + C * 333
 class FourthScore(AbstractScore):
   def stepped(self, pid, dir, cur_time, rating, combo):
+    if rating == None: return
     base = {"V": 777, "P": 777, "G": 555 }
     self.score += base.get(rating, 0) + combo * 333
 
