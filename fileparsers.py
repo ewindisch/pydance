@@ -467,7 +467,7 @@ class DWIFile(GenericFile):
         tomerge = []
         while steps[0] != ">": tomerge.append(steps.pop(0))
         steps.pop(0)
-        steplist.append([step_type] + self.parse_merge(tomerge))
+        steplist.append([step_type] + self.parse_merge(tomerge, dwifile_steps))
       else: steps.pop(0)
 
     if mode in games.SINGLE: self.steps[mode][diff] = steplist
@@ -475,15 +475,15 @@ class DWIFile(GenericFile):
       if self.steps[mode].get(diff) == None: self.steps[mode][diff] = []
       self.steps[mode][diff].append(steplist)
 
-  def parse_merge(self, steps):
+  def parse_merge(self, steps, dwifile_steps):
     ret = [0] * 20
     while len(steps) != 0:
       if steps[0] == "!":
         steps.pop(0)
-        val = DWIFile.steps[steps[0]]
+        val = dwifile_steps[steps[0]]
         ret = [a | (2 * b) for a, b in zip(ret, val)]
       else:
-        val = DWIFile.steps[steps[0]]
+        val = dwifile_steps[steps[0]]
         ret = [a | b for a, b in zip(ret, val)]
       steps.pop(0)
       
@@ -492,8 +492,8 @@ class DWIFile(GenericFile):
 class SMFile(GenericFile):
 
   gametypes = { "dance-single": "SINGLE", "dance-double": "DOUBLE",
-                "dance-couple": "COUPLE" }
-  notecount = { "SINGLE": 4, "DOUBLE": 8, "COUPLE": 8 }
+                "dance-couple": "COUPLE", "dance-solo": "6PANEL" }
+  notecount = { "SINGLE": 4, "DOUBLE": 8, "COUPLE": 8, "6PANEL": 6 }
   notetypes = { 192: "n", 64: "x", 48: "u", 32: "t", 24: "f",
                 16: "s", 12: "w", 8: "e", 4: "q", 2: "h", 1: "o" }
 

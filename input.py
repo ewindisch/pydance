@@ -68,6 +68,7 @@ class EventManager:
     # Tuples of events, key is tuple: (from, event)
     # Types are "kb" or "jsX" where X is a joystick number.
     self.events = {}
+    self.set_repeat()
 
     # These store the joystick numbers of the device
     mat = mat2 = emsusb2 = None
@@ -164,6 +165,20 @@ class EventManager:
     self.handler.clear()
     for key in self.states: self.states[key] = 0
 
+  def set_repeat(self, *args):
+    if len(args) == 0:
+      self.repeat = False
+      self.rate = False
+      self.last_press = (None, None)
+      self.last_repeat = 0
+      pygame.key.set_repeat()
+    elif len(args) == 2:
+      self.repeat = True
+      self.rate = args
+      self.last_press = ((0, E_PASS), 0)
+      self.last_repeat = 0
+      pygame.key.set_repeat(*args)
+
   # Poll the event handler and normalize the result.
   def poll(self):
     ev = self.handler.poll()
@@ -176,18 +191,22 @@ class EventManager:
     elif ev.type == KEYDOWN or ev.type == KEYUP:
       t = "kb"
       v = ev.key
+    elif (self.repeat and self.last_press[0][1] and
+          self.last_press[1] + self.rate[0] < pygame.time.get_ticks() and
+          self.last_repeat + self.rate[1] < pygame.time.get_ticks() and
+          self.states[self.last_press[0]] == True):
+      self.last_repeat = pygame.time.get_ticks()
+      return self.last_press[0]      
     else:
       return (0, E_PASS)
     
-    v = self.events.get((t, v))
-    if v != None:
-      if ev.type == JOYBUTTONUP or ev.type == KEYUP:
-        self.states[v] = False
-        v = (v[0], -v[1])
-      elif ev.type == JOYBUTTONDOWN or ev.type == KEYDOWN:
-        self.states[v] = True
-    else:
-      v = (0, E_PASS)
+    v = self.events.get((t, v), (0, E_PASS))
+    if ev.type == JOYBUTTONUP or ev.type == KEYUP:
+      self.states[v] = False
+      v = (v[0], -v[1])
+    elif ev.type == JOYBUTTONDOWN or ev.type == KEYDOWN:
+      self.states[v] = True
+      self.last_press = (v, pygame.time.get_ticks())
 
     return v
 

@@ -253,7 +253,7 @@ class SongSelect:
 
     locked = games.GAMES[gametype].couple
 
-    pygame.key.set_repeat(500, 30)
+    event.set_repeat(500, 30)
 
     self.diff_list = []
     self.song_list = []
@@ -379,7 +379,7 @@ class SongSelect:
           while ann.chan.get_busy(): pygame.time.wait(1)
         except: pass
 
-        pygame.key.set_repeat()
+        event.set_repeat()
         if optionscreen.player_opt_driver(screen, self.player_configs):
           audio.fadeout(500)
 
@@ -394,7 +394,7 @@ class SongSelect:
           self.screen.blit(self.bg, (0, 0))
           pygame.display.flip()
 
-        pygame.key.set_repeat(500, 30)
+        event.set_repeat(500, 30)
         changed = True
 
         # Reset the playlist
@@ -499,7 +499,7 @@ class SongSelect:
     audio.load(os.path.join(sound_path, "menu.ogg"))
     audio.set_volume(1.0)
     audio.play(4, 0.0)
-    pygame.key.set_repeat()
+    event.set_repeat()
 
   def render(self, changed):
     self.screen.blit(self.bg, (0,0))
