@@ -9,10 +9,13 @@ Legend:
 ----- - CURRENT
 0.9.1 -
 + Display the average time off (in milliseconds) when grading.
++ Page up and page down work again; they are back left and back right
+  on the pad.
 * Don't crash sometimes on slower systems when failing.
 * Commas (or periods) are displayed on the grading screen in the score again.
 * Fix a rare mixer-related crash.
 * Load DWIs with subtitles in courses correctly again.
+* Fix crash taking screenshots of the grading screen.
 
 0.9.0 - Great Three-Toed Sloth of Ice Planet Hoth!		[2004.02.02]
 + "Click only" assist tick.

@@ -251,6 +251,12 @@ class SongSelect(InterfaceWindow):
       
       elif ev == ui.UP: self._index -= 1
       elif ev == ui.DOWN: self._index += 1
+      elif ev == ui.PGUP:
+        self._index -= 7
+        ev = ui.UP
+      elif ev == ui.PGDN:
+        self._index += 7
+        ev = ui.DOWN
 
       elif ev == ui.LEFT:
         if not self._song.isfolder:
@@ -286,7 +292,6 @@ class SongSelect(InterfaceWindow):
           else:
             error.ErrorMessage(screen, "You don't have any songs here that " +
                                "are marked \"valid\" for random selection.")
-
       elif ev == ui.START:
         options.OptionScreen(self._configs, self._config, self._screen)
         self._screen.blit(self._bg, [0, 0])

@@ -256,6 +256,12 @@ class CourseSelector(InterfaceWindow):
       
       elif ev == ui.UP: self._index -= 1
       elif ev == ui.DOWN: self._index += 1
+      elif ev == ui.PGUP:
+        self._index -= 4
+        ev = ui.UP
+      elif ev == ui.PGDN:
+        self._index += 4
+        ev = ui.DOWN
 
       elif ev == ui.SELECT:
         if self._course.isfolder:
