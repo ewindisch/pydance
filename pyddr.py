@@ -101,7 +101,7 @@ mainconfig = Config({ # Wow we have a lot of options
   "lyriccolor": "0,244,244",  "transcolor": "0,244,122",
   "mixerclock": 0, "onboardaudio": 0, "masteroffset": 0,
   "reversescrolls": 0, "scrollspeed": 1,
-  "explodestyle": 3, "arrowspin": 0, "arrowshrink": 0, "arrowgrow": 0,
+  "explodestyle": 3, "arrowspin": 0, "arrowscale" : 1,
   "joy_left": 4, "joy_right": 5, "joy_up": 7, "joy_down": 6,
   "joy_start": 9, "joy_select": 8, "joy_pgup": 1, "joy_pgdown": 3,
   "mat_buttons": 12, "mat_axes": 6,
@@ -1992,8 +1992,8 @@ class ArrowSprite(CloneSprite):
     self.playernum = playernum-1
     self.bimage = self.image
     self.arrowspin = float(mainconfig["arrowspin"])
-    self.arrowshrink = float(mainconfig["arrowshrink"])
-    self.arrowgrow = float(mainconfig["arrowgrow"])
+    self.arrowscale = float(mainconfig["arrowscale"])
+    
     self.centerx = self.rect.centerx+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
@@ -2047,12 +2047,13 @@ class ArrowSprite(CloneSprite):
     self.rect.top = self.top
     
     self.cimage = self.bimage
-    arrscale = int(float((self.rect.top-64)/416.0)*64)
-
-    if self.arrowshrink:
-      self.cimage = pygame.transform.scale(self.bimage, (arrscale,arrscale) )
-    if self.arrowgrow:
-      self.cimage = pygame.transform.scale(self.bimage, (64-arrscale,64-arrscale) )
+    
+    if self.arrowscale != 1:
+      arrscale = int(float((self.rect.top-64)/416.0)*64)
+      if self.arrowscale > 1: # grow
+      	arrscale = 64 - arrscale
+      self.cimage = pygame.transform.scale(self.bimage, (arrscale, arrscale))
+    
     if self.arrowspin:
       self.image = pygame.transform.rotate(self.cimage,(self.rect.top-64)/self.arrowspin)
     else:
@@ -2107,8 +2108,8 @@ class HoldArrowSprite(CloneSprite):
     self.bimage = pygame.surface.Surface((64,1))
     self.bimage.blit(self.image,(0,-31))
     self.arrowspin = float(mainconfig["arrowspin"])
-    self.arrowshrink = float(mainconfig["arrowshrink"])
-    self.arrowgrow = float(mainconfig["arrowgrow"])
+    self.arrowscale = float(mainconfig["arrowscale"])
+    
     self.centerx = self.rect.centerx+(self.playernum*320)
     
   def update (self,curtime,curbpm,lbct,hidden,sudden):
@@ -2191,12 +2192,12 @@ class HoldArrowSprite(CloneSprite):
     self.cimage.blit(self.oimage2,(0,0))
     self.cimage.blit(self.oimage,(0,holdsize+32))
 
-    arrscale = int(float((self.rect.top-64)/416.0)*64)
-
-    if self.arrowshrink:
-      self.cimage = pygame.transform.scale(self.bimage, (arrscale,arrscale) )
-    if self.arrowgrow:
-      self.cimage = pygame.transform.scale(self.bimage, (64-arrscale,64-arrscale) )
+    if self.arrowscale != 1:
+      arrscale = int(float((self.rect.top-64)/416.0)*64)
+      if self.arrowscale > 1: # grow
+      	arrscale = 64 - arrscale
+      self.cimage = pygame.transform.scale(self.bimage, (arrscale, arrscale))
+    
     if self.arrowspin:
       self.image = pygame.transform.rotate(self.cimage,(self.rect.top-64)/self.arrowspin)
     else:
@@ -3072,8 +3073,7 @@ def domenu(songs):
                 ("Sudden", list_index_opt("sudden", ["none", "hide one",
                                                      "hide two", "hide three"])),
                 ("Top Arrows", onoff_opt("showtoparrows")),
-                ("Arrows Shrink", onoff_opt("arrowshrink")),
-                ("Arrows Grow", onoff_opt("arrowgrow")),
+                ("Arrow Scale", list_index_opt("arrowscale", ["shrink", "none", "grow"])),
                 ("Arrows Spin", onoff_opt("arrowspin")),
                 ("Back", None)
                 ]
