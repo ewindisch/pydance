@@ -12,7 +12,7 @@ class AbstractLifeBar(Listener, pygame.sprite.Sprite):
   def __init__(self, playernum, maxlife, songconf, game):
     pygame.sprite.Sprite.__init__(self)
     self.gameover = LIVING
-    self.maxlife = int(maxlife * songconf["diff"])
+    self.maxlife = maxlife * songconf["life"]
     self.image = pygame.Surface((204, 28))
     self.deltas = {}
 
@@ -42,23 +42,21 @@ class AbstractLifeBar(Listener, pygame.sprite.Sprite):
 # Regular DDR-style lifebar, life from 0 to 100.
 class LifeBarDisp(AbstractLifeBar):
   def __init__(self, playernum, theme, songconf, game):
-    AbstractLifeBar.__init__(self, playernum, 100, songconf, game)
-    self.life = self.maxlife / 2
+    AbstractLifeBar.__init__(self, playernum, 1.0, songconf, game)
+    self.life = self.maxlife / 2.0
     self.displayed_life = self.life
 
-    # FIXME: This might be a little harsh on misses/boos.
-    self.deltas = {"V": 0.8, "P": 0.5, "G": 0.0,
-                   "O": -1.0, "B": -4.0, "M": -8.0}
+    self.deltas = {"V": 0.08, "P": 0.08, "G": 0.04, "B": -0.04, "M": -0.08}
     self.empty = theme.theme_data.get_image('lifebar-empty.png')
     self.full = theme.theme_data.get_image('lifebar-full.png')
 
   def update(self, time):
     if self.gameover and self.displayed_life <= 0: return
 
-    if self.displayed_life < self.life:  self.displayed_life += 1
-    elif self.displayed_life > self.life:  self.displayed_life -= 1
+    if self.displayed_life < self.life:  self.displayed_life += 0.01
+    elif self.displayed_life > self.life:  self.displayed_life -= 0.01
 
-    if abs(self.displayed_life - self.life) < 1:
+    if abs(self.displayed_life - self.life) < 0.01:
       self.displayed_life = self.life
 
     AbstractLifeBar.update(self, time)
@@ -66,9 +64,10 @@ class LifeBarDisp(AbstractLifeBar):
     if self.life < 0: self.gameover = FAILED
 
     if self.displayed_life < 0: self.displayed_life = 0
-    self.image.blit(self.empty, (0, 0))
-    self.image.set_clip((0, 0, int(202 * self.displayed_life / 100.0), 28))
-    self.image.blit(self.full, (0, 0))
+    self.image.blit(self.empty, [0, 0])
+    self.image.set_clip([0, 0,
+                         int(202 * self.displayed_life / self.maxlife), 28])
+    self.image.blit(self.full, [0, 0])
     self.image.set_clip()
 
     if self.gameover:
@@ -93,7 +92,7 @@ class TugLifeBarDisp(LifeBarDisp):
 
     self.wontext = fontfx.embfade("WON",28,3,(80,32),(224,32,32))
     self.wontext.set_colorkey(self.failtext.get_at((0,0)), RLEACCEL)
-    self.deltas = {"V": 3.0, "P": 1.5, "G": 0.75, "M": -0.5 }
+    self.deltas = {"V": 0.04, "P": 0.04, "G": 0.02, "B": -0.02, "M": -0.04 }
 
     # If we're player 1, it's a new game, so delete the old lifebars.
     if playernum == 0: TugLifeBarDisp.active_bars = [self]
@@ -134,14 +133,13 @@ class TugLifeBarDisp(LifeBarDisp):
         if lifebar != self and not lifebar.gameover: lifebar.gameover = WON
 
 # Lifebar where doing too good also fails you.
-class MiddleLifeBarDisp(AbstractLifeBar):
+class MediocreLifeBarDisp(AbstractLifeBar):
   def __init__(self, playernum, theme, songconf, game):
-    AbstractLifeBar.__init__(self, playernum, 30, songconf, game)
-    self.life = 10.0
-    self.displayed_life = 10
+    AbstractLifeBar.__init__(self, playernum, 1.0, songconf, game)
+    self.life = self.maxlife / 2
 
-    self.deltas = {"V": 0.8, "P": 0.5, "G": 0.0,
-                       "O": -1.0, "B": -4.0, "M": -8.0}
+    self.deltas = {"V": 0.08, "P": 0.08, "G": 0.04,
+                       "O": -0, "B": -0.04, "M": -0.08 }
     self.image = pygame.surface.Surface([202, 28])
     self.image.fill([255, 255, 255])
 
@@ -150,9 +148,10 @@ class MiddleLifeBarDisp(AbstractLifeBar):
 
     AbstractLifeBar.update(self, time)
 
-    if self.life == self.maxlife: self.gameover = FAILED
+    if self.life < 0 or self.life == self.maxlife: self.gameover = FAILED
 
-    pct = 1 - abs(self.life - 10) / 10.0
+    pct = abs(self.life - self.maxlife) / self.maxlife * 2
+    if pct > 1: pct = max(2 - pct, 0)
     self.image.fill([int(255 * pct)] * 3)
 
     if self.gameover: self.image.blit(self.failtext, (70, 2))
@@ -166,7 +165,8 @@ class OniLifeBarDisp(AbstractLifeBar):
     AbstractLifeBar.__init__(self, playernum, songconf["onilives"],
                              songconf, game)
 
-    self.life = self.maxlife
+    # Override the songconf["diff"] stuff.
+    self.maxlife = self.life = songconf["onilives"]
 
     self.deltas = { "O": -1, "B": -1, "M": -1}
     self.empty = theme.theme_data.get_image('oni-empty.png')
@@ -198,8 +198,8 @@ class OniLifeBarDisp(AbstractLifeBar):
 
     if self.gameover: self.image.blit(self.failtext, [70, 2])
 
-bars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MiddleLifeBarDisp,
+bars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MediocreLifeBarDisp,
         TugLifeBarDisp]
 
-lifebar_opt = [(0, "Normal"), (1, "Battery"), (2, "Drop"), (3, "Suck"),
-                (4, "Tug")]
+lifebar_opt = [(0, "Normal"), (1, "Battery"), (2, "Power Drop"),
+               (3, "Mediocre"), (4, "Tug of War")]

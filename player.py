@@ -567,7 +567,7 @@ class Player(object):
                       self.judging_disp, self.stats, self.announcer]
 
     if not game.double:
-      self.judge = judge.judges[songconf["judge"]](self.pid)
+      self.judge = judge.judges[songconf["judge"]](self.pid, songconf)
       self.listeners.append(self.judge)
       arr, arrfx = self.theme.toparrows(self.top, self.pid)
       self.toparr = arr
@@ -577,7 +577,8 @@ class Player(object):
       self.listeners.append(self.holdtext)
     else:
       Judge = judge.judges[songconf["judge"]]
-      self.judge = [Judge(self.pid * 2), Judge(self.pid * 2 + 1)]
+      self.judge = [Judge(self.pid * 2, songconf),
+                    Judge(self.pid * 2 + 1, songconf)]
       self.listeners.extend(self.judge)
       arr1, arrfx1 = self.theme.toparrows(self.top, self.pid * 2)
       arr2, arrfx2 = self.theme.toparrows(self.top, self.pid * 2 + 1)

@@ -11,24 +11,25 @@ def player_opt_driver(screen, configs):
   start = pygame.time.get_ticks()
   clrs = [colors.color["cyan"], colors.color["yellow"]]
   menu = [
-    ("Speed", "speed", [(0.25, ".25x"), (0.5, ".5x"), (1, "1x"), (1.5, "1.5x"),
-                        (2, "2x"), (3, "3x"), (4, "4x"), (8, "8x")]),
+    ("Speed", "speed", [(0.25, ".25x"), (0.33, "0.33x"), (0.5, "0.5x"),
+                        (0.75, "0.75x"), (1, "1x"), (1.5, "1.5x"), (2, "2x"),
+                        (3, "3x"), (4, "4x"), (5, "5x"), (8, "8x")]),
     ("Steps", "transform", [(0, "Normal",), (1, "Mirror"), (2, "Left"),
                          (3, "Right"), (-1, "Shuffle"), (-2, "Random")]),
-    ("Size", "size", [(0, "Off"), (1, "Tiny"), (2, "Little"), (3, "Big"),
+    ("Size", "size", [(1, "Tiny"), (2, "Little"), (0, "Off"), (3, "Big"),
                       (4, "Quick"), (5, "Skippy")]),
     ("Sudden", "sudden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
                           (3, "Hide 3")]),
     ("Hidden", "hidden", [(0, "Off"), (1, "Hide 1"), (2, "Hide 2"),
                           (3, "Hide 3")]),
-    ("Accel", "accel", [(0, "None"), (1, "Boost"), (2, "Brake")]),
-    ("Scale", "scale", [(1, "Normal"), (0, "Shrink"), (2, "Grow")]),
+    ("Accel", "accel", [(2, "Brake"), (0, "None"), (1, "Boost")]),
+    ("Scale", "scale", [(0, "Shrink"), (1, "Normal"), (2, "Grow")]),
     ("Scroll", "scrollstyle", [(0, "Normal"), (1, "Reverse"), (2, "Center")]),
-    ("Jumps", "jumps", [(0, "On"), (1, "Off"), (2, "Wide")]),
+    ("Jumps", "jumps", [(1, "Off"), (0, "On"), (2, "Wide")]),
     ("Spin", "spin", [(0, "Off"), (1, "On")]),
     ("Flat", "colortype", [(4, "Off"), (1, "On")]),
     ("Dark", "dark", [(0, "Off"), (1, "On")]),
-    ("Holds", "holds", [(1, "On"), (0, "Off")]),
+    ("Holds", "holds", [(0, "Off"), (1, "On")]),
     ]
 
   while ((event.states[(0, E_START)] or event.states[(1, E_START)]) and
@@ -43,13 +44,17 @@ def game_opt_driver(screen, config):
   ev = (0, E_QUIT)
   start = pygame.time.get_ticks()
   menu = [
-    ("Difficulty", "diff", [(1, "Normal"), (1.5, "Easy"), (0.75, "Hard")]),
     ("Scoring", "scoring", scores.score_opt),
     ("Combos", "combo", combos.combo_opt),
     ("Grades", "grade", grades.grade_opt),
     ("Judge", "judge", judge.judge_opt),
+    ("Difficulty", "judgescale",
+     [(2.0 - 0.2 * i, str(i)) for i in range(10)]),
     ("Lifebar", "lifebar", lifebars.lifebar_opt),
-    ("Oni Life", "onilives", [(1, "1"), (3, "3"), (5, "5"), (9, "9")]),
+    ("Life", "life", [(0.25, "Undead"), (0.50, "Very Low"), (0.75, "Low"),
+                      (1.0, "Normal"), (1.25, "High"), (1.5, "Very High"),
+                      (1.75, "Ruma")]),
+    ("Oni Life", "onilives", [(i, str(i)) for i in range(1, 9)]),
     ("Battle", "battle", [(0, "Off"), (1, "On")]),
     ]
   clrs = [colors.color["green"]]
@@ -79,28 +84,28 @@ class OptionScreen(object):
     self.colors = colors
 
   def display(self, screen):
-    baseimage = pygame.transform.scale(screen, (640,480))
+    baseimage = pygame.transform.scale(screen, [640, 480])
 
     # Animate the menu opening
     if mainconfig['gratuitous']:
       t = pygame.time.get_ticks()
-      eyecandyimage = pygame.surface.Surface((640, 480))
+      eyecandyimage = pygame.surface.Surface([640, 480])
       while pygame.time.get_ticks() - t < 300:
         p = float(pygame.time.get_ticks() - t) / 300
         eyecandyimage.blit(baseimage, (0,0))
-        scaledbg = pygame.transform.scale(OptionScreen.bg,(int(580 * p), 480))
+        scaledbg = pygame.transform.scale(OptionScreen.bg, [int(580 * p), 480])
         scaledbg.set_alpha(220)
         r = scaledbg.get_rect()
-        r.center = (320, 240)
+        r.center = [320, 240]
         up = eyecandyimage.blit(scaledbg, r)
-        screen.blit(eyecandyimage, (0, 0))
+        screen.blit(eyecandyimage, [0, 0])
         pygame.display.update(up)
     
-    baseimage.blit(OptionScreen.bg, (30, 0))
+    baseimage.blit(OptionScreen.bg, [30, 0])
 
     self.baseimage = baseimage
     
-    screen.blit(baseimage, (0, 0))
+    screen.blit(baseimage, [0, 0])
     pygame.display.update()
     
     ev = E_PASS
@@ -149,7 +154,7 @@ class OptionScreen(object):
     return (ev == E_START)
 
   def render(self, screen):
-    rect = ((45, 5), (570, 470))
+    rect = [[45, 5], [570, 470]]
     blankimage = pygame.surface.Surface(rect[1]).convert_alpha()
     blankimage.fill([0, 0, 0, 0])
 
@@ -166,7 +171,7 @@ class OptionScreen(object):
       item = self.menu[i]
       name, opt, values = item
       text = FONTS[24].render(name, 1, color)
-      blankimage.blit(text, (10, 70 + 28 * i))
+      blankimage.blit(text, [10, 70 + 28 * i])
       for k in range(len(values)):
         color = None
         for plr in range(len(self.players)):
@@ -199,27 +204,27 @@ class OptionScreen(object):
       faketext = " / ".join([str(i+1) for i in range(len(self.current))])
       faketext = "Players: " + faketext
       textimage = pygame.surface.Surface(FONTS[16].size(faketext))
-      textimage.set_colorkey(textimage.get_at((0, 0)))
+      textimage.set_colorkey(textimage.get_at([0, 0]))
       text = FONTS[16].render("Players: ", 1, colors.WHITE)
-      textimage.blit(text, (0, 0))
+      textimage.blit(text, [0, 0])
       xpos = text.get_width()
       for i in range(len(self.current)):
         text = FONTS[16].render(str(i+1), 1, self.colors[i])
-        textimage.blit(text, (xpos, 0))
+        textimage.blit(text, [xpos, 0])
         xpos += text.get_width()
         if i != len(self.current) - 1:
           text = FONTS[16].render(" / ", 1, colors.WHITE)
-          textimage.blit(text, (xpos, 0))
+          textimage.blit(text, [xpos, 0])
           xpos += text.get_width()
 
       r = textimage.get_rect()
-      r.center = (blankimage.get_rect().centerx, 450)
+      r.center = [blankimage.get_rect().centerx, 450]
       blankimage.blit(textimage, r)
 
 
     text = FONTS[40].render(self.title, 1, colors.WHITE)
-    blankimage.blit(text, (45, 64-text.get_height()))
+    blankimage.blit(text, [45, 64 - text.get_height()])
 
-    screen.blit(self.baseimage, (0, 0))
+    screen.blit(self.baseimage, [0, 0])
     screen.blit(blankimage, rect)
     pygame.display.update()

@@ -166,6 +166,7 @@ class ExtremeNonstopScore(ThirdScore):
                  "G": 5 * score_coeff }
 
 scores = [PydanceScore, FirstScore, ThirdScore, FourthScore,
-          FifthScore, ExtremeScore]
-score_opt = [(0, "pydance"), (1, "1st"), (2, "3rd"), (3, "4th"),
-              (4, "5th"), (5, "8th")]
+          FifthScore, ExtremeScore, ExtremeOniScore, ExtremeNonstopScore]
+score_opt = [(0, "pydance"), (1, "DDR 1st/2nd Mix"), (2, "DDR 3rd Mix"),
+             (3, "DDR 4th Mix"), (4, "DDR 5th Mix"), (5, "DDR 7th/8th"),
+             (6, "DDR 8th Oni"), (7, "DDR 8th Nonstop")]

@@ -66,6 +66,8 @@ def titlecase(title):
           parts[i] = parts[i].capitalize()
 
 
+  # Capitalize the first and last words in the name, unless they are
+  # are "stylistically" lowercase.
   for i in (0, -1):
     if parts[i] != parts[i].lower() or parts[i] in uncapped:
       oldparts = parts[i]
