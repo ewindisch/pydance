@@ -276,6 +276,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
     fpstext = FPSDisp()
     timewatch = TimeDisp()
     tgroup.add([fpstext, timewatch])
+  else: fpstext = None
 
   if mainconfig['showlyrics']:
     lgroup.add(song.lyricdisplay.channels.values())
@@ -401,5 +402,5 @@ def dance(screen, song, players, prevscr, ready_go, game):
       songtext.zout()
       grptext.zout()
 
-  print "Average FPS for this song was %d." % fpstext.fps()
+  if fpstext: print "Average FPS for this song was %d." % fpstext.fps()
   return songFailed
