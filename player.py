@@ -91,11 +91,13 @@ class HoldJudgeDisp(Listener, pygame.sprite.Sprite):
     else: self.rect.top = 56
 
     self.rect.left = game.left_off(pid) + pid * game.player_offset
+    self.len = len(game.dirs)
 
-    self.slotnow = [self.space] * len(game.dirs)
+  def set_song(self, pid, bpm, difficulty, count, holds, feet):
+    self.slotnow = [self.space] * self.len
     self.slotold = list(self.slotnow)
-    self.slothit = [-1] * len(game.dirs)
-        
+    self.slothit = [-1] * self.len
+
   def ok_hold(self, pid, curtime, direction, whichone):
     if pid != self.pid: return
     self.slothit[self.game.dirs.index(direction)] = curtime
