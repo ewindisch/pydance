@@ -194,19 +194,16 @@ class TopArrow(Listener, pygame.sprite.Sprite):
 
   # The arrow was pressed, so we have to change it for some time (s state).
   def stepped(self, pid, dir, time, rating, combo):
-    print "Stepped?", self.pid, pid, self.dir, dir
-
     if self.pid != pid or self.dir != dir or rating == "M": return
-
-    print "Did step"
 
     self.adder = 4
     self.endpresstime = time + 0.25 # Number of seconds to change it for.
 
-  def set_song(self, bpm, diff, count, holds, feet):
+  def set_song(self, pid, bpm, diff, count, holds, feet):
     self.tick = toRealTime(bpm, 1)
 
-  def change_bpm(self, newbpm):
+  def change_bpm(self, pid, curtime, newbpm):
+    if self.pid != pid: return
     self.tick = toRealTime(newbpm, 1)
 
   def update(self, time, offset):
@@ -249,10 +246,11 @@ class ArrowFX(Listener, pygame.sprite.Sprite):
     style = mainconfig['explodestyle']
     self.rotating, self.scaling = style & 1, style & 2
     
-  def set_song(self, bpm, diff, count, holds, feet):
+  def set_song(self, pid, bpm, diff, count, holds, feet):
     self.tick = toRealTime(bpm, 1)
 
-  def change_bpm(self, newbpm):
+  def change_bpm(self, pid, curtime, newbpm):
+    if self.pid != pid: return
     self.tick = toRealTime(newbpm, 1)
 
   def holding(self, yesorno):

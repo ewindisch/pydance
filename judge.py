@@ -3,15 +3,15 @@ from constants import *
 from util import toRealTime
 from announcer import Announcer
 from listener import Listener
-from listener import Listener
 
 class AbstractJudge(Listener):
-  def __init__ (self):
+  def __init__ (self, pid):
     self.steps = {}
+    self.pid = pid
     self.failed = False
     announcer = Announcer(mainconfig["djtheme"])
 
-  def set_song(self, bpm, difficulty, count, holds, feet):
+  def set_song(self, pid, bpm, difficulty, count, holds, feet):
     self.bpm = bpm
     self.diff = difficulty
     self.tick = toRealTime(bpm, 0.16666666666666666)
@@ -21,11 +21,13 @@ class AbstractJudge(Listener):
   def get_rating(self, dir, curtime):
     raise NotImplementedError("This class should not be instantiated.")
 
-  def change_bpm(self, bpm):
+  def change_bpm(self, pid, curtime, bpm):
+    if self.pid != pid: return
     if bpm >= 1: self.tick = toRealTime(bpm, 0.16666666666666666)
     self.bpm = bpm
 
-  def broke_hold(self, dir, whichone):
+  def broke_hold(self, pid, curtime, dir, whichone):
+    if pid != self.pid: return
     if self.holdsub.get(whichone) != -1: self.holdsub[whichone] = -1
 
   def handle_key(self, dir, curtime):

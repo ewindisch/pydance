@@ -6,6 +6,7 @@ from listener import Listener
 from constants import *
 
 class AbstractCombo(Listener, pygame.sprite.Sprite):
+
   def __init__(self, playernum, game):
     pygame.sprite.Sprite.__init__(self)
     self.sticky = mainconfig['stickycombo']
@@ -53,7 +54,6 @@ class AbstractCombo(Listener, pygame.sprite.Sprite):
       hundreds = self.drawcount / 100
       tens = self.drawcount / 10
       ones = self.drawcount % 10
-      #get width
       if thousands:
         thousands = render[thousands%10]
         width += thousands.get_width()      
@@ -69,7 +69,6 @@ class AbstractCombo(Listener, pygame.sprite.Sprite):
       self.image = pygame.surface.Surface((width,height))
       self.image.set_colorkey(ones.get_at((0, 0)), RLEACCEL)
       left = 0		      
-      #render
       if thousands:
         self.image.blit(thousands, (left,0))
         left+= thousands.get_width()

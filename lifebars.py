@@ -180,10 +180,10 @@ class OniLifeBarDisp(AbstractLifeBar):
     self.width = 192 / self.maxlife
     self.bar = pygame.transform.scale(self.bar, (self.width, 20))
 
-  def set_song(self, bpm, diff, count, hold, feet):
+  def set_song(self, pid, bpm, diff, count, hold, feet):
     self.life = min(self.maxlife, self.life + 1)
 
-  def broke_hold(self, dir, whichone):
+  def broke_hold(self, pid, time, dir, whichone):
     OniLifeBarDisp.lose_sound.play()
     self.life -= 1
        

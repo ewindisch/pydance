@@ -33,7 +33,7 @@ class AbstractScore(Listener, pygame.sprite.Sprite):
     self.baseimage.blit(basemode, (64 - (tx / 2), 0))
     self.oldscore = -1 # Force a refresh
 
-  def set_song(self, bpm, difficulty, count, holds, feet):
+  def set_song(self, pid, bpm, difficulty, count, holds, feet):
     self.set_text(difficulty)
 
   def update(self):
@@ -51,8 +51,8 @@ class AbstractScore(Listener, pygame.sprite.Sprite):
 # L(V) = 4, L(P) = 3.5, L(G) = 2.5, L(O) = 0.5
 # V(n) = L(r) * 10,000,000 / N + 10,000,000 / S(N) * C
 class PydanceScore(AbstractScore):
-  def set_song(self, bpm, text, count, hold, feet):
-    AbstractScore.set_song(self, bpm, text, count, hold, feet)
+  def set_song(self, pid, bpm, text, count, hold, feet):
+    AbstractScore.set_song(self, pid, bpm, text, count, hold, feet)
     if count == 0: count = 1 # Don't crash on empty songs.
 
     score_coeff = 10000000.0 / count
@@ -89,8 +89,8 @@ class FirstScore(AbstractScore):
 # L(V) = L(P) = 10, L(G) = 5, L(O) = 1
 # V(n) = L(r) * 1,000,000 / S(N) * n
 class ThirdScore(AbstractScore):
-  def set_song(self, bpm, text, count, hold, feet):
-    AbstractScore.set_song(self, bpm, text, count, hold, feet)
+  def set_song(self, pid, bpm, text, count, hold, feet):
+    AbstractScore.set_song(self, pid, bpm, text, count, hold, feet)
     if count == 0: count = 1
     self.arrow = 0
 
@@ -113,8 +113,8 @@ class FourthScore(AbstractScore):
 
 # The bonus for your combo or final grade is not implemented yet.
 class FifthScore(AbstractScore):
-  def set_song(self, bpm, text, count, hold, feet):
-    AbstractScore.set_song(self, bpm, text, count, hold, feet)
+  def set_song(self, pid, bpm, text, count, hold, feet):
+    AbstractScore.set_song(self, pid, bpm, text, count, hold, feet)
     self.arrow = 0
     s = 500000.0 * (feet + 1) / float((count * (count + 1)) / 2)
     self.inc = { "V": 10 * s, "P": 10 * s, "G": 5 * s }
@@ -131,8 +131,8 @@ class FifthScore(AbstractScore):
 # In pydance's implementation, jumps are counted as two arrows; in
 # 8rd, they aren't.
 class ExtremeScore(AbstractScore):
-  def set_song(self, bpm, text, count, hold, feet):
-    AbstractScore.set_song(self, bpm, text, count, hold, feet)
+  def set_song(self, pid, bpm, text, count, hold, feet):
+    AbstractScore.set_song(self, pid, bpm, text, count, hold, feet)
     if count == 0: count = 1 # Don't crash on empty songs.
 
     self.arrow = 0

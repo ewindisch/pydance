@@ -69,22 +69,21 @@ class OrderedRenderUpdates(RenderClear):
       spritedict[s] = newrect
     return dirty
 
-# FIXME: Turn this into a listener (will require changes to the
-# ok/broke_hold interface).
-class HoldJudgeDisp(pygame.sprite.Sprite):
+class HoldJudgeDisp(Listener, pygame.sprite.Sprite):
   def __init__(self, pid, player, game):
     pygame.sprite.Sprite.__init__(self)
+    self.pid = pid
     self.game = game
 
-    self.space = pygame.surface.Surface((48, 24))
-    self.space.fill((0, 0, 0))
+    self.space = pygame.surface.Surface([48, 24])
+    self.space.fill([0, 0, 0])
 
-    self.image = pygame.surface.Surface((len(game.dirs) * game.width, 24))
-    self.image.fill((0, 0, 0))
-    self.image.set_colorkey((0, 0, 0), RLEACCEL)
+    self.image = pygame.surface.Surface([len(game.dirs) * game.width, 24])
+    self.image.fill([0, 0, 0])
+    self.image.set_colorkey([0, 0, 0], RLEACCEL)
 
-    self.okimg = fontfx.shadefade("OK", 28, 3, (48, 24), (112, 224, 112))
-    self.ngimg = fontfx.shadefade("NG", 28, 3, (48, 24), (224, 112, 112))
+    self.okimg = fontfx.shadefade("OK", 28, 3, [48, 24], [112, 224, 112])
+    self.ngimg = fontfx.shadefade("NG", 28, 3, [48, 24], [224, 112, 112])
 
     self.rect = self.image.get_rect()
     if player.scrollstyle == 2: self.rect.top = 228
@@ -93,26 +92,27 @@ class HoldJudgeDisp(pygame.sprite.Sprite):
 
     self.rect.left = game.left_off(pid) + pid * game.player_offset
 
-    self.slotnow = [''] * len(game.dirs)
+    self.slotnow = [self.space] * len(game.dirs)
     self.slotold = list(self.slotnow)
     self.slothit = [-1] * len(game.dirs)
         
-  def fillin(self, curtime, direction, value):
-    self.slothit[direction] = curtime
-    self.slotnow[direction] = value
+  def ok_hold(self, pid, curtime, direction, whichone):
+    if pid != self.pid: return
+    self.slothit[self.game.dirs.index(direction)] = curtime
+    self.slotnow[self.game.dirs.index(direction)] = self.okimg
+
+  def broke_hold(self, pid, curtime, direction, whichone):
+    if pid != self.pid: return
+    self.slothit[self.game.dirs.index(direction)] = curtime
+    self.slotnow[self.game.dirs.index(direction)] = self.ngimg
     
   def update(self, curtime):
     for i in range(len(self.slotnow)):
       if (curtime - self.slothit[i] > 0.5):
-        self.slotnow[i]=''
+        self.slotnow[i] = self.space
       if self.slotnow[i] != self.slotold[i]:
         x = (i * self.game.width)
-        if self.slotnow[i] == 'OK':
-          self.image.blit(self.okimg,(x,0))
-        elif self.slotnow[i] == 'NG':
-          self.image.blit(self.ngimg,(x,0))
-        elif self.slotnow[i] == '':
-          self.image.blit(self.space,(x,0))
+        self.image.blit(self.slotnow[i], [x, 0])
         self.slotold[i] = self.slotnow[i]
 
 class JudgingDisp(Listener, pygame.sprite.Sprite):
@@ -564,15 +564,17 @@ class Player(object):
                       self.judging_disp, self.stats, self.announcer]
 
     if not game.double:
-      self.judge = judge.judges[songconf["judge"]]()
+      self.judge = judge.judges[songconf["judge"]](self.pid)
       self.listeners.append(self.judge)
       arr, arrfx = self.theme.toparrows(self.top, self.pid)
       self.toparr = arr
       self.toparrfx = arrfx
       self.listeners.extend(arr.values() + arrfx.values())
+      self.holdtext = HoldJudgeDisp(self.pid, self, self.game)
+      self.listeners.append(self.holdtext)
     else:
       Judge = judge.judges[songconf["judge"]]
-      self.judge = [Judge(), Judge()]
+      self.judge = [Judge(self.pid * 2), Judge(self.pid * 2 + 1)]
       self.listeners.extend(self.judge)
       arr1, arrfx1 = self.theme.toparrows(self.top, self.pid * 2)
       arr2, arrfx2 = self.theme.toparrows(self.top, self.pid * 2 + 1)
@@ -582,6 +584,9 @@ class Player(object):
       self.toparrfx = [arrfx1, arrfx2]
       self.listeners.extend(arr1.values() + arr2.values() +
                             arrfx1.values() + arrfx2.values())
+      self.holdtext = [HoldJudgeDisp(self.pid * 2, self, self.game),
+                       HoldJudgeDisp(self.pid * 2 + 1, self, self.game)]
+      self.listeners.extend(self.holdtext)
 
   def set_song(self, song, diff, lyrics):
     self.difficulty = diff
@@ -605,16 +610,13 @@ class Player(object):
 
       self.ready = min(self.steps[0].ready, self.steps[1].ready)
 
-      self.holdtext = [HoldJudgeDisp(self.pid * 2, self, self.game),
-                       HoldJudgeDisp(self.pid * 2 + 1, self, self.game)]
-
       count = self.steps[0].totalarrows + self.steps[1].totalarrows
+
       total_holds = 0
+      for i in range(2):  total_holds += len(self.steps[i].holdref)
 
-      for i in range(2):
-        total_holds += len(self.steps[i].holdref)
-
-      args = (self.steps[0].bpm, diff, count, total_holds, self.steps[0].feet)
+      args = (self.pid, self.steps[0].bpm, diff, count, total_holds,
+              self.steps[0].feet)
       for l in self.listeners: l.set_song(*args)
 
     else:
@@ -623,13 +625,11 @@ class Player(object):
                                self.game.name)
       self.length = self.steps.length
       self.ready = self.steps.ready
-      self.holdtext = HoldJudgeDisp(self.pid, self, self.game)
       self.arrows = self.theme.arrows(self.pid)
 
-      if self.steps.holdref: holds = len(self.steps.holdref)
-      else: holds = 0
+      holds = len(self.steps.holdref)
 
-      args = (self.steps.bpm, diff, self.steps.totalarrows,
+      args = (self.pid, self.steps.bpm, diff, self.steps.totalarrows,
               holds, self.steps.feet)
       for l in self.listeners: l.set_song(*args)
 
@@ -741,7 +741,7 @@ class Player(object):
             and (curtime < l[i][2])):
           return i
 
-  def check_holds(self, curtime, arrows, steps, judge, toparrfx, holding, holdtext, pid):
+  def check_holds(self, pid, curtime, arrows, steps, judge, toparrfx, holding):
     # FIXME THis needs to go away
     keymap_kludge = { "u": E_UP, "k": E_UPLEFT, "z": E_UPRIGHT,
                       "d": E_DOWN, "l": E_LEFT, "r": E_RIGHT,
@@ -757,10 +757,9 @@ class Player(object):
             toparrfx[dir].holding(1)
           holding[dir_idx] = current_hold
         else:
-          holdtext.fillin(curtime, dir_idx, "NG")
           if judge.holdsub.get(current_hold) != -1:
-            judge.broke_hold(dir, current_hold)
-            for l in self.listeners: l.broke_hold(dir, current_hold)
+            args = (pid, curtime, dir, current_hold)
+            for l in self.listeners: l.broke_hold(*args)
             botchdir, timef1, timef2 = steps.holdinfo[current_hold]
             # FIXME it's slow.
             for spr in arrows.sprites():
@@ -773,13 +772,15 @@ class Player(object):
       else:
         if holding[dir_idx] > -1:
           if judge.holdsub.get(holding[dir_idx]) != -1:
-            judge.ok_hold(dir, holding[dir_idx])
-            for l in self.listeners: l.ok_hold(dir, holding[dir_idx])
+            args = (pid, curtime, dir, holding[dir_idx])
+            for l in self.listeners: l.ok_hold(*args)
             holding[dir_idx] = -1
-            holdtext.fillin(curtime, dir_idx, "OK")
 
   def handle_key(self, ev, time):
     if ev[1] not in self.game.dirs: return
+
+    # Note that we can't pack up the listener arguments ahead of time
+    # here, because otherwise we use the old values for combos.combo.
 
     if self.game.double:
       pid = ev[0] & 1
@@ -793,14 +794,11 @@ class Player(object):
         l.stepped(ev[0], dir, time, rating, self.combos.combo)
       self.fx_data.append((rating, dir, etime))
 
-  def check_bpm_change(self, time, steps, judge, toparr, toparrfx):
+  def check_bpm_change(self, pid, time, steps, judge):
     if len(steps.lastbpmchangetime) > 0:
       if time >= steps.lastbpmchangetime[0][0]:
         newbpm = steps.lastbpmchangetime[0][1]
-        if not self.dark:
-          for d in toparr:
-            toparrfx[d].tick = toRealTime(newbpm, 1)
-        for l in self.listeners: l.change_bpm(newbpm)
+        for l in self.listeners: l.change_bpm(pid, time, newbpm)
         steps.lastbpmchangetime.pop(0)
 
   def clear_sprites(self, screen, bg):
@@ -809,20 +807,19 @@ class Player(object):
   def game_loop(self, time, screen):
     if self.game.double:
       for i in range(2):
-        self.check_holds(time, self.arrow_group[i], self.steps[i],
-                         self.judge[i], self.toparrfx[i], self.holding[i],
-                         self.holdtext[i], self.pid * 2 + i)
-        self.check_bpm_change(time, self.steps[i], self.judge[i],
-                              self.toparr[i], self.toparrfx[i])
+        self.check_holds(self.pid * 2 + i, time, self.arrow_group[i],
+                         self.steps[i], self.judge[i], self.toparrfx[i],
+                         self.holding[i])
+        self.check_bpm_change(self.pid * 2 + i, time, self.steps[i],
+                              self.judge[i])
         self.check_sprites(time, self.arrow_group[i], self.steps[i],
                            self.fx_data[i], self.toparr[i], self.toparrfx[i],
                            self.judge[i])
         self.csl_update(time, self.judge[i], self.holdtext[i])
     else:
-      self.check_holds(time, self.arrow_group, self.steps, self.judge,
-                       self.toparrfx, self.holding, self.holdtext, self.pid)
-      self.check_bpm_change(time, self.steps, self.judge, self.toparr,
-                            self.toparrfx)
+      self.check_holds(self.pid, time, self.arrow_group, self.steps,
+                       self.judge, self.toparrfx, self.holding)
+      self.check_bpm_change(self.pid, time, self.steps, self.judge)
       self.check_sprites(time, self.arrow_group, self.steps, self.fx_data,
                          self.toparr, self.toparrfx, self.judge)
       self.csl_update(time, self.judge, self.holdtext)
