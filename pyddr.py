@@ -18,9 +18,7 @@ from spritelib import *
 
 import fontfx, menudriver, fileparsers, colors
 
-import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
 import os, sys, glob, random, fnmatch, types, operator, copy, string
-import pygame.transform
 
 from stat import *
 
@@ -303,8 +301,9 @@ class Judge:
   
   def handle_arrow(self, key, time, etime):
       multicheck = self.tick
-      tick_6 = multicheck / 6
-      curtick = round((time + 2*multicheck) / tick_6)
+#      tick_6 = multicheck / 6
+#      curtick = round((time + 2*multicheck) / tick_6)
+      curtick = round(6 * (time/multicheck + 2))
       self.times = self.steps.keys()
       self.actualtimes[curtick] = etime
       if curtick in self.times:
@@ -610,7 +609,7 @@ class ComboDisp(pygame.sprite.Sprite):
     self.sticky = mainconfig['stickycombo']
     self.lowcombo = mainconfig['lowestcombo']
 
-    self.trect = 296+(mainconfig['totaljudgings'] *24)
+    self.trect = 296 + (mainconfig['totaljudgings'] * 24)
     self.playernum = playernum
     self.centerx = (320*self.playernum) + 160
     
@@ -944,19 +943,7 @@ class TimeDisp(pygame.sprite.Sprite):
 class Song:
   def __init__ (self, fn, path=None):
     # note that I'm only copying DIFFICULTIES because it's the right size..
-    self.haslyrics = ''
-    self.fooblah = fn
-    try:
-      try:
-        print "trying full banner",fn[:-5]+'-full.png'
-        self.lilbanner = pygame.image.load(fn[:-5]+'-full.png').convert()
-      except:
-        print "nogo, trying rotated banner",fn[:-5]+'.png'
-        self.lilbanner = pygame.transform.rotate(pygame.image.load(fn[:-5]+'.png').convert(),-45)
-    except:
-      print "settling for blank banner for",fn
-      self.lilbanner = pygame.surface.Surface((1,1))
-    self.lilbanner.set_colorkey(self.lilbanner.get_at((0,0)))
+    self.fn = fn
     self.modes = modes = MODES.copy()
     self.modelist = []
     self.modediff = {}
@@ -979,7 +966,6 @@ class Song:
     self.bgfile = ' '
     self.file = None
     self.moviefile = ' '
-    self.mixname = 'unspecified mix'
     self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
     self.mixerclock = mainconfig['mixerclock']
     self.lyricdisplay = LyricDispKludge(400,
@@ -1010,7 +996,7 @@ class Song:
         if len(chompNext) == 1:
           # look for the DIFFICULTY keyword, we already know which MODE
           modeDict, = chompNext
-          curTime = float(self.offset) #/1000.0
+          curTime = float(self.offset)
           curBPM = self.bpm
           difficulty = firstword
           self.totarrows[difficulty] = 0
@@ -1122,14 +1108,12 @@ class Song:
              tail.next = SongEvent(when=curTime,bpm=curBPM,extra=('TRANS',rest))
              chompNext = None,tail.next
       elif firstword == 'LYRICS':
-        self.haslyrics = '  (LYRICS)'
         curTime = 0.0
         curBPM = self.bpm
         difficulty = None
         self.lyrics = SongEvent(when=curTime,bpm=curBPM)
         chompNext = None,self.lyrics
       elif firstword == 'song':        self.song = " ".join(rest)
-      elif firstword == 'mix':         self.mixname = " ".join(rest)
       elif firstword == 'group':       self.group = " ".join(rest)
       elif firstword == 'bpm':
         self.bpm = float(nextword) 
@@ -1182,17 +1166,13 @@ class Song:
         modes[m][d] = modes[m][d].next
       # zip together the difficulties and their "hardness" for easy usage
       self.modeinfo[m] = zip(self.modediff[m],tmp)
-      # this is so much easier in 2.2
-      # self.modeinfodict[m] = dict(self.modeinfo[m])
-      self.modeinfodict[m] = {}
-      for key,val in self.modeinfo[m]:
-        self.modeinfodict[key]=val
+      self.modeinfodict[m] = dict(self.modeinfo[m])
 
   def init(self):
     try:
       pygame.mixer.music.load(self.osfile)
     except pygame.error:
-      print "not a supported filetype"
+      print "Not a supported filetype"
       self.crapout = 1
     if self.startsec > 0.0:
       print "Skipping %f seconds" % self.startsec
@@ -1643,7 +1623,7 @@ def main():
     # Search recursively for all STEP files
     fileList = []
     for dir in songdir.split(os.pathsep):
-      print "searching", dir
+      print "Searching", dir
       fileList += find(dir, '*.step')
 
   totalsongs = len(fileList)
@@ -1792,7 +1772,7 @@ def dance(song, players):
     backimage = BGimage(song.bgfile)
   else:
     try:
-      bifn = song.fooblah[:-5] + '-bg.png'
+      bifn = song.fn[:-5] + '-bg.png'
       backimage = BGimage(bifn)
     except pygame.error:
       bifn = os.path.join(image_path, 'bg.png')
@@ -1897,7 +1877,7 @@ def dance(song, players):
       if ev[1] == E_START or ev[1] == E_QUIT: break
       pygame.time.wait(50)
     
-    print "crapping out: can't play this song."
+    print "Unable to play this song."
     return 0 #player didn't fail, so return 0 here.
   
   screenshot = 0
@@ -2120,7 +2100,6 @@ def dance(song, players):
   except:
     pass
     
-  print "songFailed is", songFailed
   return songFailed
 
 if __name__ == '__main__': main()

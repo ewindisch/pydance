@@ -85,17 +85,19 @@ class StepFile:
     if not self.info.has_key("subtitle"):
       try:
         l, r = self.info["song"].index("["), self.info["song"].rindex("]")
-        self.info["subtitle"] = self.info["song"][l+1:r]
-        self.info["song"] = self.info["song"][:l]
+        if l != 1 and r > l + 1:
+          self.info["subtitle"] = self.info["song"][l+1:r]
+          self.info["song"] = self.info["song"][:l]
       except ValueError:
         try:
           l, r = self.info["song"].index("("), self.info["song"].rindex(")")
-          self.info["subtitle"] = self.info["song"][l+1:r]
-          self.info["song"] = self.info["song"][:l]
+          if l != 1 and r > l + 1:
+            self.info["subtitle"] = self.info["song"][l+1:r]
+            self.info["song"] = self.info["song"][:l]
         except ValueError:
           try:
             l, r = self.info["song"].index("~"), self.info["song"].rindex("~")
-            if l != r:
+            if l != 1 and r > l + 1:
               self.info["subtitle"] = self.info["song"][l+1:r]
               self.info["song"] = self.info["song"][:l]
           except ValueError:
