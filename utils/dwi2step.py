@@ -243,7 +243,7 @@ def convert(msdfile):
         delayidx = 0
         dc = ''
         stepmode = Beat('')
-        for i in ('BASIC','TRICK','MANIAC','ANOTHER','SMANIAC'):
+        for i in ('BEGINNER', 'BASIC', 'TRICK', 'MANIAC', 'ANOTHER', 'SMANIAC'):
           if fileline[8:8+len(i)] == i:
             try:
               difficulty = int(fileline[9+len(i):11+len(i)])
