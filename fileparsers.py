@@ -430,7 +430,7 @@ class DWIFile(MSDFile):
         parts[0] = DWIFile.game_map.get(parts[0], parts[0])
         parts[1] = DWIFile.diff_map.get(parts[1], parts[1])
 
-      rest = ":".join(parts[1:])
+      rest = ":".join(parts[1:]).strip()
 
       # I think this is the fault of the SM editor; some DWIs have blank
       # fields (not many; basically all SMs do).
@@ -563,7 +563,7 @@ class SMFile(MSDFile):
 
     for parts in lines:
 
-      rest = ":".join(parts[1:])
+      rest = ":".join(parts[1:]).strip()
 
       # A lot of SM files have blank fields; I blame the editor.
       if rest == "": continue
