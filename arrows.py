@@ -91,7 +91,7 @@ class AbstractArrow(pygame.sprite.Sprite):
       self.origcenterx = self.centerx = self.rect.centerx
     else: self.centerx = self.rect.centerx = self.goalcenterx
 
-  def get_alpha(self, curtime, beatsleft, top):
+  def set_alpha(self, curtime, beatsleft, top):
     alp = 256
 
     if self.fade == 4: alp = int(alp * sin(beatsleft * 1.5708) ** 2)
@@ -114,12 +114,14 @@ class AbstractArrow(pygame.sprite.Sprite):
 
     if self.hold and self.broken and curtime > self.endtime + 0.025: alp /= 2
 
-    return alp
-
-  def update(self, curtime, curbpm, beat, lbct):
     # NB - Making a new surface, then blitting the image in place, is 20%
     # slower than calling image.convert() (and is longer to type).
-    self.image = self.arrow.get_image(beat).convert()
+    if alp < 255:
+      self.image = self.image.convert()
+      self.image.set_alpha(alp)
+
+  def update(self, curtime, curbpm, beat, lbct):
+    self.image = self.arrow.get_image(beat)
     self.baseimage = self.image
     self.rect = self.image.get_rect()
     self.rect.left = self.arrow.left
@@ -194,7 +196,7 @@ class ArrowSprite(AbstractArrow):
     pct = abs(float(top - self.top) / self.diff)
 
     self.rect, self.image = self.scale_spin_battle(self.baseimage, top, pct)
-    self.image.set_alpha(self.get_alpha(curtime, beatsleft, top))
+    self.set_alpha(curtime, beatsleft, top)
 
 class HoldArrowSprite(AbstractArrow):
   def __init__ (self, arrow, beats, secret, times, player, song):
@@ -211,17 +213,18 @@ class HoldArrowSprite(AbstractArrow):
   def update(self, curtime, curbpm, beat, lbct):
     AbstractArrow.update(self, curtime, curbpm, beat, lbct)
 
+    c = self.image.get_colorkey()
     self.top_image = pygame.surface.Surface([self.width, self.width / 2])
-    self.top_image.set_colorkey(self.image.get_colorkey())
     self.top_image.blit(self.image, [0, 0])
+    self.top_image.set_colorkey(c)
 
     self.bottom_image = pygame.surface.Surface([self.width, self.width / 2])
-    self.bottom_image.set_colorkey(self.image.get_colorkey())
     self.bottom_image.blit(self.image, [0, -self.width / 2])
+    self.bottom_image.set_colorkey(c)
 
     self.center_image = pygame.surface.Surface([self.width, 1]) 
-    self.center_image.set_colorkey(self.image.get_colorkey())
     self.center_image.blit(self.image, [0, -self.width / 2 + 1])
+    self.center_image.set_colorkey(c)
 
     if curtime > self.timef2:
       self.kill()
@@ -273,4 +276,4 @@ class HoldArrowSprite(AbstractArrow):
     image.blit(self.bottom_image, [0, holdsize + self.width / 2])
 
     self.rect, self.image = self.scale_spin_battle(image, top, pct)
-    self.image.set_alpha(self.get_alpha(curtime, beatsleft_top, top))
+    self.set_alpha(curtime, beatsleft, top)
