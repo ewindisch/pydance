@@ -33,12 +33,13 @@ BANNER_SIZE = (256, 80)
 DIFF_BOX_SIZE = (15, 25)
 DIFF_LOCATION = (8, 120)
 
-SORTS = [(lambda x, y: cmp(x.song.filename, y.song.filename)),
+SORTS = ((lambda x, y: cmp(x.song.filename, y.song.filename)),
          (lambda x, y: cmp(x.song.info.get("song"), y.song.info.get("song"))),
          (lambda x, y: cmp(x.song.info.get("group"),
                            y.song.info.get("group"))),
          (lambda x, y: cmp(x.song.info.get("bpm"), y.song.info.get("bpm"))),
-         (lambda x, y: cmp(x.song.info.get("mix"), y.song.info.get("mix")))]
+         (lambda x, y: cmp(x.song.info.get("mix"), y.song.info.get("mix"))))
+SORT_NAMES = ("filename", "title", "artist", "bpm", "mix")
 
 NUM_SORTS = len(SORTS)
 BY_FILENAME,BY_NAME,BY_GROUP,BY_BPM,BY_MIX = range(NUM_SORTS)
@@ -83,7 +84,6 @@ class SongItemDisplay:
         self.banner = NO_BANNER
       self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
     if self.menuimage == None:
-      subtext_text = " "
       colors = ["cyan", "aqua", "orange", "yellow", "red", "white"]
       # Start with a random color, but...
       color = lyric_colors[colors[random.randint(0, len(colors) - 1)]]
@@ -91,18 +91,21 @@ class SongItemDisplay:
       if info.has_key("mix"): # ... pick a consistent mix color
         idx = hash(info["mix"]) % len(colors)
         color = lyric_colors[colors[idx]]
-        subtext_text = info["mix"] + subtext_text
 
       self.menuimage = pygame.surface.Surface(ITEM_SIZE)
       self.menuimage.blit(ITEM_BG, (0,0))
       songtext = large_font.render(info["song"], 1, color)
       self.menuimage.blit(songtext, (10, 5))
 
-      if info.has_key("subtitle"): subtext_text += "- " + info["subtitle"]
-        
+      subtext_text = ""
+      if info.has_key("subtitle"): subtext_text += info["subtitle"] + " / "
+      if info.has_key("mix"): subtext_text += info["mix"] + " / "
+      subtext_text  += "bpm: " + str(int(info["bpm"]))
+
       subtext = small_font.render(subtext_text, 1, color)
       self.menuimage.blit(subtext, (30, 26))
-      grouptext = medium_font.render("by " + info["group"], 1, color)
+      st = "by " + info["group"]
+      grouptext = medium_font.render(st, 1, color)
       self.menuimage.blit(grouptext, (15, 36))
 
 class SongSelect:
@@ -134,6 +137,7 @@ class SongSelect:
     not_changed_for = 0 # How long since the song was changed, in cycles
     is_playing = False
     new_preview = True
+    scroll_wait = 0
 
     self.index = 0
     previews = mainconfig["previewmusic"]
@@ -155,15 +159,27 @@ class SongSelect:
       # levels (e.g. the standard 3).
 
       # Scroll up the menu list
-      if (ev[1] == E_LEFT or event.states[(0, E_LEFT)] or
-          event.states[(1, E_LEFT)]):
+      if ev[1] == E_LEFT:
+        self.index = (self.index - 1) % self.numsongs
+        MOVE_SOUND.play()
+        scroll_wait = 0
+        song_changed = True
+
+      elif ((event.states[(0, E_LEFT)] or event.states[(1, E_LEFT)]) and
+            scroll_wait > 5):
         self.index = (self.index - 1) % self.numsongs
         MOVE_SOUND.play()
         song_changed = True
 
       # Down the menu list
-      elif (ev[1] == E_RIGHT or event.states[(0, E_RIGHT)] or
-            event.states[(1, E_RIGHT)]):
+      elif ev[1] == E_RIGHT:
+        self.index = (self.index + 1) % self.numsongs
+        MOVE_SOUND.play()
+        scroll_wait = 0
+        song_changed = True
+
+      elif ((event.states[(0, E_RIGHT)] or event.states[(1, E_RIGHT)]) and
+            scroll_wait > 5):
         self.index = (self.index + 1) % self.numsongs
         MOVE_SOUND.play()
         song_changed = True
@@ -330,8 +346,8 @@ class SongSelect:
             is_playing = False
         not_changed_for += 1
 
-      pygame.time.delay(20)
-
+      scroll_wait += 1
+      pygame.time.delay(30)
 
     pygame.mixer.music.fadeout(500)
     pygame.time.delay(500)
@@ -370,7 +386,14 @@ class SongSelect:
     for i in range(len(temp_list)):
       txt = small_font.render(temp_list[i], 1, WHITE)
       self.screen.blit(txt, (10, 480 - (small_font.size("I")[1] - 2) * (i + 2)))
-    
+
+    # Sort mode
+    stxt = medium_font.render("sort by " + SORT_NAMES[mainconfig["sortmode"]],
+                              1, WHITE)
+    r = stxt.get_rect()
+    r.center = (DIFF_LOCATION[0] + 90, DIFF_LOCATION[1] - 10)
+    self.screen.blit(stxt, r)
+  
     i = 0
     for d in diff_list:
       # Difficulty name

@@ -67,17 +67,16 @@ class StepFile:
         sys.exit(1)
 
     dir, name = os.path.split(filename)
-    for t in (("banner", ".png"), ("bg", "-bg.png"), ("file", ".ogg")):
-      if not self.info.has_key(t[0]):
-        possible = os.path.join(dir, name.replace(".step", t[1]))
-        if os.path.isfile(possible): self.info[t[0]] = possible
-#      else: self.info[t[0]] = None
 
-    for d in ("banner", "bg", "file"):
-      if self.info.has_key(d):
-        # Stupid fucking Windows. 
-        self.info[d] = os.path.normpath(self.info[d])
-        self.info[d] = os.path.join(os.path.split(filename)[0], self.info[d])
+    for t in (("banner", ".png"), ("banner", "-full.png"),
+              ("bg", "-bg.png"), ("file", ".ogg")):
+      if self.info.has_key(t[0]):
+        self.info[t[0]] = os.path.join(dir, self.info[t[0]])
+        if not os.path.isfile(self.info[t[0]]): del(self.info[t[0]])
+      else:
+        possible = os.path.join(dir, name.replace(".step", t[1]))
+        possible = os.path.realpath(possible)
+        if os.path.isfile(possible): self.info[t[0]] = possible
 
     for key in self.difficulty:
       self.diff_list[key] = sorted_diff_list(self.difficulty[key])
