@@ -414,9 +414,6 @@ class DWIFile(MSDFile):
 
   steps["DOUBLE"] = steps["COUPLE"] = steps["SINGLE"]
 
-  diff_map = { "ANOTHER": "TRICK", "SMANIAC": "HARDCORE",
-               "S-MANIAC": "HARDCORE" }
-
   game_map = { "SOLO": "6PANEL" }
 
   def __init__(self, filename, need_steps):
@@ -428,7 +425,6 @@ class DWIFile(MSDFile):
     for parts in lines:
       if len(parts) > 3:
         parts[0] = DWIFile.game_map.get(parts[0], parts[0])
-        parts[1] = DWIFile.diff_map.get(parts[1], parts[1])
 
       rest = ":".join(parts[1:]).strip()
 
