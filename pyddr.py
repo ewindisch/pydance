@@ -1918,7 +1918,7 @@ def dance(song, players):
 
     if players[0].evt is None:
       if song.isOver():
-        break
+        return False
     else:
       # we need the current time for a few things, and it should be the same for all players
       curtime = players[0].evt[2]
@@ -1933,7 +1933,7 @@ def dance(song, players):
         sys.exit()
       elif (event.states[(i, E_START)] and event.states[(i, E_LEFT)]):
         ev = (0, E_QUIT)
-        break
+        return False
       else:
         pass
 
@@ -1951,7 +1951,7 @@ def dance(song, players):
 
       ev = event.poll()
 
-    if ev[1] == E_QUIT: break
+    if ev[1] == E_QUIT: return False
   
     for keyAction in key:
       playerID = keyAction[0]
