@@ -78,7 +78,7 @@ class Steps:
 
       if words[0] == 'W':
         cur_time += float(words[1])
-        beat += cur_bpm * float(words[1]) / 60
+        cur_beat += cur_bpm * float(words[1]) / 60
       elif words[0] == 'R':
         self.events.append(SongEvent(when = cur_time, bpm = cur_bpm,
                                      beat = cur_beat, extra= 'READY'))
