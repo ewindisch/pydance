@@ -1,4 +1,4 @@
-import os, stat, util
+import os, stat, util, string
 
 # FIXME: DanceFile and StepFile can easily share a parent class.
 # FIXME: This file needs major refactoring and cleanups
@@ -14,10 +14,7 @@ class GenericFile:
     self.need_steps = need_steps
 
   def strip_line(self, line):
-    try:
-      i = line.index(self.comment)
-      line = line[0:i]
-    except ValueError: pass
+    if line.count(self.comment) > 0: line = line[:line.index(self.comment)]
     return line.strip()
 
   def find_subtitle(self):
@@ -234,7 +231,7 @@ class StepFile(GenericFile):
 
     dir, name = os.path.split(self.filename)
     for t in (("banner", ".png"), ("banner", "-full.png"),
-              ("bg", "-bg.png"), ("filename", ".ogg"),
+              ("background", "-bg.png"), ("filename", ".ogg"),
               ("filename", ".mp3"), ("movie", ".mpg")):
       if not self.info.has_key(t[0]):
         possible = os.path.join(dir, name.replace(".step", t[1]))
