@@ -155,6 +155,14 @@ class TextProgress(object):
         surf.set_colorkey(self.notcolor, RLEACCEL)
         return surf
 
+# Find the appropriate font size to fit string into max_width pixels,
+# that's at most max_size, and at least 6.
+def max_size(string, max_width, max_size):
+  for size in range(max_size, 0, -1):
+    f = pygame.font.Font(None, size)
+    if f.size(string)[0] < max_width: return f
+  return pygame.font.Font(None, 6)
+
 class zztext(pygame.sprite.Sprite):
     def __init__(self, text, x, y):
       pygame.sprite.Sprite.__init__(self)

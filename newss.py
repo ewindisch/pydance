@@ -76,7 +76,7 @@ def make_box(color = [111, 255, 148], size = [130, 40]):
   s.fill(color + [100])
   r = s.get_rect()
   for c in [[255, 255, 255, 170], [212, 217, 255, 170],
-            [255, 252, 255, 170], [88, 104, 255, 170]]:
+            [255, 252, 255, 170], [104, 104, 104, 170]]:
     pygame.draw.rect(s, c, r, 1)
     r.width -= 2
     r.height -= 2
@@ -166,20 +166,21 @@ class FolderDisplay(object):
     if self.banner == None: self.banner = SongItemDisplay.no_banner
 
 class TextDisplay(pygame.sprite.Sprite):
-  def __init__(self, font, size, topleft, str = " "):
+  def __init__(self, font, size, midleft, str = " "):
     pygame.sprite.Sprite.__init__(self)
     self._text = " "
     self._font = font
     self._size = size
-    self._topleft = topleft
+    self._midleft = midleft
     self._render()
 
   def _render(self):
     self._needs_update = False
-    img = fontfx.shadow(self._text, self._font, 1, [255, 255, 255], [0, 0, 0])
+    font = fontfx.max_size(self._text, self._size[0], self._font)
+    img = fontfx.shadow(self._text, font, 1, [255, 255, 255], [0, 0, 0])
     self.image = img
     self.rect = self.image.get_rect()
-    self.rect.topleft = self._topleft
+    self.rect.midleft = self._midleft
 
   def set_text(self, text):
     self._text = text
@@ -283,7 +284,6 @@ class ListBox(pygame.sprite.Sprite):
   def __init__(self, font, color, spacing, count, width, topleft):
     pygame.sprite.Sprite.__init__(self)
     self._idx = self._oldidx = 0
-    self._font = font
     self._h = spacing
     self._count = count
     self._w = width
@@ -295,8 +295,12 @@ class ListBox(pygame.sprite.Sprite):
 
   def set_items(self, items):
     c2 = [c / 8 for c in self._color]
-    self._items = [fontfx.shadow(i, self._font, 1, self._color, c2) for
-                   i in items]
+    self._items = []
+
+    for i in items:
+      f = fontfx.max_size(i, self._w - 5, 28)
+      img = fontfx.shadow(i, f, 1, self._color, c2)
+      self._items.append(img)
     self._needs_update = True
 
   def set_index(self, idx):
@@ -343,18 +347,23 @@ class BannerDisplay(pygame.sprite.Sprite):
     song.render()
 
     self._title = fontfx.shadow(song.info["title"],
-                                pygame.font.Font(None, 20), 1, c1, c2)
+                                fontfx.max_size(song.info["title"], 340, 60),
+                                1, c1, c2)
     self._r_t = self._title.get_rect()
     self._r_t.center = [179, 240]
     self._artist = fontfx.shadow(song.info["artist"],
-                                 pygame.font.Font(None, 20), 1, c1, c2)
+                                 fontfx.max_size(song.info["artist"], 250, 40),
+                                 1, c1, c2)
 
     self._r_a = self._artist.get_rect()
     self._r_a.center = [179, 320]
 
     if song.info["subtitle"]:
       self._subtitle = fontfx.shadow(song.info["subtitle"],
-                                     pygame.font.Font(None, 20), 1, c1, c2)
+                                     fontfx.max_size(song.info["subtitle"],
+                                                     300, 24),
+
+                                     1, c1, c2)
       self._r_s = self._subtitle.get_rect()
       self._r_s.center = [179, 270]
     else: self._subtitle = None
@@ -499,7 +508,7 @@ class MainWindow(object):
     self._sprites.add(HelpText(SS_HELP, [255, 255, 255], [0, 0, 0],
                                pygame.font.Font(None, 22), [206, 20]))
 
-    self._title = TextDisplay(pygame.font.Font(None, 30), [218, 32], [415, 15])
+    self._title = TextDisplay(30, [218, 28], [415, 27])
     self._sprites.add(self._title)
     self._screen.blit(self._bg, [0, 0])
     pygame.display.update()

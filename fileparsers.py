@@ -38,7 +38,7 @@ class GenericFile(object):
   # Try to extract a subtitle from formats that don't support it (DWI, step)
   # Recognize ()s, []s, --s, or ~~s.
   def find_subtitle(self):
-    if "subtitle" in self.info:
+    if "subtitle" not in self.info:
       for pair in (("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")):
         if pair[0] in self.info["title"] and self.info["title"][-1] == pair[1]:
           l = self.info["title"][0:-1].rindex(pair[0])
