@@ -733,7 +733,7 @@ class SongSelect(object):
                   (120, 130), (130, 140), (140, 150), (150, 160), (160, 170),
                   (170, 180), (180, 190), (190, 200), (200, 225), (225, 250),
                   (250, 275), (275, 300)):
-        label = "%d-%d" % rng
+        label = "%3d-%3d" % rng
         if rng[0] < si.song.info["bpm"] <= rng[1]:
           if not bpms.has_key(label): bpms[label] = []
           bpms[label].append(si)
