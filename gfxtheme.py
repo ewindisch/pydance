@@ -99,9 +99,9 @@ class ThemeFile(object):
   def get_image(self, image_name):
     try:
       if self.zip:
-        return pygame.image.load(StringIO(self.zip.read(image_name)))
+        return pygame.image.load(StringIO(self.zip.read(image_name))).convert()
       else:
-        return pygame.image.load(os.path.join(self.path, image_name))
+        return pygame.image.load(os.path.join(self.path, image_name)).convert()
     except:
       raise RuntimeError("E: %s was missing from your theme." % image_name)
 
@@ -218,14 +218,14 @@ class Arrow(object):
           s = pygame.Surface([theme.size, theme.size])
           s.blit(self._image, [-i * theme.size, -j * theme.size])
           s = pygame.transform.rotate(s, rotate)
-          s.set_colorkey(s.get_at([0, 0]))
+          s.set_colorkey(s.get_at([0, 0]), RLEACCEL)
           self._images.append(s)
       self._beatcount = w / theme.size
       self._fpb = h / theme.size # frames per beat
       self._image = None
     else:
-      self._image.set_colorkey(self._image.get_at([0, 0]))
       self._image = pygame.transform.rotate(self._image, rotate)
+      self._image.set_colorkey(self._image.get_at([0, 0]), RLEACCEL)
 
     if not mainconfig["animation"] and not self._image and type == "c":
       self._image = self._images[0]
