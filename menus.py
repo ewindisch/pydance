@@ -80,7 +80,7 @@ class MenuItem:
 
 class Menu:
 
-  bgimage = None
+  bgimage = pygame.image.load(os.path.join(image_path, "menu-bg.png"))
   click_sound = pygame.mixer.Sound(os.path.join(sound_path, "clicked.ogg"))
   click_sound.set_volume(0.45)
   move_sound = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
@@ -103,9 +103,6 @@ class Menu:
         self.items[-1].activate(E_CREATE)
       elif type(i) == type((0,0)): # New submenus are tuples
         self.items.append(Menu(i[0], i[1:], screen))
-
-    if Menu.bgimage == None: # First time we make a menu, do this
-      Menu.bgimage = BGimage(os.path.join(image_path, "menu-bg.png"))
 
   # Menu rendering is tons easier, since it never changes.
   def render(self):
@@ -132,8 +129,8 @@ class Menu:
   # Postcondition: Screen buffer is in an unknown state!
   def display(self):
     screen = self.screen
-    Menu.bgimage.image.set_alpha(256)
-    pygame.display.update(screen.blit(Menu.bgimage.image, TOPLEFT))
+    Menu.bgimage.set_alpha(256)
+    pygame.display.update(screen.blit(Menu.bgimage, TOPLEFT))
     curitem = 0
     topitem = 0
     changed = False
@@ -182,8 +179,8 @@ class Menu:
         changed = True
 
       toprotater.iterate()
-      if changed: r.append(screen.blit(Menu.bgimage.image, TOPLEFT))
-      else: screen.blit(Menu.bgimage.image, TOPLEFT)
+      if changed: r.append(screen.blit(Menu.bgimage, TOPLEFT))
+      else: screen.blit(Menu.bgimage, TOPLEFT)
       r.append(screen.blit(toprotater.tempsurface, TOPLEFT))
       for i in range(DISPLAYED_ITEMS):
         if i + topitem < len(self.items):

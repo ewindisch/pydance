@@ -154,8 +154,8 @@ def do(screen, songdata):
         ["Top Arrows", onoff_opt, ("showtoparrows",)],
         ["Scale Arrows", rotate_index_opt,
          ("arrowscale", ("shrink", "normal", "grow"))],
-        ["Scrolling", rotate_index_opt, ("reversescroll",
-                                         ("normal", "reverse", "center", "switchy"))],
+        ["Scrolling", rotate_index_opt, ("scrollstyle",
+                                         ("normal", "reverse", "center"))],
         ["Arrow Speed", rotate_opt, ('scrollspeed', [0.25, 0.5, 1, 1.5,
                                                      2, 4, 8])],
         ["Back", None, None]

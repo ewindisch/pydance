@@ -9,6 +9,7 @@ legend:
 0.6.4 - We're Hardcore!						[2003.XX.XX]
 + New step file parsers
   + Beginner and hardcore (smaniac/oni/challenge) difficulty.
++ New arrow scrolling mode, 'centered'.
 + New hold arrow display
 - 'mixerclock' option removed (it's now the only timing method).
 - 'transcolor' option removed in favor of new 'lyriccolor' syntax.

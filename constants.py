@@ -61,7 +61,7 @@ mainconfig = config.Config({ # Wow we have a lot of options
   "stickycombo": 1,  "lowestcombo": 4,  "totaljudgings": 1,  "stickyjudge": 1,
   "lyriccolor": "cyan/aqua",
   "onboardaudio": 0, "masteroffset": 0,
-  "reversescroll": 0, "scrollspeed": 1,
+  "scrollstyle": 0, "scrollspeed": 1,
   "explodestyle": 3, "arrowspin": 0, "arrowscale" : 1,
   "vesacompat": 0, "fullscreen": 0,
   "sortmode": 0,

@@ -4,9 +4,13 @@ from gfxtheme import GFXTheme
 import fontfx, spritelib, colors
 
 class Player:
-  def __init__(self, pid, POS, holdtext, combos, mode = "SINGLE"):
+  def __init__(self, pid, holdtext, combos, mode = "SINGLE"):
     self.theme = GFXTheme(mainconfig["gfxtheme"])
-    self.pos = POS
+    if mainconfig["scrollstyle"] == 2: self.top = 236
+    elif mainconfig["scrollstyle"] == 1: self.top = 408
+    else: self.top = 64
+    print self.top
+    
     self.pid = pid
     self.score = ScoringDisp(pid, "Player " + str(pid))
     if mainconfig["maxonilife"] == 0:
@@ -30,8 +34,7 @@ class Player:
 
   def set_song(self, steps, Judge): # FIXME factor these out
     self.steps = steps
-    arr, arrfx = self.theme.toparrows(self.steps.bpm, self.pos['top'],
-                                      self.pid)
+    arr, arrfx = self.theme.toparrows(self.steps.bpm, self.top, self.pid)
     self.toparr = arr
     self.toparrfx = arrfx
     self.judging_list = []
