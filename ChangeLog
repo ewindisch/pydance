@@ -19,7 +19,7 @@ Legend:
 + Courses (Oni/Nonstop) support; put the files in ~/.pydance/courses
   courses/ under your pydance installation directory. Currently only
   DWI/SM-style .crs files are supported.
-+ Gentoo's install system will no longer work for this release.
+! The 'mrt' theme is now distributed separately from the main source.
 * Several crashes were fixed.
 
 0.8.1 - Standard caution on the Probulator			[2003.09.12]
