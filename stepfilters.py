@@ -318,7 +318,7 @@ class PanelTransform(Transform):
 def generate_mode(song, difficulty, target_mode, pid):
   if target_mode in games.SINGLE: mode = "SINGLE"
   elif target_mode in games.VERSUS: mode = "VERSUS"
-  elif target_mode in games.COUPLE: mode = "COUPLE"
+  elif target_mode in games.ONLY_COUPLE: mode = "COUPLE"
   elif target_mode in games.DOUBLE: mode = "DOUBLE"
 
   steps = song.steps[mode][difficulty]

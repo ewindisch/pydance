@@ -900,7 +900,7 @@ class SongItem(object):
       if game not in self.difficulty and "VERSUS" in self.difficulty:
         self.difficulty[game] = copy.copy(self.difficulty["VERSUS"])
 
-    for game in games.COUPLE:
+    for game in games.ONLY_COUPLE:
       if game not in self.difficulty and "COUPLE" in self.difficulty:
         self.difficulty[game] = copy.copy(self.difficulty["COUPLE"])
 

@@ -80,6 +80,8 @@ SINGLE = [mode for mode in GAMES if (GAMES[mode].players == 1 and
 VERSUS = [mode for mode in GAMES if (GAMES[mode].players == 2 and
                                      not GAMES[mode].couple)]
 COUPLE = [mode for mode in GAMES if GAMES[mode].couple]
+ONLY_COUPLE = [mode for mode in GAMES if (GAMES[mode].couple and
+                                          not GAMES[mode].double)]
 DOUBLE = [mode for mode in GAMES if GAMES[mode].double]
 
 
