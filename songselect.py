@@ -274,6 +274,8 @@ class SongSelect(object):
     # shortened in the case of folders.
     self.all_songs = self.songs
 
+    self.random_songs = [s for s in self.all_songs if s.song.info["valid"]]
+
     players = games.GAMES[gametype].players
 
     self.bg = pygame.image.load(BACKGROUND).convert()
@@ -439,11 +441,15 @@ class SongSelect(object):
         if optionscreen.game_opt_driver(screen, self.game_config):
           self.scroll_out(self.index)
           OPEN_SOUND.play()
-          self.index = random.randint(0, len(self.all_songs) - 1)
-          s = self.all_songs[self.index]
-          if self.folders:
-            self.set_up_songlist(s.folder[SORT_NAMES[mainconfig["sortmode"]]])
-          self.index = self.songs.index(s)
+          if len(self.random_songs) != 0:
+            s = random.choose(self.random_songs)
+            if self.folders:
+              self.set_up_songlist(s.folder[SORT_NAMES[mainconfig["sortmode"]]])
+              self.index = self.songs.index(s)
+          else:
+            error.ErrorMessage(screen, ["Although you have songs, they're all",
+                                        "marked as invalid, which means a",
+                                        "good random one can't be chosen."])
 	changed = True
 
       elif ev[1] == E_SORT:
