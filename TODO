@@ -23,6 +23,8 @@ Gameplay
  - "Tug of war" lifebar in addition to the regular one.
  - Disney-style versus
  - Option for classic or Max/pyDDR style judging of jumps.
+ - Modifiers: Left, mirror, right, brake, boost, shuffle
+  - Fix shrink/grow holds
 
 STUFF ANNOUNCER SHOULD SAY
 --------------------------
