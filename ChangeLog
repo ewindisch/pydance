@@ -11,6 +11,7 @@ legend:
   + Beginner and hardcore (smaniac/oni/challenge) difficulty.
 + New hold arrow display
 + Bug fixes, optimizations, whippings, etc.
+  + Most notably, hold arrows are working wonderfully now.
 
 0.6.3 - Reasonable Starting Times!				[2003.05.17]
 + New song loading display and algorithm (at least 4-5 times faster).
