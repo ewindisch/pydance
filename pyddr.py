@@ -1075,8 +1075,12 @@ def dance(song, players, prevscr, ready_go):
         pygame.time.delay(1)
     else:
       background.fill(colors.BLACK)
+      screen.fill(colors.BLACK)
+      pygame.display.flip()
   else:
     background.fill(colors.BLACK)
+    screen.fill(colors.BLACK)
+    pygame.display.flip()
 
   for pid in range(len(players)):
     players[pid].score.add(tgroup)
@@ -1107,9 +1111,6 @@ def dance(song, players, prevscr, ready_go):
     for plr in players:
       tgroup.add(plr.combos)
   
-  bg = pygame.Surface(screen.get_size())
-  bg.fill(colors.BLACK)
-
   songtext = fontfx.zztext(song.title, 480,12)
   grptext = fontfx.zztext(song.artist, 160,12)
 
