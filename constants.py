@@ -96,7 +96,7 @@ player_config = {"spin": 0,
                  "fade": 0,
                  "size": 0,
                  "dark": 0,
-                 "jumps": 0,
+                 "jumps": 1,
                  "holds": 1,
                  "colortype": 4,
                  "scrollstyle": 0 }

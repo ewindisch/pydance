@@ -340,6 +340,8 @@ class Player(object):
           for (dir, num) in zip(self.game.dirs, ev.feet):
             if num & 1: judge.handle_arrow(dir, ev.when, num & 4)
 
+      if self.fade == 5: return # Stealth mode
+
       newsprites = []
       for ev in nevents:
         if ev.feet:

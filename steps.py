@@ -84,7 +84,7 @@ class Steps(object):
       stepfilters.rotate(song_steps, player.transform, playmode)
 
     if player.size: stepfilters.size(song_steps, player.size)
-    if player.jumps: stepfilters.jumps(song_steps, player.jumps)
+    if player.jumps != 1: stepfilters.jumps(song_steps, player.jumps)
     if not player.holds: stepfilters.remove_holds(song_steps, player.holds)
 
     if not player.secret_kind: stepfilters.remove_secret(song_steps)

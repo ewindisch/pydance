@@ -175,7 +175,7 @@ def remove_secret(steps):
 
 # Remove or add jumps:
 def jumps(steps, jump):
-  if jump == 1: remove_jumps(steps)
+  if jump == 0: remove_jumps(steps)
   elif jump == 2: wide(steps)
 
 def remove_jumps(steps):
