@@ -163,13 +163,11 @@ class Steps:
     while (head and head.when <= (time + 2 * toRealTime(head.bpm, 1))):
       events.append(head)
       head = head.next
-    bpm = None
+    bpm = self.playingbpm
     self.head = head
 
     if head and fhead:
-      bpm = self.playingbpm
-      arrowtime = 512.0 / bpm
-      ntime = time + arrowtime * 2/self.speed # FIXME We need real math here
+      ntime = (time + toRealTime(head.bpm, 64)) / self.speed
       while fhead and fhead.when <= ntime:
         self.playingbpm = fhead.bpm
         nevents.append(fhead)

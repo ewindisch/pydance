@@ -12,10 +12,8 @@ UI Fixes & Improvements
  - "Ready? Go!" screen
 
 Code Refactors & Cleanups
- - Removal of Song (done)
- - Replace with "Steps" object in the Player object (yep)
-  - Generated from SongItem (hooray!)
-  - '.dance' format forthcoming.
+ - Rewrite event queue to use a list instead of linked list
+ - '.dance' format forthcoming.
  - Player-as-object patch (in progress, needs a lot of work)
  - Judge refactor (for pluggable grading algorithms)
 
