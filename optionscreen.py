@@ -60,10 +60,14 @@ def game_opt_driver(screen, config):
     ]
   clrs = [colors.color["green"]]
 
-  while ((ui.ui.states[(0, ui.SELECT)] or ui.ui.states[(1, ui.SELECT)]) and
+  while ((ui.ui.states[(-2, ui.SELECT)] or
+          ui.ui.states[(0, ui.SELECT)] or
+          ui.ui.states[(1, ui.SELECT)]) and
          pygame.time.get_ticks() - start < 1500): ev = ui.ui.poll()
 
-  if ui.ui.states[(0, ui.SELECT)] or ui.ui.states[(1, ui.SELECT)]:
+  if (ui.ui.states[(-2, ui.SELECT)] or
+      ui.ui.states[(0, ui.SELECT)] or
+      ui.ui.states[(1, ui.SELECT)]):
     op = OptionScreen([config], "Game Options", menu, clrs)
     op.display(screen)
     return False
@@ -85,6 +89,7 @@ class OptionScreen(object):
     self.colors = colors
 
   def display(self, screen):
+    ui.ui.forget_repeat()
     baseimage = pygame.transform.scale(screen, [640, 480])
 
     # Animate the menu opening

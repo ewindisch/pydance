@@ -77,6 +77,9 @@ class UI(object):
 
     return (pid, nev)
 
+  def forget_repeat(self):
+    self.last_press = ((None, None), None)
+
   def wait(self, delay = 20):
     ev = (-1, PASS)
     while ev[1] == PASS:
