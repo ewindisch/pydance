@@ -44,7 +44,4 @@ class Announcer:
       mood = (int(max(mood / 100.0 - 0.1, 0) * l), # don't < 0
               int(min(mood / 100.0 + 0.1, 0.999) * l)) # don't == l
 
-    if mood[0] == mood[1]:
-      self.__play(self.sections[sec][mood[0]])
-    else:
-      self.__play(self.sections[sec][random.randint(mood[0], mood[1])])
+    self.__play(self.sections[sec][random.randint(mood[0], mood[1])])
