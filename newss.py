@@ -242,10 +242,31 @@ class BannerDisplay(pygame.sprite.Sprite):
 
   def _render(self):
     self.image = pygame.Surface(self._box.get_size(), SRCALPHA, 32)
-    r = self._banner.get_rect()
-    r.centerx, r.top = self.image.get_rect().size[0] / 2, 10
     self.image.blit(self._box, [0, 0])
-    self.image.blit(self._banner, r)
+
+    r_b = self._banner.get_rect()
+    r_b.centerx, r_b.top = self.image.get_rect().size[0] / 2, 10
+    self.image.blit(self._banner, r_b)
+
+    c1, c2 = [255, 255, 255], [30, 30, 30]
+
+    title = fontfx.shadow(self._title, pygame.font.Font(None, 36), 2, c1, c2)
+    r_t = title.get_rect()
+    r_t.center = [179, 240]
+    self.image.blit(title, r_t)
+
+    artist = fontfx.shadow(self._artist, pygame.font.Font(None, 30), 2, c1, c2)
+    r_a = artist.get_rect()
+    r_a.center = [179, 320]
+    self.image.blit(artist, r_a)
+
+    if self._subtitle:
+      subtitle = fontfx.shadow(self._subtitle, pygame.font.Font(None, 20),
+                               1, c1, c2)
+      r_s = subtitle.get_rect()
+      r_s.center = [179, 270]
+      self.image.blit(subtitle, r_s)
+
     self.rect = self.image.get_rect()
     self.rect.center = self._center
 
