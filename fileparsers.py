@@ -545,7 +545,7 @@ class SMFile(GenericFile):
 
     self.find_mixname()
     for k in ("banner", "background", "filename"):
-      if not os.path.isfile(self.info.get(k, "")):
+      if k in self.info and not os.path.isfile(self.info[k]):
         del(self.info[k])
     
     if not (self.info.has_key("background") or self.info.has_key("banner")):

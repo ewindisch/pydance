@@ -249,7 +249,7 @@ class SongSelect:
     self.player_configs = [copy.copy(player_config)]
     self.player_diff_names = [self.songs[self.index].song.diff_list[self.gametype][self.player_diffs[0]]]
 
-    if self.numsongs > 100 and mainconfig["folders"]:
+    if self.numsongs > 60 and mainconfig["folders"]:
       self.set_up_folders()
       name = SORT_NAMES[mainconfig["sortmode"]]
       folder = self.folders[name].keys()[0]
