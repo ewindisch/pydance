@@ -497,9 +497,6 @@ class DWIFile(MSDFile):
         rest = rest.replace(" ", "")
         self.bpms = [(float(beat), float(bpm)) for beat, bpm in
                      [change.split("=") for change in rest.split(",")]]
-        self.info.setdefault("bpmdisplay",
-                             [self.info["bpm"]] + [b[1] for b in self.bpms])
-        
       elif parts[0] == "FREEZE":
         rest = rest.replace(" ", "")
         self.freezes = [(float(beat), float(wait)/1000) for beat, wait in
