@@ -16,15 +16,15 @@ class AbstractArrow(pygame.sprite.Sprite):
 
     self.dir = arrow.dir
     self.endbeat = beat / 4
+    self.arrow = arrow
 
-    # NB - Making a new surface, then blitting the image in place, is 20%
-    # slower than calling image.convert() (and is longer to type).
-    self.image = arrow.image.convert()
+    self.image = self.arrow.get_image(0).convert()
+    self.baseimage = self.image
+    self.rect = self.image.get_rect()
+    self.rect.left = self.arrow.left
 
     self.width = player.game.width
     self.battle = song.battle
-    self.rect = self.image.get_rect()
-    self.rect.left = arrow.left
     self.secret = secret
 
     if mainconfig['assist'] and self.dir in ArrowSprite.samples:
@@ -78,7 +78,6 @@ class AbstractArrow(pygame.sprite.Sprite):
     self.battle = song.battle
 
     self.diff = self.top - self.bottom
-    self.baseimage = self.image
 
     # NB - Although "beats" refers to 16th notes elsewhere, this refers to
     # "proper" beats, meaning a quarter note.
@@ -118,6 +117,13 @@ class AbstractArrow(pygame.sprite.Sprite):
     return alp
 
   def update(self, curtime, curbpm, beat, lbct):
+    # NB - Making a new surface, then blitting the image in place, is 20%
+    # slower than calling image.convert() (and is longer to type).
+    self.image = self.arrow.get_image(self.endbeat - beat).convert()
+    self.baseimage = self.image
+    self.rect = self.image.get_rect()
+    self.rect.left = self.arrow.left
+
     if self.sample and curtime >= self.endtime:
       self.sample.play()
       self.sample = None
@@ -183,13 +189,12 @@ class ArrowSprite(AbstractArrow):
     # int(beatsleft * speed * self.diff / self.beatsleft).
     top = self.top + self.vector * int(beatsleft * speed * 64)
     
-    self.image = self.baseimage
-  
     if top > 480: top = 480
 
     pct = abs(float(top - self.top) / self.diff)
 
     self.rect, self.image = self.scale_spin_battle(self.baseimage, top, pct)
+    self.image.set_colorkey(self.image.get_at([0, 0]))
     self.image.set_alpha(self.get_alpha(curtime, beatsleft, top))
 
 class HoldArrowSprite(AbstractArrow):
@@ -204,19 +209,17 @@ class HoldArrowSprite(AbstractArrow):
 
     self.broken = True
 
+  def update(self, curtime, curbpm, beat, lbct):
+    AbstractArrow.update(self, curtime, curbpm, beat, lbct)
+
     self.top_image = pygame.surface.Surface([self.width, self.width / 2])
     self.top_image.blit(self.image, [0, 0])
-    self.top_image.set_colorkey(self.top_image.get_at([0, 0]), RLEACCEL)
 
     self.bottom_image = pygame.surface.Surface([self.width, self.width / 2])
     self.bottom_image.blit(self.image, [0, -self.width / 2])
-    self.bottom_image.set_colorkey(self.bottom_image.get_at([0, 0]), RLEACCEL)
 
     self.center_image = pygame.surface.Surface([self.width, 1])
     self.center_image.blit(self.image, [0, -self.width / 2 + 1])
-
-  def update(self, curtime, curbpm, beat, lbct):
-    AbstractArrow.update(self, curtime, curbpm, beat, lbct)
 
     if curtime > self.timef2:
       self.kill()
@@ -268,4 +271,5 @@ class HoldArrowSprite(AbstractArrow):
     image.blit(self.bottom_image, [0, holdsize + self.width / 2])
 
     self.rect, self.image = self.scale_spin_battle(image, top, pct)
+    self.image.set_colorkey(self.image.get_at([0, 0]))
     self.image.set_alpha(self.get_alpha(curtime, beatsleft_top, top))

@@ -149,7 +149,7 @@ class ArrowSet(object):
     for n in arrows: self.__dict__[n] = arrows[n] 
     self.arrows = arrows
 
-  # allow access by instance['l']
+  # allow access by instance['l'] - FIXME - Still necessary?
   def __getitem__ (self,item):
     return getattr(self,item)
 
@@ -158,8 +158,29 @@ class ScrollingArrow(object):
   def __init__ (self, theme, dir, color, left):
     self.dir = dir
     self.left = left
-    self.image = theme.get_arrow("c", dir, color).convert()
-    self.image.set_colorkey(self.image.get_at([0, 0]), RLEACCEL)
+    self._image = theme.get_arrow("c", dir, color).convert()
+    if self._image.get_width() != self._image.get_height():
+      w = self._image.get_width()
+      h = self._image.get_height()
+      frames = h / w
+      if frames * w != h: raise RuntimeError("Theme image is %dx%d." % (w, h))
+
+      self._images = []
+      for i in range(frames):
+        s = pygame.Surface([w, w])
+        s.blit(self._image, [0, -i * w])
+        self._images.append(s)
+      self._image = None
+
+
+  def get_image(self, beat):
+    if self._image: return self._image
+    else:
+      beat %= 16.0
+      beat /= 4.0
+      pct = beat - int(beat)
+      i = int(float(len(self._images)) * pct)
+      return self._images[i]
 
 # FIXME: What follows probably doesn't belong here, but elsewhere. There's
 # too much logic for it to be just theming data.
@@ -258,17 +279,17 @@ class ArrowFX(Listener, pygame.sprite.Sprite):
   
   def stepped(self, pid, dir, time, tinttype, combo):
     if pid != self.pid or dir != self.dir: return
-    if tinttype not in self.colors: return
+    elif not tinttype or tinttype == "M": return
 
     self.combo = combo
     self.presstime = time
     self.tintimg = pygame.Surface(self.baseimg.get_size(), 0, 16)
     self.tintimg.blit(self.baseimg, (0,0))
     tinter = pygame.surface.Surface(self.baseimg.get_size())
-    tinter.fill(self.colors[tinttype])
+    tinter.fill(self.colors.get(tinttype, [0, 0, 255]))
     tinter.set_alpha(127)
     self.tintimg.blit(tinter,(0,0))
-    self.tintimg.set_colorkey(self.tintimg.get_at((0,0)))
+    self.tintimg.set_colorkey(self.tintimg.get_at([0, 0]))
     self.tintimg = self.tintimg.convert()
     if self.direction == 1: self.direction = -1
     else: self.direction = 1
