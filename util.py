@@ -1,8 +1,10 @@
+import fnmatch, os
+
 from constants import *
 
 # FIXME: We should inline this. Really.
 def toRealTime(bpm, steps):
-    return steps*0.25*60.0/bpm
+  return steps*0.25*60.0/bpm
 
 class ErrorMessage:
   def __init__(self, screen, lines):
@@ -32,3 +34,24 @@ class ErrorMessage:
     while ev[1] != E_START and ev[1] != E_QUIT:
       pygame.time.wait(50)
       ev = event.poll()
+
+# Search the directory specified by path recursively for files that match
+# the shell wildcard pattern. A list of all matching file names is returned,
+# with absolute paths.
+def find (path, patterns):
+  matches = []
+  path = os.path.expanduser(path)
+
+  if os.path.isdir(path):
+    list = os.listdir(path)
+    for f in list:
+      filepath = os.path.join(path, f)
+      if os.path.isdir(filepath):
+        matches.extend(find(filepath, patterns))
+      else:
+        for pattern in patterns:
+          if fnmatch.fnmatch(filepath, pattern):
+            matches.append(filepath)
+            break
+  return matches
+

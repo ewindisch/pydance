@@ -68,13 +68,10 @@ Text Sections:
 <Description> ::= "DESCRIPTION" <Newline> (<LongString> <Newline>)+ <EndToken>
 
 Step Sections:
-<StepSection> ::= <GameMode> <Difficulty> (<Sequence>+ | <Include>) <EndToken>
+<StepSection> ::= <GameMode> <Difficulty> <Sequence>+ <EndToken>
 <GameMode> ::= <String> <Newline>
 <Difficulty> ::= <String> <Whitespace> <PosInt> <Newline>
-<Include> ::= "I" <Whitespace> <String> <Whitespace> <String>
 <Sequence> ::= (<Comment> | <Buttons> | <Command>) <Newline>
-
-<Comment> ::= "#" <LongString>
 
 Note Sequences:
 <Buttons> ::= <NoteType> <Whitespace> <ButtonPresses>
@@ -82,13 +79,14 @@ Note Sequences:
 <ButtonPresses> ::= (0 | 1 | 2 | 3)+
 
 Song Commands:
-<Command> ::= <ChangeBPM> | <Ready> | <Wait> | <Stop> | <Delay> | <Atsec>
+<Command> ::= <ChangeBPM> | <Ready> | <Wait> | <Stop> | <Delay> | <Lyric>
 <ChangeBPM> ::= "B" <Whitespace> <Float>
 <Ready> ::= "R"
 <Wait> ::= "W" <Whitespace> <Float>
 <Stop> ::= "S" <Whitespace> <Float>
 <Delay> ::= "D" <Whitespace> <Float>
-<Atsec> ::= "A" <Whitespace> <Float>
+<Lyric> ::= "L" <Whitespace> <PosInt> <Whitespace> <Float> <Whitespace>
+                  <LongString>
 
 Informal & Semantic Description
 -------------------------------

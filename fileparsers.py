@@ -1,5 +1,86 @@
 import os
 
+# FIXME: DanceFile and StepFile can easily share a parent class.
+
+class DanceFile:
+  WAITING, METADATA, DESCRIPTION, LYRICS, GAMETYPE, STEPS = range(6)
+
+  def __init__(self, filename, need_steps):
+    self.filename = filename
+    self.difficulty = {}
+    self.steps = {}
+    self.info = {}
+    self.lyrics = {}
+    self.description = None
+    self.need_steps = need_steps
+
+    parsers = [self.parse_waiting, self.parse_metadata, self.parse_description,
+               self.parse_lyrics, self.parse_gametype, self.parse_steps]
+
+    state = DanceFile.METADATA
+    state_data = [None, None]
+
+    f = file(filename)
+
+    for line in f:
+      line = line.strip()
+      if line == "" or line[0] == "#": continue
+      elif line == "end": state = DanceFile.WAITING
+      else: state = parsers[state](line, state_data)
+
+    dir, name = os.path.split(filename)
+
+    for t in ("banner", "filename", "movie", "background"):
+      if self.info.has_key(t):
+        if not os.path.isfile(self.info[t]):
+          self.info[t] = os.path.join(dir, self.info[t])
+          if not os.path.isfile(self.info[t]): del(self.info[t])
+
+    if self.info.has_key("preview"):
+      start, length = self.info["preview"].split()
+      self.info["preview"] = (float(start), float(length))
+
+  def parse_metadata(self, line, data):
+    parts = line.split()
+    self.info[parts[0]] = " ".join(parts[1:])
+    return DanceFile.METADATA
+
+  def parse_waiting(self, line, data):
+    if line == "DESCRIPTION": return DanceFile.DESCRIPTION
+    elif line == "LYRICS": return DanceFile.LYRICS
+    else:
+      data[0] = line
+      if not self.difficulty.has_key(line):
+        self.difficulty[line] = {}
+        self.steps[line] = {}
+      return DanceFile.GAMETYPE
+
+  def parse_gametype(self, line, data):
+    data[1], diff = line.split()
+    self.difficulty[data[0]][data[1]] = int(diff)
+    self.steps[data[0]][data[1]] = []
+    return DanceFile.STEPS
+
+  def parse_steps(self, line, data):
+    if not self.need_steps: return DanceFile.STEPS
+    parts = line.split()
+    steps = [parts[0]]
+    if parts[0] in ("B", "W", "S", "D"): steps.append(float(parts[1]))
+    elif parts[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x"):
+      steps.extend([int(s) for s in parts[1]])
+    elif parts[0] == "L": steps.extend((int(parts[1]), " ".join(parts[2:])))
+
+    self.steps[data[0]][data[1]].append(steps)
+    return DanceFile.STEPS
+
+  def parse_lyrics(self, line, data):
+    parts = line.split()
+    self.lyrics.append((float(parts[0]), int(parts[1]), " ".join(parts[2:])))
+    return DanceFile.LYRICS
+
+  def parse_description(self, line, data):
+    return DanceFile.DESCRIPTION
+
 class StepFile: 
   METADATA, GAMETYPE, LYRICS, STEPS, WAITING = range(5)
   word_trans = { "whole": "o", "halfn": "h", "qurtr": "q", "eight": "e",
@@ -14,7 +95,7 @@ class StepFile:
     self.difficulty = {}
     self.info = {}
     self.lyrics = []
-    f = open(filename)
+    f = file(filename)
     # parser states
     state = StepFile.METADATA
     state_data = [None, None] # sec, diff, or time in lyric mode
@@ -108,8 +189,10 @@ class StepFile:
           try: parts[i] = float(p)
           except ValueError: pass
       i += 1
-    if parts[0] == "lyric": parts = ["L", 1, " ".join([str(i) for i in parts[1:]])]
-    elif parts[0] == "trans": parts = ["L", 0, " ".join([str(i) for i in parts[1:]])]
+    if parts[0] == "lyric":
+      parts = ["L", 1, " ".join([str(i) for i in parts[1:]])]
+    elif parts[0] == "trans":
+      parts = ["L", 0, " ".join([str(i) for i in parts[1:]])]
     self.steps[data[0]][data[1]].append(parts)
     return StepFile.STEPS, data
 
@@ -133,7 +216,8 @@ class StepFile:
       if not self.difficulty.has_key(data[0]): self.difficulty[data[0]] = {}
       return StepFile.GAMETYPE, data
 
-formats = ((".step", StepFile), )
+formats = ((".step", StepFile),
+           (".dance", DanceFile))
 
 DIFFICULTIES = ["BEGINNER", "LIGHT", "BASIC", "ANOTHER", "STANDARD", "TRICK",
                 "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI"]
@@ -150,6 +234,14 @@ def sorted_diff_list(difflist):
 
 # Encapsulates and abstracts the above classes
 class SongItem:
+
+  defaults = { "valid": 1,
+               "endat": 0.0,
+               "preview": (45.0, 10.0),
+               "startat": 0.0,
+               "revision": "1970.01.01",
+               "gap": 0 }
+  
   def __init__(self, filename, need_steps = True):
     song = None
     for pair in formats:
@@ -162,18 +254,17 @@ class SongItem:
     self.info = song.info
 
     # Sanity checks
-    for k in ("bpm", "gap", "title", "artist", "filename"):
+    for k in ("bpm", "title", "artist", "filename"):
       if not self.info.has_key(k):
-        raise RuntimError
+        raise RuntimeError
 
     # Default values
     for k in ("subtitle", "mix", "background", "banner",
                 "author", "revision", "md5sum", "movie"):
       if not self.info.has_key(k): self.info[k] = None
 
-    for k, v in (("valid", 1), ("endat", 0.0), ("preview", (45.0, 10.0)),
-                 ("startat", 0.0), ("revision", "1970.01.01"), ("gap", 0)):
-      if not self.info.has_key(k): self.info[k] = v
+    for k in SongItem.defaults:
+      if not self.info.has_key(k): self.info[k] = SongItem.defaults[k]
 
     for k in ("filename", "background", "banner"):
       if self.info[k] and not os.path.isfile(self.info[k]):
@@ -192,3 +283,46 @@ class SongItem:
     self.diff_list = {}
     for key in self.difficulty:    
       self.diff_list[key] = sorted_diff_list(self.difficulty[key])
+
+  def write(self, filename):
+    f = file(filename, "w")
+
+    # Write metadata
+    for key in ("filename", "title", "subtitle", "artist", "mix", "bpm",
+                "startat", "endat", "background", "banner", "md5sum",
+                "gap", "author", "movie", "revision", "valid"):
+      if (self.info[key] is not None and
+          self.info[key] != SongItem.defaults.get(key)):
+        f.write(key + " " + str(self.info[key]) + "\n")
+
+    self.info["gap"] = int(self.info["gap"])
+      
+    if self.info["preview"] != SongItem.defaults["preview"]:
+      f.write("preview " + str(self.info["preview"][0]) + " " +
+              str(self.info["preview"][1]) + "\n")
+
+    f.write("end\n")
+
+    if self.description is not None:
+      paras = description.split("\n ").join("\n .\n")
+      f.write("DESCRIPTION\n" + paras + "\nend\n")
+      
+    if self.lyrics != []:
+      f.write("LYRICS\n")
+      for lyr in lyrics:  f.write(" ".join([str(l) for l in lyrics]) + "\n")
+      f.write("end\n")
+
+    for game in self.difficulty:
+      for diff in self.difficulty[game]:
+        f.write(game + "\n")
+        f.write(diff + " " + str(self.difficulty[game][diff]) + "\n")
+        for step in self.steps[game][diff]:
+          extra = ""
+          if step[0] in ("B", "W", "S", "D"): extra = str(step[1])
+          elif step[0] in ("o", "h", "q", "e", "w", "s", "f", "t", "x"):
+            extra = "".join([str(i) for i in step[1:]])
+          elif step[0] == "L": extra = " ".join([str(i) for i in step[1:]])
+          f.write(step[0] + " " + extra + "\n")
+        f.write("end\n")
+
+    f.close()

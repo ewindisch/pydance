@@ -10,7 +10,7 @@
 import pygame
 from constants import *
 
-from util import ErrorMessage, toRealTime
+from util import toRealTime
 from announcer import Announcer
 from config import Config
 from gfxtheme import GFXTheme
@@ -19,7 +19,7 @@ from spritelib import *
 
 import fontfx, menudriver, fileparsers, colors, gradescreen, steps
 
-import os, sys, random, fnmatch, operator, string
+import os, sys, random, operator, string, util
 
 from stat import *
 
@@ -527,24 +527,6 @@ class TimeDisp(pygame.sprite.Sprite):
       else:
         self.blahmod += 1
 
-# Search the directory specified by path recursively for files that match
-# the shell wildcard pattern. A list of all matching file names is returned,
-# with absolute paths.
-def find (path, pattern):
-  matches = []
-  path = os.path.expanduser(path)
-
-  if os.path.isdir(path):
-    list = os.listdir(path)
-    for f in list:
-      filepath = os.path.join(path, f)
-      if os.path.isdir(filepath):
-        matches.extend(find(filepath, pattern))
-      else:
-        if fnmatch.fnmatch(filepath, pattern):
-          matches.append(filepath)
-  return matches
-
 class ArrowSprite(CloneSprite):
 
   # Assist mode sound samples
@@ -858,7 +840,7 @@ def main():
   fileList = []
   for dir in songdir.split(os.pathsep):
     print "Searching", dir
-    fileList += find(dir, '*.step')
+    fileList += util.find(dir, ('*.step', '*.dance')) # Python's matching SUCKS
 
   totalsongs = len(fileList)
   parsedsongs = 0
@@ -879,8 +861,8 @@ def main():
   r = pbar.render(0).get_rect()
   r.center = (320, 240)
   for f in fileList:
-    try: songs.append(fileparsers.SongItem(f, False))
-    except: print "Error loading " + f
+    songs.append(fileparsers.SongItem(f, False))
+    #except: print "Error loading " + f
     img = pbar.render(parsedsongs / totalsongs)
     pygame.display.update(screen.blit(img, r))
     parsedsongs += 100.0
@@ -889,12 +871,13 @@ def main():
   while ev[1] != E_PASS: ev = event.poll()
 
   if len(songs) < 1:
-    ErrorMessage(screen, ("You don't have any songs or step files. Check out",
-                          "http://icculus.org/pyddr/get.php",
-                          "and download some free ones."
-                          " ", " ", " ",
-                          "If you already have some, make sure they're in",
-                          songdir))
+    util.ErrorMessage(screen,
+                      ("You don't have any songs or step files. Check out",
+                       "http://icculus.org/pyddr/get.php",
+                       "and download some free ones."
+                       " ", " ", " ",
+                       "If you already have some, make sure they're in",
+                       songdir))
     print "You don't have any songs. http://icculus.org/pyddr/get.php."
     sys.exit(1)
 
@@ -1098,8 +1081,8 @@ def dance(song, players, prevscr):
   song.init()
 
   if song.crapout != 0:
-    ErrorMessage(screen, ["The audio file for this song", song.file,
-                          "could not be found."])
+    util.ErrorMessage(screen, ("The audio file for this song", song.file,
+                               "could not be found."))
     return False # The player didn't fail.
   
   screenshot = 0
