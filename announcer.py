@@ -33,7 +33,7 @@ class Announcer(Listener):
       print "Error: Cannot load announcer theme '%s'." % name
       sys.exit(1)
 
-    fi = open(os.path.join(filename, "djtheme.cfg"), "r")
+    fi = file(os.path.join(filename, "djtheme.cfg"), "r")
     sec = ""
     self.lasttime = -1000000
     for line in fi:

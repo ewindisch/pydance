@@ -202,7 +202,7 @@ class MSDFile(GenericFile):
   def __init__(self, filename, need_steps):
     GenericFile.__init__(self, filename, need_steps)
     lines = []
-    f = open(filename)
+    f = file(filename)
     for line in f:
       if line.find("//") != -1: line = line[:line.find("//")]
       line = line.strip()
@@ -226,7 +226,7 @@ class MSDFile(GenericFile):
 
   # MSD-style files use DWI's .lrc lyric format
   def parse_lyrics(self, filename):
-    f = open(filename)
+    f = file(filename)
     offset = 0
     for line in f:
       line = line.strip()
