@@ -1,12 +1,12 @@
 Required for 1.0
 ----------------
 Empty "Bugs" section of BUGS file.
-Best grades stored.
 Real documentation for end-users.
 Some sort of documentation for theme and step making (it can be crappy).
 Funky credits screen.
 At least some minor in-game help.
-Better graphics in the course selection screen.
+Song/game selector merge/rewrite -- looks sort of like IIDX, mockups
+  coming before implementation.
 No crashes or major bugs for 5 days after the last CVS check in.
 
 Before 1.0 If "Time"
@@ -16,13 +16,11 @@ Proper DMX and EZ2 support...
 Different game types for each player.
 Modifiers in courses (this is pretty high priority).
 Player's Best/Worst
+Less ugly grading screen (like, a real grading screen).
 Announcer. Really. Look hard.
 
 Definitely Not Touching Until After 1.0
 ---------------------------------------
-Song/game selector merge/rewrite -- looks sort of like IIDX, mockups
-  coming before implementation.
-Less ugly grading screen (like, a real grading screen).
 Combat (Disney-style) versus.
 Challenge mode.
 4 players / 2 player doubles for some modes.
