@@ -52,12 +52,18 @@ class ImageDisplay(pygame.sprite.Sprite):
     self._cache = {None: pygame.Surface([0, 0])}
     self._center = center
     self._image = self._cache[None]
+    self._oldimage = self._cache[None]
+    self._changed_time = pygame.time.get_ticks() - 200
     self.set_image(filename)
-    self._changed_time = pygame.time.get_ticks() - 250
 
   def set_image(self, filename):
-    self._oldimage = self._image
-    self._changed_time = pygame.time.get_ticks()
+    t = pygame.time.get_ticks()
+    if t - self._changed_time < 200:
+      self._changed_time = t - (200 - (t - self._changed_time))
+    elif t - self._changed_time < 400:
+      self._changed_time = t - (400 - (t - self._changed_time))
+    else:
+      self._changed_time = t
     if filename in self._cache:
       self._image = self._cache[filename]
     else:
@@ -66,15 +72,16 @@ class ImageDisplay(pygame.sprite.Sprite):
 
   def update(self, time):
     if time - self._changed_time > 400:
+      self._oldimage = self._image
       self.image = self._image
     elif time - self._changed_time > 200:
-      x = self._image.get_width()
       p = (time - self._changed_time - 200) / 200.0
-      y = int(p * self._image.get_height())
+      x = int(p * self._image.get_width())
+      y = self._image.get_height()
       self.image = pygame.transform.scale(self._image, [x, y])
     else:
       p = 1 - (time - self._changed_time) / 200.0
-      x = int(p * self._oldimage.get_width())
+      x = max(0, int(p * self._oldimage.get_width()))
       y = self._oldimage.get_height()
       self.image = pygame.transform.scale(self._oldimage, [x, y])
     self.rect = self.image.get_rect()

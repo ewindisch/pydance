@@ -24,8 +24,12 @@ VALUES = [GAMES, TYPES, SS]
 
 IMAGES = {
     "4 panel": "select-4p.png",
+    "5 panel": "select-5p.png",
     "6 panel": "select-6p.png",
     "8 panel": "select-8p.png",
+    "9 panel": "select-9p.png",
+    "Parapara": "select-para.png",
+    "DMX": "select-dmx.png"
     }
 
 SELECTORS = {
