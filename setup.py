@@ -6,34 +6,32 @@ import os, sys
 # Check for the presence of appropriate Python and Pygame versions.
 def sanity_check():
   print "Checking for appropriate libraries."
-  sys.stdout.write("Checking Python version... ")
-  if sys.version_info[0] < 2 and sys.version_info[1] < 2:
+  print "Checking Python version... ",
+  print sys.version[:6] + "."
+  if sys.version_info < (2, 2):
     print "Versions of Python less than 2.2 are not supported by pydance."
     print "Visit http://www.python.org to upgrade."
     sys.exit(1)
-  else: print "2.2.x or greater"
 
   try:
-    sys.stdout.write("Checking for Pygame... ")
+    print "Checking for Pygame... ",
     import pygame
-    ver = pygame.version.ver.split(".")
-    if int(ver[0]) == 1 and int(ver[1]) < 5 and int(ver[2]) < 5:
+    print pygame.version.ver
+    if pygame.version.vernum < (1, 5, 5):
       print "You have pygame, but a version less than 1.5.5."
       print "Visit http://www.pygame.org to upgrade."
       sys.exit(1)
-    else:
-      print pygame.version.ver
   except ImportError:
     print "You don't seem to have pygame installed."
     print "Visit http://www.pygame.org to install it."
 
 def detect_real_os():
-  sys.stdout.write("Detecting your operating system... ")
+  print "Detecting your operating system... ",
   if os.name == "nt":
     print "Windows"
     return "win32"
   elif os.name == "posix":
-    sys.stdout.write("POSIX - ")
+    print "POSIX -",
     if os.path.islink("/System/Library/CoreServices/WindowServer"):
       print "MacOS X"
       return "macosx"
