@@ -1,6 +1,6 @@
 # Code to construct pyDDR's menus
 
-import pygame, menus, os, sys, copy
+import pygame, menus, os, sys, copy, colors
 
 from constants import *
 from announcer import Announcer
@@ -155,8 +155,8 @@ def do(screen, songselect, songdata):
                                     (192, 'bright'),
                                     (255, 'very bright')])],
         ["Lyrics", onoff_opt, ("showlyrics",)],
-        ["Main Lyrics", rotate_opt, ("lyriccolor", lyric_colors.keys())],
-        ["Other Lyrics", rotate_opt, ("transcolor", lyric_colors.keys())],
+        ["Main Lyrics", rotate_opt, ("lyriccolor", colors.color.keys())],
+        ["Other Lyrics", rotate_opt, ("transcolor", colors.color.keys())],
         ["FPS Display", onoff_opt, ('fpsdisplay',)],
         ["Back", None, None]
         ),

@@ -116,11 +116,23 @@ class SongItem:
       print filename, "is in an unsupported format."
       raise NotImplementedError()
     self.info = song.info
+
+    # Sanity checks
+    for k in ("bpm", "offset", "song", "group", "file"):
+      if not self.info.has_key(k):
+        raise RuntimError
+
+    for k in ("file", "bg", "banner"):
+      if self.info.has_key(k) and not os.path.isfile(self.info[k]):
+        raise RuntimeError
+
     self.info["bpm"] = float(self.info["bpm"])
     if self.info.has_key("offset"):
       self.info["offset"] = int(self.info["offset"])
+    else: self.info['offset'] = 0
     self.steps = song.steps
     self.lyrics = song.lyrics
     self.difficulty = song.difficulty
     self.diff_list = song.diff_list
     self.filename = filename
+

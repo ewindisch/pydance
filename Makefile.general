@@ -1,6 +1,6 @@
 MANPAGES += docs/man
 UTILS += utils/dwi2step.py utils/findbpm.py utils/lyrictag.py utils/step2dwi.py utils/stepshrink.py utils/msd2step.py
-PYMODS += config.py announcer.py fontfx.py input.py constants.py menus.py menudriver.py spritelib.py gfxtheme.py songselect.py fileparsers.py
+PYMODS += config.py announcer.py fontfx.py input.py constants.py menus.py menudriver.py spritelib.py gfxtheme.py songselect.py fileparsers.py colors.py
 DATA += themes images sound
 
 clean:
@@ -10,7 +10,7 @@ distclean: clean
 	rm -f pyddr.cfg Makefile
 
 cvsclean: distclean
-	rm -rf CVS */CVS */*/CVS */*/*/CVS */*/*/*/CVS menuhelp
+	rm -rf CVS */CVS */*/CVS */*/*/CVS */*/*/*/CVS menuhelp ddrmat
 
 doc:
 	lynx -dump docs/README.html > README

@@ -1,4 +1,4 @@
-import pygame
+import pygame, colors
 from constants import *
 from fontfx import TextZoomer
 from spritelib import BGimage, SimpleSprite
@@ -41,7 +41,7 @@ class MenuItem:
 
   def activate(self, ev): # Note - event ID, not an event tuple
     if ev == E_SELECT:
-      self.rgb = WHITE
+      self.rgb = colors.WHITE
       self.alpha = SOLID
       self.render()
     elif ev == E_UNSELECT:
@@ -119,7 +119,7 @@ class Menu:
     if ev == E_START:
       self.display()
     elif ev == E_SELECT:
-      self.rgb = WHITE
+      self.rgb = colors.WHITE
       self.alpha = SOLID
       self.render()
     elif ev == E_UNSELECT:
@@ -135,7 +135,7 @@ class Menu:
     curitem = 0
     topitem = 0
     toprotater = TextZoomer(self.text, FONTS[60], (640, 64),
-                            (178, 110, 0), WHITE)
+                            (178, 110, 0), colors.WHITE)
 
     self.items[curitem].activate(E_SELECT)
 

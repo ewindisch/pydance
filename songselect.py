@@ -1,7 +1,7 @@
 # The song selector; take songs with metadata, output pretty pictures,
 # let people select difficulties, and dance.
 
-import os, string, pygame, random, copy
+import os, string, pygame, random, copy, colors
 from constants import *
 
 import spritelib, announcer
@@ -14,11 +14,11 @@ MOVE_SOUND = pygame.mixer.Sound(os.path.join(sound_path, "move.wav"))
 
 # FIXME: We need more difficulties here
 # Also we should merge this with the lyrics colors
-difficulty_colors = { "BEGINNER": (210, 210, 210),
-                      "BASIC": (255, 200, 75),
-                      "TRICK": (252, 128, 75),
-                      "MANIAC": (0, 178, 0),
-                      "SMANIAC": (191, 0, 178)
+difficulty_colors = { "BEGINNER": colors.color["yellow"],
+                      "BASIC": colors.color["orange"],
+                      "TRICK": colors.color["red"],
+                      "MANIAC": colors.color["green"],
+                      "SMANIAC": colors.color["purple"]
                      }
 
 ITEM_SIZE = (344, 60)
@@ -42,8 +42,8 @@ BY_FILENAME,BY_NAME,BY_GROUP,BY_BPM,BY_MIX = range(NUM_SORTS)
 # Make a box of a specific color - these are used for difficulty ratings
 def make_box(color):
   img = pygame.surface.Surface(DIFF_BOX_SIZE)
-  light_color = map((lambda x: min(255, x + 64)), color)
-  dark_color = map((lambda x: max(0, x - 64)), color)
+  light_color = colors.brighten(color)
+  dark_color = colors.darken(color)
   img.fill(color)
   pygame.draw.line(img, light_color, (0,0), (0, DIFF_BOX_SIZE[1] - 1))
   pygame.draw.line(img, light_color, (0,0), (DIFF_BOX_SIZE[0] - 1, 0))
@@ -80,13 +80,16 @@ class SongItemDisplay:
         self.banner = NO_BANNER
         self.banner.set_colorkey(self.banner.get_at((0,0)), RLEACCEL)
     if self.menuimage == None:
-      colors = ["cyan", "aqua", "orange", "yellow", "red", "white"]
+      rcolors = ["green", "orange", "yellow", "red", "white",
+                 "purple", "aqua"]
       # Start with a random color, but...
-      color = lyric_colors[colors[random.randint(0, len(colors) - 1)]]
+      color = colors.color[rcolors[random.randint(0, len(rcolors) - 1)]]
 
       if info.has_key("mix"): # ... pick a consistent mix color
-        idx = hash(info["mix"]) % len(colors)
-        color = lyric_colors[colors[idx]]
+        idx = hash(info["mix"]) % len(rcolors)
+        color = colors.color[rcolors[idx]]
+
+      color = colors.brighten(color, 145)
 
       self.menuimage = pygame.surface.Surface(ITEM_SIZE)
       self.menuimage.blit(ITEM_BG, (0,0))
@@ -226,13 +229,13 @@ class SongSelect:
         background.blit(self.screen,(0,0))
         for n in range(63):
           background.set_alpha(255-(n*4))
-          self.screen.fill(BLACK)
+          self.screen.fill(colors.BLACK)
           background.draw(self.screen)
           pygame.display.flip()
           pygame.time.wait(1)
           if (event.poll()[1] == E_QUIT): break
         background.set_alpha()
-        self.screen.fill(BLACK)
+        self.screen.fill(colors.BLACK)
 
         # Wait for the announcer to finish
         try:
@@ -388,12 +391,12 @@ class SongSelect:
     temp_list.reverse()
 
     for i in range(len(temp_list)):
-      txt = FONTS[14].render(temp_list[i], 1, WHITE)
+      txt = FONTS[14].render(temp_list[i], 1, colors.WHITE)
       self.screen.blit(txt, (10, 480 - (FONTS[14].size("I")[1] - 2) * (i + 2)))
 
     # Sort mode
     stxt = FONTS[20].render("sort by " + SORT_NAMES[mainconfig["sortmode"]],
-                              1, WHITE)
+                              1, colors.WHITE)
     r = stxt.get_rect()
     r.center = (DIFF_LOCATION[0] + 90, DIFF_LOCATION[1] - 10)
     self.screen.blit(stxt, r)
@@ -401,23 +404,21 @@ class SongSelect:
     i = 0
     for d in diff_list:
       # Difficulty name
-      # FIXME This color operation is common, move it elsewhere
       text = d.lower()
 
-      color = (127, 127, 127)
+      color = colors.color["gray"]
       if difficulty_colors.has_key(d):  color = difficulty_colors[d]
 
       if difficulty[d] >= 10: text += " - x" + str(difficulty[d])
 
-      text = FONTS[26].render(text.lower(), 1,
-                               map((lambda x: min(255, x + 64)), color))
+      text = FONTS[26].render(text.lower(), 1, colors.brighten(color, 64))
       r = text.get_rect()
       r.center = (DIFF_LOCATION[0] + 92, DIFF_LOCATION[1] + 25 * i + 12)
       self.screen.blit(text, r)
 
       # Difficulty boxes
       if difficulty[d] < 10:
-        box = make_box(color)
+        box = make_box(colors.brighten(color, 32))
         box.set_alpha(140)
 
         # Active boxes

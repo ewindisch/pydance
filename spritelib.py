@@ -3,7 +3,7 @@
 #FIXME - needs documentation (and cleanups?)
 # and probably generalization so we can use these elsewhere in the code
 
-import pygame, glob
+import pygame, glob, colors
 from constants import *
 
 class SimpleSprite(pygame.sprite.Sprite):
@@ -36,7 +36,7 @@ class SimpleSprite(pygame.sprite.Sprite):
     return '<Sprite fn=%r rect=%r>'%(self.fn,self.rect)
 
 class BlankSprite(SimpleSprite):
-  def __init__ (self, res, fill=BLACK,zindex=DEFAULTZINDEX):
+  def __init__ (self, res, fill=colors.BLACK,zindex=DEFAULTZINDEX):
     pygame.sprite.Sprite.__init__(self)
     self.zindex=zindex
     image = pygame.Surface(res)
@@ -79,7 +79,7 @@ class TransformSprite(BlankSprite):
     self.rect = self.image.get_rect()
 
 class TextSprite(BlankSprite):
-  def __init__(self, font=None, size=32, text='', color=WHITE, bold=None, italic=None, underline=None, antialias=1, bkgcolor=None):
+  def __init__(self, font=None, size=32, text='', color=colors.WHITE, bold=None, italic=None, underline=None, antialias=1, bkgcolor=None):
     pygame.sprite.Sprite.__init__(self)
     surf = None
     font = pygame.font.Font(font, size)

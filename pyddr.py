@@ -16,7 +16,7 @@ from config import Config
 from gfxtheme import GFXTheme
 from spritelib import *
 
-import fontfx, menudriver, fileparsers, songselect
+import fontfx, menudriver, fileparsers, songselect, colors
 
 import pygame, pygame.surface, pygame.font, pygame.image, pygame.mixer, pygame.movie, pygame.sprite
 import os, sys, glob, random, fnmatch, types, operator, copy, string
@@ -415,7 +415,7 @@ class GradingScreen:
     # dim screen
     for n in range(31):
       background.set_alpha(255-(n*4))
-      screen.fill(BLACK)
+      screen.fill(colors.BLACK)
       background.draw(screen)
       pygame.display.flip()
       pygame.time.wait(1)
@@ -767,14 +767,14 @@ class LyricDispKludge(pygame.sprite.Sprite):
       self.lasttime = -1000
 
       self.space = pygame.surface.Surface((1,1))
-      self.space.fill((0,0,0))
+      self.space.fill(colors.BLACK)
 
       self.oldlyric = -1
       self.oldalp = 0
       self.baseimage = self.space
       self.image = self.baseimage
       self.colors = colors
-      self.darkcolors = map((lambda x: int(x / 3.5)), self.colors)
+      self.darkcolors = colors.darken_div(colors)
       self.topimg = top
 
       self.rect = self.image.get_rect()
@@ -1288,9 +1288,9 @@ class Song:
     self.playingbpm = 146.0    # while playing, event handler will use this for arrow control
     self.mixerclock = mainconfig['mixerclock']
     self.lyricdisplay = LyricDispKludge(400,
-                                        lyric_colors[mainconfig['lyriccolor']])
+                                        colors.color[mainconfig['lyriccolor']])
     self.transdisplay = LyricDispKludge(428,
-                                        lyric_colors[mainconfig['transcolor']])
+                                        colors.color[mainconfig['transcolor']])
     little = mainconfig["little"]
     coloringmod = 0
     self.totarrows = {}
@@ -2023,10 +2023,11 @@ def main():
   songs = []
 
   pbar = fontfx.TextProgress(FONTS[60], "Found " + str(totalsongs) +
-                             " files. Loading...", WHITE, BLACK)
+                             " files. Loading...", colors.WHITE, colors.BLACK)
   for f in fileList:
     try: songs.append(fileparsers.SongItem(f))
-    except: pass
+    except:
+      print "Error loading " + f
     img = pbar.render(parsedsongs * 100.0 / totalsongs)
     r = img.get_rect()
     r.center = (320, 240)
@@ -2049,7 +2050,7 @@ def main():
   for playerID in range(MAXPLAYERS):
     holdkey[playerID] = keykludge()
 
-  screen.fill(BLACK)
+  screen.fill(colors.BLACK)
     
   menudriver.do(screen, songselect.SongSelect,
                 (songs, screen, playSequence, GradingScreen))
@@ -2107,7 +2108,7 @@ def blatantplug():
   background = CloneSprite(pygame.transform.scale(screen, (640,480)))
   for n in range(63):
     background.set_alpha(255-(n*4))
-    screen.fill(BLACK)
+    screen.fill(colors.BLACK)
     background.draw(screen)
     pygame.display.flip()
     pygame.time.wait(1)
@@ -2138,7 +2139,7 @@ def playSequence(players, diffList, songList):
     mrsong = Song(thisSong)
     pygame.mixer.quit()
     prevscr = pygame.transform.scale(screen, (640,480))
-    screen.fill(BLACK)
+    screen.fill(colors.BLACK)
     
     thisjudging, lifebars, prevscr = dance(mrsong, players, diffList.pop(0), lifebars, combos, prevscr)
     
@@ -2198,10 +2199,10 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
       background.image.blit(bgkludge,(0,0))
       backimage.add(bgroup)
     else:
-      background.fill(BLACK)
+      background.fill(colors.BLACK)
 #      backmovie.add(bgroup)
   else:
-    background.fill(BLACK)
+    background.fill(colors.BLACK)
 
   suddenval = mainconfig['sudden']
 
@@ -2541,7 +2542,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
       backmovie.update(curtime)
       if backmovie.changed or (fpstext.fpsavg > 30):
         backmovie.resetchange()
-        background.fill(BLACK)
+        background.fill(colors.BLACK)
         screen.blit(background.image,(0,0))
         screen.blit(backmovie.image,(0,0))
 
