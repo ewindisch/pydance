@@ -11,8 +11,9 @@ Legend:
 !!! Completely new user interface for almost all screens. Please pay
   attention to the help messages displayed onscreen, because many of the
   controls have changed.
+  + CD title and advanced BPM display support.
 + 3 panel mode (automatically generated from 6 panel beginner steps in
-  DWIs and SMs, or available directly in .dance).
+  .dwi, or available directly in .dance).
 + Hold arrows now have a grace period (by default 1/4 second, but it's
   affected by the judge type and difficulty).
 + Best grades for songs are now stored (in ~/.pydance/records).

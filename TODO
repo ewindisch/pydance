@@ -4,10 +4,8 @@ Empty "Bugs" section of BUGS file.
 Real documentation for end-users.
 Some sort of documentation for theme and step making (it can be crappy).
 Funky credits screen.
-At least some minor in-game help.
-Song/game selector merge/rewrite -- looks sort of like IIDX, mockups
-  coming before implementation.
 No crashes or major bugs for 5 days after the last CVS check in.
+CD title and displaybpm support for .dance, .sm.
 
 Before 1.0 If "Time"
 --------------------
@@ -27,15 +25,3 @@ Challenge mode.
 Player profiles, if deemed necessary.
 Song information database.
 Background animation support.
-
-STUFF ANNOUNCER SHOULD SAY
---------------------------
-<hardcore`> "Awful dancing, you dance like gaijin"
-<hardcore`> "get off the mat, there are crippled people waiting to put you
-to shame"
-<Futility> "You shame your ancestors with that feeble twitching!"
-<hardcore`> "Are you awake, you suck at dancing"  "Are your legs broken?"
-<ShredWheat> "stick to programming!"
-<ShredWheat> "don't quit that day job"
-<Futility> Hehe. "All your peers dance better than you! You are no better
-than a white person!"

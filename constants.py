@@ -1,10 +1,13 @@
 # Constants used in the game and some simple initialization routines
 # This file should be kept as small as possible, probably.
 
-VERSION = "0.8.2"
+VERSION = "0.9.0"
 
-import sys, os, config, pygame
+import config
+import pygame
 import games
+import sys
+import os
 
 from pygame.locals import *
 
