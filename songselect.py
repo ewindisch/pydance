@@ -1,10 +1,10 @@
 # The song selector; take songs with metadata, output pretty pictures,
 # let people select difficulties, and dance.
 
-import os, string, pygame, random, copy, colors
+import os, string, pygame, random, copy
 from constants import *
 
-import spritelib, announcer
+import spritelib, announcer, audio, colors
 
 # FIXME: this needs to be moved elsewhere if we want theming
 ITEM_BG = pygame.image.load(os.path.join(image_path, "ss-item-bg.png"))
@@ -148,7 +148,7 @@ class SongSelect:
     self.screen = screen
     last_event_was_expose = False # hackery for Focus Follows Mouse
 
-    pygame.mixer.music.fadeout(500)
+    audio.fadeout(500)
 
     self.helpfiles = ["menuhelp-" + str(i) + ".png" for i in range(1, 6)]
     self.last_help_update = pygame.time.get_ticks() - 1000000
@@ -165,8 +165,8 @@ class SongSelect:
     preview_start = timesince = 0
 
     if not previews:
-      pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
-      pygame.mixer.music.play(4, 0.0)
+      audio.load(os.path.join(sound_path, "menu.ogg"))
+      audio.play(4, 0.0)
 
     self.player_diffs = [0]
     self.player_diff_names = [self.songs[self.index].song.diff_list[self.gametype][self.player_diffs[0]]]
@@ -286,7 +286,7 @@ class SongSelect:
         except: self.add_current_song()
         background = spritelib.CloneSprite(pygame.transform.scale(self.screen,
                                                                   (640,480)))
-        pygame.mixer.music.fadeout(1000)
+        audio.fadeout(1000)
         ann = announcer.Announcer(mainconfig["djtheme"])
         ann.say("menu")
 
@@ -304,11 +304,11 @@ class SongSelect:
         self.diff_list = []
         self.title_list = []
 
-        pygame.mixer.music.fadeout(500) # This is the just-played song
+        audio.fadeout(500) # This is the just-played song
 
         if not previews:
-          pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
-          pygame.mixer.music.play(4, 0.0)
+          audio.load(os.path.join(sound_path, "menu.ogg"))
+          audio.play(4, 0.0)
 
         while ev[1] != E_PASS: ev = event.poll() # Empty the queue
         self.screen.blit(self.bg, (0, 0))
@@ -369,7 +369,7 @@ class SongSelect:
             self.player_diffs[i] = self.current_song.diff_list[self.gametype].index(name)
         new_preview = True
         not_changed_since = current_time
-        pygame.mixer.music.fadeout(500)
+        audio.fadeout(500)
 
       # Song preview support
       if previews:
@@ -380,11 +380,11 @@ class SongSelect:
           is_playing = True
           try:
             start_time = self.songs[self.index].song.info["preview"][0]
-            pygame.mixer.music.stop()
+            audio.stop()
             preview_start = current_time
-            pygame.mixer.music.load(self.songs[self.index].song.info["filename"])
-            pygame.mixer.music.set_volume(0.01)
-            pygame.mixer.music.play(0, start_time)
+            audio.load(self.songs[self.index].song.info["filename"])
+            audio.set_volume(0.01)
+            audio.play(0, start_time)
           except pygame.error: # The song was probably too short
             is_playing = False
             preview_start = 0
@@ -394,12 +394,12 @@ class SongSelect:
           length = self.songs[self.index].song.info["preview"][1]
           timesince = (current_time - preview_start)/2000.0
           if timesince <= 1.0:
-            pygame.mixer.music.set_volume(timesince)
+            audio.set_volume(timesince)
           elif length - 1 <= timesince <= length:
-            pygame.mixer.music.set_volume(length - timesince)
+            audio.set_volume(length - timesince)
           elif timesince > length:
-            pygame.mixer.music.set_volume(0)
-            pygame.mixer.music.stop()
+            audio.set_volume(0)
+            audio.stop()
             is_playing = False
 
       if self.index != self.oldindex:
@@ -418,12 +418,12 @@ class SongSelect:
 
       pygame.time.wait(30)
 
-    pygame.mixer.music.fadeout(500)
+    audio.fadeout(500)
     pygame.time.wait(500)
     # FIXME Does this belong in the menu code? Probably.
-    pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
-    pygame.mixer.music.set_volume(1.0)
-    pygame.mixer.music.play(4, 0.0)
+    audio.load(os.path.join(sound_path, "menu.ogg"))
+    audio.set_volume(1.0)
+    audio.play(4, 0.0)
 
   def render(self, changed, all_changed):
     r = []

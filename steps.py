@@ -1,7 +1,7 @@
 # These parse various file formats describing steps.
 # Please read docs/fileparsers.txt and docs/dance-spec.txt
 
-import colors
+import colors, audio
 
 from lyrics import Lyrics
 from util import toRealTime
@@ -158,7 +158,7 @@ class Steps:
 
   def get_events(self):
     events, nevents = [], []
-    time = self.curtime = float(pygame.mixer.music.get_pos())/1000.0
+    time = self.curtime = float(audio.get_pos())/1000.0
     head = self.head
     fhead = self.fhead
     while (head and head.when <= (time + 2 * toRealTime(head.bpm, 1))):
@@ -197,22 +197,22 @@ class SongData:
       self.lyricdisplay.addlyric(*lyr)
 
   def init(self):
-    try: pygame.mixer.music.load(self.filename)
-    except pygame.error:
+    try: audio.load(self.filename)
+    except:
       print "Not a supported file type:", self.filename
       self.crapout = 1
     if self.startat > 0:
       print "Skipping %f seconds." % self.startat
 
   def play(self):
-    pygame.mixer.music.play(0, self.startat)
+    audio.play(0, self.startat)
 
   def kill(self):
-    pygame.mixer.music.stop()
+    audio.stop()
 
   def is_over(self):
-    if not pygame.mixer.music.get_busy(): return True
-    elif self.endat and pygame.mixer.music.get_pos() > self.endat * 1000:
-      pygame.mixer.music.stop()
+    if not audio.get_busy(): return True
+    elif self.endat and audio.get_pos() > self.endat * 1000:
+      audio.stop()
       return True
     else: return False

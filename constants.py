@@ -74,7 +74,8 @@ mainconfig = config.Config({ # Wow we have a lot of options
   "grading": 1,
   "keyboard": "qwerty",
   "ingamehelp": 1,
-  "strobe": 0
+  "strobe": 0,
+  "usemad": 1
   })
 
 if osname == "posix":

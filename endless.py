@@ -1,6 +1,6 @@
 # Support for endless song playing!
 
-import random, copy, colors, fontfx, gradescreen, util
+import random, copy, colors, fontfx, gradescreen, util, audio
 from constants import *
 
 RESOLUTION = (640, 480)
@@ -96,8 +96,8 @@ class Endless:
     self.screen = screen
     self.firsttime = True
 
-    pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
-    pygame.mixer.music.play(4, 0.0)
+    audio.load(os.path.join(sound_path, "menu.ogg"))
+    audio.play(4, 0.0)
 
     self.render()
 
@@ -111,8 +111,8 @@ class Endless:
         playSequence(len(self.constraints),
                      FakePlaylist(songitems, self.constraints, screen))
 
-        pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
-        pygame.mixer.music.play(4, 0.0)
+        audio.load(os.path.join(sound_path, "menu.ogg"))
+        audio.play(4, 0.0)
 
         while ev[1] != E_PASS: ev = event.poll()
 

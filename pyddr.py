@@ -19,7 +19,7 @@ from spritelib import *
 
 from pygame.sprite import RenderUpdates
 
-import fontfx, menudriver, fileparsers, colors, gradescreen, steps
+import fontfx, menudriver, fileparsers, colors, gradescreen, steps, audio
 
 import os, sys, random, operator, string, util, getopt
 
@@ -844,8 +844,8 @@ def main():
   pygame.display.set_caption('pyDDR ' + VERSION)
   pygame.mouse.set_visible(0)
 
-  pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
-  pygame.mixer.music.play(4, 0.0)
+  audio.load(os.path.join(sound_path, "menu.ogg"))
+  audio.play(4, 0.0)
 
   background = BlankSprite(screen.get_size())
 
@@ -875,7 +875,7 @@ def main():
     sys.exit(1)
 
   menudriver.do(screen, (songs, screen, playSequence))
-  pygame.mixer.music.stop()
+  audio.stop()
   pygame.display.quit()
   mainconfig.write(os.path.join(rc_path, "pyddr.cfg"))
 
@@ -897,14 +897,14 @@ def blatantplug():
   pygamelogorect.centerx = 320;  pygamelogorect.centery = 256
   xiphlogorect.centerx = 320;  xiphlogorect.centery = 384
     
-  pygame.mixer.music.load(os.path.join(sound_path, "menu.ogg"))
-  pygame.mixer.music.play(0,14.75)
-  pygame.mixer.music.set_volume(0)
+  audio.load(os.path.join(sound_path, "menu.ogg"))
+  audio.play(0,14.75)
+  audio.set_volume(0)
   
   for i in range(26):
     screen.fill((i*8,i*8,i*8))
     pygame.display.flip()
-    pygame.mixer.music.set_volume(i/2.0)
+    audio.set_volume(i/2.0)
     pygame.time.delay(16)
     
   pygame.time.delay(225)
@@ -1086,8 +1086,8 @@ def dance(song, players, prevscr):
 
   screenshot = 0
 
-  if mainconfig['assist']: pygame.mixer.music.set_volume(0.6)
-  else: pygame.mixer.music.set_volume(1.0)
+  if mainconfig['assist']: audio.set_volume(0.6)
+  else: audio.set_volume(1.0)
 
   if (mainconfig['strobe']):
     extbox = Blinky(song.bpm)
@@ -1115,7 +1115,7 @@ def dance(song, players, prevscr):
     for plr in players: plr.get_next_events()
 
     if song.is_over(): break
-    else: curtime = pygame.mixer.music.get_pos()/1000.0
+    else: curtime = audio.get_pos()/1000.0
 
     key = []
 
