@@ -7,13 +7,16 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
-0.8.5
+0.8.5								[2004.01.xx]
 + "Click only" assist tick.
-+ New grading screen... with groove gauge!
++ New grading screen... with groove graph!
 + Player's best/worst CRS file support.
 + There are now some command line options.
 + Player's best/worst and random courses generated internally.
-! All your records will be invalidated upon running this.
+ + Added "Player's Likes/Dislikes" for commonly or rarely played songs.
++ Changing BPMs are colored (thanks to xsdg).
+* Movies work again (thanks to Jon Åslund).
+! All your records will be deleted upon running this.
 
 0.8.4 - We must force those people to date actual gamer nerds.	[2004.01.08]
 + EZ2 and EZ2 Real support.
