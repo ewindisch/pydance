@@ -119,7 +119,7 @@ class GenericFile:
 
 
 class DanceFile(GenericFile):
-  WAITING, METADATA, DESCRIPTION, LYRICS, GAMETYPE, STEPS = range(6)
+  WAITING,METADATA,DESCRIPTION,LYRICS,BACKGROUND,GAMETYPE,STEPS = range(7)
 
   COUPLEMODES = ["COUPLE"]
 
@@ -128,7 +128,8 @@ class DanceFile(GenericFile):
     self.comment = "#"
 
     parsers = [self.parse_waiting, self.parse_metadata, self.parse_description,
-               self.parse_lyrics, self.parse_gametype, self.parse_steps]
+               self.parse_lyrics, self.parse_bg, self.parse_gametype,
+               self.parse_steps]
 
     state = DanceFile.METADATA
     state_data = [None, None]
@@ -163,6 +164,9 @@ class DanceFile(GenericFile):
         self.difficulty[line] = {}
         self.steps[line] = {}
       return DanceFile.GAMETYPE
+
+  def parse_bg(self, line, data):
+    return DanceFile.BACKGROUND
 
   def parse_gametype(self, line, data):
     data[1], diff = line.split()
