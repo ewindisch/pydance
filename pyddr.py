@@ -3955,7 +3955,7 @@ def dance(song,players,difficulty,prevlife,combos,prevscr):
       backimage = BGimage(os.path.join('images', 'bg.png'))
 
   if mainconfig['showbackground'] > 0:
-    if song.moviefile == ' ':
+    if backmovie.filename == None:
       bgkludge = pygame.transform.scale(pygame.image.load(bifn),(640,480)).convert()
       bgkludge.set_alpha(mainconfig['bgbrightness'], RLEACCEL)
       background.image = pygame.surface.Surface((640,480))
