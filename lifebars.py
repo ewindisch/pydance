@@ -85,6 +85,12 @@ class DropLifeBarDisp(LifeBarDisp):
     for k in self.deltas:
       if self.deltas[k] > 0: self.deltas[k] = 0
 
+# Only greats make the bar go up.
+class GreatAttack(LifeBarDisp):
+  def __init__(self, playernum, theme, songconf, game):
+    LifeBarDisp.__init__(self, playernum, theme, songconf, game)
+    self.deltas = {"V": -0.005, "P": -0.005, "G": 0.008, "O": -0.005, "B": -0.02, "M": -0.06}
+
 # Tug of war lifebar, increases your lifebar and decreases your opponents'.
 class TugLifeBarDisp(LifeBarDisp):
 
@@ -203,10 +209,11 @@ class OniLifeBarDisp(AbstractLifeBar):
     if self.gameover: self.image.blit(self.failtext, [70, 2])
 
 bars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MediocreLifeBarDisp,
-        TugLifeBarDisp]
+        TugLifeBarDisp, GreatAttack]
 
 lifebar_opt = [(0, "Normal", ""),
                (1, "Battery", "A few points of life, increasing each song."),
                (2, "Power Drop", "Like normal, but never goes back up."),
                (3, "Mediocre", "Fail if you do too poorly or too well."),
-               (4, "Tug of War", "Fight with the other player for life.")]
+               (4, "Tug of War", "Fight with the other player for life."),
+               (5, "Great Attack", "Only greats make the bar go up.")]
