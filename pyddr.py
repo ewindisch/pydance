@@ -1666,8 +1666,8 @@ class fastSong:
     self.bannercreationtime = pygame.time.get_ticks()
     self.rrrr = self.lilbanner.get_rect()
     self.rrrr.center = (320,300)
-    screen.blit(self.lilbanner,self.rrrr)
-    pygame.display.update()
+    r = screen.blit(self.lilbanner,self.rrrr)
+    update_screen(r)
     self.file = None
     self.modes = modes = MODES.copy()
     self.modelist = []
@@ -1743,6 +1743,7 @@ class fastSong:
       for ext in [".ogg",".mp3",".wav",".mid"]:
         if os.path.isfile(os.path.join(self.path,self.file+ext)):
           self.file = self.file+ext
+          break
 
     self.osfile=os.path.join(self.path,self.file)
     
@@ -2701,7 +2702,7 @@ def main():
   print 'Prerendering'
   if not debugmode:
     # prerender the list texts for songs, speed up song selector
-    brect = Rect(220, 250, 180, 5)
+    brect = Rect(220, 250, 190, 5)
     ox = copy.copy(brect.left+4)
     pixelbar = pygame.surface.Surface((1,3))
     pixelbar.fill((192,192,192))
@@ -3332,11 +3333,13 @@ def songSelect(songs,fooblah):
   font = pygame.font.Font(None,40)
   niftyscreenclear = pygame.surface.Surface((640,8))
   niftyscreenclear.fill((0,0,0))
-
+  start = pygame.time.get_ticks()
+  ticktime = 500 / 30
   for i in range(31):
-    screen.blit(niftyscreenclear,(0,8*i))
-    screen.blit(niftyscreenclear,(0,480-(8*i)))
-    pygame.display.flip()
+    r1 = screen.blit(niftyscreenclear,(0,8*i))
+    r2 = screen.blit(niftyscreenclear,(0,480-(8*i)))
+    update_screen((r1, r2))
+    pygame.time.delay(ticktime*i - (pygame.time.get_ticks() - start))
 
   realdiff = realdiff2 = -1
   songidx = scrolloff = s = difficulty = difficulty2 = 0
