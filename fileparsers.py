@@ -35,9 +35,10 @@ class GenericFile(object):
     files.sort(lambda a, b: cmp(os.stat(a).st_size, os.stat(b).st_size))
     return files
 
-  # Try to extract a subtitle from formats that don't support it (DWI, step)
+  # Try to extract a subtitle from formats that don't support it (DWI)
   # Recognize ()s, []s, --s, or ~~s.
   def find_subtitle(self):
+    self.info["realtitle"] = self.info["title"]
     if "subtitle" not in self.info:
       title, subtitle = util.find_subtitle(self.info["title"])
       if subtitle:

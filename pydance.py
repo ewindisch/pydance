@@ -156,7 +156,7 @@ def main():
   for song in songs:
     mix = song.info["mix"].lower()
     title = song.info["title"].lower()
-    if song.info["subtitle"]: title += song.info["subtitle"].lower()
+    if song.info["subtitle"]: title += " " + song.info["subtitle"].lower()
     if not song_dict.has_key(mix): song_dict[mix] = {}
     song_dict[mix][title] = song
     record_dict[song.info["recordkey"]] = song
