@@ -99,6 +99,7 @@ class AbstractLifeBar(pygame.sprite.Sprite):
     pygame.sprite.Sprite.__init__(self)
     self.oldlife = 0
     self.failed = False
+    self.really_failed = False # The graphics have been updated with "FAILED".
     self.maxlife = int(maxlife * songconf["diff"])
     self.image = pygame.Surface((204, 28))
     self.deltas = {}
@@ -114,7 +115,7 @@ class AbstractLifeBar(pygame.sprite.Sprite):
     return self.failed
 
   def update_life(self, rating):
-    if self.life > 0 and self.deltas.has_key(rating):
+    if self.life >= 0 and self.deltas.has_key(rating):
       self.oldlife = self.life
       self.life += self.deltas[rating]
       self.life = min(self.life, self.maxlife)
@@ -126,10 +127,10 @@ class AbstractLifeBar(pygame.sprite.Sprite):
     pass
       
   def update(self, judges):
-    if self.life <= 0:
+    if self.life < 0:
       self.failed = 1
       judges.failed_out = True
-      self.life = 0
+      self.life = -1
     elif self.life > self.maxlife:
       self.life = self.maxlife
         
@@ -154,14 +155,15 @@ class LifeBarDisp(AbstractLifeBar):
     self.full = theme.theme_data.get_image('lifebar-full.png')
 
   def update(self, judges):
+    if self.really_failed and self.displayed_life <= 0: return
+
     if self.displayed_life < self.life:  self.displayed_life += 1
     elif self.displayed_life > self.life:  self.displayed_life -= 1
 
     if abs(self.displayed_life - self.life) < 1:
       self.displayed_life = self.life
 
-    if (AbstractLifeBar.update(self, judges) == False and
-        self.displayed_life <= 0): return
+    AbstractLifeBar.update(self, judges)
 
     if self.displayed_life < 0: self.displayed_life = 0
     self.image.blit(self.empty, (0, 0))
@@ -170,6 +172,7 @@ class LifeBarDisp(AbstractLifeBar):
     self.image.set_clip()
 
     if self.failed:
+      self.really_failed = True
       self.image.blit(self.failtext, (70, 2))
 
 # A lifebar that only goes down.
@@ -193,14 +196,15 @@ class MiddleLifeBarDisp(AbstractLifeBar):
     self.image.fill([255, 255, 255])
 
   def update(self, judges):
+    if self.really_failed: return
+
     if self.displayed_life < self.life:  self.displayed_life += 1
     elif self.displayed_life > self.life:  self.displayed_life -= 1
 
     if abs(self.displayed_life - self.life) < 1:
       self.displayed_life = self.life
 
-    if (AbstractLifeBar.update(self, judges) == False and
-        self.displayed_life <= 0): return
+    AbstractLifeBar.update(self, judges)
 
     if self.life == self.maxlife:
       self.failed = True
@@ -211,6 +215,7 @@ class MiddleLifeBarDisp(AbstractLifeBar):
     self.image.fill([int(255 * pct)] * 3)
 
     if self.failed:
+      self.really_failed = True
       self.image.blit(self.failtext, (70, 2))
 
 # Oni mode lifebar
@@ -239,10 +244,12 @@ class OniLifeBarDisp(AbstractLifeBar):
        
   def update_life(self, rating):
     AbstractLifeBar.update_life(self, rating)
-    if self.life < self.oldlife: OniLifeBarDisp.lose_sound.play()
+    if self.deltas.get(rating, 0) < 0: OniLifeBarDisp.lose_sound.play()
 
   def update(self, judges):
-    if AbstractLifeBar.update(self, judges) == False: return
+    if self.really_failed: return
+
+    AbstractLifeBar.update(self, judges)
     
     self.image.blit(self.empty, (0, 0))
     if self.life > 0:
@@ -250,6 +257,7 @@ class OniLifeBarDisp(AbstractLifeBar):
         self.image.blit(self.bar, (6 + self.width * i, 4))
 
     if self.failed:
+      self.really_failed = True
       self.image.blit(self.failtext, (70, 2) )
 
 class HoldJudgeDisp(pygame.sprite.Sprite):
