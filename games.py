@@ -117,7 +117,7 @@ GAMES = {
   "DMXCOUPLE": GameType(players = 2, couple = True, dirs = "lkzr",
                         theme_default = "dmxesque", width = 32,
                         centered = True, theme = "dmx"),
-  "DMXDOUBLE": GameType(players = 2, double = True, dirs = "lkzr", width = 32,
+  "DMXDOUBLE": GameType(players = 1, double = True, dirs = "lkzr", width = 32,
                         theme_default = "dmxesque", theme = "dmx"),
   }
 
