@@ -3,7 +3,7 @@
 # msd2step - converts MSD files from other clones to STEP files.
 # this could peobably be done way better than I'm doing it, but..
 
-import os, time, sys
+import sys
 
 # so it's currently in one routine. shut up, I'm learning python =]
 def main():

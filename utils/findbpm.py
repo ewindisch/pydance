@@ -7,7 +7,6 @@
 import getopt
 import sys
 import os
-import time
 import pygame, pygame.font, pygame.image, pygame.mixer
 from pygame.locals import *
 

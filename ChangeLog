@@ -6,7 +6,7 @@ legend:
 * fixed a bug
 
 ----- - CURRENT
-0.6.2 - No More Ugly-Ass Buttons
+0.6.2 - No More Ugly-Ass Buttons				[2003.04.28]
 - Fullscreen switching during the game doesn't work on MacOS X.
   - Use the configuration file instead, for now.
 - The pN_keys option is gone in favor of 'keyboard', and the 'sortpersist'

@@ -4,7 +4,7 @@
 
 # 2003-03-30 Refactoring done by Stephen Thorne <stephen@thorne.id.au>
 
-import os, time, sys
+import sys
 
 VERSION = "0.52"
 

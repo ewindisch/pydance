@@ -3,7 +3,7 @@
 # step2dwi - converts STEP files to DWI files for other clones.
 # Blatantly ripped from pyDDR's dwi2step with lots of help from Brendan on the DWI format
 
-import os, time, sys
+import sys
 
 # Dictionary that maps from pyDDR "xxxxx AA BB CC DD" to DWI note
 # (xxxxx is qurtr, etc....)
@@ -84,7 +84,7 @@ def main():
     print "----------------------"
   else:
     print "You need to actually specify a STEP file to convert!"
-    fileline = ''
+    sys.exit(1)
 
   while fileline != '':
     print '*',
