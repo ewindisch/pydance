@@ -82,7 +82,7 @@ class BPMDisplay(pygame.sprite.Sprite):
     self.set_song(song)
     self._render()
     self._color = [255, 255, 255]
-    self._bpm_range = [0, 1 # normally [min, range]
+    self._bpm_range = [0, 1] # normally [min, range]
 
   def _render(self):
     if self._bpm:
