@@ -13,7 +13,6 @@ BACKGROUND = os.path.join(image_path, "ss-bg.png")
 MOVE_SOUND = pygame.mixer.Sound(os.path.join(sound_path, "move.ogg"))
 
 # FIXME: We need more difficulties here
-# Also we should merge this with the lyrics colors
 difficulty_colors = { "BEGINNER": colors.color["yellow"],
                       "BASIC": colors.color["orange"],
                       "TRICK": colors.color["red"],
@@ -28,13 +27,17 @@ BANNER_SIZE = (256, 80)
 DIFF_BOX_SIZE = (15, 25)
 DIFF_LOCATION = (8, 120)
 
+# FIXME: DSU at some point in the future? Almost definitely yes.
 SORTS = ((lambda x, y: cmp(x.song.filename, y.song.filename)),
-         (lambda x, y: cmp(x.song.info.get("song"), y.song.info.get("song"))),
-         (lambda x, y: cmp(x.song.info.get("group"),
-                           y.song.info.get("group"))),
+         (lambda x, y: cmp(x.song.info.get("song").lower(),
+                           y.song.info.get("song").lower())),
+         (lambda x, y: cmp(x.song.info.get("group").lower(),
+                           y.song.info.get("group").lower())),
          (lambda x, y: cmp(x.song.info.get("bpm"), y.song.info.get("bpm"))),
-         (lambda x, y: (cmp(x.song.info.get("mix"), y.song.info.get("mix"))
-                        or cmp(x.song.info["song"], y.song.info["song"]))
+         (lambda x, y: (cmp(str(x.song.info.get("mix")).lower(),
+                            str(y.song.info.get("mix")).lower())
+                        or cmp(x.song.info["song"].lower(),
+                               y.song.info["song"].lower()))
           )
          )
 
@@ -138,7 +141,7 @@ class SongSelect:
     pygame.mixer.music.fadeout(500)
 
     self.helpfiles = ["menuhelp-" + str(i) + ".png" for i in range(1, 6)]
-    self.last_help_update = 0
+    self.last_help_update = pygame.time.get_ticks() - 1000000
 
     song_changed = True # Whether or not the song was changed
     needs_update = False # Whether or not we need to render the screen
@@ -559,18 +562,19 @@ class SongSelect:
     self.title_list.append(text)
 
   def update_help(self):
-    # FIXME: Get this to use a real clock
-    if self.last_help_update == 0:
+    delta = pygame.time.get_ticks() - self.last_help_update
+    if delta < 1000:
+      self.helpimage.set_alpha(int(256.0 * (delta / 1000.0)))
+    elif delta < 5000:
+      pass
+    elif delta < 6000:
+      self.helpimage.set_alpha(int(256.0 - (256.0 * (delta - 5000)/1000.0)))
+    elif delta > 6000:
       fn = self.helpfiles.pop(0)
       self.helpfiles.append(fn)
       fn = os.path.join(image_path, fn)
       self.helpimage = pygame.image.load(fn)
       self.helpimage.set_colorkey(self.helpimage.get_at((0,0)), RLEACCEL)
       self.helpimage.set_alpha(0)
-    if self.last_help_update <= 25:
-      self.helpimage.set_alpha(10 * self.last_help_update)
-    elif 125 <= self.last_help_update <= 150:
-      self.helpimage.set_alpha(250 - 20 * (self.last_help_update - 125))
-    elif self.last_help_update == 175:
-      self.last_help_update = -1
-    self.last_help_update += 1
+      self.last_help_update = pygame.time.get_ticks()
+
