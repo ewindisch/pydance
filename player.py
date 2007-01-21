@@ -210,6 +210,11 @@ class Player(object):
 
     self.__dict__.update(config)
 
+    if self.speed < 0:
+      self.target_bpm = -self.speed
+    else:
+      self.target_bpm = None
+
     self.game = game
 
     if self.scrollstyle == 2: self.top = 240 - game.width / 2

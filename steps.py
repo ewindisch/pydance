@@ -14,9 +14,10 @@ from pygame.mixer import music
 # FIXME: This can probably be replaced by something smaller, like a tuple.
 class SongEvent(object):
   def __init__ (self, bpm, when=0.0, beat = 0, feet=None, next=None,
-                extra=None, color=None):
+                extra=None, color=None, appear=None):
     self.bpm  = bpm
     self.when = when
+    self.appear = appear
     self.feet = feet
     self.extra = extra
     self.color = color
@@ -27,6 +28,7 @@ class SongEvent(object):
     if self.feet: rest.append('feet=%r'%self.feet)
     if self.extra: rest.append('extra=%r'%self.extra)
     if self.extra: rest.append('color=%r'%self.color)
+    if self.appear: rest.append('appear=%r'%self.appear)
     return '<SongEvent when=%r bpm=%r %s>' % (self.when,self.bpm,
                                                 ' '.join(rest))
 
@@ -65,13 +67,28 @@ class Steps(object):
     last_event_was_freeze = False
     cur_beat = 0
     cur_bpm = self.bpm
-    self.speed = player.speed
+    if player.target_bpm is not None:
+      self.target_bpm = player.target_bpm * 1.0
+      self.speed = None
+    else:
+      self.target_bpm = None
 
-    # If this is too small, arrows don't appear fast enough. If it's
+    # If *_lead is too small, arrows don't appear fast enough. If it's
     # too large, many arrows queue up and pydance slows down.
-    # 104 == (480 (screen height) - 64 (space on top)) / 4 (pixels per beat)
-    self.nbeat_offset = 104.0 / player.speed
-    self.lastbpmchangetime = []
+    # 6.5 == (480 (screen height) - 64 (space on top)) / 64 (pixels per beat)
+    # If we have a constant "speed", use beats. If we have a constant effective
+    # BPM, use time.
+    if self.target_bpm is None:
+      beat_lead = 6.5 / player.speed
+    else:
+      time_lead = 6.5 / self.target_bpm * 60
+
+    # self.lastbpmchangetime is used in several places. For most purposes, the
+    # initial BPM setting is not considered a BPM change, but for the purpose
+    # of back-tracking to find the number of seconds corresponding to a given
+    # number of beats at a certain point in the song, it is, so it is initialized
+    # here, and the first element is deleted later.
+    self.lastbpmchangetime = [[0.0,self.bpm]]
     self.events = [SongEvent(when = cur_time, bpm = cur_bpm, beat = cur_beat,
                              extra = song.difficulty[playmode][difficulty])]
 
@@ -150,10 +167,31 @@ class Steps(object):
           else:
             color = offbeat_color_mod
             offbeat_color_mod ^= 2
+
+          if self.target_bpm is None:
+            # Backtrack through BPM changes until we hit the BPM segment the
+            # correct number of beats before this step, and then find the right
+            # time within that segment when the arrow should first be visible.
+            beat_led=beat_lead
+            bpm_i=-1
+            time_led=0.0
+
+            while time_to_add-time_led>0 and beat_led>(time_to_add-time_led-self.lastbpmchangetime[bpm_i][0])*self.lastbpmchangetime[bpm_i][1]/60:
+              beat_led-=(time_to_add-time_led-self.lastbpmchangetime[bpm_i][0])*self.lastbpmchangetime[bpm_i][1]/60
+              time_led=time_to_add-self.lastbpmchangetime[bpm_i][0]
+              bpm_i-=1
+              
+            if time_to_add<=time_led:
+              time_led=time_to_add
+            else:
+              time_led+=beat_led/self.lastbpmchangetime[bpm_i][1]*60
+          else:
+            time_led=time_lead
           self.events.append(SongEvent(when = time_to_add, bpm = cur_bpm,
                                        feet = feetstep, extra = words[0],
                                        beat = cur_beat,
-                                       color = color))
+                                       color = color,
+                                       appear = max(time_to_add-time_led,0)))
 
           for arrowadder in feetstep:
             if arrowadder & 1 and not arrowadder & 4:
@@ -206,6 +244,9 @@ class Steps(object):
         self.ready = self.events[1].when - toRealTime(self.events[1].bpm, 16)
       else: self.ready = 0.0
 
+    # Delete the initial setting of BPM.
+    del self.lastbpmchangetime[0]
+
   def play(self):
     self.curtime = 0.0
     self.event_idx = self.nevent_idx = 0
@@ -220,16 +261,16 @@ class Steps(object):
            self.events[idx].when <= time + 2 * toRealTime(self.events[idx].bpm, 1)):
       events.append(self.events[idx])
       idx += 1
+
     bpm = self.playingbpm
     self.event_idx = idx
+    
+    while (nidx < len(self.events) and self.events[nidx].appear <= time):
+      self.playingbpm = self.events[nidx].bpm
+      nevents.append(self.events[nidx])
+      nidx += 1   
+    self.nevent_idx = nidx
 
-    if idx < len(self.events) and nidx < len(self.events):
-      nbeat = self.events[idx].beat + self.nbeat_offset
-      while (nidx < len(self.events) and self.events[nidx].beat <= nbeat):
-        self.playingbpm = self.events[nidx].bpm
-        nevents.append(self.events[nidx])
-        nidx += 1
-      self.nevent_idx = nidx
     return events, nevents, time, bpm
 
 # Player-indep data generated from SongItem.

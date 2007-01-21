@@ -74,12 +74,11 @@ information about them.
 If you don't want to sign up for a mailing list but do want to report
 a bug, you can email the Debian Bug Tracking System at
 submit@bugs.debian.org. The first line of your email should be
-"Package: pydance". You can also email them directly to Joe Wreschnig
-<piman@debian.org> if you don't feel comfortable using the Debian BTS.
+"Package: pydance".
 
 pydance has an IRC channel, #pyddr, on irc.freenode.net. It is usually
 active, and can help you fix problems with pydance (if you've already
 tried the instructions in the manual, and the ones in the official
-FAQ). The main developers are in the channel as "piman" (Joe
-Wreschnig) and "P2E" (Brendan Becker). This is not, however, a good
+FAQ). The main developers are in the channel as "Pavel" (Pavel
+Krivitsky) and "P2E" (Brendan Becker). This is not, however, a good
 place to report bugs, since they can get lost easily.

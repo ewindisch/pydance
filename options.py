@@ -31,10 +31,10 @@ OPTIONS = {
   #    describing the value.
   "speed": (True, "Speed",
             "Adjust the speed at which the arrows scroll across the screen.",
-            zip([0.25, 0.33, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5, 8],
-                ["0.25x", "0.33x", "0.50x", "0.75x", "1.0x", "1.5x", "2.0x",
-                 "3.0x", "4.0x", "5.0x", "8.0x"],
-                [""] * 11)
+            zip([0.25, 0.33, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4, 5, 8, -200, -300],
+                ["0.25x", "0.33x", "0.50x", "0.75x", "1.0x", "1.5x", "2.0x", "2.5x",
+                 "3.0x", "4.0x", "5.0x", "8.0x", "200bpm", "300bpm"],
+                [""] * 12 + ["Arrows scroll at 200bpm.", "Arrows scroll at 300bpm."])
             ),
   "transform": (True, "Transform",
                 "Change the step patterns for the song.",

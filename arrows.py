@@ -83,16 +83,23 @@ class AbstractArrow(pygame.sprite.Sprite):
 
     self.spin = player.spin
     self.scale = player.scale
-    self.speed = player.speed
+    if player.target_bpm is None:
+      self.speed = player.speed
+      self.target_bpm = None
+    else:
+      self.target_bpm = float(player.target_bpm)
 
     self.accel = player.accel
     self.battle = song.battle
 
     self.diff = self.top - self.bottom
 
-    # NB - Although "beats" refers to 16th notes elsewhere, this refers to
-    # "proper" beats, meaning a quarter note.
-    self.totalbeats = abs(self.diff) / 64.0
+    if self.target_bpm is None:
+      # NB - Although "beats" refers to 16th notes elsewhere, this refers to
+      # "proper" beats, meaning a quarter note.
+      self.totalbeats = abs(self.diff) / 64.0
+    else:
+      self.totaltime = abs(self.diff) / 64.0 / self.target_bpm * 60
 
     # "goal" locations are used for battle mode (and possibly
     # elsewhere later), meaning the arrow slowly moves towards that
@@ -148,6 +155,8 @@ class AbstractArrow(pygame.sprite.Sprite):
       self.image.set_alpha(alp)
 
   def update(self, curtime, curbpm, beat):
+    if self.target_bpm is not None:
+      self.speed = self.target_bpm / curbpm
     self.image = self.arrow.get_image(beat)
     self.baseimage = self.image
     self.rect = self.image.get_rect()
@@ -202,23 +211,40 @@ class ArrowSprite(AbstractArrow):
   def update(self, curtime, curbpm, curbeat, judge):
     AbstractArrow.update(self, curtime, curbpm, curbeat)
 
-    if curbeat > self.endbeat + 1:
-      self.kill()
-      return
-
     beatsleft = self.endbeat - curbeat
+    
+    if self.target_bpm is None:
+      if curbeat > self.endbeat + 1:
+        self.kill()
+        return
 
-    if self.accel == 1:
-      p = max(0, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats))
-      speed = self.speed * (p + 1)
-    elif self.accel == 2:
-      p = min(1, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats))
-      speed = self.speed * (p * -0.5 + 1)
-    else: speed = self.speed
+      if self.accel == 1:
+        p = max(0, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats))
+        speed = self.speed * (p + 1)
+      elif self.accel == 2:
+        p = min(1, -1 / self.totalbeats * (beatsleft * self.speed - self.totalbeats))
+        speed = self.speed * (p * -0.5 + 1)
+      else: speed = self.speed
 
-    # The second term (self.vector * ...) is a simplication of
-    # int(beatsleft * speed * self.diff / self.beatsleft).
-    top = self.top + self.vector * int(beatsleft * speed * 64)
+      # The second term (self.vector * ...) is a simplication of
+      # int(beatsleft * speed * self.diff / self.beatsleft).
+      top = self.top + self.vector * int(beatsleft * speed * 64)
+    else:
+      if curtime > self.endtime + 60.0/curbpm:
+        self.kill()
+        return
+
+      timeleft = self.endtime - curtime
+      
+      if self.accel == 1:
+        p = 1 + max(0, -1 / self.totaltime * (timeleft - self.totaltime))
+      elif self.accel == 2:
+        p = 1 - 0.5 * min(1, -1 / self.totaltime * (timeleft - self.totaltime))
+      else: p = 1
+
+      # The second term (self.vector * ...) is the number of beats
+      # corresponding to the amount of time left at the target bpm.
+      top = self.top + self.vector * int(p*timeleft*self.target_bpm/60.0 * 64)
 
     if top > 480: top = 480
 
@@ -255,57 +281,107 @@ class HoldArrowSprite(AbstractArrow):
   def update(self, curtime, curbpm, beat, judge):
     AbstractArrow.update(self, curtime, curbpm, 0)
 
-    if beat > self.endbeat2:
-      self.kill()
-      return
-
-    c = self.image.get_colorkey()
-    self.top_image = pygame.surface.Surface([self.width, self.width / 2])
-    self.top_image.fill(c)
-    self.top_image.blit(self.image, [0, 0])
-
-    self.bottom_image = pygame.surface.Surface([self.width, self.width / 2])
-    self.bottom_image.fill(c)
-    self.bottom_image.blit(self.image, [0, -self.width / 2])
-
-    self.center_image = pygame.surface.Surface([self.width, 1]) 
-    self.center_image.fill(c)
-    self.center_image.blit(self.image, [0, -self.width / 2 + 1])
-
     beatsleft_top = self.endbeat1 - beat
     beatsleft_bot = self.endbeat2 - beat
 
-    if self.accel == 1:
-      nootb = -1 / self.totalbeats
-      p = max(0, nootb * (beatsleft_top * self.speed - self.totalbeats))
-      speed_top = self.speed * (p + 1)
-      p = max(0, nootb * (beatsleft_bot * self.speed - self.totalbeats))
-      speed_bottom = self.speed * (p + 1)
-    elif self.accel == 2:
-      nootb = -1 / self.totalbeats
-      p = min(1, nootb * (beatsleft_top * self.speed - self.totalbeats))
-      speed_top = self.speed * (p * -0.5 + 1)
-      p = min(1, nootb * (beatsleft_bot * self.speed - self.totalbeats))
-      speed_bottom = self.speed * (p * -0.5 + 1)
-    else: speed_top = speed_bottom = self.speed
+    if self.target_bpm is None:
+      if beat > self.endbeat2:
+        self.kill()
+        return
 
-    # See the notes in ArrowSprite about the derivation of this.
-    if self.bottom > self.top:
-      top = self.top + self.vector * int(beatsleft_top * speed_top * 64)
-      bottom = self.top + self.vector * int(beatsleft_bot * speed_bottom * 64)
+      c = self.image.get_colorkey()
+      self.top_image = pygame.surface.Surface([self.width, self.width / 2])
+      self.top_image.fill(c)
+      self.top_image.blit(self.image, [0, 0])
+
+      self.bottom_image = pygame.surface.Surface([self.width, self.width / 2])
+      self.bottom_image.fill(c)
+      self.bottom_image.blit(self.image, [0, -self.width / 2])
+
+      self.center_image = pygame.surface.Surface([self.width, 1]) 
+      self.center_image.fill(c)
+      self.center_image.blit(self.image, [0, -self.width / 2 + 1])
+
+      if self.accel == 1:
+        nootb = -1 / self.totalbeats
+        p = max(0, nootb * (beatsleft_top * self.speed - self.totalbeats))
+        speed_top = self.speed * (p + 1)
+        p = max(0, nootb * (beatsleft_bot * self.speed - self.totalbeats))
+        speed_bottom = self.speed * (p + 1)
+      elif self.accel == 2:
+        nootb = -1 / self.totalbeats
+        p = min(1, nootb * (beatsleft_top * self.speed - self.totalbeats))
+        speed_top = self.speed * (p * -0.5 + 1)
+        p = min(1, nootb * (beatsleft_bot * self.speed - self.totalbeats))
+        speed_bottom = self.speed * (p * -0.5 + 1)
+      else: speed_top = speed_bottom = self.speed
+
+      # See the notes in ArrowSprite about the derivation of this.
+      if self.bottom > self.top:
+        top = self.top + self.vector * int(beatsleft_top * speed_top * 64)
+        bottom = self.top + self.vector * int(beatsleft_bot * speed_bottom * 64)
+      else:
+        top = self.top + self.vector * int(beatsleft_bot * speed_bottom * 64)
+        bottom = self.top + self.vector * int(beatsleft_top * speed_top * 64)
+
+      if bottom > 480: bottom = 480
+      if top > 480: top = 480
+
+      if self.top < self.bottom:
+        bottom = max(self.top, bottom)
+        top = max(self.top, top)
+      else:
+        bottom = min(self.top, bottom)
+        top = min(self.top, top)
     else:
-      top = self.top + self.vector * int(beatsleft_bot * speed_bottom * 64)
-      bottom = self.top + self.vector * int(beatsleft_top * speed_top * 64)
+      if curtime > self.timef2:
+        self.kill()
+        return
 
-    if bottom > 480: bottom = 480
-    if top > 480: top = 480
+      timeleft_top=self.timef1-curtime
+      timeleft_bot=self.timef2-curtime
+      
+      c = self.image.get_colorkey()
+      self.top_image = pygame.surface.Surface([self.width, self.width / 2])
+      self.top_image.fill(c)
+      self.top_image.blit(self.image, [0, 0])
 
-    if self.top < self.bottom:
-      bottom = max(self.top, bottom)
-      top = max(self.top, top)
-    else:
-      bottom = min(self.top, bottom)
-      top = min(self.top, top)
+      self.bottom_image = pygame.surface.Surface([self.width, self.width / 2])
+      self.bottom_image.fill(c)
+      self.bottom_image.blit(self.image, [0, -self.width / 2])
+
+      self.center_image = pygame.surface.Surface([self.width, 1]) 
+      self.center_image.fill(c)
+      self.center_image.blit(self.image, [0, -self.width / 2 + 1])
+
+      if self.accel == 1:
+        noott = -1 / self.totaltime
+        p_top = 1 + max(0, noott * (timeleft_top - self.totaltime))
+        p_bottom = 1 + max(0, noott * (timeleft_bot - self.totaltime))
+      elif self.accel == 2:
+        noott = -1 / self.totaltime
+        p_top = 1 + -0.5 * min(1, noott * (timeleft_top - self.totaltime))
+        p_bottom = 1 - 0.5 * min(1, noott * (timeleft_bot - self.totaltime))
+      else: p_top = p_bottom = 1
+
+      # See the notes in ArrowSprite about the derivation of this.
+      if self.bottom > self.top:
+        top = self.top + self.vector * int(p_top*timeleft_top * self.target_bpm/60.0 * 64)
+        bottom = self.top + self.vector * int(p_bottom*timeleft_bot * self.target_bpm/60.0 * 64)
+      else:
+        top = self.top + self.vector * int(p_top*timeleft_bot * self.target_bpm/60.0 * 64)
+        bottom = self.top + self.vector * int(p_bottom*timeleft_top * self.target_bpm/60.0 * 64)
+
+      if bottom > 480: bottom = 480
+      if top > 480: top = 480
+
+      if self.top < self.bottom:
+        bottom = max(self.top, bottom)
+        top = max(self.top, top)
+      else:
+        bottom = min(self.top, bottom)
+        top = min(self.top, top)
+      
 
     pct = abs(float(top - self.top) / self.diff)
     

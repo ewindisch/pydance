@@ -23,6 +23,7 @@ class AbstractCourse(object):
     self.banner = None
     self.all_songs = all_songs
     self.recordkeys = recordkeys
+    self.past_songs = []
 
   def __len__(self): return len(self.songs)
 
@@ -111,7 +112,7 @@ class AbstractCourse(object):
         folder, dummy = name.split("/")
         folder = folder.lower()
         if folder in self.all_songs:
-          songs = self.all_songs[folder].values()
+          songs = [s for s in self.all_songs[folder].values() if (s,diff) not in self.past_songs]
         else:
           error.ErrorMessage(self.screen, folder + " was not found.")
           raise StopIteration
@@ -121,7 +122,7 @@ class AbstractCourse(object):
         songs = []
         for v in self.all_songs.values(): songs.extend(v.values())
 
-      songs = [s for s in songs if self._find_difficulty(s, diff)]
+      songs = [s for s in songs if (s,diff) not in self.past_songs and self._find_difficulty(s, diff)]
 
       if len(songs) == 0:
         error.ErrorMessage(self.screen, "No valid songs were found.")
@@ -157,7 +158,7 @@ class AbstractCourse(object):
       raise StopIteration
 
     self.index += 1
-
+    self.past_songs.append((fullname,diff))
     return (fullname, [diff] * len(self.player_configs))
 
 def CourseFile(*args):
