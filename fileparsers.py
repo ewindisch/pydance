@@ -603,13 +603,14 @@ class SMFile(MSDFile):
         if gametype in games.COUPLE:
           step1 = [note]
           step2 = [note]
-          step1.extend([SMFile.step[int(s)] for s in sd[0:count/2]])
-          step2.extend([SMFile.step[int(s)] for s in sd[count/2:]])
+          # Ugly hack to ignore mines (for now).
+          step1.extend([SMFile.step[int(s.replace('M','0'))] for s in sd[0:count/2]])
+          step2.extend([SMFile.step[int(s.replace('M','0'))] for s in sd[count/2:]])
           stepdata[0].append(step1)
           stepdata[1].append(step2)
         else:
           step = [note]
-          step.extend([SMFile.step[int(s)] for s in sd])
+          step.extend([SMFile.step[int(s.replace('M','0'))] for s in sd])
           stepdata.append(step)
 
         beat += note / 4.0
