@@ -134,7 +134,7 @@ elif osname == "macosx":
 
 mainconfig.load("pydance.cfg")
 mainconfig.load(os.path.join(rc_path, "pydance.cfg"))
-mainconfig["sortmode"] %= 4
+mainconfig["sortmode"] %= 6
 
 player_config = dict([(k, mainconfig[k]) for k in
                       ["spin", "accel", "transform", "scale", "speed",

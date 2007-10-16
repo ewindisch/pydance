@@ -20,6 +20,10 @@ def difficulty_sort(a, b):
   elif b in DIFFICULTY_LIST: return 1
   else: return cmp(a, b)
 
+def difficulty_sort_key(k):
+  try: return DIFFICULTY_LIST.index(k)
+  except ValueError: return len(DIFFICULTY_LIST)
+
 # Return the subtitle of a song...
 def find_subtitle(title):
   for pair in [("[", "]"), ("(", ")"), ("~", "~"), ("-", "-")]:

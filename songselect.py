@@ -10,29 +10,37 @@ import dance
 import random
 import options
 import error
+import util
 
 from constants import *
 from interface import *
 from pygame.mixer import music
 
+
 SORTS = {
-  "subtitle": (lambda x, y: cmp(str(x.info["subtitle"]).lower(),
-                                str(y.info["subtitle"]).lower())),
-  "title": (lambda x, y: (cmp(x.info["title"].lower(),
-                              y.info["title"].lower()) or
-                          SORTS["subtitle"](x, y))),
-  "artist": (lambda x, y: (cmp(x.info["artist"].lower(),
-                               y.info["artist"].lower()) or
-                           SORTS["title"](x, y))),
-  "bpm": (lambda x, y: (cmp(x.info["bpm"], y.info["bpm"]) or
-                        SORTS["title"](x, y))),
-  "mix": (lambda x, y: (cmp(str(x.info["mix"]).lower(),
-                            str(y.info["mix"]).lower()) or
-                        SORTS["title"](x, y)))
+  "subtitle": lambda x: x.info["subtitle"].lower(),
+  "title": lambda x: (x.info["title"].lower(), SORTS["subtitle"](x)),
+  "artist": lambda x: (x.info["artist"].lower(), SORTS["title"](x)),
+  "bpm": lambda x: (x.info["bpm"], SORTS["title"](x)),
+  "mix": lambda x: (x.info["mix"], SORTS["title"](x)),
+  "level": lambda x: (x.difficulty[x.diff_list[0]], SORTS["rank"](x)),
+  "difficulty": lambda x: (util.difficulty_sort_key(x.diff_list[0]), SORTS["level"](x)),
+  "rank": lambda x: -records.get(x.info["recordkey"],x.diff_list[0],game)[0],
   }
 
-SORT_NAMES = ["mix", "title", "artist", "bpm"]
+SORT_DANCES = {
+  "mix":False,
+  "title":False,
+  "artist":False,
+  "bpm":False,
+  "level":True,
+  "difficulty":True
+  }
 
+# Dance sort names define sorting formats which are tied to dance data in songs;
+# therefore they can only be used if subfolders are allowed as each song may
+# appear in multiple folders.
+SORT_NAMES = ["mix", "title", "artist", "bpm", "level", "difficulty"]
 NUM_SORTS = len(SORT_NAMES)
 
 SS_HELP = [
@@ -134,57 +142,78 @@ class SongSelect(InterfaceWindow):
 
     InterfaceWindow.__init__(self, screen, "newss-bg.png")
     songs = [s for s in songs if s.difficulty.has_key(game)]
-
+    
     if len(songs) == 0:
       error.ErrorMessage(screen, "You don't have any songs for the game mode ("
                          + game + ") that you selected.")
       return
 
-    self._songs = [SongItemDisplay(s) for s in songs]
+
+    # Construct a mapping between songs displays and dance displays.
+    songs_and_dances = [(SongItemDisplay(s, game),
+                         [DanceItemDisplay(s, game, diff) for diff in s.diff_list[game]])
+                        for s in songs]
+
+    for (s,ds) in songs_and_dances:
+      for d in ds:
+        s.danceitems[d.diff]=d
+        d.songitem=s
+
+    self._songs = [s[0] for s in songs_and_dances]
+    self._dances = reduce(lambda x,y: x+y[1],songs_and_dances,[])
+
     self._index = 0
     self._game = game
     self._config = dict(game_config)
     self._all_songs = self._songs
+    self._all_dances = self._dances
     self._all_valid_songs = [s for s in self._songs if s.info["valid"]]
+    self._all_valid_dances = [d for d in self._dances if d.info["valid"]]
 
     self._list = ListBox(pygame.font.Font(None, 26),
                          [255, 255, 255], 26, 16, 220, [408, 56])
+    # please use set constructions after python 2.4 is adopted
+    sort_name = self._update_songitems()
+
     if len(self._songs) > 60 and mainconfig["folders"]:
       self._create_folders()
-      name = SORT_NAMES[mainconfig["sortmode"]]
       self._create_folder_list()
     else:
       self._folders = None
-      self._base_text = "All Songs"
-      self._songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
-      self._list.set_items([s.info["title"] for s in self._songs])
+      self._base_text = sort_name.upper()
+
+      self._songitems.sort(key=SORTS[sort_name])
+      self._list.set_items([s.info["title"] for s in self._songitems])
 
     self._preview = SongPreview()
-    self._preview.preview(self._songs[self._index])
-    self._song = self._songs[self._index]
+    self._preview.preview(self._songitems[self._index])
+    self._song = self._songitems[self._index]
 
     # Both players must have the same difficulty in locked modes.
     self._locked = games.GAMES[self._game].couple
 
     players = games.GAMES[game].players
-    self._diffs = [] # Current difficulty setting
+#    self._diffs = [] # Current difficulty setting
     self._diff_widgets = [] # Difficulty widgets
     self._configs = []
-    self._diff_names = [] # Last manually selected difficulty name
+    self._diff_names = [] # Current chosen difficulties
+    self._pref_diff_names = [] # Last manually selected difficulty names
+    self._last_player = 0 # Last player to change a difficulty
 
     for i in range(players):
-      self._diffs.append(0)
       self._configs.append(dict(player_config))
-      self._diff_names.append(" ")
       d = DifficultyBox([84 + (233 * i), 434])
+      self._pref_diff_names.append(util.DIFFICULTY_LIST[0])
       if not self._song.isfolder:
-        diff_name = self._song.diff_list[game][self._diffs[i]]
+        self._diff_names.append(self._song.diff_list[0])
+        diff_name = self._diff_names[i]
         rank = records.get(self._song.info["recordkey"],
                            diff_name, self._game)[0]
         grade = grades.grades[self._config["grade"]].grade_by_rank(rank)
         d.set(diff_name, DIFF_COLORS.get(diff_name, [127, 127, 127]),
-              self._song.difficulty[game][diff_name], grade)
+              self._song.difficulty[diff_name], grade)
       else:
+        self._diff_names.append(" ")        
         d.set("None", [127, 127, 127], 0, "?")
       self._diff_widgets.append(d)
     
@@ -210,14 +239,13 @@ class SongSelect(InterfaceWindow):
 
   def loop(self):
     pid, ev = ui.ui.poll()
-    root_idx = 0
     self._list.set_index(self._index)
     self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
-                                                         len(self._songs)))
+                                                         len(self._songitems)))
     while not (ev == ui.CANCEL and (not self._folders or self._song.isfolder)):
       # Inactive player. If the event isn't set to ui.PASS, we try to use
       # the pid later, which will be bad.
-      if pid >= len(self._diffs): ev = ui.PASS
+      if pid >= len(self._diff_names): ev = ui.PASS
       
       elif ev == ui.UP: self._index -= 1
       elif ev == ui.DOWN: self._index += 1
@@ -230,35 +258,38 @@ class SongSelect(InterfaceWindow):
 
       elif ev == ui.LEFT:
         if not self._song.isfolder:
-          didx = (self._diffs[pid] - 1) % len(self._song.diff_list[self._game])
-          self._diffs[pid] = didx
-          name = self._song.diff_list[self._game][didx]
+          namei = self._song.diff_list.index(self._diff_names[pid])
+          namei = (namei -1) % len(self._song.diff_list)
+          name = self._song.diff_list[namei]
           self._diff_names[pid] = name
+          self._pref_diff_names[pid] = name
+          self._last_player = pid
 
       elif ev == ui.RIGHT:
         if not self._song.isfolder:
-          didx = (self._diffs[pid] + 1) % len(self._song.diff_list[self._game])
-          self._diffs[pid] = didx
-          name = self._song.diff_list[self._game][didx]
+          namei = self._song.diff_list.index(self._diff_names[pid])
+          namei = (namei + 1) % len(self._song.diff_list)
+          name = self._song.diff_list[namei]
           self._diff_names[pid] = name
+          self._pref_diff_names[pid] = name
+          self._last_player = pid
 
       elif ev == ui.SELECT:
         if self._song.isfolder:
-          if len(self._all_valid_songs) > 0:
-            self._song = random.choice(self._all_valid_songs)
-            root_idx = [fol.name for fol in self._songs].index(self._song.folder[SORT_NAMES[mainconfig["sortmode"]]])
+          if len(self._all_valid_songitems) > 0:
+            self._song = random.choice(self._all_valid_songitems)
             fol = self._song.folder[SORT_NAMES[mainconfig["sortmode"]]]
             self._create_song_list(fol)
-            self._index = self._songs.index(self._song)      
+            self._index = self._songitems.index(self._song)      
           else:
             error.ErrorMessage(screen,
                                "You don't have any songs that are marked " +
                                "\"valid\" for random selection.")
         else:
-          valid_songs = [s for s in self._songs if s.info["valid"]]
+          valid_songs = [s for s in self._songitems if s.info["valid"]]
           if len(valid_songs) > 0:
             self._song = random.choice(valid_songs)
-            self._index = self._songs.index(self._song)
+            self._index = self._songitems.index(self._song)
           else:
             error.ErrorMessage(screen, "You don't have any songs here that " +
                                "are marked \"valid\" for random selection.")
@@ -269,29 +300,30 @@ class SongSelect(InterfaceWindow):
         pygame.display.update()
 
       elif ev == ui.SORT:
-        s = self._songs[self._index]
+        s = self._songitems[self._index]
         mainconfig["sortmode"] = (mainconfig["sortmode"] + 1) % NUM_SORTS
+        sort_name = self._update_songitems()
         if self._folders:
           if s.isfolder:
             self._create_folder_list()
           else:
-            self._create_song_list(s.folder[SORT_NAMES[mainconfig["sortmode"]]])
-            self._index = self._songs.index(s)
+            s = self._find_resorted()
+            self._create_song_list(s.folder[sort_name])
+            self._index = self._songitems.index(s)
         else:
-          self._songs.sort(SORTS[SORT_NAMES[mainconfig["sortmode"]]])
-          self._index = self._songs.index(s)
-          self._list.set_items([s.info["title"] for s in self._songs])
+          s = self._find_resorted()
+          self._base_text = sort_name.upper()
+          self._songitems.sort(key=SORTS[sort_name])
+          self._index = self._songitems.index(s)
+          self._list.set_items([s.info["title"] for s in self._songitems])
 
       elif ev == ui.CONFIRM:
         if self._song.isfolder:
           self._create_song_list(self._song.name)
-          root_idx = self._index
           self._index = 0
         else:
           music.fadeout(500)
-          diffs = [self._song.diff_list[self._game][d]
-                   for i, d in enumerate(self._diffs)]
-          dance.play(self._screen, [(self._song.filename, diffs)],
+          dance.play(self._screen, [(self._song.filename, self._diff_names)],
                      self._configs, self._config, self._game)
           music.fadeout(500) # The just-played song
           self._screen.blit(self._bg, [0, 0])
@@ -299,25 +331,30 @@ class SongSelect(InterfaceWindow):
           ui.ui.clear()
 
       elif ev == ui.CANCEL:
+        # first: get the parent folder of the active song
+        sort_name = SORT_NAMES[mainconfig["sortmode"]]
+        fol = folder_name(self._song.folder[sort_name], sort_name)
+        # next: change folder
         self._create_folder_list()
         for d in self._diff_widgets:
           d.set("None", [127, 127, 127], 0, "?")
 
-        self._index = root_idx
+        lst = [s.info["title"] for s in self._songitems]
+        self._index = lst.index(fol)
 
       elif ev == ui.FULLSCREEN:
         mainconfig["fullscreen"] ^= 1
         pygame.display.toggle_fullscreen()
 
-      self._index %= len(self._songs)
-      self._song = self._songs[self._index]
+      self._index %= len(self._songitems)
+      self._song = self._songitems[self._index]
 
       if self._locked and ev in [ui.LEFT, ui.RIGHT]:
-        for i in range(len(self._diffs)):
-          self._diffs[i] = self._diffs[pid]
+        for i, sd in enumerate(self._diff_names):
           self._diff_names[i] = self._diff_names[pid]
+          self._pref_diff_names[i] = self._diff_names[pid]
 
-      if ev in [ui.CANCEL, ui.UP, ui.DOWN, ui.SELECT, ui.CONFIRM]:
+      if ev in [ui.CANCEL, ui.UP, ui.DOWN, ui.SELECT, ui.CONFIRM, ui.SORT]:
         self._preview.preview(self._song)
         self._banner.set_song(self._song)
 
@@ -326,28 +363,45 @@ class SongSelect(InterfaceWindow):
         elif ev == ui.DOWN: self._list.set_index(self._index, 1)
         else: self._list.set_index(self._index, 0) # don't animate
         self._title.set_text(self._base_text + " - %d/%d" % (self._index + 1,
-                                                             len(self._songs)))
+                                                             len(self._songitems)))
 
       if ev in [ui.UP, ui.DOWN, ui.SELECT, ui.SORT, ui.CONFIRM]:
         if not self._song.isfolder:
-          for i in range(len(self._diffs)):
-            name = self._diff_names[i]
-            if name in self._song.diff_list[self._game]:
-              self._diffs[i] = self._song.diff_list[self._game].index(name)
-            else: self._diffs[i] %= len(self._song.diff_list[self._game])
+          for pl, dname in enumerate(self._diff_names):
+            name = self._pref_diff_names[pl]
+            if name in self._song.diff_list:
+               self._diff_names[pl] = name
+            elif self._unify_difficulties(name) in self._song.diff_list:
+               self._diff_names[pl] = self._unify_difficulties(name)
+            else: 
+              # if both name and the song's difficulty list can be indexed:
+              # find the nearest defined difficulty
+              if  (name in util.DIFFICULTY_LIST or
+                  self._unify_difficulties(name) in util.DIFFICULTY_LIST) and \
+                  reduce(lambda a,b: a and b in util.DIFFICULTY_LIST, 
+                         self._song.diff_list , True ):
+                name = self._unify_difficulties(name)
+                namei = util.DIFFICULTY_LIST.index(name)
+                diffi = [util.DIFFICULTY_LIST.index(d) for 
+                                        d in self._song.diff_list]
+                dds = [abs(d - namei) for d in diffi]
+                self._diff_names[pl] = self._song.diff_list\
+                                                          [dds.index(min(dds))]
+              else: # no sensible way to resolve this: jump to middle of list
+                difflen = len(self._song.diff_list)
+                self._diff_names[pl] = self._song.diff_list[difflen/2]
           
       if ev in [ui.UP, ui.DOWN, ui.LEFT, ui.RIGHT, ui.SELECT, ui.CONFIRM]:
         if not self._song.isfolder:
-          for i in range(len(self._diffs)):
-            name = self._song.diff_list[self._game][self._diffs[i]]
+          for i, name in enumerate(self._diff_names):
             rank = records.get(self._song.info["recordkey"],
                                name, self._game)[0]
             grade = grades.grades[self._config["grade"]].grade_by_rank(rank)
             self._diff_widgets[i].set(name,
                                       DIFF_COLORS.get(name, [127,127,127]),
-                                      self._song.difficulty[self._game][name],
+                                      self._song.difficulty[name],
                                     grade)
-
+      
       self.update()
       pid, ev = ui.ui.poll()
 
@@ -355,11 +409,27 @@ class SongSelect(InterfaceWindow):
     InterfaceWindow.update(self)
     self._preview.update(pygame.time.get_ticks())
 
+  # Gets rid of superfluous/misspelled difficulties for sorting purposes.
+  # Return the difficulty if it's ok, however map S-MANIAC to SMANIAC.
+  # Return an existing difficulty if at least the first three characters 
+  # are the same.
+  def _unify_difficulties(self, difficulty):
+    diff = difficulty.upper()
+    if not diff in util.DIFFICULTY_LIST:
+      diffs = [d for d in util.DIFFICULTY_LIST \
+                               if d.startswith(diff[:2])]
+      if len(diffs)>0: diff = diffs[0]
+      else: diff = "other"
+    if diff=="S-MANIAC": diff = "SMANIAC" # see constants.DIFF_COLORS
+    return diff
+    
   def _create_folders(self):
     mixes = {}
     artists = {}
     titles = {}
     bpms = {}
+    difficulties = {}
+    levels = {}
 
     for s in self._all_songs:
       if s.info["mix"] not in mixes: mixes[s.info["mix"]] = []
@@ -389,27 +459,74 @@ class SongSelect(InterfaceWindow):
         if "300+" not in bpms: bpms["300+"] = []
         bpms["300+"].append(s)
         s.folder["bpm"] = "300+"
+    for s in self._all_dances:
+      difficulty = self._unify_difficulties(s.diff_list[0])
+      label = difficulty
+      if not label in difficulties: difficulties[label]=[]
+      difficulties[label].append(s)
+      # s.folder["difficulty"] is only initialised here.
+      if "difficulty" in s.folder.keys():
+        # min() can't handle arbitrary comparators, so:
+        if util.difficulty_sort(s.folder["difficulty"], label)<=0 :
+          s.folder["difficulty"] = s.folder["difficulty"]
+        else: s.folder["difficulty"] = label
+      else:
+        s.folder["difficulty"] = label
 
+      level = s.difficulty.values()[0]
+      label = "%2d" % level
+      if not label in levels: levels[label]=[]
+      levels[label].append(s)
+      # s.folder["level"] is only initialised here.
+      if "level" in s.folder.keys():
+        s.folder["level"] = min(s.folder["level"], label) 
+      else:
+        s.folder["level"] = label
+        
     self._folders = { "mix": mixes, "title": titles, "artist": artists,
-                      "bpm": bpms }
+                      "bpm": bpms, "level": levels, "difficulty": difficulties }
 
   def _create_folder_list(self):
-    sort = SORT_NAMES[mainconfig["sortmode"]]
-    lst = self._folders[sort].keys()
+    sort_name = SORT_NAMES[mainconfig["sortmode"]]
+    lst = self._folders[sort_name].keys()
     lst.sort(lambda x, y: cmp(x.lower(), y.lower()))
-    new_songs = [FolderDisplay(folder, sort,
-                               len(self._folders[sort][folder])) for
+    new_songs = [FolderDisplay(folder, sort_name,
+                               len(self._folders[sort_name][folder])) for
                  folder in lst]
-    self._songs = new_songs
-    self._list.set_items([s.info["title"] for s in self._songs])
-    
-    self._base_text = "Sort by %s" % sort.capitalize()
+    self._songitems = new_songs
+    self._list.set_items([s.info["title"] for s in self._songitems])
+    self._base_text = "Sort by %s" % sort_name.capitalize()
     
   def _create_song_list(self, folder):
-    sort = SORT_NAMES[mainconfig["sortmode"]]
-    songlist = self._folders[sort][folder]
-    songlist.sort(SORTS[sort])
+    # folder contains a sorting criterion value in string format
+    sort_name = SORT_NAMES[mainconfig["sortmode"]]
+    songlist = self._folders[sort_name][folder]
+    
+    songlist.sort(key=SORTS[sort_name])
+    
+    self._songitems = songlist
+    self._list.set_items([s.info["title"] for s in self._songitems])
+    if self._folders: self._base_text = folder_name(folder, sort_name)
 
-    self._songs = songlist
-    self._list.set_items([s.info["title"] for s in self._songs])
-    self._base_text = folder_name(folder, sort)
+  def _update_songitems(self):
+    sort_name = SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]
+    if SORT_DANCES[sort_name]:
+      self._songitems = self._dances
+      self._all_songitems = self._all_dances
+      self._all_valid_songitems = self._all_valid_dances
+    else:
+      self._songitems = self._songs
+      self._all_songitems = self._all_songs
+      self._all_valid_songitems = self._all_valid_songs
+
+    return sort_name
+
+  def _find_resorted(self):
+    if isinstance(self._song, SongItemDisplay) and \
+       SORT_DANCES[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]]:
+      diff = self._diff_names[self._last_player]
+      return self._song.danceitems[diff]
+    elif isinstance(self._song, DanceItemDisplay) and \
+         not SORT_DANCES[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]]:
+      return self._song.songitem
+    else: return self._song

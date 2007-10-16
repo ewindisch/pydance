@@ -561,18 +561,16 @@ class InterfaceWindow(object):
 
 NO_BANNER = os.path.join(image_path, "no-banner.png")
 
-class SongItemDisplay(object):
+class AbstractItemDisplay(object):
   no_banner = make_box(size = [256, 80])
   tmp = pygame.image.load(NO_BANNER)
   tmp.set_colorkey(tmp.get_at([0, 0]))
   no_banner.blit(tmp, [4, 4])
-
   def __init__(self, song): # A SongItem object
     self._song = song
-    self.difficulty = song.difficulty
     self.info = song.info
     self.filename = song.filename
-    self.diff_list = song.diff_list
+    
     self.banner = None
     self.isfolder = False
     self.folder = {}
@@ -588,3 +586,21 @@ class SongItemDisplay(object):
     if self.info["cdtitle"]:
       self.cdtitle = pygame.image.load(self.info["cdtitle"])
     else: self.cdtitle = pygame.Surface([0, 0])
+
+class SongItemDisplay(AbstractItemDisplay):
+  def __init__(self, song, game):
+    AbstractItemDisplay.__init__(self, song)
+    self.difficulty = song.difficulty[game]
+    self.diff_list = song.diff_list[game]
+    self.danceitems = {}
+
+class DanceItemDisplay(AbstractItemDisplay):
+  def __init__(self, song, game, diff):
+    AbstractItemDisplay.__init__(self, song)
+    self.difficulty = {diff:song.difficulty[game][diff]}
+    self.diff_list = [diff]
+    self.diff = diff
+    self.songitem = None
+
+
+  

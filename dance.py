@@ -187,7 +187,7 @@ class SongInfoScreen(InterfaceWindow):
     self.songconf = songconf
     InterfaceWindow.__init__(self, screen, "songinfoscreen-bg.png")
     self._banner = BannerDisplay([190, 240])
-    self._banner.set_song(SongItemDisplay(self.song))
+    self._banner.set_song(SongItemDisplay(self.song, self.playmode))
     self.end = pygame.time.get_ticks() + 6000
     self._countdown = WrapTextDisplay(50, 68, [285,429], centered=True)
     
