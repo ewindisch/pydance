@@ -4,6 +4,7 @@
 import os
 import dircache
 import string
+import codecs
 
 import games
 import util
@@ -204,6 +205,10 @@ class MSDFile(GenericFile):
     GenericFile.__init__(self, filename, need_steps)
     lines = []
     f = file(filename)
+
+    # If there is a BOM, skip it. Otherwise, don't.
+    if f.read(3) != codecs.BOM_UTF8: f.seek(0)
+
     for line in f:
       if line.find("//") != -1: line = line[:line.find("//")]
       line = line.strip()

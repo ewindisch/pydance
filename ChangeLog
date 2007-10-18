@@ -9,7 +9,9 @@ Legend:
 ----- - CURRENT
 1.1.0 - No name yet.
 + A 2.5x speed multiplier was added.
-+ A constant-BPM speed mode (200bpm and 300bpm) was implemented.
++ A constant-BPM speed mode (from 200bpm up to 800bom) was implemented.
++ Sorting/Floders by steps difficulty and level added. (Frank Foeth)
++ UTF-8 BOMs now handled. (Stefan Kloe)
 * It is now guaranteed that songs in a course are not repeated.
 * Pygame font rendering bug workaround applied.
 * Minor typos fixed.
