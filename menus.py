@@ -1,6 +1,7 @@
 import pygame, colors, ui
 from constants import *
 from fontfx import TextZoomer
+from fonttheme import FontTheme
 
 # Hooray! Less magic numbers
 LIGHT_GRAY = (128, 128, 128)
@@ -66,17 +67,17 @@ class MenuItem(object):
     self.image = pygame.surface.Surface(BUTTON_SIZE)
     self.image.blit(self.bg, (0,0))
     if self.subtext == None:
-      text = FONTS[32].render(self.text, 1, self.rgb)
-      self.image.blit(text, (BUTTON_WIDTH/2 - FONTS[32].size(self.text)[0] / 2,
-                             BUTTON_HEIGHT/2 - FONTS[32].size(self.text)[1]/2))
+      text = FontTheme.menu.render(self.text, 1, self.rgb)
+      self.image.blit(text, (BUTTON_WIDTH/2 - FontTheme.menu.size(self.text)[0] / 2,
+                             BUTTON_HEIGHT/2 - FontTheme.menu.size(self.text)[1]/2))
     else:
-      text = FONTS[26].render(self.text, 1, self.rgb)
-      subtext = FONTS[20].render(self.subtext, 1, self.rgb)
-      self.image.blit(text, (BUTTON_WIDTH/2 - FONTS[26].size(self.text)[0] / 2,
-                             BUTTON_HEIGHT/3 - FONTS[26].size(self.text)[1]/2))
+      text = FontTheme.menusub1.render(self.text, 1, self.rgb)
+      subtext = FontTheme.menusub2.render(self.subtext, 1, self.rgb)
+      self.image.blit(text, (BUTTON_WIDTH/2 - FontTheme.menusub1.size(self.text)[0] / 2,
+                             BUTTON_HEIGHT/3 - FontTheme.menusub1.size(self.text)[1]/2))
       self.image.blit(subtext,
-                      (BUTTON_WIDTH/2 - FONTS[20].size(self.subtext)[0] / 2,
-                       2 * BUTTON_HEIGHT/3 - FONTS[20].size(self.text)[1] / 2))
+                      (BUTTON_WIDTH/2 - FontTheme.menusub2.size(self.subtext)[0] / 2,
+                       2 * BUTTON_HEIGHT/3 - FontTheme.menusub2.size(self.text)[1] / 2))
     self.image.set_alpha(self.alpha)
 
 class Menu(object):
@@ -113,9 +114,9 @@ class Menu(object):
   def render(self):
     self.image = pygame.surface.Surface(BUTTON_SIZE)
     self.image.blit(self.bg, (0,0))
-    text = FONTS[32].render(self.text, 1, self.rgb)
-    self.image.blit(text, (BUTTON_WIDTH/2 - FONTS[32].size(self.text)[0] / 2,
-                           BUTTON_HEIGHT/2 - FONTS[32].size(self.text)[1] / 2))
+    text = FontTheme.menu.render(self.text, 1, self.rgb)
+    self.image.blit(text, (BUTTON_WIDTH/2 - FontTheme.menu.size(self.text)[0] / 2,
+                           BUTTON_HEIGHT/2 - FontTheme.menu.size(self.text)[1] / 2))
     self.image.set_alpha(self.alpha)
 
   def activate(self, ev):

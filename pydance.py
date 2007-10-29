@@ -44,6 +44,7 @@ from fileparsers import SongItem
 from pygame.mixer import music
 from fontfx import TextProgress
 from error import ErrorMessage
+from fonttheme import FontTheme
 
 from pad import pad
 
@@ -83,7 +84,7 @@ def load_files(screen, files, type, Ctr, args):
   files = list(dict(map(None, files, [])).keys())
   objects = []
   message = "Found %d %s. Loading..." % (len(files), type)
-  pbar = TextProgress(FONTS[60], message, colors.WHITE, colors.BLACK)
+  pbar = TextProgress(FontTheme.loadingscreen, message, colors.WHITE, colors.BLACK)
   r = pbar.render(0).get_rect()
   r.center = [320, 240]
   for f in files:

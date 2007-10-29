@@ -19,7 +19,7 @@ class Config(object):
   # Update with a dict object, instead of a file.
   def update(self, data, master = False):
     if master: self.master.update(data)
-    else: self.user[k].update(data)
+    else: self.user.update(data)
         
   def __getitem__(self, key):
     if key in self.user: return self.user[key]

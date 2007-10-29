@@ -10,6 +10,7 @@ import pad
 from constants import *
 from announcer import Announcer
 from gfxtheme import ThemeFile
+from fonttheme import FontTheme
 from gameselect import MainWindow as GameSelect
 
 class Credits(pygame.sprite.Sprite):
@@ -257,7 +258,7 @@ def do(screen, songdata):
         ["Song Info Screen", tuple_opt, ('songinfoscreen',
                                          zip([0, 1, 2],
                                              ["Never", "Multi-song Only", "Always"]))],
-  
+        ["Font (after restart)", rotate_opt, ('fonttheme', FontTheme.themes())],
         ["Back", None, None]
         )
        )

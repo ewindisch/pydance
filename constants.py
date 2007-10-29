@@ -68,6 +68,7 @@ from pygame.locals import *
 
 # Set up the configuration file
 default_conf = {
+  "fonttheme": "default",
   "djtheme": "djenzay",
   "songdir": os.pathsep.join([os.path.join(rc_path, "songs"),
                               os.path.join(pydance_path, "songs")]),

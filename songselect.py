@@ -15,7 +15,7 @@ import util
 from constants import *
 from interface import *
 from pygame.mixer import music
-
+from fonttheme import FontTheme
 
 SORTS = {
   "subtitle": lambda x: x.info["subtitle"].lower(),
@@ -170,7 +170,7 @@ class SongSelect(InterfaceWindow):
     self._all_valid_songs = [s for s in self._songs if s.info["valid"]]
     self._all_valid_dances = [d for d in self._dances if d.info["valid"]]
 
-    self._list = ListBox(pygame.font.Font(None, 26),
+    self._list = ListBox(FontTheme.songlist,
                          [255, 255, 255], 26, 16, 220, [408, 56])
     # please use set constructions after python 2.4 is adopted
     sort_name = self._update_songitems()
@@ -221,7 +221,7 @@ class SongSelect(InterfaceWindow):
     self._banner = BannerDisplay([205, 230])
     self._banner.set_song(self._song)
     self._sprites.add(HelpText(SS_HELP, [255, 255, 255], [0, 0, 0],
-                               pygame.font.Font(None, 22), [206, 20]))
+                               FontTheme.help, [206, 20]))
 
     self._title = TextDisplay(30, [210, 28], [414, 27])
     self._sprites.add(self._diff_widgets +
