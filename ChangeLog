@@ -16,6 +16,7 @@ Legend:
 + Non-ASCII song names are now printed to console if console encoding supports it.
 - Song preview now starts at 0, to work around a pygame/libsdl bug. (Carles Pina i Estany)
 * It is now guaranteed that songs in a course are not repeated.
+* Fixes crackling sound caused by pygame mixer being initialized incorrectly.
 * Minor typos fixed.
 	
 1.0.3 - Like that's possible.					[2005.04.04]
