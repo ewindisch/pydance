@@ -12,11 +12,14 @@ import dance
 import random
 import util
 import options
+import unicodedata
 
 from constants import *
 from interface import *
 from courses import CRSFile
 from pygame.mixer import music
+
+from i18n import *
 
 NO_BANNER = os.path.join(image_path, "no-banner.png")
 
@@ -33,13 +36,13 @@ SORT_NAMES = ["mix", "title"]
 NUM_SORTS = len(SORT_NAMES)
 
 CS_HELP = [
-  "Up / Down: Change song selection",
-  "Left / Right: Change difficulty setting",
-  "Enter / Up Right: Open a folder or start a course",
-  "Escape / Up Left: Close a folder or exit",
-  "Tab / Select: Go to a random course",
-  "Start: Switch to Options screen",
-  "F11: Toggle fullscreen - S: Change the sort mode",
+  _("Up / Down: Change song selection"),
+  _("Left / Right: Change difficulty setting"),
+  _("Enter / Up Right: Open a folder or start a course"),
+  _("Escape / Up Left: Close a folder or exit"),
+  _("Tab / Select: Go to a random course"),
+  _("Start: Switch to Options screen"),
+  _("F11: Toggle fullscreen - S: Change the sort mode"),
   ]
 
 class CourseDisplay(object):
@@ -65,42 +68,42 @@ class CourseDisplay(object):
     i = 1
     for name, diff, mods in self.course.songs:
       if "*" in name: name, subtitle = "??????????", ""
-      elif name[0] == "BEST":
+      elif name[0] == _("BEST"):
         song = recordkeys.get(records.best(name[1], diff, game))
         if song:
-          subtitle = (song.info["subtitle"] or "") + (" (Best #%d)" % name[1])
+          subtitle = (song.info["subtitle"] or "") + (_(" (Best #%d)") % name[1])
           name = song.info["title"]
         else:
-          name = "Player's Best Unavailable"
-          subtitle = "(You need to play more songs!)"
+          name = _("Player's Best Unavailable")
+          subtitle = _("(You need to play more songs!)")
 
-      elif name[0] == "WORST":
+      elif name[0] == _("WORST"):
         song = recordkeys.get(records.worst(name[1], diff, game))
         if song:
-          subtitle = (song.info["subtitle"] or "") + (" (Worst #%d)" % name[1])
+          subtitle = (song.info["subtitle"] or "") + (_(" (Worst #%d)") % name[1])
           name = song.info["title"]
         else:
-          name = "Player's Worst Unavailable"
-          subtitle = "(You need to play more songs!)"
+          name = _("Player's Worst Unavailable")
+          subtitle = _("(You need to play more songs!)")
 
-      elif name[0] == "LIKES":
+      elif name[0] == _("LIKES"):
         song = recordkeys.get(records.like(name[1], diff, game))
         if song:
           subtitle = (song.info["subtitle"] or "") + (" (Likes #%d)" % name[1])
           name = song.info["title"]
         else:
-          name = "Player's Likes Unavailable"
-          subtitle = "(You need to play more songs!)"
+          name = _("Player's Likes Unavailable")
+          subtitle = _("(You need to play more songs!)")
 
-      elif name[0] == "DISLIKES":
+      elif name[0] == _("DISLIKES"):
         song = recordkeys.get(records.dislike(name[1], diff, game))
         if song:
           subtitle = ((song.info["subtitle"] or "") +
-                      (" (Dislikes #%d)" % name[1]))
+                      (_(" (Dislikes #%d)") % name[1]))
           name = song.info["title"]
         else:
-          name = "Player's Dislikes Unavailable"
-          subtitle = "(You need to play more songs!)"
+          name = _("Player's Dislikes Unavailable")
+          subtitle = _("(You need to play more songs!)")
 
       else: name, subtitle = util.find_subtitle(name.split("/")[-1])
 
@@ -172,7 +175,7 @@ class FolderDisplay(object):
   def render(self):
     if self.banner: return
 
-    name = self.name.encode("ascii", "ignore")
+    name = self.name
     for path in [rc_path, pydance_path]:
       filename = os.path.join(path, "banners", self._type, name+".png")
       if os.path.exists(filename):
@@ -209,7 +212,7 @@ class CourseSelector(InterfaceWindow):
       self._create_folder_list()
     else:
       self._folders = None
-      self._base_text = "All Courses"
+      self._base_text = _("All Courses")
       self._courses.sort(SORTS[SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]])
       self._list.set_items([s.name for s in self._courses])
 
@@ -364,7 +367,7 @@ class CourseSelector(InterfaceWindow):
     self._courses = new_courses
     self._list.set_items([s.fullname for s in self._courses])
     
-    self._base_text = "Sort by %s" % sort.capitalize()
+    self._base_text = _("Sort by %s") % sort.capitalize()
     
   def _create_course_list(self, folder):
     sort = SORT_NAMES[mainconfig["sortmode"] % NUM_SORTS]

@@ -140,8 +140,8 @@ class BeatJudge(AbstractJudge):
 
 judges = [TimeJudge, BeatJudge]
 judge_opt = [
-  (0, "Time",
-   "Judging is based on how many seconds you are from the correct time."),
-  (1, "Beat",
-   "Judging is based on how many beats you are from the correct time."),
+  (0, _("Time"),
+   _("Judging is based on how many seconds you are from the correct time.")),
+  (1, _("Beat"),
+   _("Judging is based on how many beats you are from the correct time.")),
   ]

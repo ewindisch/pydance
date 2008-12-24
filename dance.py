@@ -23,6 +23,7 @@ import colors
 import records
 import ui
 import options
+import locale
 
 import os
 
@@ -139,13 +140,35 @@ class TimeDisp(pygame.sprite.Sprite):
 class ReadyGoSprite(pygame.sprite.Sprite):
   def __init__(self, time):
     pygame.sprite.Sprite.__init__(self)
-    ready = os.path.join(pydance_path, "images", "ready.png")
-    go = os.path.join(pydance_path, "images", "go.png")
+
+  
+    ready_path = os.path.join(pydance_path, "images")#, "ready")
+    go_path = os.path.join(pydance_path, "images")#, "go")
     self._time = time
-    self._ready = pygame.image.load(ready).convert()
+
+    try:
+       ready_file = _("ready.png")
+       ready = os.path.join(ready_path,ready_file)
+       self._ready = pygame.image.load(ready).convert()
+    except:
+       ready_file = "ready.png"
+       ready = os.path.join(ready_path,ready_file)
+       self._ready = pygame.image.load(ready).convert()
+
     self._ready.set_colorkey(self._ready.get_at([0, 0]), RLEACCEL)
-    self._go = pygame.image.load(go).convert()
+
+    try:
+        go_file = _("go.png")
+	go = os.path.join(go_path,go_file)
+        self._go = pygame.image.load(go).convert()
+
+    except:
+       go_file = "go.png"
+       go = os.path.join(go_path,go_file)
+       self._go = pygame.image.load(go).convert()
+
     self._go.set_colorkey(self._go.get_at([0, 0]), RLEACCEL)
+
     self._pick_image(min(0, time))
 
   def update(self, cur_time):
@@ -198,9 +221,9 @@ class SongInfoScreen(InterfaceWindow):
       self._player_widgets += self.player_widgets(pid)
       self._player_opts += self.player_opts(pid)
 
-    self._other_widgets=[TextDisplay(50, [400, 50], [15, 35], "Next Song"),
-                         TextDisplay(30, [263, 37], [15, 450], "Confirm: Begin   Cancel: Stop"),
-                         TextDisplay(30, [263, 37], [380, 450], "Start: Change Options")]
+    self._other_widgets=[TextDisplay(50, [400, 50], [15, 35], _("Next Song")),
+                         TextDisplay(30, [263, 37], [15, 450], _("Confirm: Begin   Cancel: Stop")),
+                         TextDisplay(30, [263, 37], [380, 450], _("Start: Change Options"))]
     
     self._sprites.add([self._banner, self._countdown] +
                       self._player_widgets + self._player_opts +
@@ -237,7 +260,7 @@ class SongInfoScreen(InterfaceWindow):
 
   def player_widgets(self, pid):
     v_top = 11 + pid * 210
-    pname = WrapTextDisplay(50, 248, [380, v_top], "Player %d" % (pid+1,), centered=True)
+    pname = WrapTextDisplay(50, 248, [380, v_top], _("Player %d") % (pid+1,), centered=True)
     d=DifficultyBox([504, v_top+65])
     d.set(self.diffs[pid], DIFF_COLORS.get(self.diffs[pid], [127, 127, 127]),
           self.song.difficulty[self.playmode][self.diffs[pid]], "")
@@ -260,7 +283,7 @@ class SongInfoScreen(InterfaceWindow):
         summary.append(options.OPTIONS[opt][3][i_choice][1])
 
     if len(summary) == 0:
-      summary = "Default Settings"
+      summary = _("Default Settings")
     else:
       summary = ", ".join(summary)
       
@@ -291,7 +314,7 @@ def play(screen, playlist, configs, songconf, playmode):
   for songfn, diff in playlist:
     try: current_song = fileparsers.SongItem(songfn)
     except None:
-      error.ErrorMessage(screen, "There was an error loading " +
+      error.ErrorMessage(screen, _("There was an error loading ") +
                          os.path.split(songfn)[1])
       first = True
       continue
@@ -310,9 +333,9 @@ def play(screen, playlist, configs, songconf, playmode):
     for pid, player in enumerate(players):
       player.set_song(current_song, diff[pid], songdata.lyricdisplay)
 
-    print "Playing", songfn
-    print songdata.title.encode("ascii", "replace"), "by",
-    print songdata.artist.encode("ascii", "replace")
+    print _("Playing"), songfn
+    print songdata.title.encode(sys.stdout.encoding, "replace"), "by",
+    print songdata.artist.encode(sys.stdout.encoding, "replace")
 
     if dance(screen, songdata, players, prevscr, first, game):
       first = False
@@ -357,7 +380,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
   if ready_go:
     ready_go_time = min(100, *[plr.ready for plr in players])
     tgroup.add(ReadyGoSprite(ready_go_time))
-
+  
   if mainconfig['showbackground'] > 0:
     if backmovie is None:
       bgkludge = pygame.image.load(song.background).convert()
@@ -407,8 +430,8 @@ def dance(screen, song, players, prevscr, ready_go, game):
   song.init()
 
   if song.crapout != 0:
-    error.ErrorMessage(screen, "The audio file for this song " +
-                       song.filename + " could not be found.")
+    error.ErrorMessage(screen, _("The audio file for this song ") +
+                       song.filename + _(" could not be found."))
     return False # The player didn't fail.
 
   if mainconfig['assist']: music.set_volume(0.6)
@@ -494,7 +517,7 @@ def dance(screen, song, players, prevscr, ready_go, game):
 
     if screenshot:
       fn = os.path.join(rc_path, "screenshot.bmp")
-      print "Saving a screenshot to", fn
+      print _("Saving a screenshot to"), fn
       pygame.image.save(screen, fn)
       screenshot = False
 
@@ -508,5 +531,5 @@ def dance(screen, song, players, prevscr, ready_go, game):
       songtext.zout()
       grptext.zout()
 
-  if fpstext: print "Average FPS for this song was %d." % fpstext.fps()
+  if fpstext: print _("Average FPS for this song was %d.") % fpstext.fps()
   return songFailed

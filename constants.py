@@ -5,6 +5,9 @@
 import sys
 import os
 import locale
+
+from i18n import *
+
 VERSION = "1.0.3"
 
 try: locale.setlocale(locale.LC_ALL, '')
@@ -182,25 +185,25 @@ for s in (192, 60, 48, 40, 36, 32, 28, 26, 24, 20, 18, 16, 14):
   FONTS[s] = pygame.font.Font(None, s)
 
 # The different colors pydance uses for difficulties in the UI.
-DIFF_COLORS = { "BEGINNER": colors.color["white"],
-                "LIGHT": colors.color["orange"],
-                "EASY": colors.color["orange"],
-                "BASIC": colors.color["orange"],
-                "STANDARD": colors.color["red"],
-                "STANDER": colors.color["red"], # Shit you not, 3 people.
-                "TRICK": colors.color["red"],
-                "MEDIUM": colors.color["red"],
-                "DOUBLE": colors.color["red"],
-                "ANOTHER": colors.color["red"],
-                "PARA": colors.color["blue"],
-                "NORMAL": colors.color["red"],
-                "MANIAC": colors.color["green"],
-                "HARD": colors.color["green"],
-                "HEAVY": colors.color["green"],
-                "HARDCORE": colors.color["purple"],
-                "SMANIAC": colors.color["purple"],
-                "S-MANIAC": colors.color["purple"], # Very common typo
-                "CHALLENGE": colors.color["purple"],
-                "CRAZY": colors.color["purple"],
-                "EXPERT": colors.color["purple"]
+DIFF_COLORS = { "BEGINNER": colors.color[_("white")],
+                "LIGHT": colors.color[_("orange")],
+                "EASY": colors.color[_("orange")],
+                "BASIC": colors.color[_("orange")],
+                "STANDARD": colors.color[_("red")],
+                "STANDER": colors.color[_("red")], # Shit you not, 3 people.
+                "TRICK": colors.color[_("red")],
+                "MEDIUM": colors.color[_("red")],
+                "DOUBLE": colors.color[_("red")],
+                "ANOTHER": colors.color[_("red")],
+                "PARA": colors.color[_("blue")],
+                "NORMAL": colors.color[_("red")],
+                "MANIAC": colors.color[_("green")],
+                "HARD": colors.color[_("green")],
+                "HEAVY": colors.color[_("green")],
+                "HARDCORE": colors.color[_("purple")],
+                "SMANIAC": colors.color[_("purple")],
+                "S-MANIAC": colors.color[_("purple")], # Very common typo
+                "CHALLENGE": colors.color[_("purple")],
+                "CRAZY": colors.color[_("purple")],
+                "EXPERT": colors.color[_("purple")]
                 }

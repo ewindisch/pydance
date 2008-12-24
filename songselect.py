@@ -17,6 +17,8 @@ from interface import *
 from pygame.mixer import music
 from fonttheme import FontTheme
 
+from i18n import *
+
 SORTS = {
   "subtitle": lambda x: x.info["subtitle"].lower(),
   "title": lambda x: (x.info["title"].lower(), SORTS["subtitle"](x)),
@@ -37,6 +39,9 @@ SORT_DANCES = {
   "difficulty":True
   }
 
+TEXTS = [_("subtitle"),_("title"),_("artist"),_("bpm"),_("mix"),
+         _("level"),_("difficulty"),_("rank")]
+
 # Dance sort names define sorting formats which are tied to dance data in songs;
 # therefore they can only be used if subfolders are allowed as each song may
 # appear in multiple folders.
@@ -44,17 +49,24 @@ SORT_NAMES = ["mix", "title", "artist", "bpm", "level", "difficulty"]
 NUM_SORTS = len(SORT_NAMES)
 
 SS_HELP = [
-  "Up / Down: Change song selection",
-  "Left / Right: Change difficulty setting",
-  "Enter / Up Right: Open a folder or start a song",
-  "Escape / Up Left: Closes  folder or exit",
-  "Tab / Select: Go to a random song",
-  "Start: Go to the options screen",
-  "F11: Toggle fullscreen - S: Change the sort mode",
+  _("Up / Down: Change song selection"),
+  _("Left / Right: Change difficulty setting"),
+  _("Enter / Up Right: Open a folder or start a song"),
+  _("Escape / Up Left: Closes  folder or exit"),
+  _("Tab / Select: Go to a random song"),
+  _("Start: Go to the options screen"),
+  _("F11: Toggle fullscreen - S: Change the sort mode"),
   ]
 
 class FolderDisplay(object):
   def __init__(self, name, type, count):
+    #TODO: translate name for the sorting option
+    #name=_(name)
+    #try:
+       #name = unicode(name,"ISO-8859-15").encode("ascii","ignore")
+    #except:
+       #None
+
     self.name = name
     self._name = folder_name(name, type)
     self._type = type
@@ -63,13 +75,13 @@ class FolderDisplay(object):
     self.clip = None
     self.info = {}
     self.info["title"] = self._name
-    self.info["artist"] = "%d songs" % count
+    self.info["artist"] = _("%d songs") % count
     self.info["subtitle"] = None
 
   def render(self):
     if self.banner: return
 
-    name = self.name.encode("ascii", "ignore")
+    name = self.name
     for path in [rc_path, pydance_path]:
       filename = os.path.join(path, "banners", self._type, name+".png")
       if os.path.exists(filename):
@@ -146,8 +158,8 @@ class SongSelect(InterfaceWindow):
     songs = [s for s in songs if s.difficulty.has_key(game)]
     
     if len(songs) == 0:
-      error.ErrorMessage(screen, "You don't have any songs for the game mode ("
-                         + game + ") that you selected.")
+      error.ErrorMessage(screen, _("You don't have any songs for the game mode (")
+                         + game + _(") that you selected.")) #TODO: format using % for better i18n
       return
 
 
@@ -216,7 +228,7 @@ class SongSelect(InterfaceWindow):
               self._song.difficulty[diff_name], grade)
       else:
         self._diff_names.append(" ")        
-        d.set("None", [127, 127, 127], 0, "?")
+        d.set(_("None"), [127, 127, 127], 0, "?")
       self._diff_widgets.append(d)
     
     ActiveIndicator([405, 259], width = 230).add(self._sprites)
@@ -285,16 +297,16 @@ class SongSelect(InterfaceWindow):
             self._index = self._songitems.index(self._song)      
           else:
             error.ErrorMessage(screen,
-                               "You don't have any songs that are marked " +
-                               "\"valid\" for random selection.")
+                               _("You don't have any songs that are marked ") +
+                               _("\"valid\" for random selection."))
         else:
           valid_songs = [s for s in self._songitems if s.info["valid"]]
           if len(valid_songs) > 0:
             self._song = random.choice(valid_songs)
             self._index = self._songitems.index(self._song)
           else:
-            error.ErrorMessage(screen, "You don't have any songs here that " +
-                               "are marked \"valid\" for random selection.")
+            error.ErrorMessage(screen, _("You don't have any songs here that ") +
+                               _("are marked \"valid\" for random selection."))
       elif ev == ui.START:
         options.OptionScreen(self._configs, self._config, self._screen)
         self._screen.blit(self._bg, [0, 0])
@@ -314,7 +326,7 @@ class SongSelect(InterfaceWindow):
             self._index = self._songitems.index(s)
         else:
           s = self._find_resorted()
-          self._base_text = sort_name.upper()
+          self._base_text = _(sort_name).upper()
           self._songitems.sort(key=SORTS[sort_name])
           self._index = self._songitems.index(s)
           self._list.set_items([s.info["title"] for s in self._songitems])
@@ -497,7 +509,7 @@ class SongSelect(InterfaceWindow):
                  folder in lst]
     self._songitems = new_songs
     self._list.set_items([s.info["title"] for s in self._songitems])
-    self._base_text = "Sort by %s" % sort_name.capitalize()
+    self._base_text = _("Sort by %s") % _(sort_name).capitalize()
     
   def _create_song_list(self, folder):
     # folder contains a sorting criterion value in string format

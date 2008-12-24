@@ -2,16 +2,28 @@ import fnmatch
 import os
 import string
 
+from i18n import *
+
 # This is the standard order to present difficulties in.
 # DDR (USA home version) calls "beginner" "standard". Ignore that.
 # Beginner, light, basic, another, standard, trick, maniac, heavy, challenge,
 # and oni are from DDR. Smaniac is from DWI; s-maniac is a very common typo.
 # Hardcore is from pydance. Para and expert are from PPP. Easy, and hard are
 # from TM and PIU; medium is from TM; crazy is from PIU.
-DIFFICULTY_LIST = ["BEGINNER", "EASY", "LIGHT", "BASIC", "PARA", "ANOTHER",
-                   "NORMAL", "MEDIUM", "STANDARD", "TRICK", "DOUBLE", "HARD",
-                   "MANIAC", "HEAVY", "HARDCORE", "CHALLENGE", "ONI",
-                   "SMANIAC", "S-MANIAC", "CRAZY", "EXPERT"]
+
+#We need a dummy difficulty list to include it to .pot file
+DIFFICULTY_LIST_I18N = [_("BEGINNER"),_("EASY"),_("LIGHT"),_("BASIC"),_("PARA"),
+                   _("ANOTHER"),_("NORMAL"),_("MEDIUM"),_("STANDARD"),
+                   _("TRICK"),_("DOUBLE"),_("HARD"),_("MANIAC"),_("HEAVY"),
+                   _("HARDCORE"),_("CHALLENGE"),_("ONI"),_("SMANIAC"),
+                   _("S-MANIAC"),_("CRAZY"),_("EXPERT")]
+
+
+DIFFICULTY_LIST = ["BEGINNER","EASY","LIGHT","BASIC","PARA",
+                   "ANOTHER","NORMAL","MEDIUM","STANDARD",
+                   "TRICK","DOUBLE","HARD","MANIAC","HEAVY",
+                   "HARDCORE","CHALLENGE","ONI","SMANIAC",
+                   "S-MANIAC","CRAZY","EXPERT"]
 
 def difficulty_sort(a, b):
   if a in DIFFICULTY_LIST and b in DIFFICULTY_LIST:

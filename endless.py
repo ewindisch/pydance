@@ -13,14 +13,16 @@ from constants import *
 
 import ui
 
+from i18n import *
+
 ENDLESS_HELP = [
-  "Left: Make the songs that will be played easier",
-  "Right: Make the songs that will be played harder",
-  "Up: Select difficulty by name",
-  "Down: Select difficulty by rating",
-  "Enter / Up Right: Start playing songs until you fail",
-  "Escape / Up Left: Go back to the game selection screen",
-  "Start: Go to the options screen / F11: Toggle fullscreen",
+  _("Left: Make the songs that will be played easier"),
+  _("Right: Make the songs that will be played harder"),
+  _("Up: Select difficulty by name"),
+  _("Down: Select difficulty by rating"),
+  _("Enter / Up Right: Start playing songs until you fail"),
+  _("Escape / Up Left: Go back to the game selection screen"),
+  _("Start: Go to the options screen / F11: Toggle fullscreen"),
   ]
 
 def check_constraints(constraints, diff):
@@ -32,7 +34,7 @@ class EndlessDiffDisplay(pygame.sprite.Sprite):
   def __init__(self, pid, constraint):
     pygame.sprite.Sprite.__init__(self)
     self._c = constraint
-    self._ptext = fontfx.shadow("Player %d" % (pid + 1), 60, colors.WHITE)
+    self._ptext = fontfx.shadow(_("Player %d") % (pid + 1), 60, colors.WHITE)
     self._pr = self._ptext.get_rect()
     self._centerx = 160 + 320 * pid
     self._oldval = None
@@ -41,11 +43,12 @@ class EndlessDiffDisplay(pygame.sprite.Sprite):
   def update(self, time):
     if self._oldval != (self._c.kind, self._c.value):
       if self._c.kind == "name":
-        ctext = fontfx.shadow("Select by Difficulty", 48, colors.WHITE)
-        vtext = fontfx.shadow(self._c.value.capitalize(), 40, colors.WHITE)
+        ctext = fontfx.shadow(_("Select by Difficulty"), 48, colors.WHITE)
+	i18ndifficulty = _(self._c.value)
+	vtext = fontfx.shadow(i18ndifficulty.capitalize(), 40, colors.WHITE)
       elif self._c.kind == "number":
-        ctext = fontfx.shadow("Select by Rating", 48, colors.WHITE)
-        vtext = fontfx.shadow("Between %d and %d" % self._c.value, 40,
+        ctext = fontfx.shadow(_("Select by Rating"), 48, colors.WHITE)
+        vtext = fontfx.shadow(_("Between %d and %d") % self._c.value, 40,
                                  colors.WHITE)
       self.image = pygame.Surface([300, 400])
       cr = ctext.get_rect()
@@ -107,8 +110,8 @@ class FakePlaylist(object):
   def next(self):
     if len(self.songs) == 0:
       error.ErrorMessage(self.screen,
-                         "The difficulty settings you chose result " +
-                         "in no songs being available to play.")
+                         _("The difficulty settings you chose result ") +
+                         _("in no songs being available to play."))
       raise StopIteration
     elif len(self.working) == 0: self.working = self.songs[:]
     i = random.randint(0, len(self.working) - 1)
@@ -142,8 +145,8 @@ class Endless(InterfaceWindow):
     diffs.sort(util.difficulty_sort)
 
     if len(diffs) == 0:
-      error.ErrorMessage(screen, "You need more songs to play Endless Mode. " +
-                         "Otherwise, it's just really boring.")
+      error.ErrorMessage(screen, _("You need more songs to play Endless Mode. ") +
+                         _("Otherwise, it's just really boring."))
       return
 
     mainconfig["autofail"] = 1

@@ -13,6 +13,8 @@ from gfxtheme import ThemeFile
 from fonttheme import FontTheme
 from gameselect import MainWindow as GameSelect
 
+from i18n import *
+
 class Credits(pygame.sprite.Sprite):
   def __init__(self, lines):
     pygame.sprite.Sprite.__init__(self)
@@ -59,8 +61,8 @@ class Credits(pygame.sprite.Sprite):
 
 # A simple on/off setting, 1 or 0
 def get_onoff(name):
-  if mainconfig[name]: return None, "on"
-  else: return None, "off"
+  if mainconfig[name]: return None, _("on")
+  else: return None, _("off")
 
 def switch_onoff(name):
   mainconfig[name] ^= 1
@@ -76,8 +78,8 @@ def off_onoff(name):
 
 # A simple on/off setting, 0 or 1
 def get_offon(name):
-  if mainconfig[name]: return None, "off"
-  else: return None, "on"
+  if mainconfig[name]: return None, _("off")
+  else: return None, _("on")
 
 def switch_offon(name):
   mainconfig[name] ^= 1
@@ -181,87 +183,87 @@ def do(screen, songdata):
   try:
     lines = file(os.path.join(pydance_path, "CREDITS")).read().split("\n")
     lines = [l.decode("utf-8") for l in lines]
-    Credits(["pydance %s" % VERSION] + lines).add(sprites)
+    Credits([_("pydance %s") % VERSION] + lines).add(sprites)
   except:
-    Credits(["pydance %s" % VERSION,
+    Credits([_("pydance %s") % VERSION,
              "http://icculus.org/pyddr",
-             "By Joe Wreschnig & Brendan Becker",
-             "(Your CREDITS file is missing.)",
+             _("By Joe Wreschnig & Brendan Becker"),
+             _("(Your CREDITS file is missing.)"),
              ]).add(sprites)
 
-  m = (["Play Game", {ui.START: wrap_ctr, ui.CONFIRM: wrap_ctr},
+  m = ([_("Play Game"), {ui.START: wrap_ctr, ui.CONFIRM: wrap_ctr},
 	(GameSelect, songdata)],
-       ["Map Keys", {ui.START: wrap_ctr, ui.CONFIRM: wrap_ctr},
+       [_("Map Keys"), {ui.START: wrap_ctr, ui.CONFIRM: wrap_ctr},
         (pad.PadConfig, (screen,))],
-       ("Game Options",
-        ["Autofail", onoff_opt, ("autofail",)],
-        ["Assist Mode", tuple_opt, ("assist",
-                                    [(0, "Off"),
-                                     (1, "Click"),
-                                     (2, "Full")])],
-        ["Announcer", rotate_opt, ('djtheme', Announcer.themes())],
-        ("Themes ...",
-         ["4 Panel", rotate_opt,
+       (_("Game Options"),
+        [_("Autofail"), onoff_opt, (_("autofail"),)],
+        [_("Assist Mode"), tuple_opt, (_("assist"),
+                                    [(0, _("Off")),
+                                     (1, _("Click")),
+                                     (2, _("Full"))])],
+        [_("Announcer"), rotate_opt, ('djtheme', Announcer.themes())],
+        (_("Themes ..."),
+         [_("4 Panel"), rotate_opt,
           ("4p-theme", ThemeFile.list_themes("SINGLE"))],
-         ["3 Panel", rotate_opt,
+         [_("3 Panel"), rotate_opt,
           ("3p-theme", ThemeFile.list_themes("3PANEL"))],
-         ["5 Panel", rotate_opt,
+         [_("5 Panel"), rotate_opt,
           ("5p-theme", ThemeFile.list_themes("5PANEL"))],
-         ["Large 6 Panel", rotate_opt,
+         [_("Large 6 Panel"), rotate_opt,
           ("6pl-theme", ThemeFile.list_themes("6PANEL"))],
-         ["Small 6 Panel", rotate_opt,
+         [_("Small 6 Panel"), rotate_opt,
           ("6ps-theme", ThemeFile.list_themes("6VERSUS"))],
-         ["Large 8 Panel", rotate_opt,
+         [_("Large 8 Panel"), rotate_opt,
           ("8pl-theme", ThemeFile.list_themes("8PANEL"))],
-         ["Small 8 Panel", rotate_opt,
+         [_("Small 8 Panel"), rotate_opt,
           ("8ps-theme", ThemeFile.list_themes("8VERSUS"))],
-         ["Large 9 Panel", rotate_opt,
+         [_("Large 9 Panel"), rotate_opt,
           ("9pl-theme", ThemeFile.list_themes("9PANEL"))],
-         ["Small 9 Panel", rotate_opt,
+         [_("Small 9 Panel"), rotate_opt,
           ("9ps-theme", ThemeFile.list_themes("9VERSUS"))],
-         ["Parapara", rotate_opt,
+         [_("Parapara"), rotate_opt,
           ("para-theme", ThemeFile.list_themes("PARAPARA"))],
-         ["DMX", rotate_opt,
+         [_("DMX"), rotate_opt,
           ("dmx-theme", ThemeFile.list_themes("DMX"))],
-         ["EZ2", rotate_opt,
+         [_("EZ2"), rotate_opt,
           ("ez2-theme", ThemeFile.list_themes("EZ2SINGLE"))],
-         ["EZ2 Real", rotate_opt,
+         [_("EZ2 Real"), rotate_opt,
           ("ez2real-theme", ThemeFile.list_themes("EZ2REAL"))],
-         ["Back", None, None]
+         [_("Back"), None, None]
          ),
-        ["Back", None, None]
+        [_("Back"), None, None]
         ),
-       ("Graphic Options",
-        ["Animation", onoff_opt, ('animation',)],
-        ["Arrow Effects", rotate_index_opt,
-         ('explodestyle', ('none', 'rotate', 'scale', 'rotate & scale'))],
-        ["Backgrounds", onoff_opt, ('showbackground',)],
-        ["Brightness", tuple_opt, ('bgbrightness',
-                                   [(32, 'very dark'),
-                                    (64, 'dark'),
-                                    (127, 'normal'),
-                                    (192, 'bright'),
-                                    (255, 'very bright')])],
-        ["Lyrics", onoff_opt, ("showlyrics",)],
-        ["Lyrics Color", rotate_opt, ("lyriccolor",
-                                     ["pink/purple", "purple/cyan",
-                                      "cyan/aqua", "aqua/yellow",
-                                      "yellow/pink"])],
-        ["Back", None, None]
+       (_("Graphic Options"),
+        [_("Animation"), onoff_opt, ('animation',)],
+        [_("Arrow Effects"), rotate_index_opt,
+         ('explodestyle', (_('none'), _('rotate'), _('scale'), _('rotate & scale')))],
+        [_("Backgrounds"), onoff_opt, ('showbackground',)],
+        [_("Brightness"), tuple_opt, ('bgbrightness',
+                                   [(32, _('very dark')),
+                                    (64, _('dark')),
+                                    (127, _('normal')),
+                                    (192, _('bright')),
+                                    (255, _('very bright'))])],
+        [_("Lyrics"), onoff_opt, ("showlyrics",)],
+        [_("Lyrics Color"), rotate_opt, ("lyriccolor",
+                                     [_("pink/purple"), _("purple/cyan"),
+                                      _("cyan/aqua"), _("aqua/yellow"),
+                                      _("yellow/pink")])],
+        [_("Back"), None, None]
         ),
-       ("Interface Options",
-        ["Save Input", onoff_opt, ('saveinput',)],
-        ["Song Previews", tuple_opt, ('previewmusic',
+       (_("Interface Options"),
+        [_("Save Input"), onoff_opt, ('saveinput',)],
+        [_("Song Previews"), tuple_opt, ('previewmusic',
                                       [(0, "Off"), (1, "On"), (2, "Safe")])],
-        ["Folders", onoff_opt, ("folders",)],
-        ["Timer Display", onoff_opt, ('fpsdisplay',)],
-        ["Song Info Screen", tuple_opt, ('songinfoscreen',
+        [_("Folders"), onoff_opt, ("folders",)],
+        [_("Timer Display"), onoff_opt, ('fpsdisplay',)],
+        [_("Song Info Screen"), tuple_opt, ('songinfoscreen',
                                          zip([0, 1, 2],
-                                             ["Never", "Multi-song Only", "Always"]))],
-        ["Font (after restart)", rotate_opt, ('fonttheme', FontTheme.themes())],
-        ["Back", None, None]
+                                             [_("Never"), _("Multi-song Only"), _("Always")]))],
+        [_("Font (after restart)"), rotate_opt, ('fonttheme', FontTheme.themes())],
+        [_("Back"), None, None]
         )
        )
 
-  me = menus.Menu("Main Menu", m, screen, sprites)
+  me = menus.Menu(_("Main Menu"), m, screen, sprites)
   me.display()

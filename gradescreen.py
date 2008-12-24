@@ -10,6 +10,8 @@ import locale
 from interface import *
 from constants import *
 
+from i18n import *
+
 # Fade in a 246x80 (not a typo!) graphic in the center of the screen.
 class BannerFadeIn(pygame.sprite.Sprite):
   def __init__(self, image, center):
@@ -37,7 +39,7 @@ class BannerFadeIn(pygame.sprite.Sprite):
         elif self._i > 250: self._idir = -4
         self._i += self._idir
         c = [self._i, 192, 192]
-        txt = fontfx.shadow("Press Escape/Confirm/Start", 24, c)
+        txt = fontfx.shadow(_("Press Escape/Confirm/Start"), 24, c)
         txt_r = txt.get_rect()
         txt_r.center = [123, 70]
         self.image.blit(txt, txt_r)
@@ -204,10 +206,10 @@ class GradingScreen(InterfaceWindow):
       ratings = (p.stats["V"], p.stats["P"], p.stats["G"],
                  p.stats["O"], p.stats["B"], p.stats["M"],
                  p.stats.good_holds, p.stats.hold_count)
-      print "GRADE: %s (%s) - total steps: %d; best combo: %d" % steps
-      print "V: %d P: %d G: %d O: %d B: %d M: %d - %d/%d holds" % ratings
+      print _("GRADE: %s (%s) - total steps: %d; best combo: %d") % steps
+      print _("V: %d P: %d G: %d O: %d B: %d M: %d - %d/%d holds") % ratings
       try:
-        print "Average off: %0.3f, standard deviation %0.2f" % p.stats.times()
+        print _("Average off: %0.3f, standard deviation %0.2f") % p.stats.times()
       except: pass # Python 2.2
       print
 
@@ -227,21 +229,21 @@ class GradingScreen(InterfaceWindow):
     s = [180, 34]
     # FIXME: There is probably a shorter way to do this.
     self._sprites.add([
-      StatSprite([200, 10], "MARVEL.:", plr.stats["V"], s, 0),
-      StatSprite([200, 39], "PERFECT:", plr.stats["P"], s, 333),
-      StatSprite([200, 68], "GREAT:", plr.stats["G"], s, 666),
-      StatSprite([200, 97], "OKAY:", plr.stats["O"], s, 1000),
-      StatSprite([200, 126], "BOO:", plr.stats["B"], s, 1333),
-      StatSprite([200, 155], "MISS:", plr.stats["M"], s, 1333),
-      StatSprite([400, 10], "Score:", int(plr.score.score), s, 666),
-      HoldStatSprite([400, 39], "Holds:", plr.stats.good_holds,
+      StatSprite([200, 10], _("MARVEL.:"), plr.stats["V"], s, 0),
+      StatSprite([200, 39], _("PERFECT:"), plr.stats["P"], s, 333),
+      StatSprite([200, 68], _("GREAT:"), plr.stats["G"], s, 666),
+      StatSprite([200, 97], _("OKAY:"), plr.stats["O"], s, 1000),
+      StatSprite([200, 126], _("BOO:"), plr.stats["B"], s, 1333),
+      StatSprite([200, 155], _("MISS:"), plr.stats["M"], s, 1333),
+      StatSprite([400, 10], _("Score:"), int(plr.score.score), s, 666),
+      HoldStatSprite([400, 39], _("Holds:"), plr.stats.good_holds,
                      plr.stats.hold_count, s, 1000),
-      StatSprite([400, 68], "Max Combo:", plr.stats.maxcombo, s, 1333),
-      StatSprite([400, 97], "Early:", plr.stats.early, s, 1666),
-      StatSprite([400, 126], "Late:", plr.stats.late, s, 2000),
-      StatSprite([400, 155], "TOTAL:", plr.stats.arrow_count, s, 2333)
+      StatSprite([400, 68], _("Max Combo:"), plr.stats.maxcombo, s, 1333),
+      StatSprite([400, 97], _("Early:"), plr.stats.early, s, 1666),
+      StatSprite([400, 126], _("Late:"), plr.stats.late, s, 2000),
+      StatSprite([400, 155], _("TOTAL:"), plr.stats.arrow_count, s, 2333)
       ])
-    plr.announcer.say("rating-" + p.grade.grade(p.failed).lower())
+    plr.announcer.say(_("rating-") + p.grade.grade(p.failed).lower())
     self._sprites.add(GradeSprite([98, 183], plr.grade.grade(plr.failed)))
     self._sprites.add(GrooveGaugeSprite([10, 22], [176, 100],
                                         plr.lifebar.record))
@@ -249,19 +251,19 @@ class GradingScreen(InterfaceWindow):
     if len(self.players) == 2:
       plr = self.players[1]
       self._sprites.add([
-        StatSprite([15, 290], "MARVEL.:", plr.stats["V"], s, 0),
-        StatSprite([15, 319], "PERFECT:", plr.stats["P"], s, 333),
-        StatSprite([15, 348], "GREAT:", plr.stats["G"], s, 666),
-        StatSprite([15, 377], "OKAY:", plr.stats["O"], s, 1000),
-        StatSprite([15, 406], "BOO:", plr.stats["B"], s, 1333),
-        StatSprite([15, 435], "MISS:", plr.stats["M"], s, 1666),
-        StatSprite([215, 290], "Score:", int(plr.score.score), s, 666),
-        HoldStatSprite([215, 319], "Holds:", plr.stats.good_holds,
+        StatSprite([15, 290], _("MARVEL.:"), plr.stats["V"], s, 0),
+        StatSprite([15, 319], _("PERFECT:"), plr.stats["P"], s, 333),
+        StatSprite([15, 348], _("GREAT:"), plr.stats["G"], s, 666),
+        StatSprite([15, 377], _("OKAY:"), plr.stats["O"], s, 1000),
+        StatSprite([15, 406], _("BOO:"), plr.stats["B"], s, 1333),
+        StatSprite([15, 435], _("MISS:"), plr.stats["M"], s, 1666),
+        StatSprite([215, 290], _("Score:"), int(plr.score.score), s, 666),
+        HoldStatSprite([215, 319], _("Holds:"), plr.stats.good_holds,
                    plr.stats.hold_count, s, 1000),
-        StatSprite([215, 348], "Max Combo:", plr.stats.maxcombo, s, 1333),
-        StatSprite([215, 377], "Early:", plr.stats.early, s, 1666),
-        StatSprite([215, 406], "Late:", plr.stats.late, s, 2000),
-        StatSprite([215, 435], "TOTAL:", plr.stats.arrow_count, s, 2333),
+        StatSprite([215, 348], _("Max Combo:"), plr.stats.maxcombo, s, 1333),
+        StatSprite([215, 377], _("Early:"), plr.stats.early, s, 1666),
+        StatSprite([215, 406], _("Late:"), plr.stats.late, s, 2000),
+        StatSprite([215, 435], _("TOTAL:"), plr.stats.arrow_count, s, 2333),
         ])
       self._sprites.add(GradeSprite([541, 294], plr.grade.grade(plr.failed)))
       self._sprites.add(GrooveGaugeSprite([453, 370], [176, 100],

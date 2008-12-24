@@ -290,7 +290,14 @@ class SongData(object):
 
     self.__dict__.update(config)
 
-    clrs = [colors.color[c] for c in mainconfig["lyriccolor"].split("/")]
+    try:
+        # if user used some internationalization in the configuration file,
+	# so in mainconfig["lyriccolor"], maybe there is invalid colors
+	# TODO: not save translated colors in the config file, only English
+        clrs = [colors.color[_(c)] for c in mainconfig["lyriccolor"].split("/")]
+    except:
+        clrs = ["cyan","aqua"]
+
     clrs.reverse()
     self.lyricdisplay = Lyrics(clrs)
 
@@ -301,7 +308,7 @@ class SongData(object):
   def init(self):
     try: music.load(self.filename)
     except:
-      print "Not a supported file type:", self.filename
+      print _("Not a supported file type:"), self.filename
       self.crapout = 1
 
   def play(self):

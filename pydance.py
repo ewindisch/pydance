@@ -7,19 +7,21 @@ from getopt import getopt
 
 VERSION = "1.0.3"
 
+from i18n import *
+
 # fuck you, Python.
 def print_help():
   print
-  print "Usage: %s [options]" % sys.argv[0]
-  print " -h, --help         display this help text and exit"
-  print " -v, --version      display the version and exit"
-  print " -f, --filename     load and play a step file"
-  print " -m, --mode         the mode to play the file in (default SINGLE)"
-  print " -d, --difficulty   the difficult to play the file (default BASIC)"
+  print _("Usage: %s [options]") % sys.argv[0]
+  print _(" -h, --help         display this help text and exit")
+  print _(" -v, --version      display the version and exit")
+  print _(" -f, --filename     load and play a step file")
+  print _(" -m, --mode         the mode to play the file in (default SINGLE)")
+  print _(" -d, --difficulty   the difficult to play the file (default BASIC)")
   raise SystemExit
 
 def print_version():
-  print "pydance %s by Joe Wreschnig, Brendan Becker, and others" % VERSION
+  print _("pydance %s by Joe Wreschnig, Brendan Becker, and others") % VERSION
   print "pyddr-discuss@icculus.org - http://icculus.org/pyddr"
   raise SystemExit
 
@@ -57,13 +59,13 @@ def set_display_mode():
     if mainconfig["fullscreen"]: flags |= FULLSCREEN
     screen = pygame.display.set_mode([640, 480], flags, 16)
   except:
-    raise SystemExit("E: Can't get a 16 bit display! pydance doesn't work in 8 bit mode.")
+    raise SystemExit(_("E: Can't get a 16 bit display! pydance doesn't work in 8 bit mode."))
   return screen
 
 # Load a single song (given the filename) and then play it on the
 # given difficulty.
 def play_and_quit(fn, mode, difficulty):
-  print "Entering debug (play-and-quit) mode."
+  print _("Entering debug (play-and-quit) mode.")
   screen = set_display_mode()  
   pygame.display.set_caption("pydance " + VERSION)
   pygame.mouse.set_visible(0)
@@ -83,20 +85,20 @@ def load_files(screen, files, type, Ctr, args):
   # Remove duplicates
   files = list(dict(map(None, files, [])).keys())
   objects = []
-  message = "Found %d %s. Loading..." % (len(files), type)
+  message = _("Found %d %s. Loading...") % (len(files), _(type))
   pbar = TextProgress(FontTheme.loadingscreen, message, colors.WHITE, colors.BLACK)
   r = pbar.render(0).get_rect()
   r.center = [320, 240]
   for f in files:
     try: objects.append(Ctr(*((f,) + args)))
     except RuntimeError, message:
-      print "E:", f
-      print "E:", message
+      print _("E:"), f
+      print _("E:"), message
       print
     except Exception, message:
-      print "E: Unknown error loading", f
-      print "E:", message
-      print "E: Please contact the developers (pyddr-devel@icculus.org)."
+      print _("E: Unknown error loading"), f
+      print _("E:"), message
+      print _("E: Please contact the developers (pyddr-devel@icculus.org).")
       print
     pct += inc
     img = pbar.render(pct)
@@ -115,9 +117,9 @@ def main():
   if mainconfig["usepsyco"]:
     try:
       import psyco
-      print "Psyco optimizing compiler found. Using psyco.full()."
+      print _("Psyco optimizing compiler found. Using psyco.full().")
       psyco.full()
-    except ImportError: print "W: Psyco optimizing compiler not found."
+    except ImportError: print _("W: Psyco optimizing compiler not found.")
 
   # default settings for play_and_quit.
   mode = "SINGLE"
@@ -126,21 +128,21 @@ def main():
   for opt, arg in getopt(sys.argv[1:],
                          "hvf:d:m:", ["help", "version", "filename=",
                                       "difficulty=", "mode="])[0]:
-    if opt in ["-h", "--help"]: print_help()
-    elif opt in ["-v", "--version"]: print_version()
-    elif opt in ["-f", "--filename"]: test_file = arg
-    elif opt in ["-m", "--mode"]: mode = arg
-    elif opt in ["-d", "--difficulty"]: difficulty = arg
+    if opt in ["-h", _("--help")]: print_help()
+    elif opt in ["-v", _("--version")]: print_version()
+    elif opt in ["-f", _("--filename")]: test_file = arg
+    elif opt in ["-m", _("--mode")]: mode = arg
+    elif opt in ["-d", _("--difficulty")]: difficulty = arg
 
   if test_file: play_and_quit(test_file, mode, difficulty)
 
   song_list = []
   course_list = []
   for dir in mainconfig["songdir"].split(os.pathsep):
-    print "Searching for songs in", dir
+    print _("Searching for songs in"), dir
     song_list.extend(util.find(dir, ['*.dance', '*.dwi', '*.sm', '*/song.*']))
   for dir in mainconfig["coursedir"].split(os.pathsep):
-    print "Searching for courses in", dir
+    print _("Searching for courses in"), dir
     course_list.extend(util.find(dir, ['*.crs']))
 
   screen = set_display_mode()
@@ -157,7 +159,7 @@ def main():
   music.load(os.path.join(sound_path, "menu.ogg"))
   music.play(4, 0.0)
 
-  songs = load_files(screen, song_list, "songs", SongItem, (False,))
+  songs = load_files(screen, song_list, _("songs"), SongItem, (False,))
 
   # Construct the song and record dictionaries for courses. These are
   # necessary because courses identify songs by title and mix, rather
@@ -173,7 +175,7 @@ def main():
     song_dict[mix][title] = song
     record_dict[song.info["recordkey"]] = song
 
-  crs = load_files(screen, course_list, "courses", courses.CourseFile,
+  crs = load_files(screen, course_list, _("courses"), courses.CourseFile,
                    (song_dict, record_dict))
   crs.extend(courses.make_players(song_dict, record_dict))
   records.verify(record_dict)
@@ -186,12 +188,12 @@ def main():
 
   if len(songs) < 1:
     ErrorMessage(screen,
-                 ("You don't have any songs or step files. Check out "
+                 (_("You don't have any songs or step files. Check out "
                   "http://icculus.org/pyddr/get.php#songs "
                   "and download some free ones. "
-                  "If you already have some, make sure they're in ") +
+                  "If you already have some, make sure they're in ")) +
                  mainconfig["songdir"])
-    raise SystemExit("You don't have any songs. Check http://icculus.org/pyddr/get.php#songs .")
+    raise SystemExit(_("You don't have any songs. Check http://icculus.org/pyddr/get.php#songs ."))
 
   menudriver.do(screen, (songs, crs, screen))
 

@@ -5,6 +5,8 @@ import os, pygame, fontfx
 from listener import Listener
 from constants import *
 
+from i18n import *
+
 LIVING, FAILED, WON = range(3)
 
 # The base lifebar class from which most other ones inherit.
@@ -18,7 +20,7 @@ class AbstractLifeBar(Listener, pygame.sprite.Sprite):
     self.record = []
     self.last_record_update = 0
 
-    self.failtext = fontfx.embfade("FAILED", 28, 3, [80, 32], [224, 32, 32])
+    self.failtext = fontfx.embfade(_("FAILED"), 28, 3, [80, 32], [224, 32, 32])
     self.failtext.set_colorkey(self.failtext.get_at([0, 0]), RLEACCEL)
 
     self.rect = self.image.get_rect()
@@ -213,9 +215,9 @@ class OniLifeBarDisp(AbstractLifeBar):
 bars = [LifeBarDisp, OniLifeBarDisp, DropLifeBarDisp, MediocreLifeBarDisp,
         TugLifeBarDisp, GreatAttack]
 
-lifebar_opt = [(0, "Normal", ""),
-               (1, "Battery", "A few points of life, increasing each song."),
-               (2, "Power Drop", "Like normal, but never goes back up."),
-               (3, "Mediocre", "Fail if you do too poorly or too well."),
-               (4, "Tug of War", "Fight with the other player for life."),
-               (5, "Great Attack", "Only greats make the bar go up.")]
+lifebar_opt = [(0, _("Normal"), ""),
+               (1, _("Battery"), _("A few points of life, increasing each song.")),
+               (2, _("Power Drop"), _("Like normal, but never goes back up.")),
+               (3, _("Mediocre"), _("Fail if you do too poorly or too well.")),
+               (4, _("Tug of War"), _("Fight with the other player for life.")),
+               (5, _("Great Attack"), _("Only greats make the bar go up."))]

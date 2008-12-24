@@ -2,6 +2,8 @@
 
 PREFIX ?= /usr/local
 
+LOCALESDIR ?= /share/locale
+
 all:
 
 include Makefile.general
@@ -10,6 +12,7 @@ install: install-core install-data install-utils
 	install -m 644 $(ALLMODS) $(DESTDIR)$(PREFIX)/share/games/pydance
 	install -m 755 pydance.py $(DESTDIR)$(PREFIX)/share/games/pydance
 	ln -sf ../share/games/pydance/pydance.py $(DESTDIR)$(PREFIX)/games/pydance
+	@(cd po/ && env LOCALESDIR=$(DESTDIR)$(PREFIX)$(LOCALESDIR) $(MAKE) $@)
 
 install-core:
 	install -d $(DESTDIR)$(PREFIX)/bin $(DESTDIR)$(PREFIX)/games $(DESTDIR)$(PREFIX)/share/games/pydance

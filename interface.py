@@ -9,6 +9,8 @@ import random
 
 from constants import *
 
+from i18n import *
+
 # Make an outlined box. The size is given without the 4 pixel border.
 # This usually gets alphaed before stuff gets put in it.
 def make_box(color = [111, 255, 148], size = [130, 40]):
@@ -26,8 +28,9 @@ def make_box(color = [111, 255, 148], size = [130, 40]):
 
 def folder_name(name, type):
   if type == "mix": return name
-  elif type == "bpm": return "%s BPM" % name
-  else: return "%s: %s" % (type.capitalize(), name)
+  elif type == "bpm": return "%s BPM" % _(name)
+  else: 
+    return "%s: %s" % (_(type).capitalize(), name)
 
 def load_banner(filename, box = True):
   banner = pygame.image.load(filename)
@@ -346,7 +349,8 @@ class DifficultyBox(pygame.sprite.Sprite):
     f = pygame.font.Font(None, 24)
     self.image = make_box(color)
 
-    t1 = fontfx.shadow(diff, f, [255, 255, 255])
+    #diff has to be translated: _( ) (BEGINNER, etc.)
+    t1 = fontfx.shadow(_(diff), f, [255, 255, 255])
     r1 = t1.get_rect()
     r1.center = [self.image.get_width()/2, 14]
 

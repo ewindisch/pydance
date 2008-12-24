@@ -785,11 +785,11 @@ class SongItem(object):
              ("song.wav", KSFFile))
 
   defaults = { "valid": 1,
-               "mix": "No Mix",
-               "title": "Untitled",
+               "mix": _("No Mix"),
+               "title": _("Untitled"),
                "subtitle": "",
-               "artist": "Unknown",
-               "author": "Unknown",
+               "artist": _("Unknown"),
+               "author": _("Unknown"),
                "endat": 0.0,
                "preview": (45.0, 10.0),
                "startat": 0.0,
@@ -803,19 +803,19 @@ class SongItem(object):
         song = pair[1](filename, need_steps)
         break
     if song == None:
-      raise RuntimeError(filename + " is an unsupported format.")
+      raise RuntimeError(filename + _(" is an unsupported format."))
     self.info = song.info
 
     # Sanity checks
     for k in ["bpm", "filename"]:
       if k not in self.info:
-        raise RuntimeError(filename + " is missing: " + k)
+        raise RuntimeError(filename + _(" is missing: ") + k)
 
     for k in ["subtitle", "title", "artist", "author", "mix"]:
       try:
         if k in self.info: self.info[k] = self.info[k].decode("utf-8")
       except UnicodeError:
-        print "W: Non-Unicode key in %s: %s" % (filename, k)
+        print _("W: Non-Unicode key in %s: %s") % (filename, k)
         self.info[k] = self.info[k].decode("ascii", "ignore")
 
     # Default values

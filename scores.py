@@ -18,6 +18,8 @@ import fontfx
 from listener import Listener
 from constants import *
 
+from i18n import *
+
 class AbstractScore(Listener, pygame.sprite.Sprite):
   def __init__(self, pid, text, game):
     pygame.sprite.Sprite.__init__(self)
@@ -30,14 +32,14 @@ class AbstractScore(Listener, pygame.sprite.Sprite):
 
   def _set_text(self, text):
     tx = FONTS[28].size(text)[0] + 2
-    txt = fontfx.embfade(text, 28, 2, (tx, 24), colors.color["gray"])
+    txt = fontfx.embfade(text, 28, 2, (tx, 24), colors.color[_("gray")])
     basemode = pygame.transform.scale(txt, (tx, 48))
     self.baseimage = pygame.surface.Surface((128, 48))
     self.baseimage.blit(basemode, (64 - (tx / 2), 0))
     self.oldscore = -1 # Force a refresh
 
   def set_song(self, pid, bpm, difficulty, count, holds, feet):
-    self._set_text(difficulty)
+    self._set_text(_(difficulty))
 
   def update(self, curtime):
     if self.score != self.oldscore:
@@ -182,8 +184,8 @@ class EZ2DancerScore(ThirdScore):
 scores = [PydanceScore, FirstScore, ThirdScore, FourthScore,
           FifthScore, ExtremeScore, ExtremeOniScore, ExtremeNonstopScore,
           EZ2DancerScore]
-score_opt = [(0, "pydance", ""), (1, "DDR 1st/2nd Mix", ""),
-             (2, "DDR 3rd Mix", ""), (3, "DDR 4th Mix", ""),
-             (4, "DDR 5th Mix", ""), (5, "DDR 7th/8th", ""),
-             (6, "DDR 8th Oni", ""), (7, "DDR 8th Nonstop", ""),
-             (8, "EZ2 Dancer", "")]
+score_opt = [(0, _("pydance"), ""), (1, _("DDR 1st/2nd Mix"), ""),
+             (2, _("DDR 3rd Mix"), ""), (3, _("DDR 4th Mix"), ""),
+             (4, _("DDR 5th Mix"), ""), (5, _("DDR 7th/8th"), ""),
+             (6, _("DDR 8th Oni"), ""), (7, _("DDR 8th Nonstop"), ""),
+             (8, _("EZ2 Dancer"), "")]

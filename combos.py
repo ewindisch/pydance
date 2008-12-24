@@ -116,6 +116,6 @@ class PumpCombo(AbstractCombo):
 
 combos = [NormalCombo, OniCombo, PumpCombo]
 combo_opt = [
-  (0, "Normal", "Greats or better increase a combo"),
-  (1, "Oni-style", "Greats don't increase a combo, but also don't break it"),
-  (2, "Pump It Up", "Okays or better increase a combo")]
+  (0, _("Normal"), _("Greats or better increase a combo")),
+  (1, _("Oni-style"), _("Greats don't increase a combo, but also don't break it")),
+  (2, _("Pump It Up"), _("Okays or better increase a combo"))]

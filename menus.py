@@ -56,8 +56,8 @@ class MenuItem(object):
       else: return ev # Shouldn't happen
     elif callable(self.callbacks.get(ev)):
       text, subtext = self.callbacks[ev](*self.args)
-      if text != None: self.text = str(text)
-      if subtext != None: self.subtext = str(subtext)
+      if text != None: self.text = text #str(text)
+      if subtext != None: self.subtext = subtext #str(subtext)
       self.render()
       return ev
     else: return ev

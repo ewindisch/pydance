@@ -51,7 +51,7 @@ class EndlessGrade(DancePointsGrade):
 
 grades = [DancePointsGrade, EndlessGrade]
 grade_opt = [
-  (0, "Dance Points", ""),
-  (1, "Endless",
-   "Like dance points, but failing doesn't result in an F."),
+  (0, _("Dance Points"), ""),
+  (1, _("Endless"),
+   _("Like dance points, but failing doesn't result in an F.")),
   ]

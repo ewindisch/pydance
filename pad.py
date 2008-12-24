@@ -9,8 +9,9 @@ import colors
 (PASS, QUIT, UP, UPLEFT, LEFT, DOWNLEFT, DOWN, DOWNRIGHT,
  RIGHT, UPRIGHT, CENTER, START, SELECT, SCREENSHOT) = range(14)
 
-NAMES = ["", "quit", "up", "up-left", "left", "down-left", "down",
-         "down-right", "right", "up-right", "center", "start", "select"]
+NAMES = ["", _("quit"), _("up"), _("up-left"), _("left"), _("down-left"),
+        _("down"), _("down-right"), _("right"), _("up-right"), _("center"),
+        _("start"), _("select")]
 
 KEYS = {
   K_ESCAPE: QUIT,
@@ -126,7 +127,7 @@ class Pad(object):
     try: totaljoy = pygame.joystick.get_count()
     except: totaljoy = 0
 
-    print totaljoy, "joystick(s) found."
+    print totaljoy, _("joystick(s) found.")
 
     # Initialize all the joysticks, print diagnostics.
     for i in range(totaljoy):
@@ -135,7 +136,7 @@ class Pad(object):
       args = (i, m.get_numaxes(), m.get_numbuttons())
       # One hat is two axes.
       args = (i, m.get_numaxes() + 2 * m.get_numhats(), m.get_numbuttons())
-      print "Joystick %d initialized: %d axes, %d buttons." % args
+      print _("Joystick %d initialized: %d axes, %d buttons.") % args
 
       if args[2] == 32: emsusb2 = i
       elif mat == None and (args[1], args[2]) in MATS: mat = i
@@ -152,29 +153,29 @@ class Pad(object):
         for ev in self.events.values(): self.states[ev] = False
         loaded_input = True
       except:
-        print "W: Unable to load input configuration file."
+        print _("W: Unable to load input configuration file.")
         loaded_input = False
 
     if loaded_input:
-      print "Loaded input configuration."
+      print _("Loaded input configuration.")
     elif emsusb2 != None:
       self.merge_events(0, emsusb2, A4B16) 
       self.merge_events(1, emsusb2, dict([(k + 16, v) for (k, v) in A4B16.items()]))
-      print "EMSUSB2 found. Using preset EMSUSB2 config."
+      print _("EMSUSB2 found. Using preset EMSUSB2 config.")
     elif mat != None:
       joy = pygame.joystick.Joystick(mat)
       axes, but = joy.get_numaxes() + 2 * joy.get_numhats(), joy.get_numbuttons()
-      print "Initializing player 1 using js%d." % mat
+      print _("Initializing player 1 using js%d.") % mat
       self.merge_events(0, mat, MATS[(axes, but)])
 
       if mat2:
         joy = pygame.joystick.Joystick(mat2)
         axes, but = joy.get_numaxes() + 2 * joy.get_numhats(), joy.get_numbuttons()
-        print "Initializing player 2 using js%d." % mat2
+        print _("Initializing player 2 using js%d.") % mat2
         self.merge_events(1, mat2, MATS[(axes, but)])
     elif totaljoy > 0:
-      print "No known joysticks found! If you want to use yours,"
-      print "you'll have to map its button manually once to use it."
+      print _("No known joysticks found! If you want to use yours,")
+      print _("you'll have to map its button manually once to use it.")
 
     self.merge_events(-1, -1, KEYS)
 
@@ -182,7 +183,7 @@ class Pad(object):
     pygame.joystick.init()
     try: totaljoy = pygame.joystick.get_count()
     except: totaljoy = 0
-    print totaljoy, "joystick(s) found."
+    print totaljoy, _("joystick(s) found.")
     for i in range(totaljoy): pygame.joystick.Joystick(i).init()
 
   def add_event(self, device, key, pid, event):
@@ -305,10 +306,10 @@ class PadConfig(object):
 
     if keyb:
       wanted_type = KEYDOWN
-      text = "Press a key for %s (escape to cancel)" % NAMES[dir]
+      text = _("Press a key for %s (escape to cancel)") % NAMES[dir]
     else:
       wanted_type = JOYBUTTONDOWN
-      text = "Press a button for %s (escape to cancel)" % NAMES[dir]
+      text = _("Press a button for %s (escape to cancel)") % NAMES[dir]
 
     img = FONTS[32].render(text, True, colors.BLACK)
     r = img.get_rect()
@@ -332,8 +333,8 @@ class PadConfig(object):
 
     self.screen.blit(PadConfig.bg, [0, 0])
 
-    text = ["Player 1", "Player 2"]
-    text2 = ["Keyboard", "Joystick"]
+    text = [_("Player 1"), _("Player 2")]
+    text2 = [_("Keyboard"), _("Joystick")]
 
     for t in text:
       img = FONTS[32].render(t, True, colors.BLACK)
@@ -360,8 +361,9 @@ class PadConfig(object):
         if (dir == self.loc[1] + 2 and
             ((i < 2 and i == self.loc[0]) or
              (i > 2 and i == self.loc[0] + 1))):
-          img = FONTS[26].render(order[i], True, colors.WHITE)
-        else: img = FONTS[26].render(order[i], True, colors.BLACK)
+
+          img = FONTS[26].render(_(order[i]), True, colors.WHITE) 
+        else: img = FONTS[26].render(_(order[i]), True, colors.BLACK)
         r = img.get_rect()
         r.center = [cent + offset * i, 60 + 26 * dir]
         self.screen.blit(img, r)

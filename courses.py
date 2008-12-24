@@ -14,11 +14,13 @@ import error
 import records
 import os
 
+from i18n import *
+
 # The core course class.
 class AbstractCourse(object):
   def __init__(self, all_songs, recordkeys):
     self.songs = []
-    self.name = "A Course"
+    self.name = _("A Course")
     self.mixname = " "
     self.banner = None
     self.all_songs = all_songs
@@ -80,25 +82,25 @@ class AbstractCourse(object):
 
     # Check for player's best/worst/likes/dislikes. There are stored
     # as a tuple of (type, number).
-    if name[0] == "BEST":
+    if name[0] == _("BEST"):
       s = self.recordkeys.get(records.best(name[1], diff, self.gametype), None)
       if s:
         fullname = s.filename
         if isinstance(diff, list):
           diff = [d for d in diff if d in s.difficulty[self.gametype]][0]
-    elif name[0] == "WORST":
+    elif name[0] == _("WORST"):
       s = self.recordkeys.get(records.worst(name[1], diff, self.gametype),None)
       if s:
         fullname = s.filename
         if isinstance(diff, list):
           diff = [d for d in diff if d in s.difficulty[self.gametype]][0]
-    elif name[0] == "LIKES":
+    elif name[0] == _("LIKES"):
       s = self.recordkeys.get(records.like(name[1], diff, self.gametype),None)
       if s:
         fullname = s.filename
         if isinstance(diff, list):
           diff = [d for d in diff if d in s.difficulty[self.gametype]][0]
-    elif name[0] == "DISLIKES":
+    elif name[0] == _("DISLIKES"):
       s = self.recordkeys.get(records.dislike(name[1], diff, self.gametype),None)
       if s:
         fullname = s.filename
@@ -114,7 +116,7 @@ class AbstractCourse(object):
         if folder in self.all_songs:
           songs = [s for s in self.all_songs[folder].values() if (s,diff) not in self.past_songs]
         else:
-          error.ErrorMessage(self.screen, folder + " was not found.")
+          error.ErrorMessage(self.screen, folder + _(" was not found."))
           raise StopIteration
 
       else:
@@ -125,7 +127,7 @@ class AbstractCourse(object):
       songs = [s for s in songs if (s,diff) not in self.past_songs and self._find_difficulty(s, diff)]
 
       if len(songs) == 0:
-        error.ErrorMessage(self.screen, "No valid songs were found.")
+        error.ErrorMessage(self.screen, _("No valid songs were found."))
         raise StopIteration
       else:
         song = random.choice(songs)
@@ -153,8 +155,8 @@ class AbstractCourse(object):
 
     if not fullname:
       if len(name[0]) > 1:
-        name = "Player's %s #%d" % (name[0].capitalize(), name[1])
-      error.ErrorMessage(self.screen, name + "was not found.")
+        name = _("Player's %s #%d") % (name[0].capitalize(), name[1])
+      error.ErrorMessage(self.screen, name + _("was not found."))
       raise StopIteration
 
     self.index += 1
@@ -163,7 +165,7 @@ class AbstractCourse(object):
 
 def CourseFile(*args):
   if args[0].lower().endswith(".crs"): return CRSFile(*args)
-  else: raise RuntimeError(filename + " is an unsupported format.")
+  else: raise RuntimeError(filename + _(" is an unsupported format."))
 
 # Like DWI and SM files, CRS files are a variant of the MSD format.
 # This is the DWI variant of .crs. Stepmania's (incompatible) course
@@ -229,8 +231,8 @@ class CRSFile(AbstractCourse):
           modifiers = modifiers.split(",")
         else: continue
 
-        if name[0:4] == "BEST": name = ("BEST", int(name[4:]))
-        elif name[0:5] == "WORST": name = ("WORST", int(name[5:]))
+        if name[0:4] == _("BEST"): name = (_("BEST"), int(name[4:]))
+        elif name[0:5] == _("WORST"): name = (_("WORST"), int(name[5:]))
         else: name = name.replace("\\", "/") # DWI uses Windows-style
 
         # FIXME: This doesn't actually work yet. Modifier application
@@ -256,40 +258,40 @@ class CodedCourse(AbstractCourse):
 def make_players(all_songs, recordkeys):
   courses = []
   for start, end in [(1, 5), (5, 9), (1, 9)]:
-    for diff_name, diffs in [("(Easy)", ["BASIC", "LIGHT", "EASY"]),
-                             ("(Normal)", ["ANOTHER", "STANDARD", "NORMAL",
+    for diff_name, diffs in [(_("(Easy)"), ["BASIC", "LIGHT", "EASY"]),
+                             (_("(Normal)"), ["ANOTHER", "STANDARD", "NORMAL",
                                            "TRICK", "MEDIUM"]),
-                             ("(Hard)", ["MANIAC", "HEAVY", "HARD"]),
-                             ("(Expert)", ["HARDCORE", "CRAZY", "SMANIAC",
+                             (_("(Hard)"), ["MANIAC", "HEAVY", "HARD"]),
+                             (_("(Expert)"), ["HARDCORE", "CRAZY", "SMANIAC",
                                            "EXPERT"])]:
       # Player's best, worst, likes, and dislikes
-      for name, type in (["Best", "BEST"],
-                         ["Worst", "WORST"],
-                         ["Likes", "LIKES"],
-                         ["Dislikes", "DISLIKES"]):
+      for name, type in ([_("Best"), _("BEST")],
+                         [_("Worst"), _("WORST")],
+                         [_("Likes"), _("LIKES")],
+                         [_("Dislikes"), _("DISLIKES")]):
         realname = "%s %d-%d %s" % (name, start, end - 1, diff_name)
         songs = [((type, i), diffs, {}) for i in range(start, end)]
         courses.append(CodedCourse(all_songs, recordkeys, realname,
-                                   "Player's Picks", songs))
+                                   _("Player's Picks"), songs))
 
   # Random courses.
   for i in [4, 8, 12]:
-    for diff_name, diffs in [("(Easy)", ["BASIC", "LIGHT", "EASY"]),
-                             ("(Normal)", ["ANOTHER", "STANDARD", "NORMAL",
+    for diff_name, diffs in [(_("(Easy)"), ["BASIC", "LIGHT", "EASY"]),
+                             (_("(Normal)"), ["ANOTHER", "STANDARD", "NORMAL",
                                            "TRICK", "MEDIUM"]),
-                             ("(Hard)", ["MANIAC", "HEAVY", "HARD"]),
-                             ("(Expert)", ["HARDCORE", "CRAZY", "SMANIAC",
+                             (_("(Hard)"), ["MANIAC", "HEAVY", "HARD"]),
+                             (_("(Expert)"), ["HARDCORE", "CRAZY", "SMANIAC",
                                            "EXPERT"])]:
-      randname = "Random %d %s" % (i, diff_name)
+      randname = _("Random %d %s") % (i, diff_name)
       randsongs = [("*", diffs, {})] * i
       courses.append(CodedCourse(all_songs, recordkeys, randname,
-                                 "random.choose(songs)", randsongs))
+                                 _("random.choose(songs)"), randsongs))
 
     # ... with random difficulties.
-    randname = "All Random %d" % i
+    randname = _("All Random %d") % i
     randsongs = [("*", "0..10", {})] * i
     courses.append(CodedCourse(all_songs, recordkeys, randname,
-                               "random.choose(songs)", randsongs))
+                               _("random.choose(songs)"), randsongs))
 
   # I like this course.
   d1 = ["MANIAC", "HEAVY", "HARD"]
@@ -297,11 +299,11 @@ def make_players(all_songs, recordkeys):
   songs1 = []
   songs2 = []
   for i in [29, 23, 19, 17, 13, 11, 7, 5, 3, 2]:
-    songs1.append((("WORST", i), d1, {}))
-    songs2.append((("WORST", i), d2, {}))
+    songs1.append(((_("WORST"), i), d1, {}))
+    songs2.append(((_("WORST"), i), d2, {}))
 
-  courses.append(CodedCourse(all_songs, recordkeys, "Primal Fear (Easy)",
-                              "Player's Picks", songs1))
-  courses.append(CodedCourse(all_songs, recordkeys, "Primal Fear (Hard)",
-                              "Player's Picks", songs2))
+  courses.append(CodedCourse(all_songs, recordkeys, _("Primal Fear (Easy)"),
+                              _("Player's Picks"), songs1))
+  courses.append(CodedCourse(all_songs, recordkeys, _("Primal Fear (Hard)"),
+                              _("Player's Picks"), songs2))
   return courses

@@ -7,19 +7,21 @@ from pygame.font import Font
 import ui
 import endless, courseselect, songselect
 
+from i18n import *
+
 GS_HELP = [
-  "Up / Down: Change game, mode, or interface",
-  "Enter / Up Right: Advance your choice",
-  "Escape / Up Left: Back up or exit",
-  "F11: Toggles fullscreen",
-  "Enjoy pydance %s!" % VERSION,
+  _("Up / Down: Change game, mode, or interface"),
+  _("Enter / Up Right: Advance your choice"),
+  _("Escape / Up Left: Back up or exit"),
+  _("F11: Toggles fullscreen"),
+  _("Enjoy pydance %s!") % VERSION,
   ]
 
 # The game, type, and interfaces available on the screen.
-GAMES = ["4 panel", "5 panel", "6 panel", "8 panel", "9 panel",
-         "Parapara", "DMX", "EZ2", "EZ2 Real", "3 panel"]
-TYPES = ["Single", "Versus", "Double", "Couple"]
-SS = ["Normal", "Nonstop", "Endless"]
+GAMES = [_("4 panel"), _("5 panel"), _("6 panel"), _("8 panel"), _("9 panel"),
+         _("Parapara"), _("DMX"), _("EZ2"), _("EZ2 Real"), _("3 panel")]
+TYPES = [_("Single"), _("Versus"), _("Double"), _("Couple")]
+SS = [_("Normal"), _("Nonstop"), _("Endless")]
 
 VALUES = [GAMES, TYPES, SS]
 
@@ -54,108 +56,108 @@ def make_couple(oldimage):
 # Filenames for each mode, or functions to call with the previous image
 # to construct the new image.
 IMAGES = {
-    "3 panel": "select-3p.png",
-    "4 panel": "select-4p.png",
-    "5 panel": "select-5p.png",
-    "6 panel": "select-6p.png",
-    "8 panel": "select-8p.png",
-    "9 panel": "select-9p.png",
-    "Parapara": "select-para.png",
-    "EZ2 Real": "select-ez2real.png",
-    "EZ2": "select-ez2.png",
-    "DMX": "select-dmx.png",
-    "Single": (lambda x: x),
-    "Versus": make_versus,
-    "Double": make_double,
-    "Couple": make_couple,
-    "Normal": "select-normal.png",
-    "Nonstop": "select-nonstop.png",
-    "Endless": "select-endless.png",
+    _("3 panel"): "select-3p.png",
+    _("4 panel"): "select-4p.png",
+    _("5 panel"): "select-5p.png",
+    _("6 panel"): "select-6p.png",
+    _("8 panel"): "select-8p.png",
+    _("9 panel"): "select-9p.png",
+    _("Parapara"): "select-para.png",
+    _("EZ2 Real"): "select-ez2real.png",
+    _("EZ2"): "select-ez2.png",
+    _("DMX"): "select-dmx.png",
+    _("Single"): (lambda x: x),
+    _("Versus"): make_versus,
+    _("Double"): make_double,
+    _("Couple"): make_couple,
+    _("Normal"): "select-normal.png",
+    _("Nonstop"): "select-nonstop.png",
+    _("Endless"): "select-endless.png",
     }
 
 # Constructors for the different interfaces.
 SELECTORS = {
-  "Endless": endless.Endless,
-  "Nonstop": courseselect.CourseSelector,
-  "Normal": songselect.SongSelect,
+  _("Endless"): endless.Endless,
+  _("Nonstop"): courseselect.CourseSelector,
+  _("Normal"): songselect.SongSelect,
   }
 
 # Map the game and type onto an internal name for SongItem.difficulty.
 MODES = {
-  ("4 panel", "Single"): "SINGLE",
-  ("4 panel", "Versus"): "VERSUS",
-  ("4 panel", "Couple"): "COUPLE",
-  ("4 panel", "Double"): "DOUBLE",
+  (_("4 panel"), _("Single")): "SINGLE",
+  (_("4 panel"), _("Versus")): "VERSUS",
+  (_("4 panel"), _("Couple")): "COUPLE",
+  (_("4 panel"), _("Double")): "DOUBLE",
 
-  ("3 panel", "Single"): "3PANEL",
-  ("3 panel", "Versus"): "3VERSUS",
-  ("3 panel", "Couple"): "3COUPLE",
-  ("3 panel", "Double"): "3DOUBLE",
+  (_("3 panel"), _("Single")): "3PANEL",
+  (_("3 panel"), _("Versus")): "3VERSUS",
+  (_("3 panel"), _("Couple")): "3COUPLE",
+  (_("3 panel"), _("Double")): "3DOUBLE",
 
-  ("5 panel", "Single"): "5PANEL",
-  ("5 panel", "Versus"): "5VERSUS",
-  ("5 panel", "Couple"): "5COUPLE",
-  ("5 panel", "Double"): "5DOUBLE",
+  (_("5 panel"), _("Single")): "5PANEL",
+  (_("5 panel"), _("Versus")): "5VERSUS",
+  (_("5 panel"), _("Couple")): "5COUPLE",
+  (_("5 panel"), _("Double")): "5DOUBLE",
 
-  ("6 panel", "Single"): "6PANEL",
-  ("6 panel", "Versus"): "6VERSUS",
-  ("6 panel", "Couple"): "6COUPLE",
-  ("6 panel", "Double"): "6DOUBLE",
+  (_("6 panel"), _("Single")): "6PANEL",
+  (_("6 panel"), _("Versus")): "6VERSUS",
+  (_("6 panel"), _("Couple")): "6COUPLE",
+  (_("6 panel"), _("Double")): "6DOUBLE",
 
-  ("8 panel", "Single"): "8PANEL",
-  ("8 panel", "Versus"): "8VERSUS",
-  ("8 panel", "Couple"): "8COUPLE",
-  ("8 panel", "Double"): "8DOUBLE",
+  (_("8 panel"), _("Single")): "8PANEL",
+  (_("8 panel"), _("Versus")): "8VERSUS",
+  (_("8 panel"), _("Couple")): "8COUPLE",
+  (_("8 panel"), _("Double")): "8DOUBLE",
 
-  ("9 panel", "Single"): "9PANEL",
-  ("9 panel", "Versus"): "9VERSUS",
-  ("9 panel", "Couple"): "9COUPLE",
-  ("9 panel", "Double"): "9DOUBLE",
+  (_("9 panel"), _("Single")): "9PANEL",
+  (_("9 panel"), _("Versus")): "9VERSUS",
+  (_("9 panel"), _("Couple")): "9COUPLE",
+  (_("9 panel"), _("Double")): "9DOUBLE",
 
-  ("Parapara", "Single"): "PARAPARA",
-  ("Parapara", "Versus"): "PARAVERSUS",
-  ("Parapara", "Couple"): "PARACOUPLE",
-  ("Parapara", "Double"): "PARADOUBLE",
+  (_("Parapara"), _("Single")): "PARAPARA",
+  (_("Parapara"), _("Versus")): "PARAVERSUS",
+  (_("Parapara"), _("Couple")): "PARACOUPLE",
+  (_("Parapara"), _("Double")): "PARADOUBLE",
 
-  ("DMX", "Single"): "DMX",
-  ("DMX", "Versus"): "DMXVERSUS",
-  ("DMX", "Couple"): "DMXCOUPLE",
-  ("DMX", "Double"): "DMXDOUBLE",
+  (_("DMX"), _("Single")): "DMX",
+  (_("DMX"), _("Versus")): "DMXVERSUS",
+  (_("DMX"), _("Couple")): "DMXCOUPLE",
+  (_("DMX"), _("Double")): "DMXDOUBLE",
 
-  ("EZ2", "Single"): "EZ2SINGLE",
-  ("EZ2", "Versus"): "EZ2VERSUS",
-  ("EZ2", "Couple"): "EZ2COUPLE",
-  ("EZ2", "Double"): "EZ2DOUBLE",
+  (_("EZ2"), _("Single")): "EZ2SINGLE",
+  (_("EZ2"), _("Versus")): "EZ2VERSUS",
+  (_("EZ2"), _("Couple")): "EZ2COUPLE",
+  (_("EZ2"), _("Double")): "EZ2DOUBLE",
 
-  ("EZ2 Real", "Single"): "EZ2REAL",
-  ("EZ2 Real", "Versus"): "REALVERSUS",
-  ("EZ2 Real", "Couple"): "REALCOUPLE",
-  ("EZ2 Real", "Double"): "REALDOUBLE",
+  (_("EZ2 Real"), _("Single")): "EZ2REAL",
+  (_("EZ2 Real"), _("Versus")): "REALVERSUS",
+  (_("EZ2 Real"), _("Couple")): "REALCOUPLE",
+  (_("EZ2 Real"), _("Double")): "REALDOUBLE",
 }
 
 DESCRIPTIONS = {
-  "4 panel": ("The standard up, down, left and right arrows " +
-              "like Dance Dance Revolution)"),
-  "3 panel": "Practice using up left and up right with easier steps.",
-  "5 panel": "Diagonal arrows and the center (like Pump It Up)",
-  "6 panel": "Four panel plus the upper diagonal arrows (like DDR Solo)",
-  "8 panel": "Everything but the center (like Technomotion)",
-  "9 panel": "Everything! (like Pop'n'Stage)",
-  "Parapara": "Wave your arms (or feet) around",
-  "DMX": ("Crazy kung-fu action (like Dance ManiaX / Freaks). " +
-          "Use left, up left, up right, and right."),
+  _("4 panel"): (_("The standard up, down, left and right arrows ") +
+              _("like Dance Dance Revolution)")),
+  _("3 panel"): _("Practice using up left and up right with easier steps."),
+  _("5 panel"): _("Diagonal arrows and the center (like Pump It Up)"),
+  _("6 panel"): _("Four panel plus the upper diagonal arrows (like DDR Solo)"),
+  _("8 panel"): _("Everything but the center (like Technomotion)"),
+  _("9 panel"): _("Everything! (like Pop'n'Stage)"),
+  _("Parapara"): _("Wave your arms (or feet) around"),
+  _("DMX"): (_("Crazy kung-fu action (like Dance ManiaX / Freaks). ") +
+          _("Use left, up left, up right, and right.")),
 
-  "EZ2": "Three panels, two sensors, using left and right.",
-  "EZ2 Real": "Three panels and four sensors.",
+  _("EZ2"): _("Three panels, two sensors, using left and right."),
+  _("EZ2 Real"): _("Three panels and four sensors."),
 
-  "Single": "Play by yourself.",
-  "Versus": "Challenge an opponent to the same steps.",
-  "Couple": "Two people dance different steps to the same song.",
-  "Double": "Try playing on both sides at once.",
+  _("Single"): _("Play by yourself."),
+  _("Versus"): _("Challenge an opponent to the same steps."),
+  _("Couple"): _("Two people dance different steps to the same song."),
+  _("Double"): _("Try playing on both sides at once."),
 
-  "Normal": "Play one song at a time.",
-  "Endless": "Keep dancing until you fail.",
-  "Nonstop": "Play several songs in a row.",
+  _("Normal"): _("Play one song at a time."),
+  _("Endless"): _("Keep dancing until you fail."),
+  _("Nonstop"): _("Play several songs in a row."),
   }
 
 class MainWindow(InterfaceWindow):
@@ -165,7 +167,7 @@ class MainWindow(InterfaceWindow):
     self._courses = courses
     self._indicator_y = [152, 322, 414]
     # Displayed in the upper right.
-    self._message = ["Select a Game", "Select a Mode", "Select Type"]
+    self._message = [_("Select a Game"), _("Select a Mode"), _("Select Type")]
 
     font = Font(None, 26)
 
@@ -185,8 +187,8 @@ class MainWindow(InterfaceWindow):
     # Description of the currently selected object.
     self._description = WrapTextDisplay(30, 360, [25, 396])
     self._title.set_text(self._message[0])
-    self._selected.set_text("4 panel")
-    self._description.set_text(DESCRIPTIONS["4 panel"])
+    self._selected.set_text(_("4 panel"))
+    self._description.set_text(DESCRIPTIONS[_("4 panel")])
     self._sprites.add([self._title, self._selected, self._description])
     self._indicator = ActiveIndicator([405, 152], width = 230)
     self._sprites.add(self._indicator)
@@ -194,7 +196,7 @@ class MainWindow(InterfaceWindow):
                                Font(None, 22), [206, 20]))
     self._sprites.add(self._lists)
     # The image displayed on the main part of the screen.
-    self._image = FlipImageDisplay(IMAGES.get("4 panel"), [200, 200])
+    self._image = FlipImageDisplay(IMAGES.get(_("4 panel")), [200, 200])
     self._sprites.add(self._image)
 
     self._screen.blit(self._bg, [0, 0])
