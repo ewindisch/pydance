@@ -125,7 +125,9 @@ class SongPreview(object):
         music.stop()
         music.load(self._filename)
         music.set_volume(0.01) # 0.0 stops pygame.mixer.music.
-        music.play(0, self._start)
+        # Workaround for a pygame/libsdl mixer bug.
+        #music.play(0, self._start)
+        music.play(0, 0)
         self._playing = True
       except: # Filename not found? Song is too short? SMPEG blows?
         music.stop()

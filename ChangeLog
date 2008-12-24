@@ -12,8 +12,8 @@ Legend:
 + A constant-BPM speed mode (from 200bpm up to 800bom) was implemented.
 + Sorting/Floders by steps difficulty and level added. (Frank Foeth)
 + UTF-8 BOMs now handled. (Stefan Kloe)
+- Song preview now starts at 0, to work around a pygame/libsdl bug. (Carles Pina i Estany)
 * It is now guaranteed that songs in a course are not repeated.
-* Pygame font rendering bug workaround applied.
 * Minor typos fixed.
 	
 1.0.3 - Like that's possible.					[2005.04.04]
