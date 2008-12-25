@@ -1,7 +1,14 @@
 import gettext
 import locale
+import os.path,sys
 
-directories=['mo','/usr/share/locale','/usr/local/share/locale','../share/locale','../../../share/locale']
+def MyDir():
+    filename = sys.argv[0]
+    return os.path.abspath(os.path.dirname(filename))
+
+mydir=MyDir()
+
+directories=['/usr/share/locale','/usr/local/share/locale',mydir+'/../../locale',mydir+'/../share/locale',mydir+'/mo']
 
 lang = None
 for dir in directories:

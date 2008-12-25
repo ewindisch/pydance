@@ -8,6 +8,10 @@ all:
 
 include Makefile.general
 
+mo-generate:
+	@(cd po/ && env LOCALESDIR=$(DESTDIR)$(PREFIX)$(LOCALESDIR) $(MAKE) generate)
+
+
 install: install-core install-data install-utils
 	install -m 644 $(ALLMODS) $(DESTDIR)$(PREFIX)/share/games/pydance
 	install -m 755 pydance.py $(DESTDIR)$(PREFIX)/share/games/pydance
