@@ -1,7 +1,5 @@
 #Inspired from Powertop po/Makefile
 
-LOCALESDIR=/usr/share/locale
-
 SRC=$(wildcard *.po)
 OBJ= $(SRC:.po=.mo)
 INST= $(SRC:.po=.inst)

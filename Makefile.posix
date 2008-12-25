@@ -29,7 +29,7 @@ install-data: install-core
 	cp docs/man/*.1 $(DESTDIR)$(PREFIX)/share/man/man1
 	cp docs/man/*.6 $(DESTDIR)$(PREFIX)/share/man/man6
 	cp pydance.posix.cfg pydance.cfg
-	install -D -m 644 pydance.cfg $(DESTDIR)/etc/pydance.cfg
+	install -D -m 644 pydance.cfg $(DESTDIR)$(PREFIX)/etc/pydance.cfg
 
 install-zip: pydance.zip install-core install-data install-utils
 	install -m 644 constants.py pydance.zip $(DESTDIR)$(PREFIX)/share/games/pydance

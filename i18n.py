@@ -1,18 +1,16 @@
 import gettext
 import locale
-lang = None
 
-try:
-    lang=gettext.translation('pydance','mo/')
-    print lang
-except:
+directories=['mo','/usr/share/locale','/usr/local/share/locale','../share/locale','../../../share/locale']
+
+lang = None
+for dir in directories:
     try:
-         lang=gettext.translation('pydance','/usr/share/locale')
+        lang=gettext.translation('pydance',dir)
+        break
     except:
-        try:
-	    lang=gettext.translation('pydance','/usr/local/share/locale')
-        except:
-	    lang = None
+        pass
+
 
 if lang!=None:
     lang.install(True)
