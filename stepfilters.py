@@ -113,7 +113,7 @@ class MappingTransform(Transform):
     if steps[0] not in NOT_STEPS:
       steps = steps[:]
       step = steps[1:]
-      for j in range(len(step)): steps[self._mapping[j] + 1] = step[j]
+      for j,s in enumerate(step): steps[self._mapping[j] + 1] = s
       return steps
     else:
       return steps[:]
@@ -140,9 +140,9 @@ class RandomTransform(ShuffleTransform):
   def _update_state(self, steps):
     if steps[0] not in NOT_STEPS:
       if len(self._holds) == 0: random.shuffle(self._mapping)
-      for i in range(1, len(steps)):
-        if steps[i] & 1 and i in self._holds: self._holds.remove(i)
-        if steps[i] & 2: self._holds.append(i)
+      for i,s in enumerate(steps[1:]):
+        if s & 1 and i in self._holds: self._holds.remove(i)
+        if s & 2: self._holds.append(i)
 
 rotate = [Transform, MirrorTransform, LeftTransform, RightTransform,
           RandomTransform, ShuffleTransform]
@@ -174,8 +174,8 @@ def little(steps, mod):
           s[i] |= 1
           holds.remove(i)
       beat += s[0]
-      for i in range(1, len(s)):
-        if i not in holds and s[i] & 2: holds.append(i)
+      for i,si in enumerate(s[1:]):
+        if i not in holds and si & 2: holds.append(i)
 
     elif s[0] == "D": beat += s[1]
 
@@ -191,34 +191,34 @@ def insert_taps(steps, interval, offset, not_same):
   holds = []
   beat = 0.0
   rand = NonRandom(int(interval * offset * len(steps)))
-  for i in range(len(steps) - 1):
-    if isinstance(steps[i][0], float): # This is a note...
-      for j in range(len(steps[i][1:])):
-        if steps[i][j + 1] & 2: holds.append(j)
-        elif steps[i][j + 1] & 1 and j in holds: holds.remove(j)
+  for i,step in enumerate(steps[:-1]):
+    if isinstance(step[0], float): # This is a note...
+      for j,s in enumerate(step[1:]):
+        if s & 2: holds.append(j)
+        elif s & 1 and j in holds: holds.remove(j)
       
       if not isinstance(steps[i + 1][0], float):
-        new_steps.append(steps[i]) # Next isn't a note.
+        new_steps.append(step) # Next isn't a note.
 
-      elif (steps[i][1:].count(0) == len(steps[i][1:]) or
+      elif (step[1:].count(0) == len(step[1:]) or
             steps[i + 1][1:].count(0) == len(steps[i + 1][1:])):
         # The surrounding notes are both empty.
-        new_steps.append(steps[i])
+        new_steps.append(step)
 
       elif len(holds) > 1: # Don't add things during two holds
-        new_steps.append(steps[i])
+        new_steps.append(step)
 
-      elif steps[i][0] == interval and beat % interval == 0: # Bingo!
-        steps[i][0] = offset
+      elif step[0] == interval and beat % interval == 0: # Bingo!
+        step = steps[i][0] = offset
         beat += offset
-        new_steps.append(steps[i])
+        new_steps.append(step)
 
         if not_same:
           start = rand.randint(0, len(steps[i][1:]) -1)
-          empty = [0] * len(steps[i][1:])
-          for j in range(len(steps[i][1:])):
-            checking = (start + j) % len(steps[i][1:])
-            if not (steps[i][checking + 1] or steps[i + 1][checking + 1]):
+          empty = [0] * len(step[1:])
+          for j in range(len(step[1:])):
+            checking = (start + j) % len(step[1:])
+            if not (step[checking + 1] or steps[i + 1][checking + 1]):
               empty[checking] = 1
               break
           new_steps.append([interval - offset] + empty)
@@ -249,8 +249,8 @@ class RemoveSecret(Transform):
   def _transform(self, s):
     s = s[:]
     if s[0] not in NOT_STEPS:
-      for i in range(1, len(s)):
-        if s[i] & 4: s[i] = 0
+      for i,si in enumerate(s[1:]):
+        if si & 4: si = s[i] = 0
     return s
 
 class RemoveJumps(Transform):
@@ -261,20 +261,20 @@ class RemoveJumps(Transform):
   def _transform(self, s):
     if s[0] not in NOT_STEPS:
       step = s[1:]
-      for i in range(len(step)):
-        if step[i] & 2 and i not in self._holds: self._holds.append(i)
+      for i,s in enumerate(step):
+        if s & 2 and i not in self._holds: self._holds.append(i)
 
       if step.count(0) < len(step) - 1:
         if self._side and not self._holds: step.reverse()
-        for i in range(len(step)):
-          if step[i]:
+        for i,stepi in enumerate(step):
+          if stepi:
             step[i] = 0
             break
         if self._side and not self._holds: step.reverse()
         self._side ^= 1
 
-      for i in range(len(step)):
-        if step[i] & 1 and not step[i] & 2 and i in self._holds:
+      for i,s in enumerate(step):
+        if s & 1 and not s & 2 and i in self._holds:
           self._holds.remove(i)
 
       return [s[0]] + step
@@ -288,8 +288,8 @@ class WideTransform(Transform):
 
   def _update_state(self, s):
     if s[0] not in NOT_STEPS:
-      for i in range(1, len(s)):
-        if s[i] & 1 and i in self._holds: self._holds.remove(i)
+      for i,si in enumerate(s[1:]):
+        if si & 1 and i in self._holds: self._holds.remove(i)
 
   def _transform(self, s):
     if s[0] not in NOT_STEPS:
@@ -303,8 +303,8 @@ class WideTransform(Transform):
         step[to_add] = 1
         s = [s[0]] + step
 
-      for i in range(1, len(s)):
-        if s[i] & 2: self._holds.append(i)
+      for i,si in enumerate(s[1:]):
+        if si & 2: self._holds.append(i)
 
       self._beat += s[0]
     elif s[0] == "D": beat += s[1]
@@ -446,10 +446,10 @@ class PanelTransform(Transform):
         self._generate_transform()
 
     # Note any holds, so they don't get remapped in the middle.
-    for i in range(len(steps[1:])):
-      if steps[i + 1] & 2:
+    for i,s in enumerate(steps[1:]):
+      if s & 2:
         self.holds.append(self.orig_panels[i])
-      elif steps[i + 1] & 1 and self.orig_panels[i] in self.holds:
+      elif s & 1 and self.orig_panels[i] in self.holds:
         self.holds.remove(self.orig_panels[i])
 
   # Actually perform the transformation on the data.
@@ -460,10 +460,9 @@ class PanelTransform(Transform):
     new_steps = [0] * (len(self.transform_mapping) + 1)
     new_steps[0] = steps[0]
 
-    for i in range(len(steps[1:])):
-      if steps[i + 1] and self.orig_panels[i] in self.transform_mapping:
-        v = steps[i + 1]
-        new_steps[self.transform_mapping.index(self.orig_panels[i]) + 1] = v
+    for i,s in enumerate(steps[1:]):
+      if s and self.orig_panels[i] in self.transform_mapping:
+        new_steps[self.transform_mapping.index(self.orig_panels[i]) + 1] = s
 
     return new_steps
 
@@ -485,7 +484,7 @@ class FiveToFourTransform(Transform):
     new_steps = [steps[0], steps[1], steps[2], steps[4], steps[5]]
 
     if 0 in new_steps:
-      possible = [i for i in range(len(new_steps)) if new_steps[i] == 0]
+      possible = [i for i,new_step in enumerate(new_steps) if new_step == 0]
       new_steps[self.rand.choice(possible)] |= steps[3]
     return new_steps
 

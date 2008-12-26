@@ -357,13 +357,13 @@ class PadConfig(object):
       p2_joy = pad.device_key_for(False, 1, dir)
 
       order = [p1_key, p1_joy, NAMES[dir], p2_key, p2_joy]
-      for i in range(len(order)):
+      for i,o in enumerate(order):
         if (dir == self.loc[1] + 2 and
             ((i < 2 and i == self.loc[0]) or
              (i > 2 and i == self.loc[0] + 1))):
 
-          img = FONTS[26].render(_(order[i]), True, colors.WHITE) 
-        else: img = FONTS[26].render(_(order[i]), True, colors.BLACK)
+          img = FONTS[26].render(_(o), True, colors.WHITE) 
+        else: img = FONTS[26].render(_(o), True, colors.BLACK)
         r = img.get_rect()
         r.center = [cent + offset * i, 60 + 26 * dir]
         self.screen.blit(img, r)

@@ -127,9 +127,8 @@ class CourseDisplay(object):
     self.image.fill([0, 0, 0, 0])
 
     y_off = 0
-    for i in range(len(self._songs)):
+    for name,subtitle,diff in self._songs:
       t3 = None
-      name, subtitle, diff = self._songs[i]
       t1 = font.render(name, color = colors.WHITE, indent = "    ")
       if subtitle:
         t3 = small_font.render(subtitle, color = [190, 190, 190],

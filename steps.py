@@ -142,23 +142,24 @@ class Steps(object):
           else: time_to_add = cur_time
 
           # Check for holds
-          for hold in range(len(feetstep)):
-            if feetstep[hold] & 2 and holding[hold] == 0:
+          for hold,fs in enumerate(feetstep):
+            h = holding[hold]
+            if fs & 2 and h == 0:
               holdtimes.insert(self.numholds, time_to_add)
               holdbeats.insert(self.numholds, cur_beat)
               holdlist.insert(self.numholds, hold)
               releasetimes.append(None)
               releasebeats.append(None)
               releaselist.append(None)
-              holding[hold] = self.numholds
+              h = holding[hold] = self.numholds
               self.numholds += 1
 
-            elif (feetstep[hold] and holding[hold]):
-              releasetimes[holding[hold] - 1] = time_to_add
-              releasebeats[holding[hold] - 1] = cur_beat
-              releaselist[holding[hold] - 1] = hold
-              feetstep[hold] = 0
-              holding[hold] = 0
+            elif (fs and holding[hold]):
+              releasetimes[h - 1] = time_to_add
+              releasebeats[h - 1] = cur_beat
+              releaselist[h - 1] = hold
+              fs = feetstep[hold] = 0
+              h = holding[hold] = 0
 
           if coloring_mod == int(coloring_mod):
             color = coloring_mod % 4

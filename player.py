@@ -120,13 +120,13 @@ class HoldJudgeDisp(Listener, pygame.sprite.Sprite):
     self.slotnow[self.game.dirs.index(direction)] = self.ngimg
     
   def update(self, curtime):
-    for i in range(len(self.slotnow)):
+    for i,s in enumerate(self.slotnow):
       if (curtime - self.slothit[i] > 0.5):
-        self.slotnow[i] = self.space
-      if self.slotnow[i] != self.slotold[i]:
+        s = self.slotnow[i] = self.space
+      if s != self.slotold[i]:
         x = (i * self.game.width)
-        self.image.blit(self.slotnow[i], [x, 0])
-        self.slotold[i] = self.slotnow[i]
+        self.image.blit(s, [x, 0])
+        self.slotold[i] = s
 
 class JudgingDisp(Listener, pygame.sprite.Sprite):
   def __init__(self, playernum, game):
@@ -398,11 +398,10 @@ class Player(object):
     self.toparr_group.update(curtime, curbeat)
 
   def should_hold(self, steps, direction, curtime):
-    l = steps.holdinfo
-    for i in range(len(l)):
-      if l[i][0] == self.game.dirs.index(direction):
-        if ((curtime - 15.0/steps.playingbpm > l[i][1])
-            and (curtime < l[i][2])):
+    for i,l in enumerate(steps.holdinfo):
+      if l[0] == self.game.dirs.index(direction):
+        if ((curtime - 15.0/steps.playingbpm > l[1])
+            and (curtime < l[2])):
           return i
 
   def check_holds(self, pid, curtime, arrows, steps, judge, toparrfx, holding):

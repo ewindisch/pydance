@@ -85,17 +85,17 @@ def titlecase(title):
   parts = title.split()
   if len(parts) == 0: return ""
 
-  for i in range(len(parts)):
+  for i,p in enumerate(parts):
     nonletter = 0
     has_vowels = False
-    for l in parts[i]:
+    for l in p:
       if l not in letters: nonletter += 1
       if l in vowels: has_vowels = True
-    if float(nonletter) / len(parts[i]) < 1.0/3:
-      if parts[i] == parts[i].upper() and has_vowels:
-        parts[i] = parts[i].lower()
-        if parts[i] not in uncapped:
-          parts[i] = parts[i].capitalize()
+    if float(nonletter) / len(p) < 1.0/3:
+      if p == p.upper() and has_vowels:
+        p = parts[i] = p.lower()
+        if p not in uncapped:
+          p = parts[i] = p.capitalize()
 
 
   # Capitalize the first and last words in the name, unless they are

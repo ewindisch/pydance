@@ -240,8 +240,8 @@ class MSDFile(GenericFile):
         time = self.parse_time(line[1:line.index("]")])
         lyr = line[line.index("]") + 1:].split("|")
         lyr.reverse()
-        self.lyrics.extend([(time, i + 1, lyr[i]) for i in range(len(lyr)) if
-                            lyr[i] != ""])
+        self.lyrics.extend([(time, i + 1, l) for i,l in enumerate(lyr) if
+                            l != ""])
 
   # Return a list of all the images in the directory, sorted by file size
   def find_images(self):
@@ -464,8 +464,8 @@ class DWIFile(MSDFile):
             # Some DWI files have things like ...2!(2...
             step_type = DWIFile.modes[possible]
             holdstep = dwifile_steps[steps.pop(0)]
-          for i in range(len(holdstep)):
-            if holdstep[i]: step[i] |= 3
+          for i,h in enumerate(holdstep):
+            if h: step[i] |= 3
         steplist.append([step_type] + step)
         current_time += step_type
 

@@ -39,7 +39,6 @@ A Comprehensive List of Features for pydance 1.2
    big changes to all the themes, though.
 
 * Cleanup & Port to Python 2.3
-  - Replace a lot of 'i in range(len(x))' with 'i,o in enumerate(x)'.
   - See if "string" in otherstring will help anywhere.
   - Port pydance.log hackery to a Logger object!
 
