@@ -76,7 +76,12 @@ class GenericFile(object):
       if len(parts) == 2: time = 60 * int(parts[0]) + float(parts[1])
       elif len(parts) == 3: ## M:SS:CS
         time = int(parts[0]) + float(parts[1]) + float(parts[2]) / 100
-    elif "." in string: time = float(string) # seconds in a float value
+    elif "." in string:
+      if string.count('.')==2: # M.SS.CS
+        parts = string.split('.')
+        time = 60 * int(parts[0]) + float(parts[1]) + float(parts[2])/100
+      else: time = float(string) # seconds in a float value
+      
     else: time = int(string) / 1000.0 # no punctuation means in milliseconds
     return offset + time
 
@@ -608,14 +613,14 @@ class SMFile(MSDFile):
         if gametype in games.COUPLE:
           step1 = [note]
           step2 = [note]
-          # Ugly hack to ignore mines (for now).
-          step1.extend([SMFile.step[int(s.replace('M','0'))] for s in sd[0:count/2]])
-          step2.extend([SMFile.step[int(s.replace('M','0'))] for s in sd[count/2:]])
+          # Ugly hack to ignore mines and other "letters" (for now).
+          step1.extend([SMFile.step[int(s.translate(ZERO_ALPHA))] for s in sd[0:count/2]])
+          step2.extend([SMFile.step[int(s.translate(ZERO_ALPHA))] for s in sd[count/2:]])
           stepdata[0].append(step1)
           stepdata[1].append(step2)
         else:
           step = [note]
-          step.extend([SMFile.step[int(s.replace('M','0'))] for s in sd])
+          step.extend([SMFile.step[int(s.translate(ZERO_ALPHA))] for s in sd])
           stepdata.append(step)
 
         beat += note / 4.0
