@@ -18,7 +18,7 @@ from constants import *
 from interface import *
 from courses import CRSFile
 from pygame.mixer import music
-
+from fonttheme import FontTheme
 from i18n import *
 
 NO_BANNER = os.path.join(image_path, "no-banner.png")
@@ -115,8 +115,8 @@ class CourseDisplay(object):
 
   def render(self):
     if self.banner: return
-    font = fontfx.WrapFont(28, 320)
-    small_font = fontfx.WrapFont(18, 250)
+    font = fontfx.WrapFont(FontTheme.crsdisp, 320)
+    small_font = fontfx.WrapFont(FontTheme.crsdispsmall, 250)
     ls = font.get_linesize()
     y = ls * 3
     for name, subtitle, diff in self._songs:
@@ -136,7 +136,8 @@ class CourseDisplay(object):
 
       if isinstance(diff, list): d = diff[0]
       else: d = diff
-      t2 = fontfx.shadow(d[0], 28, DIFF_COLORS.get(d, colors.WHITE))
+      
+      t2 = fontfx.shadow(d[0], FontTheme.crsdisp, DIFF_COLORS.get(d, colors.WHITE))
 
       r1 = t1.get_rect()
       r2 = t2.get_rect()
@@ -204,7 +205,7 @@ class CourseSelector(InterfaceWindow):
     self._config = dict(game_config)
     self._configs = []
 
-    self._list = ListBox(pygame.font.Font(None, 28),
+    self._list = ListBox(FontTheme.crslist,
                          [255, 255, 255], 32, 10, 256, [373, 150])
     if len(self._courses) > 60 and mainconfig["folders"]:
       self._create_folders()
@@ -224,12 +225,12 @@ class CourseSelector(InterfaceWindow):
       self._configs.append(dict(player_config))
 
     ActiveIndicator([368, 306], height = 32, width = 266).add(self._sprites)
-    HelpText(CS_HELP, [255, 255, 255], [0, 0, 0], pygame.font.Font(None, 20),
+    HelpText(CS_HELP, [255, 255, 255], [0, 0, 0], FontTheme.help,
              [186, 20]).add(self._sprites)
 
     self._list_gfx = ScrollingImage(self._course.image, [15, 80], 390)
-    self._coursetitle = TextDisplay(28, [345, 28], [20, 56])
-    self._title = TextDisplay(30, [240, 28], [377, 27])
+    self._coursetitle = TextDisplay('crsselcrstitle', [345, 28], [20, 56])
+    self._title = TextDisplay('crsseltitle', [240, 28], [377, 27])
     self._banner = ImageDisplay(self._course.banner, [373, 56])
     self._sprites.add([self._list, self._list_gfx, self._title,
                        self._coursetitle, self._banner])

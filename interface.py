@@ -7,8 +7,9 @@ import colors
 import fontfx
 import random
 
-from constants import *
 
+from constants import *
+from fonttheme import FontTheme
 from i18n import *
 
 # Make an outlined box. The size is given without the 4 pixel border.
@@ -56,16 +57,16 @@ def load_banner(filename, box = True):
 
 # Just display a text string, within a specific width.
 class TextDisplay(pygame.sprite.Sprite):
-  def __init__(self, font, size, midleft, str = " "):
+  def __init__(self, purpose, size, midleft, str = " "):
     pygame.sprite.Sprite.__init__(self)
     self._text = str
-    self._font = font
+    self._purpose = purpose
     self._size = size
     self._midleft = midleft
     self._render()
 
   def _render(self):
-    font = fontfx.max_size(self._text, self._size[0], self._font)
+    font = FontTheme.font(self._purpose, self._text, self._size[0])
     img = fontfx.shadow(self._text, font, [255, 255, 255])
     self.image = img
     self.rect = self.image.get_rect()
@@ -346,7 +347,7 @@ class DifficultyBox(pygame.sprite.Sprite):
     self._topleft = [center[0]-65, center[1]-20]
 
   def set(self, diff, color, feet, grade):
-    f = pygame.font.Font(None, 24)
+    f = FontTheme.diffbox
     self.image = make_box(color)
 
     #diff has to be translated: _( ) (BEGINNER, etc.)
@@ -450,7 +451,7 @@ class BannerDisplay(pygame.sprite.Sprite):
     self._next_update = -1
     self._delta = 5
     self._idx = 1
-    self._bpmdisplay = BPMDisplay(pygame.font.Font(None, 24), [60, 180])
+    self._bpmdisplay = BPMDisplay(FontTheme.bannerdispbpm, [60, 180])
 
   def set_song(self, song):
     c1 = [255, 255, 255]
@@ -460,12 +461,12 @@ class BannerDisplay(pygame.sprite.Sprite):
     song.render()
 
     self._title = fontfx.shadow(song.info["title"],
-                                fontfx.max_size(song.info["title"], 340, 60),
+                                FontTheme.font('bannerdisptitle',song.info["title"],340),
                                 c1)
     self._r_t = self._title.get_rect()
     self._r_t.center = [179, 240]
     self._artist = fontfx.shadow(song.info["artist"],
-                                 fontfx.max_size(song.info["artist"], 250, 40),
+                                 FontTheme.font('bannerdispartist',song.info["artist"], 250),
                                  c1)
 
     self._r_a = self._artist.get_rect()
@@ -473,8 +474,7 @@ class BannerDisplay(pygame.sprite.Sprite):
 
     if song.info["subtitle"]:
       self._subtitle = fontfx.shadow(song.info["subtitle"],
-                                     fontfx.max_size(song.info["subtitle"],
-                                                     300, 24),
+                                     FontTheme.font('bannerdispsubtitle',song.info["subtitle"],300),
 
                                      c1)
       self._r_s = self._subtitle.get_rect()

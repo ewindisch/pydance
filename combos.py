@@ -4,6 +4,7 @@ import pygame
 
 from listener import Listener
 from constants import *
+from fonttheme import FontTheme
 
 class AbstractCombo(Listener, pygame.sprite.Sprite):
 
@@ -17,8 +18,9 @@ class AbstractCombo(Listener, pygame.sprite.Sprite):
     self._top = 320
     
     fonts = []
+    fontfn, basesize = FontTheme.combo
     for x in range(11, 0, -1):
-      fonts.append(pygame.font.Font(None, 28+int(x*1.82)))
+      fonts.append(pygame.font.Font(fontfn, basesize+int(x*1.82/28*basesize)))
 
     # Store each digit individually, to avoid long text rendering
     # times in the middle of the game. FIXME: This breaks above 9999

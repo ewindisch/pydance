@@ -14,6 +14,7 @@ from constants import *
 import ui
 
 from i18n import *
+from fonttheme import FontTheme
 
 ENDLESS_HELP = [
   _("Left: Make the songs that will be played easier"),
@@ -34,7 +35,7 @@ class EndlessDiffDisplay(pygame.sprite.Sprite):
   def __init__(self, pid, constraint):
     pygame.sprite.Sprite.__init__(self)
     self._c = constraint
-    self._ptext = fontfx.shadow(_("Player %d") % (pid + 1), 60, colors.WHITE)
+    self._ptext = fontfx.shadow(_("Player %d") % (pid + 1), FontTheme.endlessplr, colors.WHITE)
     self._pr = self._ptext.get_rect()
     self._centerx = 160 + 320 * pid
     self._oldval = None
@@ -43,12 +44,12 @@ class EndlessDiffDisplay(pygame.sprite.Sprite):
   def update(self, time):
     if self._oldval != (self._c.kind, self._c.value):
       if self._c.kind == "name":
-        ctext = fontfx.shadow(_("Select by Difficulty"), 48, colors.WHITE)
+        ctext = fontfx.shadow(_("Select by Difficulty"), FontTheme.endlessselby, colors.WHITE)
 	i18ndifficulty = _(self._c.value)
-	vtext = fontfx.shadow(i18ndifficulty.capitalize(), 40, colors.WHITE)
+	vtext = fontfx.shadow(i18ndifficulty.capitalize(), FontTheme.endlesssel, colors.WHITE)
       elif self._c.kind == "number":
-        ctext = fontfx.shadow(_("Select by Rating"), 48, colors.WHITE)
-        vtext = fontfx.shadow(_("Between %d and %d") % self._c.value, 40,
+        ctext = fontfx.shadow(_("Select by Rating"), FontTheme.endlessselby, colors.WHITE)
+        vtext = fontfx.shadow(_("Between %d and %d") % self._c.value, FontTheme.endlesssel,
                                  colors.WHITE)
       self.image = pygame.Surface([300, 400])
       cr = ctext.get_rect()
@@ -165,7 +166,7 @@ class Endless(InterfaceWindow):
       EndlessDiffDisplay(i, c).add(self._sprites)
 
     self._sprites.add(HelpText(ENDLESS_HELP, [255, 255, 255], [0, 0, 0],
-                               pygame.font.Font(None, 22), [320, 20]))
+                               FontTheme.help, [320, 20]))
 
     music.load(os.path.join(sound_path, "menu.ogg"))
     music.play(4, 0.0)

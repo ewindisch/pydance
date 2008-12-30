@@ -27,6 +27,8 @@ import locale
 
 import os
 
+from fonttheme import FontTheme
+
 # A simple movie-playing sprite. It can only do MPEG1 though.
 class BGMovie(pygame.sprite.Sprite):
   def __init__ (self, filename):
@@ -61,7 +63,7 @@ class FPSDisp(pygame.sprite.Sprite):
     self._clock = pygame.time.Clock()
     self._cycles = 1
     self._totalcount = 0
-    self._font = FONTS[16]
+    self._font = FontTheme.fps
 
   # Return the average of the average FPS rather than just the average
   # FPS. This avoids the average FPS shooting up incredibly fast at
@@ -125,7 +127,7 @@ class TimeDisp(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.top = 0
     self.rect.centerx = 320
-    self._font = FONTS[32]
+    self._font = FontTheme.timedisp
 
   def update(self, time):
     if (time - self._oldtime) > 0.1: # Update 10 times a second at most
@@ -212,7 +214,7 @@ class SongInfoScreen(InterfaceWindow):
     self._banner = BannerDisplay([190, 240])
     self._banner.set_song(SongItemDisplay(self.song, self.playmode))
     self.end = pygame.time.get_ticks() + 6000
-    self._countdown = WrapTextDisplay(50, 68, [285,429], centered=True)
+    self._countdown = WrapTextDisplay(FontTheme.songinfoscrctdn, 68, [285,429], centered=True)
     
     self._player_widgets = []
     self._player_opts = []
@@ -221,9 +223,9 @@ class SongInfoScreen(InterfaceWindow):
       self._player_widgets += self.player_widgets(pid)
       self._player_opts += self.player_opts(pid)
 
-    self._other_widgets=[TextDisplay(50, [400, 50], [15, 35], _("Next Song")),
-                         TextDisplay(30, [263, 37], [15, 450], _("Confirm: Begin   Cancel: Stop")),
-                         TextDisplay(30, [263, 37], [380, 450], _("Start: Change Options"))]
+    self._other_widgets=[TextDisplay('songinfoscrnext', [400, 50], [15, 35], _("Next Song")),
+                         TextDisplay('songinfoscrsel', [259, 37], [15, 450], _("Confirm: Begin   Cancel: Stop")),
+                         TextDisplay('songinfoscrsel', [259, 37], [380, 450], _("Start: Change Options"))]
     
     self._sprites.add([self._banner, self._countdown] +
                       self._player_widgets + self._player_opts +
@@ -260,7 +262,7 @@ class SongInfoScreen(InterfaceWindow):
 
   def player_widgets(self, pid):
     v_top = 11 + pid * 210
-    pname = WrapTextDisplay(50, 248, [380, v_top], _("Player %d") % (pid+1,), centered=True)
+    pname = WrapTextDisplay(FontTheme.songinfoscrplr, 248, [380, v_top], _("Player %d") % (pid+1,), centered=True)
     d=DifficultyBox([504, v_top+65])
     d.set(self.diffs[pid], DIFF_COLORS.get(self.diffs[pid], [127, 127, 127]),
           self.song.difficulty[self.playmode][self.diffs[pid]], "")
@@ -268,7 +270,7 @@ class SongInfoScreen(InterfaceWindow):
   
   def player_opts(self,pid):
     v_top = 11 + pid * 210
-    return [WrapTextDisplay(30, 248, [380, v_top+95],
+    return [WrapTextDisplay(FontTheme.songinfoscropts, 248, [380, v_top+95],
                             self.opt_summary(pid), centered=True)]
 
   def opt_summary(self, pid):
@@ -419,8 +421,9 @@ def dance(screen, song, players, prevscr, ready_go, game):
   if mainconfig['showlyrics']:
     lgroup.add(song.lyricdisplay.channels())
 
-  songtext = fontfx.zztext(song.title, 480, 12)
-  grptext = fontfx.zztext(song.artist, 160, 12)
+  fontfn, basesize = FontTheme.titleartist
+  songtext = fontfx.zztext(song.title, 480, 12, basesize, fontfn)
+  grptext = fontfx.zztext(song.artist, 160, 12, basesize, fontfn)
 
   songtext.zin()
   grptext.zin()

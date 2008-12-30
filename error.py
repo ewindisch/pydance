@@ -4,6 +4,7 @@ from interface import *
 from constants import mainconfig
 import fontfx
 import ui
+from fonttheme import FontTheme
 
 class ErrorMessage(InterfaceWindow):
   def __init__(self, screen, line):
@@ -17,7 +18,7 @@ class ErrorMessage(InterfaceWindow):
     # method. (Pre-1.0)
     if isinstance(line, list): lines = " ".join(line)
 
-    font = fontfx.WrapFont(32, 440)
+    font = fontfx.WrapFont(FontTheme.errormessage, 440)
     b = font.render(line, shdw = True, centered = True)
     r = b.get_rect()
     r.center = [320, 240]

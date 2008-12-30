@@ -237,7 +237,7 @@ class SongSelect(InterfaceWindow):
     self._sprites.add(HelpText(SS_HELP, [255, 255, 255], [0, 0, 0],
                                FontTheme.help, [206, 20]))
 
-    self._title = TextDisplay(30, [210, 28], [414, 27])
+    self._title = TextDisplay('sortmode', [210, 28], [414, 27])
     self._sprites.add(self._diff_widgets +
                       [self._banner, self._list, self._title])
     self._screen.blit(self._bg, [0, 0])

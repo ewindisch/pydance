@@ -141,7 +141,7 @@ class Menu(object):
     curitem = 0
     topitem = 0
     changed = False
-    toprotater = TextZoomer(self.text, FONTS[60], (640, 64),
+    toprotater = TextZoomer(self.text, FontTheme.menutop, (640, 64),
                             (178, 110, 0), colors.WHITE)
 
     self.items[curitem].activate(SELECT)

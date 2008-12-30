@@ -7,6 +7,8 @@ from pygame.font import Font
 import ui
 import endless, courseselect, songselect
 
+from fonttheme import FontTheme
+
 from i18n import *
 
 GS_HELP = [
@@ -169,23 +171,21 @@ class MainWindow(InterfaceWindow):
     # Displayed in the upper right.
     self._message = [_("Select a Game"), _("Select a Mode"), _("Select Type")]
 
-    font = Font(None, 26)
-
     # Three lists, one for each type of selection.
-    self._lists = [ListBox(font, [255, 255, 255], 26, 9, 220, [408, 53]),
-                   ListBox(font, [255, 255, 255], 26, 3, 220, [408, 300]),
-                   ListBox(font, [255, 255, 255], 26, 3, 220, [408, 393])]
+    self._lists = [ListBox(FontTheme.gamelist, [255, 255, 255], 26, 9, 220, [408, 53]),
+                   ListBox(FontTheme.gamelist, [255, 255, 255], 26, 3, 220, [408, 300]),
+                   ListBox(FontTheme.gamelist, [255, 255, 255], 26, 3, 220, [408, 393])]
     self._lists[0].set_items(GAMES)
     self._lists[1].set_items(TYPES)
     self._lists[2].set_items(SS)
 
     # Title in the upper right (from self._message).
-    self._title = TextDisplay(24, [210, 28], [414, 26])
+    self._title = TextDisplay('gameseltitle', [210, 28], [414, 26])
 
     # Currently selected object.
-    self._selected = TextDisplay(48, [400, 28], [15, 380])
+    self._selected = TextDisplay('gameselselected', [400, 28], [15, 380])
     # Description of the currently selected object.
-    self._description = WrapTextDisplay(30, 360, [25, 396])
+    self._description = WrapTextDisplay(FontTheme.gamedsc, 360, [25, 396])
     self._title.set_text(self._message[0])
     self._selected.set_text(_("4 panel"))
     self._description.set_text(DESCRIPTIONS[_("4 panel")])
@@ -193,7 +193,7 @@ class MainWindow(InterfaceWindow):
     self._indicator = ActiveIndicator([405, 152], width = 230)
     self._sprites.add(self._indicator)
     self._sprites.add(HelpText(GS_HELP, [255, 255, 255], [0, 0, 0],
-                               Font(None, 22), [206, 20]))
+                               FontTheme.help, [206, 20]))
     self._sprites.add(self._lists)
     # The image displayed on the main part of the screen.
     self._image = FlipImageDisplay(IMAGES.get(_("4 panel")), [200, 200])

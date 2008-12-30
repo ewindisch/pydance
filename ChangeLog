@@ -14,6 +14,7 @@ Legend:
 + UTF-8 BOMs now handled. (Stefan Kloe)
 + Pydance now has gettext support, with Catalan translation available. (Carles Pina i Estany and Catux LUG)
 + Non-ASCII song names are now printed to console if console encoding supports it.
++ Font theming support, including support for Asian song names, unsupported by pygame's default font.
 - Song preview now starts at 0, to work around a pygame/libsdl bug. (Carles Pina i Estany)
 * It is now guaranteed that songs in a course are not repeated.
 * Fixes crackling sound caused by pygame mixer being initialized incorrectly.

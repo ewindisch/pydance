@@ -5,6 +5,7 @@
 import sys
 import os
 import locale
+from string import maketrans
 
 from i18n import *
 
@@ -179,11 +180,6 @@ changeable_between = [('speed', {}),
 
 pygame.init()
 
-# Fonts
-FONTS = {}
-for s in (192, 60, 48, 40, 36, 32, 28, 26, 24, 20, 18, 16, 14):
-  FONTS[s] = pygame.font.Font(None, s)
-
 # The different colors pydance uses for difficulties in the UI.
 DIFF_COLORS = { "BEGINNER": colors.color[_("white")],
                 "LIGHT": colors.color[_("orange")],
@@ -207,3 +203,5 @@ DIFF_COLORS = { "BEGINNER": colors.color[_("white")],
                 "CRAZY": colors.color[_("purple")],
                 "EXPERT": colors.color[_("purple")]
                 }
+
+ZERO_ALPHA = maketrans(''.join([chr(x) for x in range(ord("a"),ord("z")+1)+range(ord("A"),ord("Z")+1)]),'0'*26*2)

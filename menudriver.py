@@ -18,7 +18,7 @@ from i18n import *
 class Credits(pygame.sprite.Sprite):
   def __init__(self, lines):
     pygame.sprite.Sprite.__init__(self)
-    self._font = pygame.font.Font(None, 16)
+    self._font = FontTheme.credits
     self._lines = lines
     self._idx = 0
     self._update = pygame.time.get_ticks() + 7000

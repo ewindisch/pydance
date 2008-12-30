@@ -21,6 +21,8 @@ from listener import Listener
 
 from pygame.sprite import RenderUpdates, RenderClear
 
+from fonttheme import FontTheme
+
 # This class keeps an ordered list of sprites in addition to the dict,
 # so we can draw in the order the sprites were added.
 class OrderedRenderUpdates(RenderClear):
@@ -93,8 +95,8 @@ class HoldJudgeDisp(Listener, pygame.sprite.Sprite):
     self.image.fill([0, 0, 0])
     self.image.set_colorkey([0, 0, 0], RLEACCEL)
 
-    self.okimg = fontfx.shadefade(_("OK"), 28, 3, [48, 24], [112, 224, 112])
-    self.ngimg = fontfx.shadefade(_("NG"), 28, 3, [48, 24], [224, 112, 112])
+    self.okimg = fontfx.shadefade(_("OK"), FontTheme.judgingholddisp, 3, [48, 24], [112, 224, 112])
+    self.ngimg = fontfx.shadefade(_("NG"), FontTheme.judgingholddisp, 3, [48, 24], [224, 112, 112])
 
     self.rect = self.image.get_rect()
     if player.scrollstyle == 2: self.rect.top = 228
@@ -139,25 +141,25 @@ class JudgingDisp(Listener, pygame.sprite.Sprite):
     self._bottom = 320
     self._centerx = game.sprite_center + (playernum * game.player_offset)
         
-    tx = FONTS[48].size(_("MARVELOUS"))[0] + 4
-    marvelous = fontfx.shadefade(_("MARVELOUS"), 48, 4, [tx, 40], [224, 224, 224])
+    tx = FontTheme.judgingdisp.size(_("MARVELOUS"))[0] + 4
+    marvelous = fontfx.shadefade(_("MARVELOUS"), FontTheme.judgingdisp, 4, [tx, 40], [224, 224, 224])
 
-    tx = FONTS[48].size(_("PERFECT"))[0] + 4
-    perfect = fontfx.shadefade(_("PERFECT"), 48, 4, [tx, 40], [224, 224, 32])
+    tx = FontTheme.judgingdisp.size(_("PERFECT"))[0] + 4
+    perfect = fontfx.shadefade(_("PERFECT"), FontTheme.judgingdisp, 4, [tx, 40], [224, 224, 32])
 
-    tx = FONTS[48].size(_("GREAT"))[0] + 4
-    great = fontfx.shadefade(_("GREAT"), 48, 4, [tx, 40], [32, 224, 32])
+    tx = FontTheme.judgingdisp.size(_("GREAT"))[0] + 4
+    great = fontfx.shadefade(_("GREAT"), FontTheme.judgingdisp, 4, [tx, 40], [32, 224, 32])
 
-    tx = FONTS[48].size(_("OKAY"))[0] + 4
-    okay = fontfx.shadefade(_("OKAY"), 48, 4, [tx, 40], [32, 32, 224])
+    tx = FontTheme.judgingdisp.size(_("OKAY"))[0] + 4
+    okay = fontfx.shadefade(_("OKAY"), FontTheme.judgingdisp, 4, [tx, 40], [32, 32, 224])
 
-    tx = FONTS[48].size(_("BOO"))[0] + 4
-    boo = fontfx.shadefade(_("BOO"), 48, 4, [tx, 40], [96, 64, 32])
+    tx = FontTheme.judgingdisp.size(_("BOO"))[0] + 4
+    boo = fontfx.shadefade(_("BOO"), FontTheme.judgingdisp, 4, [tx, 40], [96, 64, 32])
 
-    tx = FONTS[48].size(_("MISS"))[0]+4
-    miss = fontfx.shadefade(_("MISS"), 48, 4, [tx, 40], [224, 32, 32])
+    tx = FontTheme.judgingdisp.size(_("MISS"))[0]+4
+    miss = fontfx.shadefade(_("MISS"), FontTheme.judgingdisp, 4, [tx, 40], [224, 32, 32])
 
-    self._space = FONTS[48].render(" ", True, [0, 0, 0])
+    self._space = FontTheme.judgingdisp.render(" ", True, [0, 0, 0])
 
     marvelous.set_colorkey(marvelous.get_at([0, 0]), RLEACCEL)
     perfect.set_colorkey(perfect.get_at([0, 0]), RLEACCEL)

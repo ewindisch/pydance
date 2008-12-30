@@ -3,12 +3,13 @@
 import pygame
 import random
 from constants import *
+from fonttheme import FontTheme
 
 # Text that wraps at a particular width (in pixels), automatically. No
 # limit is placed on height.
 class WrapFont(object):
-  def __init__(self, size, width):
-    self._font = pygame.font.Font(None, size)
+  def __init__(self, font, width):
+    self._font = font
     self._width = width
     self._ls = self._font.get_linesize()
     self._ds = - self._font.get_descent()
@@ -70,9 +71,8 @@ class WrapFont(object):
     return image
 
 # EMBFADE - does a 3d emboss-like effect
-def embfade(textstring, textsize, amount, displaysize, trgb = [255, 255, 255]):
+def embfade(textstring, font, amount, displaysize, trgb = [255, 255, 255]):
   displaysurface = pygame.Surface(displaysize)
-  font = pygame.font.Font(None, textsize)
   for i in range(amount):
     text = font.render(textstring, True, [c / (i + 1) for c in trgb])
     displaysurface.blit(text, [i, i])
@@ -81,8 +81,6 @@ def embfade(textstring, textsize, amount, displaysize, trgb = [255, 255, 255]):
 # Do a simple drop-shadow on text, with a darker color offset by a certain
 # number of pixels.
 def shadow(text, font, color, offset = 1, color2 = None):
-  # Allow integers or fonts for 'font'.
-  if isinstance(font, int): font = pygame.font.Font(None, font)
   if color2 == None: color2 = [c / 9 for c in color]
   t1 = font.render(text, True, color)
   t2 = font.render(text, True, color2)
@@ -92,9 +90,8 @@ def shadow(text, font, color, offset = 1, color2 = None):
   return s
 
 # SHADEFADE - does a 3d dropshadow-like effect
-def shadefade(textstring, textsize, amount, displaysize, trgb=(255,255,255)):
+def shadefade(textstring, font, amount, displaysize, trgb=(255,255,255)):
   displaysurface = pygame.Surface(displaysize, SRCALPHA, 32)
-  font = pygame.font.Font(None, textsize)
   for i in range(amount - 1, 0, -1):
     text = font.render(textstring, True, [c / i for c in trgb])
     displaysurface.blit(text, [i, i])
@@ -182,14 +179,6 @@ class TextProgress(object):
     surf.set_colorkey(self.notcolor, RLEACCEL)
     return surf
 
-# Find the appropriate font size to fit string into max_width pixels,
-# that's at most max_size, and at least 6.
-def max_size(string, max_width, max_size):
-  for size in range(max_size, 0, -1):
-    f = pygame.font.Font(None, size)
-    if f.size(string)[0] < max_width: return f
-  return pygame.font.Font(None, 6)
-
 # Replace as much of the middle of the string with "..." as is necessary
 # to fit it into width.
 def render_outer(string, width, font):
@@ -207,7 +196,7 @@ def render_outer(string, width, font):
 # Text that zooms in, then out.
 # FIXME: Put some timer controls on this
 class zztext(pygame.sprite.Sprite):
-  def __init__(self, text, x, y):
+  def __init__(self, text, x, y, basesize, fontfn=None):
     pygame.sprite.Sprite.__init__(self)
     self.cent = [x, y]
     self.zoom = 0
@@ -216,7 +205,7 @@ class zztext(pygame.sprite.Sprite):
     self.rect.center = self.cent
 
     for i in (0, 1, 2, 3, 4, 5, 6, 7, 8, 15):
-      font = pygame.font.Font(None, 9 + i)
+      font = pygame.font.Font(fontfn, int((9 + i) / 9.0 * basesize))
       gtext = font.render(text, True, [i * 16] * 3)
       textpos = gtext.get_rect()
       textpos.center = [160, 12]

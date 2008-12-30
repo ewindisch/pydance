@@ -6,6 +6,7 @@ from listener import Listener
 from constants import *
 
 from i18n import *
+from fonttheme import FontTheme
 
 LIVING, FAILED, WON = range(3)
 
@@ -20,7 +21,7 @@ class AbstractLifeBar(Listener, pygame.sprite.Sprite):
     self.record = []
     self.last_record_update = 0
 
-    self.failtext = fontfx.embfade(_("FAILED"), 28, 3, [80, 32], [224, 32, 32])
+    self.failtext = fontfx.embfade(_("FAILED"), FontTheme.lifebar, 3, [80, 32], [224, 32, 32])
     self.failtext.set_colorkey(self.failtext.get_at([0, 0]), RLEACCEL)
 
     self.rect = self.image.get_rect()
@@ -107,7 +108,7 @@ class TugLifeBarDisp(LifeBarDisp):
   def __init__(self, playernum, theme, songconf, game):
     LifeBarDisp.__init__(self, playernum, theme, songconf, game)
 
-    self.wontext = fontfx.embfade("WON",28,3,(80,32),(224,32,32))
+    self.wontext = fontfx.embfade("WON",FontTheme.lifebar,3,(80,32),(224,32,32))
     self.wontext.set_colorkey(self.failtext.get_at((0,0)), RLEACCEL)
     self.deltas = {"V": 0.02, "P": 0.02, "G": 0.01, "B": -0.01, "M": -0.02 }
 
