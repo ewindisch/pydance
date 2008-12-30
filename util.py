@@ -55,23 +55,18 @@ def toRealTime(bpm, steps):
 # Search the directory specified by path recursively for files that match
 # the shell wildcard pattern. A list of all matching file names is returned,
 # with absolute paths.
-# FIXME: Why aren't we using some sort of tree walk here? (Oh yeah, it's
-# Python 2.3 only. Fix that for 1.2.)
 def find(path, patterns):
+  root = os.path.abspath(os.path.expanduser(path))
   matches = []
-  path = os.path.abspath(os.path.expanduser(path))
 
-  if os.path.isdir(path):
-    list = os.listdir(path)
-    for f in list:
-      filepath = os.path.join(path, f)
-      if os.path.isdir(filepath):
-        matches.extend(find(filepath, patterns))
-      else:
-        for pattern in patterns:
-          if fnmatch.fnmatch(filepath.lower(), pattern):
-            matches.append(filepath)
-            break
+  for path,dirs,files in os.walk(root):
+    for fn in files:
+      filepath = os.path.join(path, fn)
+      for pattern in patterns:
+        if fnmatch.fnmatch(filepath.lower(), pattern):
+          matches.append(filepath)
+          break
+
   return matches
 
 # This uses a bunch of heuristics to come up with a good titlecased
