@@ -137,7 +137,7 @@ MODES = {
 
 DESCRIPTIONS = {
   _("4 panel"): (_("The standard up, down, left and right arrows ") +
-              _("like Dance Dance Revolution)")),
+              _("(like Dance Dance Revolution)")),
   _("3 panel"): _("Practice using up left and up right with easier steps."),
   _("5 panel"): _("Diagonal arrows and the center (like Pump It Up)"),
   _("6 panel"): _("Four panel plus the upper diagonal arrows (like DDR Solo)"),

@@ -516,8 +516,8 @@ msgid "The standard up, down, left and right arrows "
 msgstr "Les fletxes estàndard amunt, avall, esquerra i dreta "
 
 #: gameselect.py:140
-msgid "like Dance Dance Revolution)"
-msgstr "com Dance Dance Revolution)"
+msgid "(like Dance Dance Revolution)"
+msgstr "(com Dance Dance Revolution)"
 
 #: gameselect.py:141
 msgid "Practice using up left and up right with easier steps."
