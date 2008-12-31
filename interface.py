@@ -451,7 +451,7 @@ class BannerDisplay(pygame.sprite.Sprite):
     self._next_update = -1
     self._delta = 5
     self._idx = 1
-    self._bpmdisplay = BPMDisplay(FontTheme.bannerdispbpm, [60, 180])
+    self._bpmdisplay = BPMDisplay(FontTheme.BannerDisp_BPM, [60, 180])
 
   def set_song(self, song):
     c1 = [255, 255, 255]
@@ -461,12 +461,12 @@ class BannerDisplay(pygame.sprite.Sprite):
     song.render()
 
     self._title = fontfx.shadow(song.info["title"],
-                                FontTheme.font('bannerdisptitle',song.info["title"],340),
+                                FontTheme.font('BannerDisp_title',song.info["title"],340),
                                 c1)
     self._r_t = self._title.get_rect()
     self._r_t.center = [179, 240]
     self._artist = fontfx.shadow(song.info["artist"],
-                                 FontTheme.font('bannerdispartist',song.info["artist"], 250),
+                                 FontTheme.font('BannerDisp_artist',song.info["artist"], 250),
                                  c1)
 
     self._r_a = self._artist.get_rect()
@@ -474,7 +474,7 @@ class BannerDisplay(pygame.sprite.Sprite):
 
     if song.info["subtitle"]:
       self._subtitle = fontfx.shadow(song.info["subtitle"],
-                                     FontTheme.font('bannerdispsubtitle',song.info["subtitle"],300),
+                                     FontTheme.font('BannerDisp_subtitle',song.info["subtitle"],300),
 
                                      c1)
       self._r_s = self._subtitle.get_rect()

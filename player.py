@@ -95,8 +95,8 @@ class HoldJudgeDisp(Listener, pygame.sprite.Sprite):
     self.image.fill([0, 0, 0])
     self.image.set_colorkey([0, 0, 0], RLEACCEL)
 
-    self.okimg = fontfx.shadefade(_("OK"), FontTheme.judgingholddisp, 3, [48, 24], [112, 224, 112])
-    self.ngimg = fontfx.shadefade(_("NG"), FontTheme.judgingholddisp, 3, [48, 24], [224, 112, 112])
+    self.okimg = fontfx.shadefade(_("OK"), FontTheme.Dance_hold_judgment, 3, [48, 24], [112, 224, 112])
+    self.ngimg = fontfx.shadefade(_("NG"), FontTheme.Dance_hold_judgment, 3, [48, 24], [224, 112, 112])
 
     self.rect = self.image.get_rect()
     if player.scrollstyle == 2: self.rect.top = 228
@@ -141,25 +141,25 @@ class JudgingDisp(Listener, pygame.sprite.Sprite):
     self._bottom = 320
     self._centerx = game.sprite_center + (playernum * game.player_offset)
         
-    tx = FontTheme.judgingdisp.size(_("MARVELOUS"))[0] + 4
-    marvelous = fontfx.shadefade(_("MARVELOUS"), FontTheme.judgingdisp, 4, [tx, 40], [224, 224, 224])
+    tx = FontTheme.Dance_step_judgment.size(_("MARVELOUS"))[0] + 4
+    marvelous = fontfx.shadefade(_("MARVELOUS"), FontTheme.Dance_step_judgment, 4, [tx, 40], [224, 224, 224])
 
-    tx = FontTheme.judgingdisp.size(_("PERFECT"))[0] + 4
-    perfect = fontfx.shadefade(_("PERFECT"), FontTheme.judgingdisp, 4, [tx, 40], [224, 224, 32])
+    tx = FontTheme.Dance_step_judgment.size(_("PERFECT"))[0] + 4
+    perfect = fontfx.shadefade(_("PERFECT"), FontTheme.Dance_step_judgment, 4, [tx, 40], [224, 224, 32])
 
-    tx = FontTheme.judgingdisp.size(_("GREAT"))[0] + 4
-    great = fontfx.shadefade(_("GREAT"), FontTheme.judgingdisp, 4, [tx, 40], [32, 224, 32])
+    tx = FontTheme.Dance_step_judgment.size(_("GREAT"))[0] + 4
+    great = fontfx.shadefade(_("GREAT"), FontTheme.Dance_step_judgment, 4, [tx, 40], [32, 224, 32])
 
-    tx = FontTheme.judgingdisp.size(_("OKAY"))[0] + 4
-    okay = fontfx.shadefade(_("OKAY"), FontTheme.judgingdisp, 4, [tx, 40], [32, 32, 224])
+    tx = FontTheme.Dance_step_judgment.size(_("OKAY"))[0] + 4
+    okay = fontfx.shadefade(_("OKAY"), FontTheme.Dance_step_judgment, 4, [tx, 40], [32, 32, 224])
 
-    tx = FontTheme.judgingdisp.size(_("BOO"))[0] + 4
-    boo = fontfx.shadefade(_("BOO"), FontTheme.judgingdisp, 4, [tx, 40], [96, 64, 32])
+    tx = FontTheme.Dance_step_judgment.size(_("BOO"))[0] + 4
+    boo = fontfx.shadefade(_("BOO"), FontTheme.Dance_step_judgment, 4, [tx, 40], [96, 64, 32])
 
-    tx = FontTheme.judgingdisp.size(_("MISS"))[0]+4
-    miss = fontfx.shadefade(_("MISS"), FontTheme.judgingdisp, 4, [tx, 40], [224, 32, 32])
+    tx = FontTheme.Dance_step_judgment.size(_("MISS"))[0]+4
+    miss = fontfx.shadefade(_("MISS"), FontTheme.Dance_step_judgment, 4, [tx, 40], [224, 32, 32])
 
-    self._space = FontTheme.judgingdisp.render(" ", True, [0, 0, 0])
+    self._space = FontTheme.Dance_step_judgment.render(" ", True, [0, 0, 0])
 
     marvelous.set_colorkey(marvelous.get_at([0, 0]), RLEACCEL)
     perfect.set_colorkey(perfect.get_at([0, 0]), RLEACCEL)

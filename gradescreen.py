@@ -40,7 +40,7 @@ class BannerFadeIn(pygame.sprite.Sprite):
         elif self._i > 250: self._idir = -4
         self._i += self._idir
         c = [self._i, 192, 192]
-        txt = fontfx.shadow(_("Press Escape/Confirm/Start"), FontTheme.gradescrcont, c)
+        txt = fontfx.shadow(_("Press Escape/Confirm/Start"), FontTheme.GrScr_tocontinue, c)
         txt_r = txt.get_rect()
         txt_r.center = [123, 70]
         self.image.blit(txt, txt_r)
@@ -128,7 +128,7 @@ class StatSprite(pygame.sprite.Sprite):
     self._pos = pos
     self._curcount = 0
     self._size = size
-    self._title = fontfx.shadow(title, FontTheme.gradescreen, colors.WHITE)
+    self._title = fontfx.shadow(title, FontTheme.GrScr_text, colors.WHITE)
     self._render()
 
   def _render(self):
@@ -137,7 +137,7 @@ class StatSprite(pygame.sprite.Sprite):
     rt = self._title.get_rect()
     rt.midleft = [0, self._size[1] / 2]
     self.image.blit(self._title, rt)
-    cnt = fontfx.shadow(locale.format("%d", self._curcount, True), FontTheme.gradescreen,
+    cnt = fontfx.shadow(locale.format("%d", self._curcount, True), FontTheme.GrScr_text,
                         colors.WHITE)
     rc = cnt.get_rect()
     rc.midright = [self._size[0] - 1, self._size[1] / 2]
@@ -166,7 +166,7 @@ class HoldStatSprite(pygame.sprite.Sprite):
     self._curgood = 0
     self._curtotal = 0
     self._size = size
-    self._title = fontfx.shadow(title, FontTheme.gradescreen, colors.WHITE)
+    self._title = fontfx.shadow(title, FontTheme.GrScr_text, colors.WHITE)
     self._render()
 
   def _render(self):
@@ -176,7 +176,7 @@ class HoldStatSprite(pygame.sprite.Sprite):
     rt.midleft = [0, self._size[1] / 2]
     self.image.blit(self._title, rt)
     s = "%d / %d" % (self._curgood, self._curtotal)
-    cnt = fontfx.shadow(s, FontTheme.gradescreen, colors.WHITE)
+    cnt = fontfx.shadow(s, FontTheme.GrScr_text, colors.WHITE)
     rc = cnt.get_rect()
     rc.midright = [self._size[0] - 1, self._size[1] / 2]
     self.image.blit(cnt, rc)

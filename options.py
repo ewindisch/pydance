@@ -196,7 +196,7 @@ class OptionSelect(pygame.sprite.Sprite):
     self._center = center
     self._end_time = pygame.time.get_ticks()
     self._needs_update = True
-    self._font = FontTheme.optsel
+    self._font = FontTheme.Opts_choices
     self._render(pygame.time.get_ticks())
 
   def update(self, time):
@@ -235,7 +235,7 @@ class OptionSelect(pygame.sprite.Sprite):
     else: offset = 0
 
     t = fontfx.shadow(self._possible[self._index],
-                      FontTheme.optsel, [255, 255, 255])
+                      FontTheme.Opts_choices, [255, 255, 255])
     r = t.get_rect()
     r.center = [215 + offset, 20]
     self.image.blit(t, r)
@@ -244,7 +244,7 @@ class OptionSelect(pygame.sprite.Sprite):
     idx = self._index - 1
     while idx >= 0 and r.left > 0:
       t = fontfx.shadow(self._possible[idx],
-                        FontTheme.optsel, [255, 255, 255])
+                        FontTheme.Opts_choices, [255, 255, 255])
       t2 = pygame.Surface(t.get_size())
       t2.blit(t, [0, 0])
       t2.set_colorkey(t2.get_at([0, 0]))
@@ -260,7 +260,7 @@ class OptionSelect(pygame.sprite.Sprite):
     r = old_r
     while idx < len(self._possible) and r.right < 430:
       t = fontfx.shadow(self._possible[idx],
-                        FontTheme.optsel, [255, 255, 255])
+                        FontTheme.Opts_choices, [255, 255, 255])
       t2 = pygame.Surface(t.get_size())
       t2.blit(t, [0, 0])
       t2.set_colorkey(t2.get_at([0, 0]))
@@ -285,29 +285,29 @@ class OptionScreen(InterfaceWindow):
     self._config = game_config
     self._players = len(self._configs)
 
-    self._lists = [ListBox(FontTheme.optlist, [255, 255, 255],
+    self._lists = [ListBox(FontTheme.Opts_list, [255, 255, 255],
                            25, 9, 176, [10, 10])]
-    self._text = [WrapTextDisplay(FontTheme.optdsc, 430, [198, 165], centered = True,
+    self._text = [WrapTextDisplay(FontTheme.Opts_description, 430, [198, 165], centered = True,
                                   str = OPTIONS[self.optlist[0]][DESCRIPTION])]    
     val = self._configs[0][self.optlist[0]]
     names = [v[NAME] for v in OPTIONS[self.optlist[0]][VALUES]]
     desc = OPTIONS[self.optlist[0]][VALUES][index_of(val, self.optlist[0])][DESCRIPTION]
-    self._text2 = [WrapTextDisplay(FontTheme.optseldsc, 430, [198, 105], centered = True,
+    self._text2 = [WrapTextDisplay(FontTheme.Opts_choice_description, 430, [198, 105], centered = True,
                                   str = desc)]
     self._displayers = [OptionSelect(names, [415, 40],
                                      index_of(val, self.optlist[0]))]
     self._index = [0]
     ActiveIndicator([5, 106], height = 25, width = 185).add(self._sprites)
     if self._players == 2:
-      self._lists.append(ListBox(FontTheme.optlist, [255, 255, 255],
+      self._lists.append(ListBox(FontTheme.Opts_list, [255, 255, 255],
                                  25, 9, 176, [453, 246]))
       self._index.append(0)
-      self._text.append(WrapTextDisplay(FontTheme.optdsc, 430, [10, 275], centered = True,
+      self._text.append(WrapTextDisplay(FontTheme.Opts_description, 430, [10, 275], centered = True,
                                         str = OPTIONS[self.optlist[0]][DESCRIPTION]))
       ActiveIndicator([448, 341], height = 25, width = 185).add(self._sprites)
       val = self._configs[1][self.optlist[0]]
       desc = OPTIONS[self.optlist[0]][VALUES][index_of(val, self.optlist[0])][DESCRIPTION]
-      self._text2.append(WrapTextDisplay(FontTheme.optseldsc, 430, [10, 350], centered = True,
+      self._text2.append(WrapTextDisplay(FontTheme.Opts_choice_description, 430, [10, 350], centered = True,
                                          str = desc))
       self._displayers.append(OptionSelect(names, [220, 440],
                                            index_of(val, self.optlist[0])))

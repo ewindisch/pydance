@@ -184,7 +184,7 @@ class SongSelect(InterfaceWindow):
     self._all_valid_songs = [s for s in self._songs if s.info["valid"]]
     self._all_valid_dances = [d for d in self._dances if d.info["valid"]]
 
-    self._list = ListBox(FontTheme.songlist,
+    self._list = ListBox(FontTheme.SongSel_list,
                          [255, 255, 255], 26, 16, 220, [408, 56])
     # please use set constructions after python 2.4 is adopted
     sort_name = self._update_songitems()
@@ -237,7 +237,7 @@ class SongSelect(InterfaceWindow):
     self._sprites.add(HelpText(SS_HELP, [255, 255, 255], [0, 0, 0],
                                FontTheme.help, [206, 20]))
 
-    self._title = TextDisplay('sortmode', [210, 28], [414, 27])
+    self._title = TextDisplay('SongSel_sort_mode', [210, 28], [414, 27])
     self._sprites.add(self._diff_widgets +
                       [self._banner, self._list, self._title])
     self._screen.blit(self._bg, [0, 0])

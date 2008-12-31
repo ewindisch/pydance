@@ -33,8 +33,8 @@ class AbstractScore(Listener, pygame.sprite.Sprite):
     self.rect.centerx = game.sprite_center + pid * game.player_offset
 
   def _set_text(self, text):
-    tx = FontTheme.scoredisp.size(text)[0] + 2
-    txt = fontfx.embfade(text, FontTheme.scoredisp, 2, (tx, 24), colors.color[_("gray")])
+    tx = FontTheme.Dance_score_display.size(text)[0] + 2
+    txt = fontfx.embfade(text, FontTheme.Dance_score_display, 2, (tx, 24), colors.color[_("gray")])
     basemode = pygame.transform.scale(txt, (tx, 48))
     self.baseimage = pygame.surface.Surface((128, 48))
     self.baseimage.blit(basemode, (64 - (tx / 2), 0))
@@ -46,7 +46,7 @@ class AbstractScore(Listener, pygame.sprite.Sprite):
   def update(self, curtime):
     if self.score != self.oldscore:
       self.image.blit(self.baseimage, (0,0))
-      scoretext = FontTheme.scoredisp.render(str(int(self.score)), 1, (192,192,192))
+      scoretext = FontTheme.Dance_score_display.render(str(int(self.score)), 1, (192,192,192))
       self.image.blit(scoretext, (64 - (scoretext.get_rect().size[0] / 2), 13))
       self.image.set_colorkey(self.image.get_at((0, 0)), RLEACCEL)
       self.oldscore = self.score

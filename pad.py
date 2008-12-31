@@ -312,7 +312,7 @@ class PadConfig(object):
       wanted_type = JOYBUTTONDOWN
       text = _("Press a button for %s (escape to cancel)") % NAMES[dir]
 
-    img = FontTheme.padconfmsg.render(text, True, colors.BLACK)
+    img = FontTheme.MapKeys_message.render(text, True, colors.BLACK)
     r = img.get_rect()
     r.midbottom = [320, 460]
     self.screen.blit(img, r)
@@ -338,13 +338,13 @@ class PadConfig(object):
     text2 = [_("Keyboard"), _("Joystick")]
 
     for t in text:
-      img = FontTheme.padconfplr.render(t, True, colors.BLACK)
+      img = FontTheme.MapKeys_player.render(t, True, colors.BLACK)
       r = img.get_rect()
       r.midtop = [160 + 320 * text.index(t), 15]
       self.screen.blit(img, r)
 
       for t2 in text2:
-        img = FontTheme.padconfinput.render(t2, True, colors.BLACK)
+        img = FontTheme.MapKeys_input_type.render(t2, True, colors.BLACK)
         r = img.get_rect()
         r.midtop = [cent + offset * text2.index(t2) +
                     (offset * 3) * text.index(t), 50]
@@ -363,8 +363,8 @@ class PadConfig(object):
             ((i < 2 and i == self.loc[0]) or
              (i > 2 and i == self.loc[0] + 1))):
 
-          img = FontTheme.padconfdirs.render(_(o), True, colors.WHITE) 
-        else: img = FontTheme.padconfdirs.render(_(o), True, colors.BLACK)
+          img = FontTheme.MapKeys_entries.render(_(o), True, colors.WHITE) 
+        else: img = FontTheme.MapKeys_entries.render(_(o), True, colors.BLACK)
         r = img.get_rect()
         r.center = [cent + offset * i, 60 + 26 * dir]
         self.screen.blit(img, r)

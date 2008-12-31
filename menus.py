@@ -67,17 +67,17 @@ class MenuItem(object):
     self.image = pygame.surface.Surface(BUTTON_SIZE)
     self.image.blit(self.bg, (0,0))
     if self.subtext == None:
-      text = FontTheme.menu.render(self.text, 1, self.rgb)
-      self.image.blit(text, (BUTTON_WIDTH/2 - FontTheme.menu.size(self.text)[0] / 2,
-                             BUTTON_HEIGHT/2 - FontTheme.menu.size(self.text)[1]/2))
+      text = FontTheme.Menu_button_no_sub.render(self.text, 1, self.rgb)
+      self.image.blit(text, (BUTTON_WIDTH/2 - FontTheme.Menu_button_no_sub.size(self.text)[0] / 2,
+                             BUTTON_HEIGHT/2 - FontTheme.Menu_button_no_sub.size(self.text)[1]/2))
     else:
-      text = FontTheme.menusub1.render(self.text, 1, self.rgb)
-      subtext = FontTheme.menusub2.render(self.subtext, 1, self.rgb)
-      self.image.blit(text, (BUTTON_WIDTH/2 - FontTheme.menusub1.size(self.text)[0] / 2,
-                             BUTTON_HEIGHT/3 - FontTheme.menusub1.size(self.text)[1]/2))
+      text = FontTheme.Menu_button_if_sub.render(self.text, 1, self.rgb)
+      subtext = FontTheme.Menu_button_sub.render(self.subtext, 1, self.rgb)
+      self.image.blit(text, (BUTTON_WIDTH/2 - FontTheme.Menu_button_if_sub.size(self.text)[0] / 2,
+                             BUTTON_HEIGHT/3 - FontTheme.Menu_button_if_sub.size(self.text)[1]/2))
       self.image.blit(subtext,
-                      (BUTTON_WIDTH/2 - FontTheme.menusub2.size(self.subtext)[0] / 2,
-                       2 * BUTTON_HEIGHT/3 - FontTheme.menusub2.size(self.text)[1] / 2))
+                      (BUTTON_WIDTH/2 - FontTheme.Menu_button_sub.size(self.subtext)[0] / 2,
+                       2 * BUTTON_HEIGHT/3 - FontTheme.Menu_button_sub.size(self.text)[1] / 2))
     self.image.set_alpha(self.alpha)
 
 class Menu(object):
@@ -114,9 +114,9 @@ class Menu(object):
   def render(self):
     self.image = pygame.surface.Surface(BUTTON_SIZE)
     self.image.blit(self.bg, (0,0))
-    text = FontTheme.menu.render(self.text, 1, self.rgb)
-    self.image.blit(text, (BUTTON_WIDTH/2 - FontTheme.menu.size(self.text)[0] / 2,
-                           BUTTON_HEIGHT/2 - FontTheme.menu.size(self.text)[1] / 2))
+    text = FontTheme.Menu_button_no_sub.render(self.text, 1, self.rgb)
+    self.image.blit(text, (BUTTON_WIDTH/2 - FontTheme.Menu_button_no_sub.size(self.text)[0] / 2,
+                           BUTTON_HEIGHT/2 - FontTheme.Menu_button_no_sub.size(self.text)[1] / 2))
     self.image.set_alpha(self.alpha)
 
   def activate(self, ev):
@@ -141,7 +141,7 @@ class Menu(object):
     curitem = 0
     topitem = 0
     changed = False
-    toprotater = TextZoomer(self.text, FontTheme.menutop, (640, 64),
+    toprotater = TextZoomer(self.text, FontTheme.Menu_rotating_top, (640, 64),
                             (178, 110, 0), colors.WHITE)
 
     self.items[curitem].activate(SELECT)

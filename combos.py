@@ -18,7 +18,7 @@ class AbstractCombo(Listener, pygame.sprite.Sprite):
     self._top = 320
     
     fonts = []
-    fontfn, basesize = FontTheme.combo
+    fontfn, basesize = FontTheme.Dance_combo_display
     for x in range(11, 0, -1):
       fonts.append(pygame.font.Font(fontfn, basesize+int(x*1.82/28*basesize)))
 

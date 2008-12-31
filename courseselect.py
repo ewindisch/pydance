@@ -115,8 +115,8 @@ class CourseDisplay(object):
 
   def render(self):
     if self.banner: return
-    font = fontfx.WrapFont(FontTheme.crsdisp, 320)
-    small_font = fontfx.WrapFont(FontTheme.crsdispsmall, 250)
+    font = fontfx.WrapFont(FontTheme.Crs_song_title, 320)
+    small_font = fontfx.WrapFont(FontTheme.Crs_song_subtitle, 250)
     ls = font.get_linesize()
     y = ls * 3
     for name, subtitle, diff in self._songs:
@@ -137,7 +137,7 @@ class CourseDisplay(object):
       if isinstance(diff, list): d = diff[0]
       else: d = diff
       
-      t2 = fontfx.shadow(d[0], FontTheme.crsdisp, DIFF_COLORS.get(d, colors.WHITE))
+      t2 = fontfx.shadow(d[0], FontTheme.Crs_song_title, DIFF_COLORS.get(d, colors.WHITE))
 
       r1 = t1.get_rect()
       r2 = t2.get_rect()
@@ -205,7 +205,7 @@ class CourseSelector(InterfaceWindow):
     self._config = dict(game_config)
     self._configs = []
 
-    self._list = ListBox(FontTheme.crslist,
+    self._list = ListBox(FontTheme.Crs_list,
                          [255, 255, 255], 32, 10, 256, [373, 150])
     if len(self._courses) > 60 and mainconfig["folders"]:
       self._create_folders()
@@ -229,8 +229,8 @@ class CourseSelector(InterfaceWindow):
              [186, 20]).add(self._sprites)
 
     self._list_gfx = ScrollingImage(self._course.image, [15, 80], 390)
-    self._coursetitle = TextDisplay('crsselcrstitle', [345, 28], [20, 56])
-    self._title = TextDisplay('crsseltitle', [240, 28], [377, 27])
+    self._coursetitle = TextDisplay('Crs_course_name', [345, 28], [20, 56])
+    self._title = TextDisplay('Crs_course_list_head', [240, 28], [377, 27])
     self._banner = ImageDisplay(self._course.banner, [373, 56])
     self._sprites.add([self._list, self._list_gfx, self._title,
                        self._coursetitle, self._banner])

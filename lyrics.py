@@ -27,8 +27,8 @@ class LyricChannel(pygame.sprite.Sprite):
     self._lyrics.append(lyric)
     self._times.append(time)
  
-    image1 = FontTheme.lyrics.render(lyric, True, self._darkcolor)
-    image2 = FontTheme.lyrics.render(lyric, True, self._color)
+    image1 = FontTheme.Dance_lyrics_display.render(lyric, True, self._darkcolor)
+    image2 = FontTheme.Dance_lyrics_display.render(lyric, True, self._color)
     rimage = pygame.Surface(image1.get_size())
     rimage.fill([64, 64, 64])
     rimage.blit(image1, [-2, -2])

@@ -86,7 +86,7 @@ def load_files(screen, files, type, Ctr, args):
   files = list(dict(map(None, files, [])).keys())
   objects = []
   message = _("Found %d %s. Loading...") % (len(files), _(type))
-  pbar = TextProgress(FontTheme.loadingscreen, message, colors.WHITE, colors.BLACK)
+  pbar = TextProgress(FontTheme.loading_screen, message, colors.WHITE, colors.BLACK)
   r = pbar.render(0).get_rect()
   r.center = [320, 240]
   for f in files:

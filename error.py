@@ -18,7 +18,7 @@ class ErrorMessage(InterfaceWindow):
     # method. (Pre-1.0)
     if isinstance(line, list): lines = " ".join(line)
 
-    font = fontfx.WrapFont(FontTheme.errormessage, 440)
+    font = fontfx.WrapFont(FontTheme.error_message, 440)
     b = font.render(line, shdw = True, centered = True)
     r = b.get_rect()
     r.center = [320, 240]
