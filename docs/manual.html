@@ -3,7 +3,7 @@
  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head>
     <title>pydance User's Manual</title>
-    <meta name="author" content="Joe Wreschnig &lt;piman@debian.org&gt;" />
+    <meta name="author" content="Pavel N. Krivitsky"/>
     <style type="text/css">
 h1 { border-bottom: solid 2px }
 h2 { border-bottom: solid 1px; margin-right: 15% }
@@ -81,6 +81,7 @@ p {
 <li><a href="#install.cd">Getting CD Titles and Banners</a></li>
 <li><a href="#install.themes">Graphical Themes</a></li>
 <li><a href="#install.dj">Announcer (DJ) Themes</a></li>
+<li><a href="#install.fonttheme">Font Themes</a></li>
 </ol>
 </li>
 <li><a href="#play">Playing the Game</a><ol>
@@ -130,6 +131,8 @@ p {
 <li><a href="#themes.zip">Zipping Themes</a></li>
 </ol>
 </li>
+<li><a href="#fontthemes">Creating Font Themes</a></li>
+<li><a href="#i18n">Translating pydance</a></li>
 <li><a href="#contact">Contact the Developers</a></li>
 <li><a href="#faq">FAQ</a></li>
 <li><a href="#license">License</a></li></ol>
@@ -261,7 +264,7 @@ also results in a few more things to download.</p>
 Python and Pygame are available at the <a
 href="http://icculus.org/pyddr/get.php">pydance download page</a>.</p>
     <h3 id="install.py.unix">Unix</h3>
-    <p>You will need Python 2.3, and Pygame 1.6. The <a
+    <p>You will need Python 2.4, and Pygame 1.8.1. The <a
 href="http://icculus.org/pyddr/get.php">pydance download page</a>
 contains links and information on how to get the packages you need.
 Usually, these will be easy to find, or may even already be
@@ -272,10 +275,10 @@ href="http://prdownloads.sourceforge.net/visionegg/py_kitchensink_8Mar2003.dmg">
 kitchen sink</a> install, which contains everything you'll need.</p>
     <h3 id="install.py.win">Windows</h3>
     <p>Download a recent version of <a
-href="http://www.python.org/ftp/python/2.3/Python-2.3.exe">Python
-2.3</a>, and <a
-href="http://www.pygame.org/ftp/pygame-1.6.win32-py2.3.exe">Pygame
-1.6</a>.</p>
+href="http://www.python.org/ftp/python/2.4/Python-2.4.exe">Python
+2.4</a>, and <a
+href="http://www.pygame.org/ftp/pygame-1.8.1release.win32-py2.4.msi">Pygame
+1.8.1</a>.</p>
 
     <h2 id="install.dance">Getting pydance</h2>
     <p>To get the latest version of pydance, visit the <a
@@ -427,12 +430,16 @@ or
 (the .zip file can be read without being unpacked). <em>N</em> is the
 height and width of the images in the theme; different game modes use
 different image sizes.</p>
+
     <h2 id="install.dj">Announcer (DJ) Themes</h2>
     <p>pydance supports an announcer, who talks during the game,
 giving you feedback on your progress. You should unzip (or untar) such
 themes in <tt><em>rc_path</em>/themes/dj</tt>, into a subdirectory of
 their name. Announcers are still being developed, and don't work very
 well.</p>
+
+	<h2 id="install.fonttheme">Font Themes</h2>
+	<p>pydance user interface can be customized to use True Type fonts different from the default Pygame font. Currently, VL PGothic Font is supported to display song titles and locales with Asian characters. Font theme configuration files and font files are found under <tt><em>rc_path</em>/themes/font</tt> with a configuration file for each theme, describing what font and size combination should be used for each UI element.</p>
 
     <h1 id="play">Playing the Game</h1>
     <p>A dancing pad normally has somewhere between 6 and 11 buttons.
@@ -535,6 +542,9 @@ off.</dd>
 	  <dd>Turning this on results in a game timer being displayed
 at the top of the screen (in seconds), and an FPS counter in the lower
 left corner.</dd>
+          <dt>Font</dt>
+          <dd>Select the font theme being used. Current choices are the
+pygame default and VLGothic for Asian fonts. Requires restart.</dd>
 	</dl>
 </dd>
     </dl>
@@ -606,7 +616,7 @@ is one of the "main screens" of the pydance interface.  This is where
 you pick the song you want to play, and the difficulty of it.</p>
     <p>If you have more than 60 songs, the song selector will start up
 in "folder mode", where your songs are organized into folders by
-title, artist, BPM, or mix name. You can turn off folders in the
+title, artist, BPM, mix name, difficulty level, or difficulty rating. You can turn off folders in the
 Interface Options menu; they are automatically disabled if you have
 fewer than 60 songs.</p>
     <p>When a folder is selected, the number of songs inside it will
@@ -775,8 +785,8 @@ function, not their old one.</p>
 creates unnecessary foot movements. While this might make it easier to
 keep your bearings on simple songs, it makes harder and faster ones
 nearly impossible</p>
-    <p><em>Try practicing songs on 1.5x or 2x.</em> Some songs,
-especially slow ones, are easier to read on higher speeds.</p>
+    <p><em>Try practicing songs on 1.5x or 2x or one of the constant BPM modes.</em> Some songs,
+especially slow ones, are easier to read on higher speeds or when the scrolling speed is constant.</p>
     <p><em>Don't stomp.</em> Stomping might help you pick up the beat
 better, but it also tires you out much faster. When you're tired, you
 move slower and less accurately, and begin missing the beat
@@ -1056,6 +1066,34 @@ that the scaled oni-bar.png image will be displayed over.</p>
     instead of <tt>mytheme/arr_n_d_0.png</tt>. Make sure the is-theme
     file gets included.</p>
 
+	<h1 id="fontthemes">Creating Font Themes</h1>
+	Each font theme has a configuration file, <tt>themes/font/<em>theme</em>.cfg</tt>, containing the following sections:
+	<dl>
+		<dt><tt>[global]</tt></dt>
+		<dd>Settings global to the theme and theme defaults:
+		<dl>
+			<dt><tt>title=<em>theme_name</em></tt></dt>
+			<dd>The name under which the theme appers in the menus and in the configuration file.</dd>
+			<dt><tt>font=<em>font_file</em>.ttf</tt></dt>
+			<dd>Filename of the default font for this theme. If missing, the default Pygame font is used.</dd>
+		</dl>
+		</dd>
+		<dt><tt>[<em>purpose</em>]</tt></dt>
+		<dd>Specification of font and size to be used for each UI element. See the included font theme configuration files for the list of elements to be specified. Note that only <tt>size</tt> option needs to be specified.
+		<dl>
+			<dt><tt>font=<em>font_file</em>.ttf</tt></dt>
+			<dd>Filename of the font to be used for this element. If missing, the font specified in the <tt>[global]</tt> is used.</dd>
+			<dt><tt>size=<em>font_size</em></tt></dt>
+			<dd>An integer specifying size for fixed-sized elements, maximum size for elements whose font size is adjusted to fit in a given width, and base size for elements whose scaling is handled by the UI code.</dd>
+		</dl>
+		</dd>
+	</dl> 	
+	<h1 id="i18n">Translating pydance</h1>
+	pydance supports gettext for internationalization, with the following languages currently supported:
+	<ul>
+		<li>English (default)</li>
+		<li>Catalan</li>
+	</ul>
     <h1 id="contact">Contact the Developers</h1>
     <h2>Email</h2>
     <p>There are two mailing lists for pydance. The first is <a
