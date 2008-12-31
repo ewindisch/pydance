@@ -3,7 +3,6 @@
  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head>
     <title>pydance User's Manual</title>
-    <meta name="author" content="Pavel N. Krivitsky"/>
     <style type="text/css">
 h1 { border-bottom: solid 2px }
 h2 { border-bottom: solid 1px; margin-right: 15% }
@@ -45,22 +44,22 @@ p {
   </head>
   <body>
 <h1 style="text-align: center; font-weight: bold; border: none;
-  text-decoration: underline">pydance User's Manual</h1>
+  text-decoration: underline"><tt>pydance</tt> User's Manual</h1>
 <div class="toc">
 <ol>
-<li><a href="#about">About pydance</a><ol>
+<li><a href="#about">About <tt>pydance</tt></a><ol>
 <li><a href="#about.sysrq">System Requirements</a></li>
-<li><a href="#about.cant">What pydance <em>Can't</em> Do</a></li>
+<li><a href="#about.cant">What <tt>pydance</tt> <em>Can't</em> Do</a></li>
 </ol>
 </li>
-<li><a href="#install">Installing pydance</a><ol>
+<li><a href="#install">Installing <tt>pydance</tt></a><ol>
 <li><a href="#install.py">Getting Python and Pygame</a><ol>
 <li><a href="#install.py.unix">Unix</a></li>
 <li><a href="#install.py.osx">Mac OS X</a></li>
 <li><a href="#install.py.win">Windows</a></li>
 </ol>
 </li>
-<li><a href="#install.dance">Getting pydance</a></li>
+<li><a href="#install.dance">Getting <tt>pydance</tt></a></li>
 <li><a href="#install.songs">Getting Songs</a><ol>
 <li><a href="#install.songs.dance">Installing .dance Files</a></li>
 <li><a href="#install.songs.braindead">.sm and .dwi Files</a></li>
@@ -132,13 +131,13 @@ p {
 </ol>
 </li>
 <li><a href="#fontthemes">Creating Font Themes</a></li>
-<li><a href="#i18n">Translating pydance</a></li>
+<li><a href="#i18n">Translating <tt>pydance</tt></a></li>
 <li><a href="#contact">Contact the Developers</a></li>
 <li><a href="#faq">FAQ</a></li>
 <li><a href="#license">License</a></li></ol>
 
 </div>
-    <h1 id="about">About pydance</h1>
+    <h1 id="about">About <tt>pydance</tt></h1>
     <p>
     <img src="images/joe-sis.jpg" alt="Joe and his sister playing DDR"
       title="Joe and his sister playing DDR" style="float: right" />
@@ -149,28 +148,28 @@ is probably Dance Dance Revolution, or DDR for short, which has been a
 hit in Asian countries for awhile and is finally getting popular in
 Europe and North America. It might also have been a similar game, such
 as Pump It Up, or EZ2 Dancer.</p>
-    <p>pydance lets you play these games, and others like them, on
+    <p><tt>pydance</tt> lets you play these games, and others like them, on
 your computer, either with the keyboard or with a custom controller.
 What you do is watch the screen as colored arrows move up the screen.
 As soon as they cover up stationary arrows at the top, you step (or
 press) the corresponding direction, in time with the beat of the
 music.</p>
     <p>This manual is designed to guide you through the process of
-getting and installing pydance, finding songs, setting it up, and
+getting and installing <tt>pydance</tt>, finding songs, setting it up, and
 dancing the night away. In addition, it has instructions for making
 your own dance patterns or arrow graphics.</p>
-    <p>You don't need a dance mat to play pydance! It's a lot more fun
+    <p>You don't need a dance mat to play <tt>pydance</tt>! It's a lot more fun
 if you do, but you can also use your keyboard or gamepad.</p>
     <h2 id="about.sysrq">System Requirements</h2>
     <p>These are rough guidelines. Depending on your graphical theme,
 operating system, and so on, these requirements can differ. Although
-it is possible to install and play pydance on systems slower than
+it is possible to install and play <tt>pydance</tt> on systems slower than
 this, the frame rate (and input latency) will be high enough that it
 won't be much fun.</p>
     <dl>
       <dt>Operating System</dt>
       <dd>GNU/Linux (<a href="http://www.debian.org">Debian</a> is the
-easiest to use with pydance), Mac OS X, or Windows 2000 or higher. If
+easiest to use with <tt>pydance</tt>), Mac OS X, or Windows 2000 or higher. If
 Windows is your OS of choice, we can't help you debug. If Mac OS X is
 your OS of choice, we'll have plenty of trouble as well, but it's
 likely to work in the end.</dd>
@@ -178,38 +177,38 @@ likely to work in the end.</dd>
       <dd>A video card capable of doing 640x480x16bpp, which is most
 video cards made since 1995. More recent cards will be faster, but
 many old cards (ATI Radeon 7000, Matrox G200, nVidia TNT1) will be
-able to run pydance acceptably.</dd>
+able to run <tt>pydance</tt> acceptably.</dd>
       <dt>Processor</dt>
       <dd>We recommend a 1 GHz IA32 or 600 MHz PPC processor, or
-better, for pydance. However, pydance will run acceptably on a P3-500
+better, for <tt>pydance</tt>. However, <tt>pydance</tt> will run acceptably on a P3-500
 or equivalent.</dd>
       <dt>RAM</dt>
       <dd>At least 64MB is required. 128MB is very strongly
-recommended. pydance uses RAM to cache graphics, so more RAM means the
+recommended. <tt>pydance</tt> uses RAM to cache graphics, so more RAM means the
 UI will respond faster.</dd>
       <dt>Hard Disk Space</dt>
-      <dd>pydance requires about 5MB (around 50MB if you don't already
+      <dd><tt>pydance</tt> requires about 5MB (around 50MB if you don't already
 have Python, SDL, or Pygame installed) of hard drive space to install.
 Songs take 1MB to 6MB each, on average. If your RAM is low, you will
 also need hard drive space for swap.</dd>
     </dl>
 
-    <h2 id="about.cant">What pydance <em>Can't</em> Do</h2>
+    <h2 id="about.cant">What <tt>pydance</tt> <em>Can't</em> Do</h2>
     <p>Upfront: This program is not perfect. There are some things it
 can't do, either because we haven't gotten around to making it do them
 yet, or because we don't want to. On the whole, these are very minor
 things, but they're faults nonetheless.</p>
     <dl>
       <dt>Play MP3s</dt>
-      <dd>pydance has very poor MP3 support. Some MP3s will load;
-most won't. Many will load, but then later cause pydance to crash,
+      <dd><tt>pydance</tt> has very poor MP3 support. Some MP3s will load;
+most won't. Many will load, but then later cause <tt>pydance</tt> to crash,
 even if you aren't using them for anything. Setting your Preview mode
-to "Safe" can alleviate some of the problems, but not all. pydance is
+to "Safe" can alleviate some of the problems, but not all. <tt>pydance</tt> is
 capable of loading Ogg Vorbis (.ogg) and Wave (.wav) files without
 issue, however.</dd>
       <dt>Display Most Background Movies</dt>
       <dd>Many dancing games have movies playing in the background.
-pydance cannot load these movies.</dd>
+<tt>pydance</tt> cannot load these movies.</dd>
       <dt>"Magic Dance" or "Challenge Mode" games</dt>
       <dd>"Magic Dance" was a rare DDR mode that appeared in DDR
 Disney Rave. "Challenge Mode" appeared in DDR 4th mix and Ultramix
@@ -217,32 +216,32 @@ Disney Rave. "Challenge Mode" appeared in DDR 4th mix and Ultramix
 very popular).</dd>
       <dt>"Half Double" games</dt>
       <dd>"Half double" is a mode in Pump It Up that uses a different
-part of each mat. pydance can emulate half double by playing regular
+part of each mat. <tt>pydance</tt> can emulate half double by playing regular
 doubles mode, and having steps only appear on the relevant
 panels.</dd>
       <dt>Sundry Proprietary Konamiisms</dt>
-      <dd>pydance cannot read your Playstation memory cards, nor can
+      <dd><tt>pydance</tt> cannot read your Playstation memory cards, nor can
 it register you for Internet Ranking scores.</dd>
       <dt>Be a DDR/PIU/EZ2/etc. Arcade Machine</dt>
       <dd>We're not aiming to perfectly clone the arcade games with
-pydance; to start with, since we support at least 5 different arcade
+<tt>pydance</tt>; to start with, since we support at least 5 different arcade
 machines, that's impossible. We have our own interface, scoring
 system, and other ideas about what makes a fun dancing game.
-(Technically, if you put a computer running pydance inside an arcade
+(Technically, if you put a computer running <tt>pydance</tt> inside an arcade
 cabinet and attached some pads and a keyboard, I guess it would be an
 arcade machine; but it still won't look like the other games very
 much.)</dd>      
       <dt>Network Play</dt>
-      <dd>Although a future version of pydance <em>might</em> have
+      <dd>Although a future version of <tt>pydance</tt> <em>might</em> have
 network support, the current version does not. The best way to ensure
-that pydance does have network support in the future is to help write
+that <tt>pydance</tt> does have network support in the future is to help write
 it yourself.</dd>
       <dt>Edit Dance Patterns Graphically</dt>
-      <dd>There is no graphical step pattern editor for pydance's
+      <dd>There is no graphical step pattern editor for <tt>pydance</tt>'s
 .dance format; instead, you can use a text editor.</dd>
     </dl>
 
-    <h1 id="install">Installing pydance</h1>
+    <h1 id="install">Installing <tt>pydance</tt></h1>
     <p>Throughout the install guide, two path "aliases" will be used.
 <tt><em>pydance_path</em></tt> refers to the place you're running
 pydance from (e.g. <tt>/usr/share/games/pydance/</tt>,
@@ -250,22 +249,22 @@ pydance from (e.g. <tt>/usr/share/games/pydance/</tt>,
 <tt><em>rc_path</em></tt> refers to a "user-specific" path. On Unix,
 this is <tt>~/.pydance/</tt>. On Mac OS X, this is
 <tt>~/Library/Preferences/pydance/</tt>. On Windows, this is the same
-as the place you unpacked pydance.</p>
+as the place you unpacked <tt>pydance</tt>.</p>
     <p>This guide always uses '/' to separate directories. Windows
 users can also use '\' which they might be more accustomed to.</p>
 
     <h2 id="install.py">Getting Python and Pygame</h2>
-    <p>pydance is written in the <a
+    <p><tt>pydance</tt> is written in the <a
 href="http://www.python.org">Python</a> programming language, and uses
 the <a href="http://www.pygame.org">Pygame</a> game programming
 library. While this makes the program small and easy to develop, it
 also results in a few more things to download.</p>
     <p>More detailed (and/or recent) instructions for installing
 Python and Pygame are available at the <a
-href="http://icculus.org/pyddr/get.php">pydance download page</a>.</p>
+href="http://icculus.org/pyddr/get.php"><tt>pydance</tt> download page</a>.</p>
     <h3 id="install.py.unix">Unix</h3>
     <p>You will need Python 2.4, and Pygame 1.8.1. The <a
-href="http://icculus.org/pyddr/get.php">pydance download page</a>
+href="http://icculus.org/pyddr/get.php"><tt>pydance</tt> download page</a>
 contains links and information on how to get the packages you need.
 Usually, these will be easy to find, or may even already be
 installed.</p>
@@ -280,29 +279,29 @@ href="http://www.python.org/ftp/python/2.4/Python-2.4.exe">Python
 href="http://www.pygame.org/ftp/pygame-1.8.1release.win32-py2.4.msi">Pygame
 1.8.1</a>.</p>
 
-    <h2 id="install.dance">Getting pydance</h2>
-    <p>To get the latest version of pydance, visit the <a
-href="http://icculus.org/pyddr/get.php">pydance download page</a>. It
+    <h2 id="install.dance">Getting <tt>pydance</tt></h2>
+    <p>To get the latest version of <tt>pydance</tt>, visit the <a
+href="http://icculus.org/pyddr/get.php"><tt>pydance</tt> download page</a>. It
 is available as a .zip or a .tar.gz file. The site also contains
 information about installing from packages for Debian, Mandrake, and
 Gentoo GNU/Linux, and also has a disk image for Mac OS X users.</p>
-    <p>Otherwise, to run pydance, you can often just download the
-source, unpack it, and double click on pydance.py (or run
+    <p>Otherwise, to run <tt>pydance</tt>, you can often just download the
+source, unpack it, and double click on <tt>pydance.py</tt> (or run
 <kbd>./pydance.py</kbd>). The <tt>INSTALL</tt> file included with
-pydance has detailed installation instructions for Unix.</p>
+<tt>pydance</tt> has detailed installation instructions for Unix.</p>
 
     <h2 id="install.songs">Getting Songs</h2>
-    <p>pydance requires songs to run properly. There are some free
+    <p><tt>pydance</tt> requires songs to run properly. There are some free
 songs available <a href="http://icculus.org/pyddr/get.php#songs">on
-the pydance site</a>, one of which is a "how to play" tutorial. In
+the <tt>pydance</tt> site</a>, one of which is a "how to play" tutorial. In
 addition, there are many other songs available on the web.</p>
     <p>All song files must go in one of your song directories,
 <tt><em>rc_path</em>/songs/</tt> and
-<tt><em>pydance_path</em>/songs/</tt> (when you run pydance from a
+<tt><em>pydance_path</em>/songs/</tt> (when you run <tt>pydance</tt> from a
 terminal or command prompt, it will print a list of the directories
 it's searching for songs).</p>
     <h3 id="install.songs.dance">Installing .dance Files</h3>
-    <p>The .dance format is pydance's native step file format. .dance
+    <p>The .dance format is <tt>pydance</tt>'s native step file format. .dance
 files are accompanied by a music file (.ogg), and optionally a banner,
 background, and CD title (all images). Assuming the .dance file is
 properly constructed, you can simply put the .dance, .ogg, and other
@@ -330,12 +329,12 @@ for that song.</p>
 the format <tt>Artist Name - Song Name/</tt>.</p>
 
     <h2 id="install.mat">Setting Up a Mat</h2>
-    <p>pydance supports anything that looks like a joystick (or
+    <p><tt>pydance</tt> supports anything that looks like a joystick (or
 gamepad) or keyboard to your operating system. This includes most mats
 and adapters. However, some adapters map (e.g.) left and right onto a
 single joystick axis, which means you can't press left and right at
 the same time. This doesn't affect most games, but will affect
-pydance.</p>
+<tt>pydance</tt>.</p>
     <h3 id="install.mat.ps2">Attaching a PSX/PS2 Mat</h3>
     <p>
     <a href="http://www.levelsix.com/detail.aspx?ID=2" title="Purchase
@@ -350,7 +349,7 @@ themselves at <a href="http://www.levelsix.com">Level Six</a>. If you
 live outside of North America, <a
 href="http://www.lik-sang.com/info.php?category=23&amp;products_id=1697">buying 
 an EMSUSB2 from Lik-Sang</a> might be easier, because they can ship
-from Europe and Hong Kong as well. If you're looking for a high-quality dance pad, <a href="http://www.cobaltflux.com">Cobalt Flux pads</a> sells metal pads for $300. They have all 9 panels (center and the 8 directions), and work with pydance if you have a PS2-to-USB adapter like the EMSUSB2.</p>
+from Europe and Hong Kong as well. If you're looking for a high-quality dance pad, <a href="http://www.cobaltflux.com">Cobalt Flux pads</a> sells metal pads for $300. They have all 9 panels (center and the 8 directions), and work with <tt>pydance</tt> if you have a PS2-to-USB adapter like the EMSUSB2.</p>
 
     <p>
     <a href="http://www.levelsix.com/detail.aspx?ID=56" title="A good
@@ -362,7 +361,7 @@ href="http://www.buynshop.com">Buy'n'Shop</a> DDR mats is supported on
 many platforms, including Linux with the use of our <a
 href="http://icculus.org/pyddr/get.php#ddrmat">ddrmat.o kernel
 module</a>. However, the EMSUSB2 is the most recommended.</p>
-    <p>The Radio Shack adapter will not work with pydance. Don't buy
+    <p>The Radio Shack adapter will not work with <tt>pydance</tt>. Don't buy
 it.</p>
     <h3 id="install.mat.piu">Attaching a Pump It Up Mat</h3>
     <p>Pump It Up mats come in two varieties, PS/2 and USB. The PS/2
@@ -375,28 +374,28 @@ use a USB to PS/2 adapter.</p>
     <h3 id="install.mat.ppp">ParaParaParadise Controllers</h3>
     <p>Although the PPP controller appears as a USB joystick in all
 operating systems, it does not send any events when a sensor is
-triggered. So it will not work with pydance, under any OS.</p>
+triggered. So it will not work with <tt>pydance</tt>, under any OS.</p>
     <h3 id="install.mat.other">Other Mats</h3>
     <p>There exist some other mats, such as the X-Box DDR mat, and
 some mats that hook directly up to a parallel or USB port. If your OS
 detects these as a joystick or keyboard, and they use buttons (or axes
-<em>and</em> buttons) to record direction presses, pydance will
+<em>and</em> buttons) to record direction presses, <tt>pydance</tt> will
 support them. If you are buying a mat and adapter for the first time,
 though, we recommend avoiding these and going to the kinds that will
 definitely work.</p>
 
-    <p><strong>This is all you need to start playing pydance</strong>,
+    <p><strong>This is all you need to start playing <tt>pydance</tt></strong>,
 a few songs and a mat. If you're starting out you can skip the next
 few sections, because those files are optional.</p>
 
     <h2 id="install.courses">Getting Courses</h2>
-    <p>pydance comes with some courses for "Nonstop Mode" (explained
+    <p><tt>pydance</tt> comes with some courses for "Nonstop Mode" (explained
 later), but you can also download your own. Courses go in
 <tt><em>rc_path</em>/courses/</tt> or
 <tt><em>pydance_path</em>/courses</tt>.</p>
 
     <h3 id="install.courses.crs">.crs Files</h3>
-    <p><tt>.crs</tt> files are the only courses supported by pydance
+    <p><tt>.crs</tt> files are the only courses supported by <tt>pydance</tt>
 currently. These are used with <tt>.dwi</tt> files, usually. Like
 those, they need to be in a subdirectory <tt><em>coursedir</em>/Mix
 Name/Course Name/</tt>. If a file exists with the same name as the
@@ -415,14 +414,14 @@ For example, if you want a banner for your "DDR 4th Mix" folder, you
 can name it <tt>~/.pydance/banners/mix/DDR 4th Mix.png</tt>. If you
 want one for the "Title: A" folder, use
 <tt>~/.pydance/banners/title/a.png</tt>.</p>
-    <p>pydance also supports "CD titles", which are small images that
+    <p><tt>pydance</tt> also supports "CD titles", which are small images that
 appear next to the song in the song selector, usually indicate what
 album or game it is originally from. These go under
 <tt><em>pydance_or_rc_path</em>/cdtitles/</tt>, or in the same
 directory as the song file itself.</p>
 
     <h2 id="install.themes">Graphical Themes</h2>
-    <p>There are many different arrow graphics that come with pydance,
+    <p>There are many different arrow graphics that come with <tt>pydance</tt>,
 and you can also add more. These go under
 <tt><em>rc_path</em>/themes/gfx/<em>N</em>x<em>N</em>/themename/</tt>
 or
@@ -432,18 +431,18 @@ height and width of the images in the theme; different game modes use
 different image sizes.</p>
 
     <h2 id="install.dj">Announcer (DJ) Themes</h2>
-    <p>pydance supports an announcer, who talks during the game,
+    <p><tt>pydance</tt> supports an announcer, who talks during the game,
 giving you feedback on your progress. You should unzip (or untar) such
 themes in <tt><em>rc_path</em>/themes/dj</tt>, into a subdirectory of
 their name. Announcers are still being developed, and don't work very
 well.</p>
 
 	<h2 id="install.fonttheme">Font Themes</h2>
-	<p>pydance user interface can be customized to use True Type fonts different from the default Pygame font. Currently, VL PGothic Font is supported to display song titles and locales with Asian characters. Font theme configuration files and font files are found under <tt><em>rc_path</em>/themes/font</tt> with a configuration file for each theme, describing what font and size combination should be used for each UI element.</p>
+	<p><tt>pydance</tt> user interface can be customized to use True Type fonts different from the default Pygame font. Currently, VL PGothic Font is supported to display song titles and locales with Asian characters. Font theme configuration files and font files are found under <tt><em>rc_path</em>/themes/font</tt> with a configuration file for each theme, describing what font and size combination should be used for each UI element.</p>
 
     <h1 id="play">Playing the Game</h1>
     <p>A dancing pad normally has somewhere between 6 and 11 buttons.
-These buttons are used to control the pydance interface, as well as
+These buttons are used to control the <tt>pydance</tt> interface, as well as
 play the game. When using them to navigate menus and so on, they have
 slightly different names.</p>
     <dl>
@@ -479,7 +478,7 @@ Unix. This can't be used in the middle of a song.</dd>
     <img src="images/menu.jpg" alt="Menu Screenshot"
       title="The pydance main menu" style="float:right" /> If your
 songs are properly installed, this is the first screen you will see
-after pydance finishes loading (if your songs aren't installed, you'll
+after <tt>pydance</tt> finishes loading (if your songs aren't installed, you'll
 get a reminder to install them).</p>
     <dl>
       <dt>Up or Down</dt><dd>Select an item in the menu.</dd>
@@ -493,7 +492,7 @@ is probably what you want to select. The <em>Map Keys</em> option
 takes you to a screen to map your keyboard and joystick on. After you
 do this once your settings will be saved, and you'll only need to
 remap it after you change adapters or joysticks.</p>
-    <p>The other choices let you change pydance's global
+    <p>The other choices let you change <tt>pydance</tt>'s global
 configuration, or your theme settings.</p>
     <dl>
       <dt>Game Options</dt>
@@ -504,7 +503,7 @@ screen when all players have failed it.</dd>
 each direction, when an arrow should be hit.</dd>
 	  <dt>Announcer</dt><dd>Set your announcer theme.</dd>
 	  <dt>Themes...</dt><dd>Set your graphical themes for all the
-different modes pydance supports.</dd>
+different modes <tt>pydance</tt> supports.</dd>
 	</dl></dd>
       <dt>Graphic Options</dt>
       <dd><dl>
@@ -526,13 +525,13 @@ lyrics.</dd>
       <dt>Interface Options</dt>
       <dd><dl>
 	  <dt>Save Input</dt>
-	  <dd>When pydance exits, it can save your input settings, or
+	  <dd>When <tt>pydance</tt> exits, it can save your input settings, or
 forget about them. Turning this off makes it forget them.</dd>
 	  <dt>Song Previews</dt>
 	  <dd>Turning this off disables the song clips that are played
 in the song selector. Selecting "Safe" means that Ogg Vorbis files
 will be previewed, but MP3s won't. If you're having trouble with
-pydance crashing while previewing MP3s, set this to Safe.</dd>
+<tt>pydance</tt> crashing while previewing MP3s, set this to Safe.</dd>
 	  <dt>Folders</dt>
 	  <dd>If you have over 60 songs or courses, folders will be
 displayed in the song and course selector for your convenience. If you
@@ -597,7 +596,7 @@ cross over between them as you play.</dd>
     <dl>
       <dt>Normal</dt><dd>Select one song at a time to play.</dd>
       <dt>Nonstop</dt><dd>Select a "course" of songs to play, without
-breaks in between. pydance comes with several courses, and you can add
+breaks in between. <tt>pydance</tt> comes with several courses, and you can add
 your own.</dd>
       <dt>Endless</dt><dd>Select your difficulty level, and then keep
 dancing until you fail.</dd>
@@ -612,7 +611,7 @@ out you need to back up and pick different options.</p>
     <img src="images/ss-song.jpg"
       alt="Screenshot of the song selector, with a song selected"
       title="Viewing a Song" style="float: right"/> The song selector
-is one of the "main screens" of the pydance interface.  This is where
+is one of the "main screens" of the <tt>pydance</tt> interface.  This is where
 you pick the song you want to play, and the difficulty of it.</p>
     <p>If you have more than 60 songs, the song selector will start up
 in "folder mode", where your songs are organized into folders by
@@ -647,14 +646,14 @@ viewing the folder list)</dd>
     <img src="images/diff-indicator.jpg" alt="The difficulty selector"
       title="The difficulty selector" style="float: right" /> In
 addition to a name, each difficulty has a numerical rating, usually on
-a scale of 1 to 9. The pydance tutorial song has a difficulty of 0,
+a scale of 1 to 9. The <tt>pydance</tt> tutorial song has a difficulty of 0,
 and some very hard songs may have difficulties above 9.</p>
 
     <h3 id="play.ss.diff">Song Difficulties</h3>
     <p>Different games have used different names to refer to the same
 difficulty level. For example, the easiest game mode is called "easy"
 in TechnoMotion, "basic" in early versions of DDR, and "light" in
-later versions. pydance uses the same <em>colors</em> to indicate what
+later versions. <tt>pydance</tt> uses the same <em>colors</em> to indicate what
 difficulties have different names, but are the same. These colors are
 also used on the nonstop screen, where only the first letter of the
 difficulty is displayed.</p>
@@ -682,7 +681,7 @@ type of lifebar used.</p>
 saved between songs. If you exit from the song selector (and go back
 to the main menu or game selection screen) only the first player's are
 remembered, and set as the default for both players. If you exit
-pydance, these options are all reset.</p>
+<tt>pydance</tt>, these options are all reset.</p>
     <p>There are too many different options and settings to explain
 here, but each option has a description that is displayed with it when
 you select it. If you're not sure what something does, just try it
@@ -698,7 +697,7 @@ selector</dd>
     <h2 id="play.nonstop">Nonstop Mode</h2>
     <p>
     <img src="images/nonstop.jpg" alt="Screenshot of Nonstop"
-      title="The HARD CORE course" style="float: right" /> pydance
+      title="The HARD CORE course" style="float: right" /> <tt>pydance</tt>
 lets you play several songs in a row, also called a "course". In
 nonstop mode you to select courses to play. The course selector works
 much like the song selector, except you can't select difficulties.
@@ -718,7 +717,7 @@ turned off)</dd>
 the folder list)</dd>
     </dl>
     <h3 id="play.nonstop.inc">Included Courses</h3>
-    <p>pydance comes with two sets of courses that you can play,
+    <p><tt>pydance</tt> comes with two sets of courses that you can play,
 without having to install them.</p>
     <dl>
       <dt>Player's Picks</dt>
@@ -808,17 +807,17 @@ Most of these can be changed by using the menus in the game, but the
 following ones aren't (0 means off, and 1 means on):</p>
     <dl>
       <dt>autogen 1|0</dt>
-      <dd>On by default. If this is turned off, pydance won't
+      <dd>On by default. If this is turned off, <tt>pydance</tt> won't
 automatically generate steps for other modes when it knows about 4 or
 5 panel steps.</dd>
       <dt>grading 1|0</dt>
-      <dd>If this is off, pydance won't display the grading screen
+      <dd>If this is off, <tt>pydance</tt> won't display the grading screen
 after a song.</dd>
       <dt>showcombo 1|0</dt>
-      <dd>If this is off, pydance won't display your combo count.</dd>
+      <dd>If this is off, <tt>pydance</tt> won't display your combo count.</dd>
       <dt>stickycombo 1|0</dt>
       <dt>stickyjudge 1|0</dt>
-      <dd>If these are off, pydance will remove the combo count or
+      <dd>If these are off, <tt>pydance</tt> will remove the combo count or
 step judging text from the screen after a few seconds.</dd>
       <dt>masteroffset [number] (default 0)</dt>
       <dd>Some systems have speakers or displays that take measurable
@@ -830,20 +829,20 @@ files you get will be wrong, and no one else will be able to use your
 original files.</dd>
       <dt>onboardaudio 0|1</dt>
       <dd>Some systems (especially laptops) use sound cards or drivers
-that resample sound in strange ways, which may make pydance play songs
+that resample sound in strange ways, which may make <tt>pydance</tt> play songs
 such that they "drift" in relation to the steps. If you seem to be
 having drifting issues in all the songs you play, you should try
 turning this on.</dd>
       <dt>songdir [dir1:dir2:dir] (or on Windows, dir1;dir2;dir3)</dt>
-      <dd>This is a list of directories where pydance should look for
+      <dd>This is a list of directories where <tt>pydance</tt> should look for
 songs (.dance files, backgrounds and banners, and the audio itself).
-Generally installing pydance gives you a system-wide location to place
+Generally installing <tt>pydance</tt> gives you a system-wide location to place
 songs (that all users will have access to), and a local one in your
 home directory.</dd>
       <dt>coursedir [dir1:dir2:dir] (or on Windows,
 dir1;dir2;dir3)</dt>
-      <dd>This is a list of directories where pydance should look for
-courses (.crs files). Installing pydance gives you a system-wide
+      <dd>This is a list of directories where <tt>pydance</tt> should look for
+courses (.crs files). Installing <tt>pydance</tt> gives you a system-wide
 location to place courses (that all users will have access to), and a
 local one in your home directory.</dd>
 
@@ -852,7 +851,7 @@ local one in your home directory.</dd>
 href="http://psyco.sf.net">http://psyco.sf.net</a>). This is on by
 default, and can give 30-50% speed gains on slower systems. However,
 it also uses substantially more memory (which is usually not a
-problem, since pydance's code memory footprint is small relative to
+problem, since <tt>pydance</tt>'s code memory footprint is small relative to
 its song data). Psyco is currently only available for IA32 (Intel and
 AMD) systems.</dd>
     </dl>
@@ -873,7 +872,7 @@ all your grades.</p>
     <p>.dance is designed to be easily written by hand, and work for
 all possible dancing or beat games. If you're interested in writing
 tools to work with .dance files, read the <tt>docs/dance-spec.txt</tt>
-file included with pydance.</p>
+file included with <tt>pydance</tt>.</p>
     <p>.dance files are broken up into 3 parts &mdash; the header
 information (often called the metadata), the text information, and the
 step information. All parts are in UTF-8 encoding (which is compatible
@@ -882,7 +881,7 @@ case-sensitive. If you begin any line with a #, it will be ignored as
 a comment.</p>
     <h2 id="dance.header">Header Information</h2>
     <p>The header gives important information about the song that
-pydance uses to load or categorize it. A sample header (for,
+<tt>pydance</tt> uses to load or categorize it. A sample header (for,
 mysong.dance) might look like:</p>
     <pre>filename mysong.ogg
 title My Song
@@ -931,7 +930,7 @@ pressing select.</dd>
       <dt>revision</dt><dd>The last date the file was modified, in
 YYYY.MM.DD format.</dd>
       <dt>movie</dt><dd>A background movie to play with the file.
-pydance currently only plays MPEG-1 files, but .dance files can
+<tt>pydance</tt> currently only plays MPEG-1 files, but .dance files can
 specify any format.</dd>
     </dl>
     <h2 id="dance.text">Text Data</h2>
@@ -977,7 +976,7 @@ difficulty, with a rating of 7. First a left step, then a right step,
 and then the song ends.</p>
     <p>The string of numerals indicates which directions to press at
 that time; from left to right they are the same as the directions
-displayed in pydance's top arrows left to right (e.g. left, down, up,
+displayed in <tt>pydance</tt>'s top arrows left to right (e.g. left, down, up,
 right for 4 panel). A 1 indicates a normal arrow or the end of a hold
 arrow; a 3 indicates the start of a hold arrow; a 5 indicates a secret
 arrow.</p>
@@ -1009,7 +1008,7 @@ lyric, on a particular channel, with the given text (this lets you
 have different lyrics for each difficulty).</p>
     <p>If you're making double or couple steps, separate the two
 players' steps with spaces, like <tt>q&nbsp;1001&nbsp;0110</tt>.</p>
-    <p>The game modes that pydance supports follows: SINGLE, VERSUS,
+    <p>The game modes that <tt>pydance</tt> supports follows: SINGLE, VERSUS,
 COUPLE, DOUBLE (these are for 4 panel mode), 3PANEL, 3VERSUS, 3COUPLE,
 3DOUBLE, 5PANEL etc, 6PANEL etc, 8PANEL etc, 9PANEL etc, EZ2SINGLE,
 EZ2VERSUS, EZ2COUPLE, EZ2DOUBLE, EZ2REAL, REALVERSUS, REALCOUPLE,
@@ -1028,7 +1027,7 @@ arrow.</p>
     <p>Every theme must contain a file <tt>is-theme</tt> (no
 extension) in the same directory.</p>
     <h2 id="themes.arrows">The Arrows</h2>
-    <p>pydance uses one file per arrow direction, but it can also
+    <p><tt>pydance</tt> uses one file per arrow direction, but it can also
 rotate arrows 90 degrees if necessary; so if you have an up arrow and
 a diagonal up right arrow, it can make all 8 directions (minus
 center). Each file is named
@@ -1088,24 +1087,36 @@ that the scaled oni-bar.png image will be displayed over.</p>
 		</dl>
 		</dd>
 	</dl> 	
-	<h1 id="i18n">Translating pydance</h1>
-	pydance supports gettext for internationalization, with the following languages currently supported:
+	<h1 id="i18n">Translating <tt>pydance</tt></h1>
+	<tt>pydance</tt> uses <tt>gettext</tt> for internationalization, with the following languages currently supported:
 	<ul>
 		<li>English (default)</li>
 		<li>Catalan</li>
 	</ul>
+	To create a new translation on a POSIX system, begin by executing the following in the <tt>pydance</tt> source directory:
+	<pre>
+pydance$ ./setup.py                         # Create Makefile
+pydance$ make uptrans                       # Create pydance.pot in po/
+pydance$ cd po
+pydance/po$ mv pydance.pot <em>XX</em>.po            # <em>XX</em> is the code of the language.</pre> 
+	Then, edit <tt><em>XX</em>.po</tt> with the translations. See 
+	<a href="http://www.gnu.org/software/gettext/manual/gettext.html#PO-Files">GNU <tt>gettext</tt> Manual</a> for information on this format.
+	Finally, reinstall <tt>pydance</tt> or run
+	<pre>
+pydance/po$ make generate</pre>
+	This will create a <tt>mo/</tt> directory with compiled translation files.
     <h1 id="contact">Contact the Developers</h1>
     <h2>Email</h2>
-    <p>There are two mailing lists for pydance. The first is <a
+    <p>There are two mailing lists for <tt>pydance</tt>. The first is <a
 href="mailto:pyddr-discuss@icculus.org">pyddr-discuss</a> (<a
 href="mailto:pyddr-discuss-subscribe@icculus.org">subscribe</a>),
-which is for general discussion of pydance, questions about running
+which is for general discussion of <tt>pydance</tt>, questions about running
 it, making dance files, announcements of new releases, and so on. It
 is low traffic, at most 10 or 15 messages a month, and subscribing is
-recommended if you use pydance. The second is <a
+recommended if you use <tt>pydance</tt>. The second is <a
 href="mailto:pyddr-devel@icculus.org">pyddr-devel</a> (<a
 href="mailto:pyddr-devel-subscribe@icculus.org">subscribe</a>), which
-is a list for discussing pydance development. This list is even lower
+is a list for discussing <tt>pydance</tt> development. This list is even lower
 traffic, containing mostly release announcements. This is a good place
 to send patches or bug reports.</p> <p>If you don't want to sign up
 for a mailing list but do want to report a bug, you can email the <a
@@ -1113,17 +1124,17 @@ href="http://www.debian.org/Bugs/Reporting">Debian Bug Tracking
 System</a> at <a
 href="mailto:submit@bugs.debian.org">submit@bugs.debian.org</a>. The
 first line of your email should be "Package: pydance".</p>
-    <p>Simon Tatham (who probably doesn't even know about pydance) has
+    <p>Simon Tatham (who probably doesn't even know about <tt>pydance</tt>) has
 written a <a
 href="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html"
 title="How to Report Bugs Effectively">good document on how to report
 bugs</a> in any program.</p>
 
     <h2>IRC</h2>
-    <p>pydance has an IRC channel, #pyddr, on <a
+    <p><tt>pydance</tt> has an IRC channel, #pyddr, on <a
 href="http://www.freenode.net" title="The Freenode IRC
 network">irc.freenode.net</a>. It is usually active, and can help you
-fix problems with pydance (if you've already tried the instructions
+fix problems with <tt>pydance</tt> (if you've already tried the instructions
 here, and the ones in the <a
 href="http://icculus.org/pyddr/faq.php">official FAQ</a>). The main
 developers are in the channel as "Pavel" (Pavel Krivitsky) and "P2E"
@@ -1132,15 +1143,15 @@ since they can get lost easily.</p>
 
     <h1 id="faq">FAQ</h1>
     <p>This is not the <a
-href="http://icculus.org/pyddr/faq.php">official pydance FAQ</a>,
+href="http://icculus.org/pyddr/faq.php">official <tt>pydance</tt> FAQ</a>,
 which you should check in addition to this one before asking
 questions. This FAQ deals with very frequently asked questions with
 unchanging answers.</p>
     <dl>
       <dt>What is 'pyDDR'?</dt>
-      <dd>Before version 0.7.2, pydance was named pyDDR. This was
+      <dd>Before version 0.7.2, <tt>pydance</tt> was named pyDDR. This was
 because it only played DDR at the time. Now, in addition to being
-possible trademark violation, the name is inaccurate; pydance plays
+possible trademark violation, the name is inaccurate; <tt>pydance</tt> plays
 many dancing games in addition to Dance Dance Revolution.</dd>
       <dt>What is 'Bemani'?</dt>
       <dd>Bemani is the name of Konami of Japan's music game division,
@@ -1149,7 +1160,7 @@ Other non-Konami music games are also often called "bemani" by
 association. The word itself is a shortening of "Beatmania", the first
 beat game produced by Konami.</dd>
       <dt>Where can I get songs?</dt>
-      <dd>Aside from the free songs available on the pydance site,
+      <dd>Aside from the free songs available on the <tt>pydance</tt> site,
 there are some places to get other songs and steps (often called
 "simfiles"). BemaniStyle maintains <a
 href="http://www.bemanistyle.com/sims/sims.php?cat=1"
@@ -1159,18 +1170,18 @@ href="http://www.ddruk.com">DDRUK</a> has simfiles for most of the
 official DDR songs, available via <a
 href="http://bitconjurer.org/BitTorrent/">BitTorrent</a>. However,
 downloading any of these songs may be copyright infringement.</dd>
-      <dt>Why does pydance crash with a segmentation fault, or
+      <dt>Why does <tt>pydance</tt> crash with a segmentation fault, or
 "parachute error"?</dt>
       <dd>You are trying to play MP3s of a type that is not supported
 by SDL_mixer. Change your song preview mode to "Safe". If that doesn't
 work, try converting your songs to Ogg, or removing the tags
 (instructions on how to do this are available in the <a
-href="http://icculus.org/pyddr/faq.php">official pydance FAQ</a>.</dd>
+href="http://icculus.org/pyddr/faq.php">official <tt>pydance</tt> FAQ</a>.</dd>
     </dl>
 
     <h1 id="license">License</h1>
-    <p>This document is Copyright &copy; 2004 Joe Wreschnig, and may
-be distributed and modified under the same terms as pydance itself.
+    <p>This document is Copyright &copy; 2004&ndash;2008 Joe Wreschnig and Pavel Krivitsky, and may
+be distributed and modified under the same terms as <tt>pydance</tt> itself.
 Many games and companies referred to above are trademarks of their
 respective mark holders, and no challenge is made to the validity of
 those marks; the only name we claim as ours is 'pydance'. Images from
