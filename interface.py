@@ -340,7 +340,7 @@ class ActiveIndicator(pygame.sprite.Sprite):
   def update(self, time):
     self.image.set_alpha(int(255 * (0.3 + (math.sin(time / 720.0)**2 / 3.0))))
 
-# Box to indicate the current difficulty level.
+# Box to indicate the current difficulty level and rating.
 class DifficultyBox(pygame.sprite.Sprite):
   def __init__(self, center):
     pygame.sprite.Sprite.__init__(self)

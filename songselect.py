@@ -25,8 +25,8 @@ SORTS = {
   "artist": lambda x: (x.info["artist"].lower(), SORTS["title"](x)),
   "bpm": lambda x: (x.info["bpm"], SORTS["title"](x)),
   "mix": lambda x: (x.info["mix"], SORTS["title"](x)),
-  "level": lambda x: (x.difficulty[x.diff_list[0]], SORTS["rank"](x)),
-  "difficulty": lambda x: (util.difficulty_sort_key(x.diff_list[0]), SORTS["level"](x)),
+  "rating": lambda x: (x.difficulty[x.diff_list[0]], SORTS["rank"](x)),
+  "difficulty": lambda x: (util.difficulty_sort_key(x.diff_list[0]), SORTS["rating"](x)),
   "rank": lambda x: -records.get(x.info["recordkey"],x.diff_list[0],game)[0],
   }
 
@@ -35,17 +35,17 @@ SORT_DANCES = {
   "title":False,
   "artist":False,
   "bpm":False,
-  "level":True,
+  "rating":True,
   "difficulty":True
   }
 
 TEXTS = [_("subtitle"),_("title"),_("artist"),_("bpm"),_("mix"),
-         _("level"),_("difficulty"),_("rank")]
+         _("rating"),_("difficulty"),_("rank")]
 
 # Dance sort names define sorting formats which are tied to dance data in songs;
 # therefore they can only be used if subfolders are allowed as each song may
 # appear in multiple folders.
-SORT_NAMES = ["mix", "title", "artist", "bpm", "level", "difficulty"]
+SORT_NAMES = ["mix", "title", "artist", "bpm", "rating", "difficulty"]
 NUM_SORTS = len(SORT_NAMES)
 
 SS_HELP = [
@@ -443,7 +443,7 @@ class SongSelect(InterfaceWindow):
     titles = {}
     bpms = {}
     difficulties = {}
-    levels = {}
+    ratings = {}
 
     for s in self._all_songs:
       if s.info["mix"] not in mixes: mixes[s.info["mix"]] = []
@@ -487,18 +487,18 @@ class SongSelect(InterfaceWindow):
       else:
         s.folder["difficulty"] = label
 
-      level = s.difficulty.values()[0]
-      label = "%2d" % level
-      if not label in levels: levels[label]=[]
-      levels[label].append(s)
-      # s.folder["level"] is only initialised here.
-      if "level" in s.folder.keys():
-        s.folder["level"] = min(s.folder["level"], label) 
+      rating = s.difficulty.values()[0]
+      label = "%2d" % rating
+      if not label in ratings: ratings[label]=[]
+      ratings[label].append(s)
+      # s.folder["rating"] is only initialised here.
+      if "rating" in s.folder.keys():
+        s.folder["rating"] = min(s.folder["rating"], label) 
       else:
-        s.folder["level"] = label
+        s.folder["rating"] = label
         
     self._folders = { "mix": mixes, "title": titles, "artist": artists,
-                      "bpm": bpms, "level": levels, "difficulty": difficulties }
+                      "bpm": bpms, "rating": ratings, "difficulty": difficulties }
 
   def _create_folder_list(self):
     sort_name = SORT_NAMES[mainconfig["sortmode"]]

@@ -10,7 +10,7 @@ Legend:
 1.1.0 - No name yet.
 + A 2.5x speed multiplier was added.
 + A constant-BPM speed mode (from 200bpm up to 800bpm) was implemented.
-+ Sorting/Floders by steps difficulty and level added. (Frank Foeth)
++ Sorting/Floders by steps difficulty and rating added. (Frank Foeth)
 + UTF-8 BOMs now handled. (Stefan Kloe)
 + Pydance now has gettext support, with Catalan translation available. (Carles Pina i Estany and Catux LUG)
 + Non-ASCII song names are now printed to console if console encoding supports it.

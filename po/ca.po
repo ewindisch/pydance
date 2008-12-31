@@ -1822,7 +1822,7 @@ msgid "mix"
 msgstr "barreja"
 
 #: songselect.py:43
-msgid "level"
+msgid "rating"
 msgstr "nivell"
 
 #: songselect.py:43
