@@ -9,7 +9,7 @@ from string import maketrans
 
 from i18n import *
 
-VERSION = "1.0.3"
+VERSION = "1.1.0"
 
 try: locale.setlocale(locale.LC_ALL, '')
 except locale.Error: pass
