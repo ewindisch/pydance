@@ -8,8 +8,8 @@ def sanity_check():
   print "Checking for appropriate libraries."
   print "Checking Python version... ",
   print sys.version[:5] + "."
-  if sys.version_info < (2, 3):
-    print "Versions of Python less than 2.3 are not supported by pydance."
+  if sys.version_info < (2, 4):
+    print "Versions of Python less than 2.4 are not supported by pydance."
     print "Visit http://www.python.org to upgrade."
     sys.exit(1)
 
@@ -17,8 +17,8 @@ def sanity_check():
     print "Checking for Pygame... ",
     import pygame
     print pygame.version.ver + "."
-    if pygame.version.vernum < (1, 6):
-      print "You have pygame, but a version less than 1.6."
+    if pygame.version.vernum < (1, 8):
+      print "You have pygame, but a version less than 1.8."
       print "Visit http://www.pygame.org to upgrade."
       sys.exit(1)
   except ImportError:
