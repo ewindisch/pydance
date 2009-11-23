@@ -7,15 +7,19 @@ Legend:
 ! Changed something important, probably incompatibly.
 
 ----- - CURRENT
-1.1.0 - No name yet.
+1.1.0 - Under new management.
 + A 2.5x speed multiplier was added.
 + A constant-BPM speed mode (from 200bpm up to 800bpm) was implemented.
 + Sorting/Floders by steps difficulty and rating added. (Frank Foeth)
 + UTF-8 BOMs now handled. (Stefan Kloe)
-+ Pydance now has gettext support, with Catalan translation available. (Carles Pina i Estany and Catux LUG)
-+ Non-ASCII song names are now printed to console if console encoding supports it.
-+ Font theming support, including support for Asian song names, unsupported by pygame's default font.
-- Song preview now starts at 0, to work around a pygame/libsdl bug. (Carles Pina i Estany)
++ Pydance now has gettext support, with Catalan translation
+  available. (Carles Pina i Estany and Catux LUG)
++ Non-ASCII song names are now printed to console if console encoding
+  supports it.
++ Font theming support, including support for Asian song names,
+  unsupported by pygame's default font.
+- Song preview now starts at 0, to work around a pygame/libsdl
+  bug. (Carles Pina i Estany)
 * It is now guaranteed that songs in a course are not repeated.
 * Fixes crackling sound caused by pygame mixer being initialized incorrectly.
 * Minor typos fixed.

@@ -187,7 +187,7 @@ def do(screen, songdata):
   except:
     Credits([_("pydance %s") % VERSION,
              "http://icculus.org/pyddr",
-             _("By Joe Wreschnig & Brendan Becker"),
+             _("By Joe Wreschnig, Brendan Becker, & Pavel Krivitsky"),
              _("(Your CREDITS file is missing.)"),
              ]).add(sprites)
 
