@@ -11,6 +11,7 @@ import random
 import options
 import error
 import util
+import renderer
 
 from constants import *
 from interface import *
@@ -242,6 +243,7 @@ class SongSelect(InterfaceWindow):
                       [self._banner, self._list, self._title])
     self._screen.blit(self._bg, [0, 0])
     pygame.display.update()
+
     self.loop()
     music.fadeout(500)
     pygame.time.wait(500)
@@ -420,8 +422,9 @@ class SongSelect(InterfaceWindow):
       pid, ev = ui.ui.poll()
 
   def update(self):
-    InterfaceWindow.update(self)
-    self._preview.update(pygame.time.get_ticks())
+    renderer.update(self.screen, self.screen.blit(self.bg, (0, 0)))
+    #InterfaceWindow.update(self)
+    #self._preview.update(pygame.time.get_ticks())
 
   # Gets rid of superfluous/misspelled difficulties for sorting purposes.
   # Return the difficulty if it's ok, however map S-MANIAC to SMANIAC.

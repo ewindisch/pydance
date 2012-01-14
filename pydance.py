@@ -5,6 +5,12 @@ import os
 import sys
 from getopt import getopt
 
+# EricW - OpenGL
+from OpenGL.GL import *
+from OpenGL.GLU import *
+import Image
+import renderer
+
 VERSION = "1.1.0"
 
 from i18n import *
@@ -146,7 +152,32 @@ def main():
     course_list.extend(util.find(dir, ['*.crs']))
 
   screen = set_display_mode()
-  
+
+  glMatrixMode(GL_PROJECTION)
+  gluPerspective(45.0,640/480.0,0.1,100.0)    #setup lens
+  glTranslate(0.0, -0.3, -3.0)                 #move back
+  #glRotate(25, 1, 0.5, 0)                       #orbit higher
+  glMaterialfv(GL_FRONT, GL_SPECULAR, ( 1, 1, 1, 1 ))
+  glMaterialfv(GL_FRONT, GL_SHININESS, 50)
+  glMaterialfv(GL_FRONT, GL_AMBIENT, (0, 0, 0, 0))
+  glLightfv ( GL_LIGHT0, GL_POSITION, (1, 1, 1))
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, (1, 1, 1, 1))
+  glEnable (GL_LIGHT0)
+  glEnable(GL_NORMALIZE | GL_BLEND)
+  glShadeModel(GL_SMOOTH)
+  glColorMaterial(GL_FRONT, GL_AMBIENT)
+  glEnable(GL_POLYGON_SMOOTH)
+  glEnable(GL_COLOR_MATERIAL)
+
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+  glEnable (GL_LIGHTING)
+  glEnable (GL_LIGHT0)
+  glColor3f (1, 0, 0)
+  quad=gluNewQuadric()
+  gluSphere (quad, .5, 50, 50)
+  glDisable (GL_LIGHTING)
+ 
   pygame.display.set_caption("pydance " + VERSION)
   pygame.mouse.set_visible(False)
   try:

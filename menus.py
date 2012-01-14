@@ -3,6 +3,12 @@ from constants import *
 from fontfx import TextZoomer
 from fonttheme import FontTheme
 
+# EricW - OpenGL
+from OpenGL.GL import *
+import renderer
+from OpenGL.GLU import *
+import Image
+
 # Hooray! Less magic numbers
 LIGHT_GRAY = (128, 128, 128)
 TOPLEFT = (0, 0)
@@ -197,10 +203,7 @@ class Menu(object):
                                 TOP_OFFSET + i * (BUTTON_HEIGHT +
                                                   BUTTON_PADDING))))
 
-      self.sprites.update()
-      r.extend(self.sprites.draw(screen))
-      pygame.display.update(r)
-      #self.sprites.clear(screen, Menu.bgimage)
+      renderer.update(screen, r)
       clock.tick(30)
 
     if ev == ui.QUIT:

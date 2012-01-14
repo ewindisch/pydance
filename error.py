@@ -6,35 +6,45 @@ import fontfx
 import ui
 from fonttheme import FontTheme
 
+# EricW - OpenGL
+from OpenGL.GL import *
+from OpenGL.GLU import *
+import Image
+
 class ErrorMessage(InterfaceWindow):
-  def __init__(self, screen, line):
-    InterfaceWindow.__init__(self, screen, "error-bg.png")
-    text = fontfx.shadow("Error!", 60, [255, 255, 255], offset = 2)
+  def __init__(self, screen, lines):
+    #screen.fill((0, 0, 0))
+    bg = pygame.image.load(os.path.join(image_path, "bg.png"))
+    bg.set_alpha(128)
+    screen.blit(bg, (0, 0))
+    text = FONTS[60].render("ERROR!", 1, (0, 0, 0))
     text_rect = text.get_rect()
-    text_rect.center = [320, 50]
+    text_rect.center = (320, 30)
     screen.blit(text, text_rect)
 
-    # FIXME: Remove this when I'm sure that nothing uses the old calling
-    # method. (Pre-1.0)
-    if isinstance(line, list): lines = " ".join(line)
+    for i in range(len(lines)):
+      text = FONTS[32].render(lines[i], 1, (244, 244, 244))
+      text_rect = text.get_rect()
+      text_rect.center = (320, 36 * (i + 3))
+      screen.blit(text, text_rect)
 
-    font = fontfx.WrapFont(FontTheme.error_message, 440)
-    b = font.render(line, shdw = True, centered = True)
-    r = b.get_rect()
-    r.center = [320, 240]
-    screen.blit(b, r)
-
-    text = fontfx.shadow("Press Enter/Start/Escape", 32, [160, 160, 160])
+    text = FONTS[32].render("Press Enter/Start/Esc", 1, (160, 160, 160))
+    text.set_colorkey(text.get_at((0, 0)))
     textpos = text.get_rect()
-    textpos.center = [320, 440]
+    textpos.center = (320, 440)
     screen.blit(text, textpos)
 
-    pygame.display.update()
-    ui.ui.clear()
+    img=pygame.image.tostring(screen, "RGB", 1)
+    glDrawPixels (screen.get_size()[0], screen.get_size()[1], GL_RGB, GL_UNSIGNED_BYTE, img);
 
-    pid, ev = (0, ui.PASS)
-    while ev not in [ui.START, ui.CONFIRM, ui.QUIT]:
-      if ev == ui.FULLSCREEN:
-        pygame.display.toggle_fullscreen()
-        mainconfig["fullscreen"] ^= 1
-      pid, ev = ui.ui.wait()
+    glEnable (GL_LIGHTING)
+    glEnable (GL_LIGHT0)
+    quad=gluNewQuadric()
+    gluSphere (quad, .5, 50, 50)
+    glDisable (GL_LIGHTING)
+
+    pygame.display.flip()
+    ev = (0, E_PASS)
+    while ev[1] != E_START and ev[1] != E_QUIT:
+      pygame.time.wait(50)
+      ev = event.poll()
